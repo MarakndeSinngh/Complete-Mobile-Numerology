@@ -1,0 +1,8 @@
+{
+  "name": "Leo Family Numerology",
+  "description": "Premium Name, Mobile Number, and Date of Birth Astro-Numerology calculator synthesized with Gemini intelligence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

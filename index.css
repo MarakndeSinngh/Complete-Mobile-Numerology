@@ -1,0 +1,71 @@
+:root {
+  --color-gold-primary: #D97706;
+  --color-gold-muted: #B45309;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #F8F4EF;
+  color: #1F2937;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-lora {
+  font-family: 'Lora', serif;
+}
+
+.gold-text-shimmer {
+  background: linear-gradient(to right, #D97706, #F59E0B, #B45309, #FBBF24, #D97706);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(229, 231, 235, 0.7);
+  transition: border 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(217, 119, 6, 0.3);
+  box-shadow: 0 10px 30px rgba(217, 119, 6, 0.05);
+}
+
+.sacred-glow {
+  box-shadow: 0 4px 30px rgba(217, 119, 6, 0.04);
+}
+
+.sacred-glow:hover {
+  box-shadow: 0 10px 40px rgba(217, 119, 6, 0.12);
+}
+
+@keyframes drift {
+  from {
+    transform: translateY(0px) scale(1);
+  }
+  to {
+    transform: translateY(-10px) scale(1.01);
+  }
+}
+
+.cosmic-drift {
+  animation: drift 10s ease-in-out infinite alternate;
+}

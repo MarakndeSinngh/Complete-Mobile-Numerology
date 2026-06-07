@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEO FAMILY - Ancient Wisdom, Modern Life</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-ivory: #F8F4EF;
+            --color-beige: #F2E8DC;
+            --color-white: #FFFFFF;
+            --color-saffron: #D97706;
+            --color-amber: #F59E0B;
+            --color-text-primary: #1F2937;
+            --color-text-secondary: #6B7280;
+            --color-success: #10B981;
+            --color-danger: #EF4444;
+            --color-border: #E5E7EB;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F4EF;
+            color: #1F2937;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-lora { font-family: 'Lora', serif; }
+        
+        .premium-border {
+            border: 1px solid rgba(217, 119, 6, 0.15);
+        }
+        .gold-text-shimmer {
+            background: linear-gradient(to right, #D97706, #F59E0B, #B45309, #FBBF24, #D97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shimmer 4s linear infinite;
+        }
+        @keyframes shimmer {
+            to { background-position: 200% center; }
+        }
+        .sacred-glow {
+            box-shadow: 0 4px 30px rgba(217, 119, 6, 0.04);
+            transition: box-shadow 0.5s ease, transform 0.3s ease;
+        }
+        .sacred-glow:hover {
+            box-shadow: 0 10px 40px rgba(217, 119, 6, 0.12);
+        }
+        .inner-sacred-shadow {
+            box-shadow: inset 0 0 20px rgba(242, 232, 220, 0.8);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(229, 231, 235, 0.75);
+            transition: border 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .glass-panel:hover {
+            border-color: rgba(217, 119, 6, 0.3);
+            box-shadow: 0 10px 30px rgba(217, 119, 6, 0.05);
+        }
+        
+        @keyframes drift {
+            from { transform: translateY(0px) rotate(0deg); }
+            to { transform: translateY(-10px) rotate(2deg); }
+        }
+        .cosmic-drift {
+            animation: drift 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.3); }
+            70% { box-shadow: 0 0 0 12px rgba(217, 119, 6, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
+        }
+        .pulse-active {
+            animation: pulse-gold 2.5s infinite;
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0 !important;
+            }
+            body, html {
+                background: #F8F4EF !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                color: #1F2937 !important;
+            }
+            #root {
+                display: none !important;
+            }
+            #report-print-root {
+                display: block !important;
+                visibility: visible !important;
+                width: 210mm !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .page-break {
+                page-break-after: always !important;
+                break-after: page !important;
+                height: 297mm !important;
+                width: 210mm !important;
+                position: relative !important;
+                overflow: hidden !important;
+                box-sizing: border-box !important;
+            }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
