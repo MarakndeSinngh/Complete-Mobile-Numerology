@@ -20,6 +20,7 @@ type ViewTab = 'DASHBOARD' | 'MOBILE' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' 
 const App: React.FC = () => {
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null);
   const [activeTab, setActiveTab] = useState<ViewTab>('MOBILE');
+  const [analysisMode, setAnalysisMode] = useState<'QUICK' | 'ADVANCED'>('QUICK');
 
   // Input states
   const [name, setName] = useState('');
@@ -148,61 +149,88 @@ const App: React.FC = () => {
         {!personalDetails ? (
           <div id="landing-stage" className="space-y-20 animate-in fade-in duration-800">
             
-            {/* SECTION 1: HERO BANNER */}
+            {/* SECTION 1: HERO BANNER - LIGHT LUXURY EDITION */}
             <div 
-              style={{
-                background: 'linear-gradient(135deg, #C0392B 0%, #D97706 35%, #7C3AED 100%)'
-              }}
-              className="rounded-[40px] px-6 py-16 md:py-20 lg:px-16 text-center text-white relative overflow-hidden shadow-2xl"
+              className="rounded-[40px] px-6 py-16 md:py-24 lg:px-16 text-center text-[#1F2937] relative overflow-hidden bg-gradient-to-br from-[#FDFCF7] via-[#F9F6EE] to-[#F2EADA] border border-[#D97706]/10 shadow-xl"
             >
-              {/* Star Constellation Background Canvas */}
-              <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]"></div>
+              {/* Star Constellation Background Canvas - Subtle light gold star map */}
+              <div className="absolute inset-0 opacity-25 pointer-events-none bg-[radial-gradient(#D97706_0.75px,transparent_0.75px)] [background-size:32px_32px]"></div>
               
-              {/* Subtle Sacred Geometry Circle */}
-              <div className="absolute -top-16 -left-16 w-64 h-64 border border-white/10 rounded-full flex items-center justify-center animate-spin-slow pointer-events-none">
-                <div className="w-48 h-48 border border-white/5 rounded-full rotate-45"></div>
+              {/* Sacred Geometry Circles in soft gold */}
+              <div className="absolute -top-16 -left-16 w-64 h-64 border border-[#D97706]/10 rounded-full flex items-center justify-center animate-spin-slow pointer-events-none">
+                <div className="w-48 h-48 border border-[#D97706]/5 rounded-full rotate-45"></div>
               </div>
-              <div className="absolute -bottom-20 -right-20 w-80 h-80 border border-white/10 rounded-full flex items-center justify-center pointer-events-none">
-                <div className="w-64 h-64 border border-white/5 rounded-full"></div>
-                <div className="absolute w-40 h-40 border border-white/10 rounded-full animate-pulse"></div>
+              <div className="absolute -bottom-20 -right-20 w-80 h-80 border border-[#D97706]/10 rounded-full flex items-center justify-center pointer-events-none">
+                <div className="w-64 h-64 border border-[#D97706]/5 rounded-full"></div>
+                <div className="absolute w-40 h-40 border border-[#D97706]/10 rounded-full animate-pulse"></div>
               </div>
 
-              {/* Glowing Zodiac Sign Symbols Floating */}
-              <div className="absolute top-12 right-1/4 text-2xl opacity-20 pointer-events-none cosmic-drift select-none font-serif">♌</div>
-              <div className="absolute bottom-16 left-1/4 text-2xl opacity-25 pointer-events-none cosmic-drift select-none font-serif" style={{ animationDelay: '2s' }}>☉</div>
-              <div className="absolute top-1/3 left-12 text-3xl opacity-20 pointer-events-none cosmic-drift select-none font-serif" style={{ animationDelay: '4s' }}>⚙️</div>
+              {/* Floating Celestial/Zodiac Symbols */}
+              <div className="absolute top-12 right-1/4 text-2xl text-[#D97706]/20 pointer-events-none cosmic-drift select-none font-serif">♌</div>
+              <div className="absolute bottom-16 left-1/4 text-2xl text-[#D97706]/25 pointer-events-none cosmic-drift select-none font-serif" style={{ animationDelay: '2s' }}>☉</div>
+              <div className="absolute top-1/3 left-12 text-3xl text-[#D97706]/20 pointer-events-none cosmic-drift select-none font-serif" style={{ animationDelay: '4s' }}>⚙️</div>
 
               {/* Hero Contents */}
-              <div className="max-w-4xl mx-auto space-y-8 relative z-10">
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-xs tracking-widest uppercase text-amber-200 justify-center">
-                  <Sparkles className="w-3.5 h-3.5" /> Vedic Numerology & Chaldean Frequencies
+              <div className="max-w-4xl mx-auto space-y-10 relative z-10">
+                <div className="inline-flex items-center gap-2 bg-[#D97706]/5 backdrop-blur-md px-5 py-2 rounded-full border border-[#D97706]/15 text-xs tracking-widest uppercase text-[#D97706] justify-center font-cinzel font-semibold">
+                  <Sparkles className="w-4 h-4 text-[#D97706]" /> Vedic Numerology & Chaldean Frequencies
                 </div>
 
-                <div className="space-y-4">
-                  <h2 className="font-playfair text-4xl md:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+                <div className="space-y-6">
+                  <h2 className="font-cinzel text-4xl md:text-6xl font-extrabold tracking-wide text-[#1F2937] leading-[1.12]">
                     अपने मोबाइल नंबर की <br className="hidden md:block" /> ग्रहीय तरंगों को डिकोड करें
                   </h2>
-                  <p className="text-amber-50 text-sm md:text-lg max-w-2xl mx-auto leading-relaxed">
-                    छिपे हुए ग्रहीय योग, चुनौतियाँ, दोहरे अंकों के स्पंदन, लक्ष्मी योग क्षमता और अपने दिव्य भाग्य का संरेखण खोजें।
+                  <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-[#D97706] to-transparent mx-auto"></div>
+                  <p className="text-[#6B7280] text-sm md:text-[17px] max-w-2xl mx-auto leading-relaxed font-lora italic">
+                    Chaldean Vibrations & Modern Occult Science curated by Rajiv Singh Chauhann. Explore hidden planetary yogas, material blockages, and cosmic alignments.
                   </p>
                 </div>
 
-                {/* Input Panel */}
-                <div className="max-w-xl mx-auto bg-white text-[#1F2937] p-8 md:p-10 rounded-[35px] shadow-2xl border border-white/80 relative text-left">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="font-playfair text-xs font-bold text-[#D97706] uppercase tracking-widest block">
-                      🔮 पवित्र इनपुट मंडल (Sacred Form)
+                {/* Input Panel with Two Modes */}
+                <div className="max-w-xl mx-auto bg-white/95 backdrop-blur-lg p-8 md:p-10 rounded-[35px] shadow-2xl border border-[#D97706]/10 relative text-left sacred-glow">
+                  
+                  {/* Form Header */}
+                  <div className="flex justify-between items-center mb-6 border-b border-[#E5E7EB] pb-4">
+                    <span className="font-cinzel text-xs font-bold text-[#D97706] uppercase tracking-wider block">
+                      🔮 ज्योतिषीय संरेखण मंडल
                     </span>
                     <button
                       type="button"
                       onClick={handleLoadDemoNumber}
-                      className="text-[10px] font-mono bg-[#F2E8DC] text-[#D97706] px-3.5 py-1.5 rounded-xl uppercase tracking-wider hover:bg-[#E5D7C6] transition-all font-bold"
+                      className="text-[10px] font-sans bg-[#F2E8DC] text-[#D97706] px-4 py-2 rounded-xl uppercase tracking-wider hover:bg-[#E5D7C6] transition-all font-bold border border-[#D97706]/10"
                     >
-                      डेमो अंक भरें
+                      🔮 डेमो अंक भरें
+                    </button>
+                  </div>
+
+                  {/* Mode Toggles */}
+                  <div className="flex bg-[#F8F4EF] p-1 rounded-2xl border border-[#E5E7EB] mb-6 shadow-inner">
+                    <button
+                      type="button"
+                      onClick={() => setAnalysisMode('QUICK')}
+                      className={`flex-1 py-3 text-xs font-bold rounded-xl tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        analysisMode === 'QUICK'
+                          ? 'bg-[#D97706] text-white shadow-md'
+                          : 'text-[#6B7280] hover:text-[#1F2937]'
+                      }`}
+                    >
+                      <Phone className="w-4 h-4" /> Quick Mobile
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAnalysisMode('ADVANCED')}
+                      className={`flex-1 py-3 text-xs font-bold rounded-xl tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        analysisMode === 'ADVANCED'
+                          ? 'bg-[#D97706] text-white shadow-md'
+                          : 'text-[#6B7280] hover:text-[#1F2937]'
+                      }`}
+                    >
+                      <User className="w-4 h-4" /> Advanced
                     </button>
                   </div>
 
                   <form onSubmit={handleProfileSubmit} className="space-y-6">
+                    {/* Always display Mobile Number */}
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <label className="text-[10px] font-sans text-[#6B7280] uppercase tracking-widest block font-bold">
@@ -226,42 +254,47 @@ const App: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Advanced parameters collapse */}
-                    <details className="group border-t border-[#E5E7EB] pt-4">
-                      <summary className="list-none flex justify-between items-center cursor-pointer select-none text-[10px] font-mono text-[#6B7280] hover:text-[#D97706] transition uppercase tracking-widest py-1">
-                        <span className="flex items-center gap-1 font-sans">
-                          <User className="w-3.5 h-3.5 text-[#D97706]" /> + उन्नत ज्योतिषीय समन्वय (वैकल्पिक जन्म तारीख और नाम)
-                        </span>
-                        <span className="transition duration-300 group-open:rotate-180">▼</span>
-                      </summary>
-
-                      <div className="space-y-4 pt-5 animate-in fade-in duration-300">
+                    {/* Show only for Advanced Analysis Mode */}
+                    {analysisMode === 'ADVANCED' && (
+                      <div className="space-y-4 pt-2 border-t border-[#E5E7EB]/80 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">पूरा नाम (काल्डियन नामांक लिंक)</label>
-                          <input
-                            type="text"
-                            placeholder="जैसे: Raajeev Singh Chauhann"
-                            className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl px-5 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937]"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                          />
+                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">पूरा नाम (Chaldean Link)</label>
+                          <div className="relative">
+                            <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
+                              <User className="h-4 w-4" />
+                            </span>
+                            <input
+                              type="text"
+                              required
+                              placeholder="जैसे: Raajeev Singh Chauhann"
+                              className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] transition-all"
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                            />
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-1">
                             <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">जन्म तिथि (Date of Birth)</label>
-                            <input
-                              type="date"
-                              className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl px-5 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937]"
-                              value={dob}
-                              onChange={(e) => setDob(e.target.value)}
-                            />
+                            <div className="relative">
+                              <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
+                                <Calendar className="h-4 w-4" />
+                              </span>
+                              <input
+                                type="date"
+                                required
+                                className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] transition-all font-mono"
+                                value={dob}
+                                onChange={(e) => setDob(e.target.value)}
+                              />
+                            </div>
                           </div>
 
                           <div className="space-y-1">
                             <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">लिंग (Gender Alignment)</label>
                             <select
-                              className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl px-5 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937]"
+                              className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl px-5 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] font-semibold cursor-pointer"
                               value={gender}
                               onChange={(e: any) => setGender(e.target.value)}
                             >
@@ -273,22 +306,27 @@ const App: React.FC = () => {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">ईमेल (प्रतिवेदन प्राप्ति हेतु)</label>
-                          <input
-                            type="email"
-                            placeholder="जैसे: contact@domain.com"
-                            className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl px-5 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937]"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                          />
+                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">ईमेल (वैकल्पिक)</label>
+                          <div className="relative">
+                            <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
+                              <Mail className="h-4 w-4" />
+                            </span>
+                            <input
+                              type="email"
+                              placeholder="जैसे: contact@domain.com"
+                              className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] transition-all"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </details>
+                    )}
 
                     <div className="pt-2">
                       <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] hover:from-[#B45309] hover:to-[#D97706] text-white font-bold py-4 rounded-2xl transition-all duration-300 text-xs tracking-[0.25em] uppercase hover:shadow-lg hover:shadow-[#D97706]/20 flex items-center justify-center gap-2 cursor-pointer outline-none font-sans"
+                        className="w-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] hover:from-[#B45309] hover:to-[#D97706] text-white font-bold py-4.5 rounded-2xl transition-all duration-300 text-xs tracking-[0.25em] uppercase hover:shadow-lg hover:shadow-[#D97706]/20 flex items-center justify-center gap-2 cursor-pointer outline-none font-sans"
                       >
                         ग्रहीय स्पंदन विश्लेषण प्रारंभ करें <ArrowRight className="w-4 h-4" />
                       </button>

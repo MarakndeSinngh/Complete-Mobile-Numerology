@@ -192,6 +192,18 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
   const coreScore = mobileData.score;
   const wealthScore = Math.max(45, Math.min(100, Math.floor(coreScore * 1.05) - (mobileData.hostileRelationships.length * 8)));
   const commScore = Math.max(50, Math.min(100, Math.floor(coreScore * 0.95) + (digitsArray.filter(d => d === 5 || d === 6 || d === 1).length * 6)));
+  
+  // Custom Career, Relationship, and Stability score formulas based on digits and hostile nodes
+  const careerScore = Math.max(45, Math.min(100, Math.floor(coreScore * 0.98) + (digitsArray.filter(d => d === 1 || d === 8 || d === 9).length * 5) - (mobileData.hostileRelationships.length * 6)));
+  const relationshipScore = Math.max(40, Math.min(100, 95 - (mobileData.repeatingAlarms.length * 10) - (mobileData.hostileRelationships.length * 8) + (digitsArray.filter(d => d === 2 || d === 6).length * 5)));
+  const stabilityScore = Math.max(35, Math.min(100, Math.floor(coreScore * 0.92) + (digitsArray.filter(d => d === 4 || d === 8 || d === 3).length * 7) - (mobileData.negativePairsAvoid.length * 8)));
+
+  const getScoreRating = (score: number): { label: string, colorClass: string, bgClass: string, borderClass: string } => {
+    if (score >= 82) return { label: 'EXCELLENT', colorClass: 'text-emerald-600 border-emerald-200 bg-emerald-50/60', bgClass: 'bg-emerald-500/10', borderClass: 'border-emerald-500/25' };
+    if (score >= 68) return { label: 'FAVORABLE', colorClass: 'text-indigo-600 border-indigo-250 bg-indigo-50/60', bgClass: 'bg-indigo-500/10', borderClass: 'border-indigo-500/25' };
+    if (score >= 50) return { label: 'MODERATE', colorClass: 'text-amber-600 border-amber-200 bg-amber-50/60', bgClass: 'bg-amber-500/10', borderClass: 'border-amber-500/25' };
+    return { label: 'REMEDIAL', colorClass: 'text-rose-600 border-[#FCA5A5]/40 bg-rose-50/60', bgClass: 'bg-rose-500/10', borderClass: 'border-rose-500/25' };
+  };
 
   // Section 3 Vibrations analysis mapping variables
   const hasRepeating = mobileData.repeatingAlarms.length > 0;
@@ -416,112 +428,256 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
         </div>
 
-        {/* 3 Large Premium Summary Cards with Counter and visual representations */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* 6 Premium Luxury Summary Cards with progress bars, score indicators, badges and descriptions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* Card A: Overall Mobile Score */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:border-[#D97706]/20 transition-all duration-500">
-            <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-widest">Overall Mobile Score</span>
-                <span className={`px-2.5 py-0.5 text-[9px] font-mono rounded font-bold uppercase ${
-                  coreScore >= 80 ? 'bg-emerald-500/10 text-emerald-400' :
-                  coreScore >= 60 ? 'bg-[#D97706]/10 text-[#D97706]' :
-                  'bg-rose-500/10 text-rose-450'
-                }`}>
-                  {mobileData.rating}
-                </span>
+          {/* Card 1: Overall Mobile Score */}
+          {(() => {
+            const rating = getScoreRating(coreScore);
+            return (
+              <div className="rounded-3xl border border-[#D97706]/15 hover:border-[#D97706]/35 p-6 bg-white shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+                <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-[#D97706]/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-mono text-[#6B7280] uppercase tracking-widest block font-bold">Overall Mobile Alignment</span>
+                    <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border ${rating.colorClass}`}>
+                      {rating.label}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl md:text-5xl font-cinzel font-black text-[#1F2937]">{coreScore}%</span>
+                    <span className="text-[10px] text-[#6B7280] font-mono uppercase tracking-wider bg-[#F8F4EF] px-2 py-0.5 rounded">Resonance</span>
+                  </div>
+                  
+                  <p className="text-xs text-[#6B7280] leading-relaxed">
+                    The absolute Chaldean numerical alignment of your combined digit totals with your birthday energy grids.
+                  </p>
+                </div>
+                
+                <div className="mt-5 space-y-2">
+                  <div className="w-full bg-[#F2E8DC] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] rounded-full transition-all duration-[1500ms]"
+                      style={{ width: `${coreScore}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-[8px] font-mono text-[#9CA3AF] uppercase">
+                    <span>Vedic Sepharial</span>
+                    <span>Score: {coreScore}/100</span>
+                  </div>
+                </div>
               </div>
-              
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-cinzel font-black text-[#1F2937]">{coreScore}%</span>
-                <span className="text-xs text-slate-500 font-mono">Resonance</span>
-              </div>
-              
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
-                Represents complete Chaldean numerical union of your device total sums with cosmic nodes strength.
-              </p>
-            </div>
-            
-            <div className="mt-6">
-              <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-[1500ms] ${
-                    coreScore >= 80 ? 'bg-emerald-400' : coreScore >= 60 ? 'bg-amber-400' : 'bg-rose-450'
-                  }`}
-                  style={{ width: `${coreScore}%` }}
-                ></div>
-              </div>
-              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase block mt-2 text-right">Rule Engine: Chaldean Classic</span>
-            </div>
-          </div>
+            );
+          })()}
 
-          {/* Card B: Wealth Attraction Score */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:border-[#D97706]/20 transition-all duration-500">
-            <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-widest">Wealth Attraction Score</span>
-                <Coins className="w-4 h-4 text-[#F5B52E]" />
+          {/* Card 2: Money Score */}
+          {(() => {
+            const rating = getScoreRating(wealthScore);
+            return (
+              <div className="rounded-3xl border border-[#D97706]/15 hover:border-[#D97706]/35 p-6 bg-white shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+                <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-mono text-[#6B7280] uppercase tracking-widest block font-bold">Money Attraction Score</span>
+                    <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border ${rating.colorClass}`}>
+                      {rating.label}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl md:text-5xl font-cinzel font-black text-[#1F2937]">{wealthScore}%</span>
+                    <span className="text-[10px] text-[#6B7280] font-mono uppercase tracking-wider bg-[#F2E8DC]/40 px-2 py-0.5 rounded">Abundance</span>
+                  </div>
+                  
+                  <p className="text-xs text-[#6B7280] leading-relaxed">
+                    Evaluates the status of financial multipliers: Mercury (5), Venus (6), and Saturn (8) in prominent focal cells.
+                  </p>
+                </div>
+                
+                <div className="mt-5 space-y-2">
+                  <div className="w-full bg-[#F2E8DC] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-400 to-[#D97706] rounded-full transition-all duration-[1500ms]"
+                      style={{ width: `${wealthScore}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-[8px] font-mono text-[#9CA3AF] uppercase">
+                    <span>Lal Kitab Prosperity</span>
+                    <span>Score: {wealthScore}/100</span>
+                  </div>
+                </div>
               </div>
-              
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-cinzel font-black text-[#1F2937]">{wealthScore}%</span>
-                <span className="text-xs text-slate-500 font-mono">Vedic Abundance</span>
-              </div>
-              
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
-                Evaluates representation of riches multipliers (5, 6, and 8) in prominent marital & gain attraction cells.
-              </p>
-            </div>
-            
-            <div className="mt-6">
-              <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-amber-400 rounded-full transition-all duration-[1500ms]"
-                  style={{ width: `${wealthScore}%` }}
-                ></div>
-              </div>
-              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase block mt-2 text-right">Lal Kitab Prosperity Weightage</span>
-            </div>
-          </div>
+            );
+          })()}
 
-          {/* Card C: Communication Strength Score */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:border-[#D97706]/20 transition-all duration-500">
-            <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-widest">Communication Strength Score</span>
-                <Star className="w-4 h-4 text-purple-400" />
+          {/* Card 3: Career Score */}
+          {(() => {
+            const rating = getScoreRating(careerScore);
+            return (
+              <div className="rounded-3xl border border-[#D97706]/15 hover:border-[#D97706]/35 p-6 bg-white shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+                <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-mono text-[#6B7280] uppercase tracking-widest block font-bold">Career & Drive Command</span>
+                    <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border ${rating.colorClass}`}>
+                      {rating.label}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl md:text-5xl font-cinzel font-black text-[#1F2937]">{careerScore}%</span>
+                    <span className="text-[10px] text-[#6B7280] font-mono uppercase tracking-wider bg-[#F2E8DC]/40 px-2 py-0.5 rounded">Authority</span>
+                  </div>
+                  
+                  <p className="text-xs text-[#6B7280] leading-relaxed">
+                    Measures leadership resonance based on Sun (1), Saturn (8), and Mars (9) combinations inside your numbers.
+                  </p>
+                </div>
+                
+                <div className="mt-5 space-y-2">
+                  <div className="w-full bg-[#F2E8DC] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-400 to-indigo-500 rounded-full transition-all duration-[1500ms]"
+                      style={{ width: `${careerScore}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-[8px] font-mono text-[#9CA3AF] uppercase">
+                    <span>Karma Alignment</span>
+                    <span>Score: {careerScore}/100</span>
+                  </div>
+                </div>
               </div>
-              
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-cinzel font-black text-[#1F2937]">{commScore}%</span>
-                <span className="text-xs text-slate-500 font-mono">Mercurial Aura</span>
+            );
+          })()}
+
+          {/* Card 4: Relationship Score */}
+          {(() => {
+            const rating = getScoreRating(relationshipScore);
+            return (
+              <div className="rounded-3xl border border-[#D97706]/15 hover:border-[#D97706]/35 p-6 bg-white shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+                <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-rose-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-mono text-[#6B7280] uppercase tracking-widest block font-bold">Relationship Harmony</span>
+                    <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border ${rating.colorClass}`}>
+                      {rating.label}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl md:text-5xl font-cinzel font-black text-[#1F2937]">{relationshipScore}%</span>
+                    <span className="text-[10px] text-[#6B7280] font-mono uppercase tracking-wider bg-[#F2E8DC]/40 px-2 py-0.5 rounded">Aura Sync</span>
+                  </div>
+                  
+                  <p className="text-xs text-[#6B7280] leading-relaxed">
+                    Evaluates relationship stability based on Moon (2) and Venus (6) support, penalizing for hostile digit pairs.
+                  </p>
+                </div>
+                
+                <div className="mt-5 space-y-2">
+                  <div className="w-full bg-[#F2E8DC] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-pink-400 to-rose-500 rounded-full transition-all duration-[1500ms]"
+                      style={{ width: `${relationshipScore}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-[8px] font-mono text-[#9CA3AF] uppercase">
+                    <span>Mitra planetary grid</span>
+                    <span>Score: {relationshipScore}/100</span>
+                  </div>
+                </div>
               </div>
-              
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
-                Calculates voice pitch influence, negotiation capacity, and defensive bridging stability vectors.
-              </p>
-            </div>
-            
-            <div className="mt-6">
-              <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-purple-500 rounded-full transition-all duration-[1500ms]"
-                  style={{ width: `${commScore}%` }}
-                ></div>
+            );
+          })()}
+
+          {/* Card 5: Communication Score */}
+          {(() => {
+            const rating = getScoreRating(commScore);
+            return (
+              <div className="rounded-3xl border border-[#D97706]/15 hover:border-[#D97706]/35 p-6 bg-white shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+                <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-mono text-[#6B7280] uppercase tracking-widest block font-bold">Communication Strength</span>
+                    <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border ${rating.colorClass}`}>
+                      {rating.label}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl md:text-5xl font-cinzel font-black text-[#1F2937]">{commScore}%</span>
+                    <span className="text-[10px] text-[#6B7280] font-mono uppercase tracking-wider bg-[#F2E8DC]/40 px-2 py-0.5 rounded">Expression</span>
+                  </div>
+                  
+                  <p className="text-xs text-[#6B7280] leading-relaxed">
+                    Measures voice resonance, marketing clarity, and defensive dialog bridging using Mercury (5) weightings.
+                  </p>
+                </div>
+                
+                <div className="mt-5 space-y-2">
+                  <div className="w-full bg-[#F2E8DC] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-purple-400 to-indigo-600 rounded-full transition-all duration-[1500ms]"
+                      style={{ width: `${commScore}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-[8px] font-mono text-[#9CA3AF] uppercase">
+                    <span>Budh & Chandra Node</span>
+                    <span>Score: {commScore}/100</span>
+                  </div>
+                </div>
               </div>
-              <span className="text-[9px] font-mono text-slate-500 tracking-wider uppercase block mt-2 text-right">Grid: Budh & Chandra Force</span>
-            </div>
-          </div>
+            );
+          })()}
+
+          {/* Card 6: Stability Score */}
+          {(() => {
+            const rating = getScoreRating(stabilityScore);
+            return (
+              <div className="rounded-3xl border border-[#D97706]/15 hover:border-[#D97706]/35 p-6 bg-white shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+                <div className="absolute top-[-30px] right-[-30px] w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] font-mono text-[#6B7280] uppercase tracking-widest block font-bold">Stability & Foundations</span>
+                    <span className={`px-2.5 py-0.5 text-[9px] font-mono font-bold rounded-full border ${rating.colorClass}`}>
+                      {rating.label}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl md:text-5xl font-cinzel font-black text-[#1F2937]">{stabilityScore}%</span>
+                    <span className="text-[10px] text-[#6B7280] font-mono uppercase tracking-wider bg-[#F2E8DC]/40 px-2 py-0.5 rounded">Grounding</span>
+                  </div>
+                  
+                  <p className="text-xs text-[#6B7280] leading-relaxed">
+                    Evaluates life anchors, financial discipline, resistance to debts, and safety nets from Saturn (8) forces.
+                  </p>
+                </div>
+                
+                <div className="mt-5 space-y-2">
+                  <div className="w-full bg-[#F2E8DC] h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-cyan-400 to-blue-600 rounded-full transition-all duration-[1500ms]"
+                      style={{ width: `${stabilityScore}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-[8px] font-mono text-[#9CA3AF] uppercase">
+                    <span>Shani & Rahu Balance</span>
+                    <span>Score: {stabilityScore}/100</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
         </div>
-
       </div>
 
       {/* SECTION 2: MOBILE NUMBER BREAKDOWN */}
@@ -1012,12 +1168,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
-              { label: 'Overall Resonance', desc: 'Shoring up entire auric shield frequency', value: coreScore, color: 'bg-amber-400', colorText: 'text-[#D97706]' },
-              { label: 'Career Impact', desc: 'Attracting corporate validation and title promotions', value: 92, color: 'bg-emerald-400', colorText: 'text-emerald-450' },
-              { label: 'Business Growth', desc: 'Promoting raw commerce, liquid assets & negotiation accuracy', value: 88, color: 'bg-sky-450', colorText: 'text-sky-450' },
-              { label: 'Relationships Alignment', desc: 'Easing friction, marital bonds & domestic grace', value: 85, color: 'bg-pink-400', colorText: 'text-pink-450' },
-              { label: 'Health Energy Reserve', desc: 'Preventing sudden stress and support vitality fields', value: 80, color: 'bg-teal-400', colorText: 'text-teal-450' },
-              { label: 'Spiritual Alignment Block', desc: 'Unlocking deep intuition, calm & cosmic awareness', value: 90, color: 'bg-purple-400', colorText: 'text-purple-450' },
+              { label: 'Overall Resonance', desc: 'Shoring up entire auric shield frequency', value: coreScore, color: 'bg-[#D97706]', colorText: 'text-[#D97706]' },
+              { label: 'Career Impact', desc: 'Attracting corporate validation and title promotions', value: careerScore, color: 'bg-emerald-500', colorText: 'text-emerald-600' },
+              { label: 'Business Growth', desc: 'Promoting raw commerce, liquid assets & negotiation accuracy', value: wealthScore, color: 'bg-indigo-500', colorText: 'text-indigo-650' },
+              { label: 'Relationships Alignment', desc: 'Easing friction, marital bonds & domestic grace', value: relationshipScore, color: 'bg-rose-450', colorText: 'text-rose-500' },
+              { label: 'Health Energy Reserve', desc: 'Preventing sudden stress and support vitality fields', value: stabilityScore, color: 'bg-cyan-500', colorText: 'text-cyan-600' },
+              { label: 'Spiritual Alignment Block', desc: 'Unlocking deep intuition, calm & cosmic awareness', value: commScore, color: 'bg-purple-500', colorText: 'text-purple-600' },
             ].map((score, index) => (
               <div key={index} className="space-y-2 p-4 bg-[#F8F4EF]/75 border border-[#E5E7EB]/70 rounded-2xl">
                 <div className="flex justify-between items-end">
@@ -1027,7 +1183,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                   </div>
                   <span className={`font-cinzel font-black text-lg ${score.colorText}`}>{score.value}%</span>
                 </div>
-                <div className="w-full bg-white/[0.04] h-2.5 rounded-full overflow-hidden">
+                <div className="w-full bg-[#E5E7EB] h-2.5 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full ${score.color}`} style={{ width: `${score.value}%` }}></div>
                 </div>
               </div>
