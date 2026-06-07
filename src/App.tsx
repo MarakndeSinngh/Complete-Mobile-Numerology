@@ -178,7 +178,7 @@ const App: React.FC = () => {
 
                 <div className="space-y-6">
                   <h2 className="font-cinzel text-4xl md:text-6xl font-extrabold tracking-wide text-[#1F2937] leading-[1.12]">
-                    अपने मोबाइल नंबर की <br className="hidden md:block" /> ग्रहीय तरंगों को डिकोड करें
+                    Decode the Planetary Vibrations <br className="hidden md:block" /> of Your Mobile Number
                   </h2>
                   <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-[#D97706] to-transparent mx-auto"></div>
                   <p className="text-[#6B7280] text-sm md:text-[17px] max-w-2xl mx-auto leading-relaxed font-lora italic">
@@ -192,14 +192,14 @@ const App: React.FC = () => {
                   {/* Form Header */}
                   <div className="flex justify-between items-center mb-6 border-b border-[#E5E7EB] pb-4">
                     <span className="font-cinzel text-xs font-bold text-[#D97706] uppercase tracking-wider block">
-                      🔮 ज्योतिषीय संरेखण मंडल
+                      🔮 Astrological Alignment Portal
                     </span>
                     <button
                       type="button"
                       onClick={handleLoadDemoNumber}
                       className="text-[10px] font-sans bg-[#F2E8DC] text-[#D97706] px-4 py-2 rounded-xl uppercase tracking-wider hover:bg-[#E5D7C6] transition-all font-bold border border-[#D97706]/10"
                     >
-                      🔮 डेमो अंक भरें
+                      🔮 Load Demo Data
                     </button>
                   </div>
 
@@ -234,9 +234,9 @@ const App: React.FC = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <label className="text-[10px] font-sans text-[#6B7280] uppercase tracking-widest block font-bold">
-                          १० अंकों का मोबाइल नंबर दर्ज करें
+                          Enter 10-Digit Mobile Number
                         </label>
-                        <span className="text-[10px] font-sans text-[#D97706]">देश कोड न लगाएं</span>
+                        <span className="text-[10px] font-sans text-[#D97706]">Do not include country code</span>
                       </div>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
@@ -245,7 +245,7 @@ const App: React.FC = () => {
                         <input
                           type="text"
                           required
-                          placeholder="जैसे: 9930117696"
+                          placeholder="e.g. 9930117696"
                           maxLength={10}
                           className="w-full bg-[#F8F4EF] border border-[#E5E7EB] hover:border-[#D97706]/35 focus:border-[#D97706] rounded-2xl pl-12 pr-6 py-4.5 outline-none text-lg text-[#1F2937] font-mono tracking-[0.15em] font-bold shadow-inner transition-colors"
                           value={mobile}
@@ -258,7 +258,7 @@ const App: React.FC = () => {
                     {analysisMode === 'ADVANCED' && (
                       <div className="space-y-4 pt-2 border-t border-[#E5E7EB]/80 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">पूरा नाम (Chaldean Link)</label>
+                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">Full Name (Chaldean Link)</label>
                           <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
                               <User className="h-4 w-4" />
@@ -266,7 +266,7 @@ const App: React.FC = () => {
                             <input
                               type="text"
                               required
-                              placeholder="जैसे: Raajeev Singh Chauhann"
+                              placeholder="e.g. Raajeev Singh Chauhann"
                               className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] transition-all"
                               value={name}
                               onChange={(e) => setName(e.target.value)}
@@ -276,7 +276,7 @@ const App: React.FC = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-1">
-                            <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">जन्म तिथि (Date of Birth)</label>
+                            <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">Date of Birth</label>
                             <div className="relative">
                               <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
                                 <Calendar className="h-4 w-4" />
@@ -292,28 +292,28 @@ const App: React.FC = () => {
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">लिंग (Gender Alignment)</label>
+                            <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">Gender Alignment</label>
                             <select
                               className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl px-5 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] font-semibold cursor-pointer"
                               value={gender}
                               onChange={(e: any) => setGender(e.target.value)}
                             >
-                              <option value="MALE">पुरुष (Male)</option>
-                              <option value="FEMALE">स्त्री (Female)</option>
-                              <option value="OTHER">अन्य (Other)</option>
+                              <option value="MALE">Male</option>
+                              <option value="FEMALE">Female</option>
+                              <option value="OTHER">Other</option>
                             </select>
                           </div>
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">ईमेल (वैकल्पिक)</label>
+                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">Email Address (Optional)</label>
                           <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
                               <Mail className="h-4 w-4" />
                             </span>
                             <input
                               type="email"
-                              placeholder="जैसे: contact@domain.com"
+                              placeholder="e.g. contact@domain.com"
                               className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] transition-all"
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
@@ -328,7 +328,7 @@ const App: React.FC = () => {
                         type="submit"
                         className="w-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] hover:from-[#B45309] hover:to-[#D97706] text-white font-bold py-4.5 rounded-2xl transition-all duration-300 text-xs tracking-[0.25em] uppercase hover:shadow-lg hover:shadow-[#D97706]/20 flex items-center justify-center gap-2 cursor-pointer outline-none font-sans"
                       >
-                        ग्रहीय स्पंदन विश्लेषण प्रारंभ करें <ArrowRight className="w-4 h-4" />
+                        Begin Planetary Resonance Analysis <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </form>

@@ -36,10 +36,10 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       } else if (data.error) {
         setErrorMessage(data.error);
       } else {
-        setErrorMessage('ब्रह्मांडीय तरंगों में अवरोध है। कृपया कुछ ही क्षणों में पुनः प्रयास करें।');
+        setErrorMessage('Celestial wave obstruction. Please try again in a few moments.');
       }
     } catch (err) {
-      setErrorMessage('वैदिक सर्वरों से संपर्क स्थापित नहीं हो पाया। कृपया सुनिश्चित करें कि सेटिंग्स (Settings > Secrets) में आपकी GEMINI_API_KEY भली-भांति दर्ज है।');
+      setErrorMessage('Could not establish connection with servers. Please check if your GEMINI_API_KEY is correctly set in your environment configuration (Settings > Secrets).');
     } finally {
       setLoading(false);
     }
@@ -62,19 +62,19 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       <div style="background-color: #F8F4EF; color: #1F2937; font-family: 'Inter', system-ui, sans-serif; padding: 40px; border: 2px solid #D97706; border-radius: 30px; max-width: 800px; margin: 0 auto;">
         <div style="text-align: center; border-bottom: 2px solid #E5E7EB; padding-bottom: 25px; margin-bottom: 25px;">
           <h2 style="font-family: serif; color: #D97706; text-transform: uppercase; letter-spacing: 2px; margin: 0; font-size: 26px;">
-            लियो फैमिली न्यूमरोलॉजी पोर्टल
+            Leo Family Numerology Portal
           </h2>
           <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #6B7280; font-weight: bold; margin-top: 5px; display: inline-block;">
-            पवित्र ब्रह्मांडीय भाग्य और मोबाइल अंक ज्योतिष फलादेश
+            Sacred Celestial Destiny and Mobile Numerology Predictions
           </span>
-          <p style="font-style: italic; color: #6B7280; margin: 10px 0 0 0; font-size: 13px;">विशेष रूप से तैयार किया गया: ${personalDetails.name}</p>
+          <p style="font-style: italic; color: #6B7280; margin: 10px 0 0 0; font-size: 13px;">Prepared especially for: ${personalDetails.name}</p>
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; background-color: #FFFFFF; padding: 20px; border-radius: 15px; border: 1px solid #E5E7EB; font-size: 13px;">
-          <div><strong>आभामंडल नाम (Name):</strong> ${personalDetails.name}</div>
-          <div><strong>मोबाईल नंबर (Mobile):</strong> ${personalDetails.mobile}</div>
-          <div><strong>मूल जन्म तारीख (DOB):</strong> ${personalDetails.dob}</div>
-          <div><strong>ग्रहीय स्पंदन:</strong> भाग्यांक (LP) ${dobData.lifePathNumber} | नामांक (Expression) ${dobData.destinyNumber}</div>
+          <div><strong>Name:</strong> ${personalDetails.name}</div>
+          <div><strong>Mobile Number:</strong> ${personalDetails.mobile}</div>
+          <div><strong>Date of Birth (DOB):</strong> ${personalDetails.dob}</div>
+          <div><strong>Planetary Vibrations:</strong> Life Path (LP) ${dobData.lifePathNumber} | Expression Number (DN) ${dobData.destinyNumber}</div>
         </div>
 
         <div style="font-size: 14px; line-height: 1.7; color: #374151;">
@@ -82,7 +82,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
         </div>
         
         <div style="margin-top: 40px; border-top: 1px solid #E5E7EB; padding-top: 20px; text-align: center; font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 2px;">
-          राजीव सिंह चौहान पद्धति • प्रमाणित ज्योतिषीय प्रतिवेदन
+          Rajeev Singh Chauhann Method • Certified Astrological Report
         </div>
       </div>
     `;
@@ -98,9 +98,9 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
             📜
           </div>
           <div className="space-y-2">
-            <h3 className="font-playfair text-xl font-bold text-[#1F2937] tracking-wider">वैदिक ज्योतिष-AI दिव्य महा प्रतिवेदन</h3>
+            <h3 className="font-playfair text-xl font-bold text-[#1F2937] tracking-wider">Vedic Astrology & AI Destiny Report</h3>
             <p className="text-[#6B7280] text-sm max-w-md mx-auto leading-relaxed font-sans">
-              अपनी समस्त अंक ज्योतिषीय गणनाओं को एक संयुक्त महा फलादेश प्रतिवेदन में एकत्रित करें। यह प्रतिवेदन प्रमाणित दिव्य ग्रहीय गणनाओं को आधुनिकतम कृत्रिम बुद्धिमत्ता (Gemini AI) से समन्वित कर तैयार किया जाता है।
+              Consolidate your numerological readings into a single comprehensive destiny report. This synthesis aligns certified planetary calculations with advanced artificial intelligence (Gemini AI) for precise life path insights.
             </p>
           </div>
 
@@ -118,26 +118,26 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
                 loading ? 'animate-pulse' : ''
               }`}
             >
-              {loading ? 'ग्रहीय गणना की जा रही है...' : 'AI पीडीएफ महा प्रतिवेदन निर्मित करें'}
+              {loading ? 'Analyzing Celestial Paths...' : 'Generate AI Astrological Report'}
             </button>
           </div>
         </div>
       ) : (
         <div className="space-y-6 animate-in slide-in-from-bottom-6 duration-700">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h3 className="font-playfair text-xl font-bold text-[#1F2937]">आपका व्यक्तिगत दिव्य महा फलादेश</h3>
+            <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Your Personalized Destiny Report</h3>
             <div className="flex gap-3">
               <button
                 onClick={() => setReportText(null)}
                 className="bg-[#F2E8DC] hover:bg-[#E5D7C6] text-[#D97706] font-semibold px-5 py-2.5 rounded-xl text-xs transition duration-300 cursor-pointer border border-[#D97706]/20 font-sans"
               >
-                पुनः प्रारंभ करें
+                Reset / Restart
               </button>
               <button
                 onClick={handlePrint}
                 className="bg-[#D97706] hover:bg-[#B45309] text-white font-bold px-5 py-2.5 rounded-xl text-xs tracking-wider uppercase transition duration-300 cursor-pointer shadow-sm font-sans"
               >
-                प्रिंट करें / पीडीएफ डाउनलोड करें
+                Print / Download PDF
               </button>
             </div>
           </div>

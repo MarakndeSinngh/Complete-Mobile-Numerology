@@ -321,23 +321,23 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
       <div className="sticky top-0 z-50 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm/90 backdrop-blur-md border-b border-[#E5E7EB] shadow-xl py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto gap-4 scrollbar-none">
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[#D97706] font-cinzel text-xs font-bold tracking-widest uppercase">निदान प्रणाली:</span>
+            <span className="text-[#D97706] font-cinzel text-xs font-bold tracking-widest uppercase">Diagnostics:</span>
             <div className="bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/20 px-3 py-1 rounded-full text-[10px] font-mono">
-              श्रेणी (Rating): {mobileData.rating}
+              Rating: {mobileData.rating}
             </div>
           </div>
           <div className="flex gap-1 shrink-0">
             {[
-              { id: 'hero', label: 'मुख्य सारांश', ref: heroRef },
-              { id: 'breakdown', label: 'अंक विश्लेषण', ref: breakdownRef },
-              { id: 'pairs', label: 'पंच ग्रहीय अंक जोड़े', ref: pairsRef },
-              { id: 'vibration', label: 'ग्रहीय ऊर्जा स्पंदन', ref: vibrationRef },
-              { id: 'scoreboard', label: 'योग्यता स्कोरबोर्ड', ref: scoreboardRef },
-              { id: 'charts', label: 'सांख्यिकीय चार्ट', ref: chartsRef },
-              { id: 'report', label: 'ज्योतिषीय कुंडली', ref: reportRef },
-              { id: 'remedies', label: 'महा उपाय मैट्रिक्स', ref: remediesRef },
-              { id: 'ai', label: 'AI दिव्य परामर्श', ref: aiRef },
-              { id: 'pdf', label: 'प्रमाणित वैदिक प्रतिवेदन', ref: pdfRef },
+              { id: 'hero', label: 'Summary', ref: heroRef },
+              { id: 'breakdown', label: 'Digit Analysis', ref: breakdownRef },
+              { id: 'pairs', label: 'Chaldean Pairs', ref: pairsRef },
+              { id: 'vibration', label: 'Planetary Energy', ref: vibrationRef },
+              { id: 'scoreboard', label: 'Scoreboard', ref: scoreboardRef },
+              { id: 'charts', label: 'Charts', ref: chartsRef },
+              { id: 'report', label: 'Astrological Chart', ref: reportRef },
+              { id: 'remedies', label: 'Remedies Matrix', ref: remediesRef },
+              { id: 'ai', label: 'AI Counseling', ref: aiRef },
+              { id: 'pdf', label: 'Certified Report', ref: pdfRef },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -814,10 +814,10 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
             for (let i = 0; i < modifiedMobile.length - 1; i++) {
               pairsToGenerate.push({
                 indices: [i, i + 1],
-                label: `अंक जोड़ ${i + 1}`,
-                indexLabel: `अंक ${i + 1}-${i + 2}`,
+                label: `Pair ${i + 1}`,
+                indexLabel: `Digit ${i + 1}-${i + 2}`,
                 type: 'standard',
-                areaPlaceholder: standardAreas[i] || 'वैदिक प्रभाव'
+                areaPlaceholder: standardAreas[i] || 'Vedic Influence'
               });
             }
 
@@ -832,16 +832,15 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
               const finalPair = modA + modB;
               const isZeroModified = rawPair.includes('0');
               const zeroExplainer = isZeroModified 
-                ? `शून्य प्रतिस्थापन: मूल अंक "${rawPair}" को पिछले अंक से बदलकर उच्च-आवृत्ति जोड़ "${finalPair}" बनाया गया है।`
+                ? `Zero Replacement: Preceding digit "${modA}" fills the zero placeholder to configure "${finalPair}" vibration.`
                 : '';
 
               let lookupResult = PAIR_MEANINGS[finalPair];
-              let hindiLookup = HINDI_PAIR_MEANINGS[finalPair];
 
-              let displayMeaning = hindiLookup ? hindiLookup.meaning : (lookupResult ? lookupResult.meaning : `${finalPair} स्पंदन`);
-              let displayPositive = hindiLookup ? hindiLookup.positive : (lookupResult ? lookupResult.positive : 'सकारात्मक प्रभाव उपलब्ध नहीं है');
-              let displayNegative = hindiLookup ? hindiLookup.negative : (lookupResult ? lookupResult.negative : 'सावधानी नियम उपलब्ध नहीं है');
-              let displayArea = hindiLookup ? hindiLookup.area : (lookupResult ? lookupResult.area : 'सामान्य');
+              let displayMeaning = lookupResult ? lookupResult.meaning : `${finalPair} Vibration`;
+              let displayPositive = lookupResult ? lookupResult.positive : 'Positive frequencies are balanced in this placement.';
+              let displayNegative = lookupResult ? lookupResult.negative : 'Ensure supportive remedies for custom balancing.';
+              let displayArea = lookupResult ? lookupResult.area : 'General';
               let severity = lookupResult ? lookupResult.severity : 65;
 
               return (
@@ -866,7 +865,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                         </span>
                         {isZeroModified && (
                           <span className="absolute -top-2.5 -right-3 px-1 py-0.5 bg-rose-500/10 text-rose-455 text-[8px] font-mono border border-rose-500/20 rounded">
-                            मूल: {rawPair}
+                            Original: {rawPair}
                           </span>
                         )}
                       </div>
@@ -875,7 +874,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                           {displayMeaning}
                         </h4>
                         <p className="text-[10px] font-mono text-slate-500">
-                          {isZeroModified ? 'शून्य प्रतिस्थापन नियम लागू' : 'सामान्य संरेखण'}
+                          {isZeroModified ? 'Zero Replacement Applied' : 'Direct Alignment'}
                         </p>
                       </div>
                     </div>
@@ -888,18 +887,18 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
 
                     <div className="space-y-3 pt-1">
                       <div className="text-xs space-y-1">
-                        <span className="text-[10px] font-sans font-bold text-emerald-600 uppercase block tracking-wider">सकारात्मक प्रभाव</span>
+                        <span className="text-[10px] font-sans font-bold text-emerald-600 uppercase block tracking-wider">Positive Impact</span>
                         <p className="text-[#374151] text-[11px] leading-relaxed">{displayPositive}</p>
                       </div>
                       <div className="text-xs space-y-1">
-                        <span className="text-[10px] font-sans font-bold text-rose-600 uppercase block tracking-wider">सावधानी</span>
+                        <span className="text-[10px] font-sans font-bold text-rose-600 uppercase block tracking-wider">Precaution</span>
                         <p className="text-[#6B7280] text-[11px] leading-relaxed">{displayNegative}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-4 mt-5 border-t border-[#E5E7EB]/70 flex justify-between items-center text-[10px] font-mono">
-                    <span className="text-slate-500">स्थिरता स्कोर:</span>
+                    <span className="text-slate-500">Stability Score:</span>
                     <div className="flex items-center gap-2">
                       <div className="w-16 bg-white/5 h-1.5 rounded-full overflow-hidden">
                         <div
