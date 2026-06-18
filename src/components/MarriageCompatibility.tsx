@@ -1,6 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
 import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber } from '../services/numerologyEngine';
 import { computeLoshuAnalysis } from '../services/loshuEngine';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } }
+};
 import { 
   Heart, Sparkles, Calendar, User, Phone, Compass, Award, 
   ShieldCheck, Printer, Download, History, Flame, Coins, 
@@ -436,10 +452,16 @@ export default function MarriageCompatibility() {
 
       {/* DETAILED RESULTS & AI GENERATED REPORT SCREEN */}
       {currentResult && (
-        <div id="mc-results-wrapper" className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-600">
+        <motion.div 
+          id="mc-results-wrapper" 
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="space-y-12 text-left"
+        >
           
           {/* EXPORT AND ACTION BANNER */}
-          <div className="p-4 border border-[#F2E8DC] bg-[#FDFCF7] rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm print:hidden">
+          <motion.div variants={itemVariants} className="p-4 border border-[#F2E8DC] bg-[#FDFCF7] rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm print:hidden">
             <div className="text-left space-y-0.5">
               <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Authentic Chart Generated</span>
               <p className="text-xs text-[#1F2937] font-semibold">
@@ -454,7 +476,7 @@ export default function MarriageCompatibility() {
                 <Printer className="w-3.5 h-3.5" /> Print / Export PDF
               </button>
             </div>
-          </div>
+          </motion.div>
 
           {/* PRINT-ONLY HEADLINE BANNER */}
           <div className="hidden print:block text-center border-b-2 border-amber-600 pb-8 space-y-2">
@@ -470,7 +492,7 @@ export default function MarriageCompatibility() {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch">
             
             {/* Stability Wheel Chart */}
-            <div className="md:col-span-4 bg-[#1E3A8A] text-white rounded-[40px] p-8 text-center flex flex-col justify-between gap-6 relative overflow-hidden shadow-lg">
+            <motion.div variants={itemVariants} className="md:col-span-4 bg-[#1E3A8A] text-white rounded-[40px] p-8 text-center flex flex-col justify-between gap-6 relative overflow-hidden shadow-lg">
               {/* Golden circular sacred backdrop element */}
               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#FFF_0.75px,transparent_0.75px)] [background-size:20px_20px] pointer-events-none"></div>
               
@@ -527,10 +549,10 @@ export default function MarriageCompatibility() {
                   </p>
                 )}
               </div>
-            </div>
+            </motion.div>
 
             {/* Individual Compatibility Pillars */}
-            <div className="md:col-span-8 bg-[#FDFCF7] border border-[#F2E8DC] rounded-[40px] p-8 md:p-10 shadow-sm flex flex-col justify-between">
+            <motion.div variants={itemVariants} className="md:col-span-8 bg-[#FDFCF7] border border-[#F2E8DC] rounded-[40px] p-8 md:p-10 shadow-sm flex flex-col justify-between">
               <div className="text-left space-y-1 pb-4 border-b border-[#F2E8DC]">
                 <h3 className="font-playfair text-xl font-bold text-slate-800">Planetary Harmony Indexes</h3>
                 <p className="text-xs text-slate-500 font-sans">
@@ -606,15 +628,15 @@ export default function MarriageCompatibility() {
                 </div>
 
               </div>
-            </div>
+            </motion.div>
 
           </div>
 
           {/* DUAL MULANK & BHAGYANK COMPATIBILITY */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Mulank Compatibility Panel */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6 text-left">
+            <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6 text-left">
               <div className="flex items-center justify-between border-b border-slate-150 pb-4">
                 <div className="space-y-1">
                   <span className="text-[9px] font-mono bg-rose-50 border border-rose-200 text-rose-600 font-extrabold px-2 py-0.5 rounded-full uppercase">Mulank (Psychic Axis)</span>
@@ -645,10 +667,10 @@ export default function MarriageCompatibility() {
                 This produces a <strong>Compatibility score of {currentResult.metrics.mulankScore}%</strong>. 
                 This relationship forms a highly active structural link. Everyday actions between the couple will align cleanly, creating cohesive household coordination.
               </p>
-            </div>
+            </motion.div>
 
             {/* Bhagyank Compatibility Panel */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6 text-left">
+            <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6 text-left">
               <div className="flex items-center justify-between border-b border-slate-150 pb-4">
                 <div className="space-y-1">
                   <span className="text-[9px] font-mono bg-blue-50 border border-blue-200 text-blue-600 font-extrabold px-2 py-0.5 rounded-full uppercase">Bhagyank (Destiny Axis)</span>
@@ -678,12 +700,12 @@ export default function MarriageCompatibility() {
                 bringing an outstanding <strong>Bhagyank score of {currentResult.metrics.bhagyankScore}%</strong>. 
                 This axis defines long-term spiritual growth, retirement assets, and material luck. High synchronization here ensures smooth wealth sharing and persistent support during major career changes.
               </p>
-            </div>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
           {/* DUAL LOSHU GRIDS COMPARISON */}
-          <div className="bg-[#FDFCF7] border border-[#F2E8DC] rounded-[40px] p-8 md:p-10 shadow-sm text-left space-y-8">
+          <motion.div variants={itemVariants} className="bg-[#FDFCF7] border border-[#F2E8DC] rounded-[40px] p-8 md:p-10 shadow-sm text-left space-y-8">
             <div className="border-b border-[#F2E8DC] pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h3 className="font-playfair text-2xl font-black text-indigo-900">Dual Loshu Grid Positions</h3>
@@ -755,13 +777,13 @@ export default function MarriageCompatibility() {
               </div>
 
             </div>
-          </div>
+          </motion.div>
 
           {/* COMBINED MISSING NUMBERS & ARROWS ANALYSIS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Missing Numbers Audit */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
+            <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
               <div className="border-b border-slate-150 pb-4">
                 <h3 className="font-playfair text-lg font-bold text-slate-800">Missing Elements Integration</h3>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest block font-bold">Vibrational Empty Holes Matching</p>
@@ -809,10 +831,10 @@ export default function MarriageCompatibility() {
                 </p>
 
               </div>
-            </div>
+            </motion.div>
 
             {/* Strength Arrow Analysis */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
+            <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
               <div className="border-b border-slate-150 pb-4">
                 <h3 className="font-playfair text-lg font-bold text-slate-800">Dynamic Lushu Arrows Match</h3>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest block font-bold">Strengths & Willpower Planes Map</p>
@@ -847,15 +869,15 @@ export default function MarriageCompatibility() {
                 </p>
 
               </div>
-            </div>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
           {/* DUAL NAME & MOBILE NUMEROLOGY COMPATIBILITY */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Name Numerology Grid Compatibility */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
+            <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
               <div className="border-b border-slate-150 pb-4">
                 <h3 className="font-playfair text-lg font-bold text-slate-800">Name Vibrations (Chaldean Link)</h3>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest block font-bold">Planetary Word Frequency Match</p>
@@ -879,10 +901,10 @@ export default function MarriageCompatibility() {
                   highly cooperative harmonic. It protects the couple from public rumors and enhances domestic peace.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Mobile Numerology Alignment */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
+            <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
               <div className="border-b border-slate-150 pb-4">
                 <h3 className="font-playfair text-lg font-bold text-slate-800">Mobile Numerology Integration</h3>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest block font-bold">Dynamic Digital Shielding</p>
@@ -904,12 +926,12 @@ export default function MarriageCompatibility() {
                   The combined phone systems totals are beautifully harmonious. Under Chaldean phone diagnostics, these numbers do not form hostile alignments, ensuring that phone messages and everyday chats remain respectful and filled with positive trust.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
           {/* SACRED SPIRITUALITY & SOULMATE INDICATORS */}
-          <div className="p-8 md:p-10 bg-[#FDFCF7] border border-[#F2E8DC] rounded-[40px] shadow-sm text-left space-y-6 relative overflow-hidden">
+          <motion.div variants={itemVariants} className="p-8 md:p-10 bg-[#FDFCF7] border border-[#F2E8DC] rounded-[40px] shadow-sm text-left space-y-6 relative overflow-hidden">
             {/* Shiny golden circular glow decoration */}
             <div className="absolute right-4 bottom-4 w-52 h-52 bg-[#D97706]/5 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -951,13 +973,13 @@ export default function MarriageCompatibility() {
               </div>
 
             </div>
-          </div>
+          </motion.div>
 
           {/* MARRIAGE TIMING ANALYSIS & AUSPICIOUS DATES */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+          <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
             
             {/* Wedding Timing Analysis */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6">
+            <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6">
               <div className="border-b border-slate-150 pb-4">
                 <Clock className="w-6 h-6 text-amber-500 inline-block mr-2" />
                 <h3 className="font-playfair text-lg font-bold text-slate-800 inline-block align-middle">Marriage Timing Analysis</h3>
@@ -974,10 +996,10 @@ export default function MarriageCompatibility() {
                   The upcoming months corresponding to <strong>Vedic Solar Transits (Aswin, Kartik and Phalguna)</strong> provide unmatched planetary backing, especially when dates resolve to celestial integers <strong>1, 3, 5 or 9</strong>.
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Lucky Dates & Colors */}
-            <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6">
+            <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6">
               <div className="border-b border-slate-150 pb-4">
                 <Palette className="w-6 h-6 text-[#1E3A8A] inline-block mr-2" />
                 <h3 className="font-playfair text-lg font-bold text-slate-800 inline-block align-middle">Lucky Elements & Colors</h3>
@@ -1008,12 +1030,12 @@ export default function MarriageCompatibility() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
           {/* FAMILY & CHILDREN ENERGY & REMEDIES */}
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
+          <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm text-left space-y-6">
             <div className="border-b border-slate-150 pb-4 flex items-center justify-between">
               <div>
                 <h3 className="font-playfair text-lg font-bold text-slate-800">Family Energy & Planetary Remedies</h3>
@@ -1047,10 +1069,10 @@ export default function MarriageCompatibility() {
               </div>
 
             </div>
-          </div>
+          </motion.div>
 
           {/* COMPLETE AI GENERATED CONSULTATION REPORT */}
-          <div className="p-8 md:p-12 bg-gradient-to-br from-[#1E3A8A] to-[#111827] rounded-[40px] text-white shadow-2xl space-y-10 relative overflow-hidden text-left">
+          <motion.div variants={itemVariants} className="p-8 md:p-12 bg-gradient-to-br from-[#1E3A8A] to-[#111827] rounded-[40px] text-white shadow-2xl space-y-10 relative overflow-hidden text-left">
             {/* Elegant luxury backdrop curves */}
             <div className="absolute right-0 top-0 w-96 h-96 bg-amber-400/5 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -1104,9 +1126,9 @@ export default function MarriageCompatibility() {
               </div>
 
             </div>
-          </div>
+          </motion.div>
 
-        </div>
+        </motion.div>
       )}
 
     </div>

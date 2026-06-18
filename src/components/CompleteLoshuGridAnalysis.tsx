@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { 
   computeLoshuAnalysis, 
   performLoshuCompatibility, 
@@ -11,6 +12,21 @@ import {
   Trash2, Heart, Shield, BookOpen, Layers, Award, FileText, Download, 
   Check, AlertCircle, Eye, Info, ShieldCheck, ArrowRight, CheckCircle, Flame, Droplet, Trees, Hammer, Landmark, Printer
 } from 'lucide-react';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } }
+};
 
 interface CompleteLoshuGridAnalysisProps {
   initialProfile?: { name: string; dob: string; gender: string } | null;
@@ -301,10 +317,18 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
         <div className="space-y-10 animate-in fade-in duration-500">
           
           {/* SECTION 3: KEY METRICS ROW (MULANK & BHAGYANK CARDS) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
             
             {/* Mulank (Driver) Card */}
-            <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex flex-col justify-between gap-4 border-t-4 border-t-[#D97706]">
+            <motion.div 
+              variants={itemVariants}
+              className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex flex-col justify-between gap-4 border-t-4 border-t-[#D97706]"
+            >
               <div className="flex items-start justify-between w-full gap-4">
                 <div className="space-y-2 text-left">
                   <span className="text-[9px] font-mono uppercase bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/20 px-2.5 py-0.5 rounded-full font-bold">Psychic / Driver Number</span>
@@ -330,10 +354,13 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                   </p>
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Bhagyank (Conductor) Card */}
-            <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex flex-col justify-between gap-4 border-t-4 border-t-[#1E3A8A]">
+            <motion.div 
+              variants={itemVariants}
+              className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex flex-col justify-between gap-4 border-t-4 border-t-[#1E3A8A]"
+            >
               <div className="flex items-start justify-between w-full gap-4">
                 <div className="space-y-2 text-left">
                   <span className="text-[9px] font-mono uppercase bg-blue-50 text-[#1E3A8A] border border-blue-200 px-2.5 py-0.5 rounded-full font-bold">Conductor / Destiny Number</span>
@@ -359,10 +386,13 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                   </p>
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Personal Year Card */}
-            <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex items-center justify-between gap-6 border-t-4 border-t-emerald-600">
+            <motion.div 
+              variants={itemVariants}
+              className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex items-center justify-between gap-6 border-t-4 border-t-emerald-600"
+            >
               <div className="space-y-2 text-left">
                 <span className="text-[9px] font-mono uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-bold">Active Year Influence</span>
                 <h3 className="font-playfair text-2xl font-black text-[#1F2937]">व्यक्तिगत वर्ष #{analysisResult.personalYear.number}</h3>
@@ -373,9 +403,9 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
               <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-200 text-emerald-700 font-playfair font-black text-3xl flex items-center justify-center shadow-inner">
                 {analysisResult.personalYear.number}
               </div>
-            </div>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
           {/* SECTION 4: SUBTAB MENU */}
           <div className="border-b border-[#E5E7EB] pt-2 flex flex-wrap gap-2 print:hidden">
@@ -427,19 +457,27 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                   </div>
 
                   {/* Complete Animated Magic Board */}
-                  <div className="grid grid-cols-3 gap-3 max-w-[340px] mx-auto aspect-square my-4 p-2 bg-[#F8F4EF]/80 rounded-[30px] border border-[#E5E7EB]">
+                  <motion.div 
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                    className="grid grid-cols-3 gap-3 max-w-[340px] mx-auto aspect-square my-4 p-2 bg-[#F8F4EF]/80 rounded-[30px] border border-[#E5E7EB]"
+                  >
                     {loshuGridOrder.map((digit) => {
                       const box = analysisResult.loshuGrid[digit];
                       const style = getBoxElementStyle(box.element, box.count);
                       const isSelected = selectedBoxDigit === digit;
 
                       return (
-                        <div
+                        <motion.div
                           key={digit}
+                          variants={itemVariants}
                           onClick={() => setSelectedBoxDigit(digit)}
                           className={`rounded-2xl border-2 flex flex-col justify-between p-3 cursor-pointer select-none transition-all duration-300 relative overflow-hidden group ${style} ${
                             isSelected ? 'ring-4 ring-[#D97706]/40 border-[#D97706] scale-102 z-20 shadow-lg' : 'hover:scale-101 hover:border-[#D97706]/20'
                           }`}
+                          whileHover={{ scale: 1.04, y: -2 }}
+                          whileTap={{ scale: 0.96 }}
                         >
                           {/* Inner tiny background number mapping index */}
                           <span className="absolute -bottom-2 -left-2 text-[28px] font-mono font-bold opacity-5 group-hover:opacity-10 transition-opacity">
@@ -465,10 +503,10 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                               {box.element}
                             </span>
                           </div>
-                        </div>
+                        </motion.div>
                       );
                     })}
-                  </div>
+                  </motion.div>
 
                   <div className="flex gap-4 items-center justify-center text-[10px] font-mono flex-wrap bg-[#F8F4EF] p-4 rounded-2xl">
                     <div className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-emerald-100 border border-emerald-300 rounded"></span><span>Wood Element</span></div>
@@ -940,10 +978,18 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
               </div>
 
               {partnerResult && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-6 duration-500 text-left select-all">
+                <motion.div 
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left select-all"
+                >
                   
                   {/* Radial Synastry Compass (Left) */}
-                  <div className="p-8 bg-white border border-[#E5E7EB] rounded-[40px] shadow-sm flex flex-col justify-center items-center text-center space-y-6">
+                  <motion.div 
+                    variants={itemVariants}
+                    className="p-8 bg-white border border-[#E5E7EB] rounded-[40px] shadow-sm flex flex-col justify-center items-center text-center space-y-6"
+                  >
                     <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-wider font-bold">Synastry Resonance Rating</span>
                     
                     <div className="relative w-44 h-44 flex items-center justify-center">
@@ -971,10 +1017,13 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                       <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold block">Divine Verdict</span>
                       <p className="font-playfair text-lg text-[#1F2937] font-extrabold uppercase tracking-widest">{partnerResult.verdict}</p>
                     </div>
-                  </div>
+                  </motion.div>
 
                   {/* Detailed Forecast Breakdown (Right) */}
-                  <div className="p-8 bg-white border border-[#E5E7EB] rounded-[40px] shadow-sm space-y-6">
+                  <motion.div 
+                    variants={itemVariants}
+                    className="p-8 bg-white border border-[#E5E7EB] rounded-[40px] shadow-sm space-y-6"
+                  >
                     <h4 className="font-playfair text-xl font-bold text-[#1F2937] pb-2 border-b border-[#E5E7EB]">Planetary Affinity Report</h4>
                     <div className="space-y-4 text-xs leading-relaxed text-slate-700">
                       
@@ -1007,9 +1056,9 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                       </div>
 
                     </div>
-                  </div>
+                  </motion.div>
 
-                </div>
+                </motion.div>
               )}
 
             </div>
