@@ -94,6 +94,20 @@ export interface LoshuAnalysisResult {
     gemstones: string[];
     remedies: string[];
   };
+  chaldeanMulank?: {
+    compound: number;
+    reduced: number;
+    title: string;
+    ruler: string;
+    description: string;
+  };
+  chaldeanBhagyank?: {
+    compound: number;
+    reduced: number;
+    title: string;
+    ruler: string;
+    description: string;
+  };
   rawJSON: string;
 }
 
@@ -122,6 +136,74 @@ const PLANE_TEMPLATES = [
   { name: 'Silver Spiritual Plane', type: 'DIAGONAL' as const, digits: [2, 5, 8], title: 'रजत संपत्ति भूमि विमान', description: 'Highlights stability, multi-asset real estate luck, and high spiritual peace.' }
 ];
 
+interface ChaldeanCompound {
+  title: string;
+  ruler: string;
+  description: string;
+}
+
+const CHALDEAN_COMPOUNDS: Record<number, ChaldeanCompound> = {
+  1: { title: "सूर्य शक्ति (The Solar Core)", ruler: "Sun (सूर्य)", description: "Creative willpower, highly independent leadership, and raw drive." },
+  2: { title: "चन्द्र आभा (The Lunar Balance)", ruler: "Moon (चन्द्र)", description: "Harmony, emotional depth, sensitivity, and cooperative design." },
+  3: { title: "गुरु बल (The Jovian Scepter)", ruler: "Jupiter (गुरु)", description: "Spiritual mastery, natural expansion, wisdom, and strict order." },
+  4: { title: "उग्र चक्र (The Uranian Axis)", ruler: "Rahu (राहू)", description: "Rebellious structural designs, dynamic shifts, and sudden ideas." },
+  5: { title: "बुध चेतना (The Mercurial Fire)", ruler: "Mercury (बुध)", description: "Rapid communications, commercial strategy, and versatile intellect." },
+  6: { title: "शुक्र वैभव (The Venusian Halo)", ruler: "Venus (शुक्र)", description: "Luxury, cosmetic or artistic values, high beauty, and attraction." },
+  7: { title: "अतीन्द्रिय केतु (The Mystic Anchor)", ruler: "Ketu (केतु)", description: "Inward research, solitary wisdom, high gut-intuition, and analysis." },
+  8: { title: "शनि अनुशासन (The Saturnian Pillar)", ruler: "Saturn (शनि)", description: "Karmic tests, extreme physical stamina, and long-term material gains." },
+  9: { title: "मंगल शौर्य (The Martial Spear)", ruler: "Mars (मंगल)", description: "Dynamic courage, leadership execute focus, and fiery energy." },
+  10: { title: "भाग्य चक्र (The Wheel of Fortune)", ruler: "Sun (सूर्य)", description: "Highly auspicious. Indicates rise in power, honor, and success in trade." },
+  11: { title: "संघर्ष (The Clashing Fists)", ruler: "Moon (चन्द्र)", description: "Double-mindedness; warns of hidden competitors and emotional trials." },
+  12: { title: "त्याग और ज्ञान (The Sacrifice)", ruler: "Jupiter (गुरु)", description: "Accomplishment through persistent mental development and voluntary sacrifice." },
+  13: { title: "परिवर्तन (The Change)", ruler: "Rahu (राहू)", description: "Denotes sudden transitions, change of workspace or plans, and fresh visions." },
+  14: { title: "गतिशीलता (The Magnetic Movement)", ruler: "Mercury (बुध)", description: "Highly propitious for trading, investments, and public speech dynamics." },
+  15: { title: "आकर्षण (The Alchemist)", ruler: "Venus (शुक्र)", description: "Generates superb charisma, strong support from public, and artistic luck." },
+  16: { title: "भंग शिखर (The Falling Citadel)", ruler: "Ketu (केतु)", description: "Warns of sudden changes in pride. Suggests keeping a highly humble outlook to trigger deep spiritual security." },
+  17: { title: "जादूगर का तारा (The Star of the Magi)", ruler: "Saturn (शनि)", description: "Excellent financial safety. Indicates rise above early childhood limitations." },
+  18: { title: "कलह चक्र (The Bitter Conflict)", ruler: "Mars (मंगल)", description: "Warns of legal disputes, sudden hot arguments, or electric energy shocks." },
+  19: { title: "स्वर्ग का राजकुमार (The Prince of Heaven)", ruler: "Sun (सूर्य)", description: "Vantglorious success. Brings high respect, social glory, and abundance." },
+  20: { title: "जागृति (The Awakening)", ruler: "Moon (चन्द्र)", description: "Call to professional action. Focuses the mind on spiritual or artistic tasks." },
+  21: { title: "मुकुट और विजय (The Crown of the Magi)", ruler: "Jupiter (गुरु)", description: "Guarantees complete target fulfillment and honors after a long trial." },
+  22: { title: "भ्रमित यात्री (The Blind Fold)", ruler: "Rahu (राहू)", description: "A warning against blind reliance on false business partners or speculations." },
+  23: { title: "सिंह का तारा (The Royal Star on High)", ruler: "Mercury (बुध)", description: "Promises support from authorities and outstanding success in commerce." },
+  24: { title: "शुक्र वरदान (The Divine Helper)", ruler: "Venus (शुक्र)", description: "Fosters peaceful domestic relationships, wealthy patrons, and safety." },
+  25: { title: "आंतरिक खोज (The Spiritual Meditation)", ruler: "Ketu (केतु)", description: "Auspicious for intellectual fields, analytical research, and metaphysics." },
+  26: { title: "कठोर दायित्व (The Lead Collar)", ruler: "Saturn (शनि)", description: "Expect early duties and hard trials; advises caution in heavy partnership deals." },
+  27: { title: "राजदण्ड (The Sovereign Scepter)", ruler: "Mars (मंगल)", description: "Grants command, execution powers, and excellent protective shielding." },
+  28: { title: "मित्रता और परीक्षा (The Trusting Companion)", ruler: "Sun (सूर्य)", description: "Highlights stable commercial success but advises checking contracts twice." },
+  29: { title: "कठिन परीक्षा (The Trial under Fire)", ruler: "Moon (चन्द्र)", description: "Great trials of patience followed by long-term administrative capability." },
+  30: { title: "मौन साधक (The Silent Thinker)", ruler: "Jupiter (गुरु)", description: "Exceptional intelligence in writing, academic study, and quiet meditation." },
+  31: { title: "एकांत चिंतन (The Solitary Path)", ruler: "Rahu (राहू)", description: "Fosters deep independent mindset; warns against social isolation." },
+  32: { title: "सहमति और गठबंधन (The Covenant)", ruler: "Mercury (बुध)", description: "Superb for travel, media, foreign agreements, and community communication." },
+  33: { title: "पवित्र गुरु (The Archway of Love)", ruler: "Venus (शुक्र)", description: "Brings outstanding marital comfort, general lucky stars, and spiritual joy." },
+  34: { title: "परिश्रम फल (The Silent Forge)", ruler: "Ketu (केतु)", description: "Rewards after initial delays. Denotes strong engineering or analytical skills." },
+  35: { title: "हिलता सिंहासन (The Shaking Throne)", ruler: "Moon (चन्द्र)", description: "High financial safety but warns of health fluctuations. Keep stable habits." },
+  36: { title: "विजयी योद्धा (The Conquering Soldier)", ruler: "Mars (मंगल)", description: "Grants persistent courage to beat rivals and secure administrative ranks." },
+  37: { title: "तेजस्वी राजदण्ड (The Bright Scepter)", ruler: "Sun (सूर्य)", description: "Commanding luck. Fosters rapid business fame and perfect health vibrations." },
+  38: { title: "शांत धारा (The Peaceful River)", ruler: "Moon (चन्द्र)", description: "Promotes peaceful joint ventures, emotional healing, and artistic goals." },
+  39: { title: "बुद्धिजीवी (The Rational Mind)", ruler: "Jupiter (गुरु)", description: "Exceptional capabilities in debate, legal support, and teaching others." },
+  40: { title: "स्वर्ण लंगर (The Golden Anchor)", ruler: "Rahu (राहू)", description: "Brings safe property investments; warns against material greed or speculation." },
+  41: { title: "लिखित आदेश (The Written Command)", ruler: "Mercury (बुध)", description: "Excellent for writers, publications, print businesses, and trade contracts." },
+  42: { title: "सहानुभूति (The Gentle Guide)", ruler: "Venus (शुक्र)", description: "Grants deep domestic warmth, loyalty from friends, and comfortable lifestyle." },
+  43: { title: "सुरक्षा कवच (The Star-lit Shield)", ruler: "Mars (मंगल)", description: "Protects from unexpected physical harms; advises calm, deliberate speaking." },
+  44: { title: "मजबूत नींव (The Iron Anvil)", ruler: "Saturn (शनि)", description: "Long-term legacy building through massive willpower and physical stamina." },
+  45: { title: "महान मुुकुट (The Celestial Canopy)", ruler: "Jupiter (गुरु)", description: "Generates long-term peace, high moral code, and recognition from elders." },
+  46: { title: "चतुर राजनयिक (The Master Diplomat)", ruler: "Sun (सूर्य)", description: "Fosters excellent tactical negotiations and control of public relations." },
+  47: { title: "रहस्यमयी दर्शन (The Dream Weaver)", ruler: "Moon (चन्द्र)", description: "Propitious for artistic writing, creative concepts, and maritime exports." },
+  48: { title: "अटल कमान (The Steel Pillar)", ruler: "Saturn (शनि)", description: "Indicates huge duties in commercial organizations; unmatched patience." },
+  49: { title: "रणनीतिकार (The Supreme General)", ruler: "Mars (मंगल)", description: "Outstanding strategic execution; defeats any legal or operational hurdles." },
+  50: { title: "यात्रा और नवाचार (The Voyager)", ruler: "Mercury (बुध)", description: "Gives high luck in foreign traveling, digital businesses, and creative shifts." },
+  51: { title: "शाही ध्वज (The Royal Star of Glory)", ruler: "Sun (सूर्य)", description: "Propels the person to peak status or political fame; commands true devotion." },
+  52: { title: "संरक्षित मार्ग (The Blessed Highway)", ruler: "Moon (चन्द्र)", description: "High protection from feminine alignment; intuitive and psychic depth." },
+  53: { title: "आदेश चक्र (The High Command)", ruler: "Jupiter (गुरु)", description: "Denotes peak administrative capabilities, judicial command, or spiritual guru roles." },
+  54: { title: "रण सुरक्षा (The Guardian Spear)", ruler: "Mars (मंगल)", description: "Provides outstanding protection, military bravery, and physical stability." },
+  55: { title: "सूर्य मुकुट (The Zenith Solar)", ruler: "Sun (सूर्य)", description: "Superb financial command, authority, and public respect." },
+  56: { title: "समन्वय (The Master Harmonizer)", ruler: "Venus (शुक्र)", description: "Denotes beautiful partnerships, social fame, and family harmony." },
+  57: { title: "गूढ़ साधक (The Esoteric Whisperer)", ruler: "Ketu (केतु)", description: "Brings strong talent in occult search, deep analysis, and writing secrets." },
+  58: { title: "दृढ़ कोट (The Fortress)", ruler: "Saturn (शनि)", description: "Outstanding perseverance; success in minerals, heavy industries, or land development." },
+  59: { title: "सक्रिय सेनापति (The Vanguard Commander)", ruler: "Mars (मंगल)", description: "Fosters great physical speed, high reaction focus, and mechanical skills." }
+};
+
 export function computeLoshuAnalysis(dobStr: string, name: string, gender: string = 'MALE'): LoshuAnalysisResult {
   const parts = dobStr.split('-');
   const bYear = parseInt(parts[0], 10) || 1990;
@@ -134,6 +216,24 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
 
   // Count digits in date of birth (excluding zeros)
   const dobDigitsStr = dobStr.replace(/[^0-9]/g, '');
+
+  // Chaldean psychic / destiny calculations
+  const chaldeanMulankCompound = bDay;
+  const chaldeanMulankReduced = mulank;
+  const chaldeanBhagyankCompound = dobDigitsStr.split('').map(d => parseInt(d, 10)).reduce((acc, v) => acc + v, 0);
+  const chaldeanBhagyankReduced = reduceToSingleDigit(chaldeanBhagyankCompound);
+
+  const mComp = CHALDEAN_COMPOUNDS[chaldeanMulankCompound] || {
+    title: `मूलांक ${chaldeanMulankCompound} कम्पाउंड`,
+    ruler: mulank === 1 ? "Sun (सूर्य)" : mulank === 2 ? "Moon (चन्द्र)" : mulank === 3 ? "Jupiter (गुरु)" : mulank === 4 ? "Rahu (राहू)" : mulank === 5 ? "Mercury (बुध)" : mulank === 6 ? "Venus (शुक्र)" : mulank === 7 ? "Ketu (केतु)" : mulank === 8 ? "Saturn (शनि)" : "Mars (मंगल)",
+    description: `Highly energetic vibrational focus aligning with ruler frequencies.`
+  };
+
+  const bComp = CHALDEAN_COMPOUNDS[chaldeanBhagyankCompound] || {
+    title: `भाग्यांक ${chaldeanBhagyankCompound} कम्पाउंड`,
+    ruler: chaldeanBhagyankReduced === 1 ? "Sun (सूर्य)" : chaldeanBhagyankReduced === 2 ? "Moon (चन्द्र)" : chaldeanBhagyankReduced === 3 ? "Jupiter (गुरु)" : chaldeanBhagyankReduced === 4 ? "Rahu (राहू)" : chaldeanBhagyankReduced === 5 ? "Mercury (बुध)" : chaldeanBhagyankReduced === 6 ? "Venus (शुक्र)" : chaldeanBhagyankReduced === 7 ? "Ketu (केतु)" : chaldeanBhagyankReduced === 8 ? "Saturn (शनि)" : "Mars (मंगल)",
+    description: `Defines critical cosmic pathways supporting overall lifetime missions.`
+  };
   const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
   const sourcesMap: Record<number, ('DOB' | 'MULANK' | 'BHAGYANK')[]> = {};
 
@@ -597,6 +697,20 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
     currentMahadasha,
     currentAntardasha,
     luckyDetails,
+    chaldeanMulank: {
+      compound: chaldeanMulankCompound,
+      reduced: chaldeanMulankReduced,
+      title: mComp.title,
+      ruler: mComp.ruler,
+      description: mComp.description
+    },
+    chaldeanBhagyank: {
+      compound: chaldeanBhagyankCompound,
+      reduced: chaldeanBhagyankReduced,
+      title: bComp.title,
+      ruler: bComp.ruler,
+      description: bComp.description
+    },
     rawJSON: JSON.stringify(outputObj, null, 2)
   };
 }

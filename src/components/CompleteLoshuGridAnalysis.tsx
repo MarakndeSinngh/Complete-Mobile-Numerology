@@ -304,31 +304,61 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Mulank (Driver) Card */}
-            <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex items-center justify-between gap-6 border-t-4 border-t-[#D97706]">
-              <div className="space-y-2 text-left">
-                <span className="text-[9px] font-mono uppercase bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/20 px-2.5 py-0.5 rounded-full font-bold">Psychic / Driver Number</span>
-                <h3 className="font-playfair text-2xl font-black text-[#1F2937]">मूलांक #{analysisResult.mulank}</h3>
-                <p className="text-slate-500 text-xs leading-relaxed max-w-xs">
-                  Governs raw talent, personality traits, and default mental attributes. Triggers how you approach immediate decisions.
-                </p>
+            <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex flex-col justify-between gap-4 border-t-4 border-t-[#D97706]">
+              <div className="flex items-start justify-between w-full gap-4">
+                <div className="space-y-2 text-left">
+                  <span className="text-[9px] font-mono uppercase bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/20 px-2.5 py-0.5 rounded-full font-bold">Psychic / Driver Number</span>
+                  <h3 className="font-playfair text-2xl font-black text-[#1F2937]">मूलांक #{analysisResult.mulank}</h3>
+                  <p className="text-slate-500 text-xs leading-relaxed max-w-xs">
+                    Governs raw talent, personality traits, and default mental attributes. Triggers how you approach immediate decisions.
+                  </p>
+                </div>
+                <div className="w-16 h-16 shrink-0 rounded-full bg-[#FDFCF7] border-2 border-[#D97706]/20 text-[#D97706] font-playfair font-black text-3xl flex items-center justify-center shadow-inner">
+                  {analysisResult.mulank}
+                </div>
               </div>
-              <div className="w-16 h-16 rounded-full bg-[#FDFCF7] border-2 border-[#D97706]/20 text-[#D97706] font-playfair font-black text-3xl flex items-center justify-center shadow-inner">
-                {analysisResult.mulank}
-              </div>
+              {analysisResult.chaldeanMulank && (
+                <div className="pt-3 border-t border-slate-100 text-left space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase text-[#D97706] font-bold">
+                    <span>Chaldean Rank #{analysisResult.chaldeanMulank.compound}</span>
+                    <span>•</span>
+                    <span>{analysisResult.chaldeanMulank.ruler}</span>
+                  </div>
+                  <h4 className="text-xs font-extrabold text-slate-800">{analysisResult.chaldeanMulank.title}</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-sans">
+                    {analysisResult.chaldeanMulank.description}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Bhagyank (Conductor) Card */}
-            <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex items-center justify-between gap-6 border-t-4 border-t-[#1E3A8A]">
-              <div className="space-y-2 text-left">
-                <span className="text-[9px] font-mono uppercase bg-blue-50 text-[#1E3A8A] border border-blue-200 px-2.5 py-0.5 rounded-full font-bold">Conductor / Destiny Number</span>
-                <h3 className="font-playfair text-2xl font-black text-[#1F2937]">भाग्यांक #{analysisResult.bhagyank}</h3>
-                <p className="text-slate-500 text-xs leading-relaxed max-w-xs">
-                  Governs life purpose, core destiny, career achievements, and major planetary direction changes.
-                </p>
+            <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm flex flex-col justify-between gap-4 border-t-4 border-t-[#1E3A8A]">
+              <div className="flex items-start justify-between w-full gap-4">
+                <div className="space-y-2 text-left">
+                  <span className="text-[9px] font-mono uppercase bg-blue-50 text-[#1E3A8A] border border-blue-200 px-2.5 py-0.5 rounded-full font-bold">Conductor / Destiny Number</span>
+                  <h3 className="font-playfair text-2xl font-black text-[#1F2937]">भाग्यांक #{analysisResult.bhagyank}</h3>
+                  <p className="text-slate-500 text-xs leading-relaxed max-w-xs">
+                    Governs life purpose, core destiny, career achievements, and major planetary direction changes.
+                  </p>
+                </div>
+                <div className="w-16 h-16 shrink-0 rounded-full bg-blue-50/50 border-2 border-blue-200 text-[#1E3A8A] font-playfair font-black text-3xl flex items-center justify-center shadow-inner">
+                  {analysisResult.bhagyank}
+                </div>
               </div>
-              <div className="w-16 h-16 rounded-full bg-blue-50/50 border-2 border-blue-200 text-[#1E3A8A] font-playfair font-black text-3xl flex items-center justify-center shadow-inner">
-                {analysisResult.bhagyank}
-              </div>
+              {analysisResult.chaldeanBhagyank && (
+                <div className="pt-3 border-t border-slate-100 text-left space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase text-[#1E3A8A] font-bold">
+                    <span>Chaldean Rank #{analysisResult.chaldeanBhagyank.compound}</span>
+                    <span>•</span>
+                    <span>{analysisResult.chaldeanBhagyank.ruler}</span>
+                  </div>
+                  <h4 className="text-xs font-extrabold text-slate-800">{analysisResult.chaldeanBhagyank.title}</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-sans">
+                    {analysisResult.chaldeanBhagyank.description}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Personal Year Card */}

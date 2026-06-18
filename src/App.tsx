@@ -15,13 +15,14 @@ import RemediesTab from './components/RemediesTab';
 import ReportTab from './components/ReportTab';
 import AdminPanel from './components/AdminPanel';
 import CompleteLoshuGridAnalysis from './components/CompleteLoshuGridAnalysis';
+import MarriageCompatibility from './components/MarriageCompatibility';
 
 type ViewTab = 'DASHBOARD' | 'MOBILE' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
 
 const App: React.FC = () => {
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null);
   const [activeTab, setActiveTab] = useState<ViewTab>('MOBILE');
-  const [currentPortal, setCurrentPortal] = useState<'MOBILE_NUMEROLOGY' | 'LOSHU_GRID'>('MOBILE_NUMEROLOGY');
+  const [currentPortal, setCurrentPortal] = useState<'MOBILE_NUMEROLOGY' | 'LOSHU_GRID' | 'MARRIAGE_COMPATIBILITY'>('MOBILE_NUMEROLOGY');
   const [analysisMode, setAnalysisMode] = useState<'QUICK' | 'ADVANCED'>('QUICK');
 
   // Input states
@@ -149,7 +150,7 @@ const App: React.FC = () => {
       <main id="main-content" className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full relative z-30 animate-in fade-in duration-500">
         
         {/* Top-Level Portal Navigation - Separate page and menu items */}
-        <div className="flex flex-col sm:flex-row border border-[#E5E7EB] mb-8 bg-white p-2 rounded-3xl gap-2 shadow-sm border-t-slate-100 print:hidden">
+        <div className="flex flex-col md:flex-row border border-[#E5E7EB] mb-8 bg-white p-2 rounded-3xl gap-2 shadow-sm border-t-slate-100 print:hidden">
           <button
             onClick={() => setCurrentPortal('MOBILE_NUMEROLOGY')}
             className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
@@ -170,6 +171,17 @@ const App: React.FC = () => {
             }`}
           >
             <Compass className="w-4 h-4 animate-spin-slow text-[#D97706]" /> Complete Loshu Grid Analysis 🌟
+          </button>
+
+          <button
+            onClick={() => setCurrentPortal('MARRIAGE_COMPATIBILITY')}
+            className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+              currentPortal === 'MARRIAGE_COMPATIBILITY'
+                ? 'bg-[#1E3A8A] text-white shadow-md'
+                : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50'
+            }`}
+          >
+            <Heart className="w-4 h-4 text-rose-500 fill-rose-500 animate-pulse" /> Marriage Compatibility 💕
           </button>
         </div>
 
@@ -725,8 +737,10 @@ const App: React.FC = () => {
 
           </div>
         )
-        ) : (
+        ) : currentPortal === 'LOSHU_GRID' ? (
           <CompleteLoshuGridAnalysis initialProfile={personalDetails} />
+        ) : (
+          <MarriageCompatibility />
         )}
 
       </main>
