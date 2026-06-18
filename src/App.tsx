@@ -14,12 +14,14 @@ import CompatibilityTab from './components/CompatibilityTab';
 import RemediesTab from './components/RemediesTab';
 import ReportTab from './components/ReportTab';
 import AdminPanel from './components/AdminPanel';
+import CompleteLoshuGridAnalysis from './components/CompleteLoshuGridAnalysis';
 
 type ViewTab = 'DASHBOARD' | 'MOBILE' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
 
 const App: React.FC = () => {
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null);
   const [activeTab, setActiveTab] = useState<ViewTab>('MOBILE');
+  const [currentPortal, setCurrentPortal] = useState<'MOBILE_NUMEROLOGY' | 'LOSHU_GRID'>('MOBILE_NUMEROLOGY');
   const [analysisMode, setAnalysisMode] = useState<'QUICK' | 'ADVANCED'>('QUICK');
 
   // Input states
@@ -144,9 +146,35 @@ const App: React.FC = () => {
       </header>
 
       {/* Content wrapper */}
-      <main id="main-content" className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full relative z-30">
+      <main id="main-content" className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full relative z-30 animate-in fade-in duration-500">
         
-        {!personalDetails ? (
+        {/* Top-Level Portal Navigation - Separate page and menu items */}
+        <div className="flex flex-col sm:flex-row border border-[#E5E7EB] mb-8 bg-white p-2 rounded-3xl gap-2 shadow-sm border-t-slate-100 print:hidden">
+          <button
+            onClick={() => setCurrentPortal('MOBILE_NUMEROLOGY')}
+            className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+              currentPortal === 'MOBILE_NUMEROLOGY'
+                ? 'bg-[#1E3A8A] text-white shadow-md'
+                : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50'
+            }`}
+          >
+            <Phone className="w-4 h-4" /> Mobile Numerology Scanner
+          </button>
+          
+          <button
+            onClick={() => setCurrentPortal('LOSHU_GRID')}
+            className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+              currentPortal === 'LOSHU_GRID'
+                ? 'bg-[#1E3A8A] text-white shadow-md'
+                : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50'
+            }`}
+          >
+            <Compass className="w-4 h-4 animate-spin-slow text-[#D97706]" /> Complete Loshu Grid Analysis 🌟
+          </button>
+        </div>
+
+        {currentPortal === 'MOBILE_NUMEROLOGY' ? (
+          !personalDetails ? (
           <div id="landing-stage" className="space-y-20 animate-in fade-in duration-800">
             
             {/* SECTION 1: HERO BANNER - LIGHT LUXURY EDITION */}
@@ -626,11 +654,13 @@ const App: React.FC = () => {
               <nav className="flex flex-wrap gap-2 w-full lg:w-auto">
                 {[
                   { id: 'MOBILE', label: 'Mobile Diagnostics' },
-                  { id: 'DASHBOARD', label: 'Overview Planes' },
-                  { id: 'COMPATIBILITY', label: 'Hostile/Lover Match' },
-                  { id: 'REMEDIES', label: 'Remedies Altar' },
-                  { id: 'REPORT', label: 'AI printable Report' },
-                  { id: 'ADMIN', label: 'Systems Hub' }
+                  ...(analysisMode === 'ADVANCED' ? [
+                    { id: 'DASHBOARD', label: 'Overview Planes' },
+                    { id: 'COMPATIBILITY', label: 'Hostile/Lover Match' },
+                    { id: 'REMEDIES', label: 'Remedies Altar' },
+                    { id: 'REPORT', label: 'AI printable Report' },
+                    { id: 'ADMIN', label: 'Systems Hub' }
+                  ] : [])
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -666,6 +696,7 @@ const App: React.FC = () => {
                   nameData={nameData}
                   mobileData={mobileData}
                   remedies={remedies}
+                  isQuickMode={analysisMode === 'QUICK'}
                 />
               )}
 
@@ -693,6 +724,9 @@ const App: React.FC = () => {
             </div>
 
           </div>
+        )
+        ) : (
+          <CompleteLoshuGridAnalysis initialProfile={personalDetails} />
         )}
 
       </main>

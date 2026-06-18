@@ -21,6 +21,7 @@ interface MobileDiagnosticsPanelProps {
   nameData: NameAnalysis;
   mobileData: MobileAnalysis;
   remedies: remediesAdvice;
+  isQuickMode?: boolean;
 }
 
 const planetMapping: Record<number, {
@@ -130,7 +131,8 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
   dobData,
   nameData,
   mobileData,
-  remedies
+  remedies,
+  isQuickMode = false
 }) => {
   // Use remedies from prop or fallback
   const internalRemedies = remedies;
@@ -154,7 +156,6 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
   const pairsRef = useRef<HTMLDivElement>(null);
   const vibrationRef = useRef<HTMLDivElement>(null);
   const scoreboardRef = useRef<HTMLDivElement>(null);
-  const chartsRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const remediesRef = useRef<HTMLDivElement>(null);
   const aiRef = useRef<HTMLDivElement>(null);
@@ -333,7 +334,6 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
               { id: 'pairs', label: 'Chaldean Pairs', ref: pairsRef },
               { id: 'vibration', label: 'Planetary Energy', ref: vibrationRef },
               { id: 'scoreboard', label: 'Scoreboard', ref: scoreboardRef },
-              { id: 'charts', label: 'Charts', ref: chartsRef },
               { id: 'report', label: 'Astrological Chart', ref: reportRef },
               { id: 'remedies', label: 'Remedies Matrix', ref: remediesRef },
               { id: 'ai', label: 'AI Counseling', ref: aiRef },
@@ -359,60 +359,66 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
       <div ref={heroRef} className="max-w-7xl mx-auto px-4 pt-4 space-y-8">
         
         {/* Luxury top card info */}
-        <div className="relative overflow-hidden rounded-[40px] border border-[#E5E7EB] p-8 md:p-12 bg-gradient-to-br from-[#0B1220] via-[#050816] to-[#0B1220] sacred-glow">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/[0.02] rounded-full blur-3xl pointer-events-none"></div>
+        <div className="relative overflow-hidden rounded-[40px] border border-[#E5E7EB] p-8 md:p-12 bg-gradient-to-br from-[#FCFAF7] via-[#F8F4EF] to-[#FCFAF7] shadow-sm sacred-glow">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/[0.04] rounded-full blur-3xl pointer-events-none"></div>
           
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 relative z-10">
             <div className="space-y-4 text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/10 rounded-full font-mono text-[9px] uppercase tracking-widest">
-                <Sparkles className="w-3 h-3 text-amber-500 animate-spin-slow" /> Luxury Astro Diagnostics Installed
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/20 rounded-full font-mono text-[9px] uppercase tracking-widest font-bold">
+                <Sparkles className="w-3 h-3 text-amber-600 animate-spin-slow" /> Luxury Astro Diagnostics Installed
               </div>
               
               <h2 className="font-cinzel text-3xl md:text-5xl font-black text-[#1F2937] tracking-wide uppercase leading-none">
-                {personalDetails.name}
+                {isQuickMode ? "Quick Mobile Scan" : personalDetails.name}
               </h2>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-3 pt-2">
                 <div className="flex items-center gap-2.5">
-                  <User className="w-4 h-4 text-[#BFC7D5]" />
+                  <User className="w-4 h-4 text-[#D97706]" />
                   <div>
-                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider">DOB Anchor</span>
-                    <span className="text-xs text-[#1F2937] font-mono font-medium">{personalDetails.dob}</span>
+                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">DOB Anchor</span>
+                    <span className="text-xs text-[#1F2937] font-mono font-bold">
+                      {isQuickMode ? "Not Provided 🔒" : personalDetails.dob}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <Smartphone className="w-4 h-4 text-[#BFC7D5]" />
+                  <Smartphone className="w-4 h-4 text-[#D97706]" />
                   <div>
-                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider">Mobile Number</span>
+                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">Mobile Number</span>
                     <span className="text-xs text-[#1F2937] font-mono font-bold tracking-wider">{personalDetails.mobile}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <Activity className="w-4 h-4 text-[#BFC7D5]" />
+                  <Activity className="w-4 h-4 text-[#D97706]" />
                   <div>
-                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider">Life Path Power</span>
-                    <span className="text-xs text-[#D97706] font-bold">LP #{dobData.lifePathNumber}</span>
+                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">Life Path Power</span>
+                    <span className="text-xs text-[#D97706] font-bold">
+                      {isQuickMode ? "Not Computed 🔒" : `LP #${dobData.lifePathNumber}`}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <Award className="w-4 h-4 text-[#BFC7D5]" />
+                  <Award className="w-4 h-4 text-[#D97706]" />
                   <div>
-                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider">Destiny Power</span>
-                    <span className="text-xs text-[#D97706] font-bold">DN #{dobData.destinyNumber}</span>
+                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">Destiny Power</span>
+                    <span className="text-xs text-[#D97706] font-bold">
+                      {isQuickMode ? "Not Computed 🔒" : `DN #${dobData.destinyNumber}`}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
             
             {/* Mobile Vibration Indicator */}
-            <div className="bg-[#F8F4EF] border border-[#E5E7EB] p-6 rounded-3xl flex items-center gap-5 text-left w-full lg:w-auto shrink-0 relative hover:border-[#D97706]/20 transition-all duration-500">
+            <div className="bg-[#FFFFFF] border border-[#E5E7EB] p-6 rounded-3xl flex items-center gap-5 text-left w-full lg:w-auto shrink-0 relative hover:border-[#D97706]/20 transition-all duration-500 shadow-md">
               <div className="w-14 h-14 bg-[#D97706]/10 border border-amber-500/15 rounded-full flex items-center justify-center font-cinzel text-xl font-bold text-[#D97706]">
                 {mobileData.reducedTotal}
               </div>
               <div>
-                <span className="block text-[9px] font-mono text-slate-500 uppercase tracking-widest">Mobile Vibration Number</span>
+                <span className="block text-[9px] font-mono text-slate-500 uppercase tracking-widest font-bold">Mobile Vibration Number</span>
                 <span className="text-base text-[#1F2937] font-cinzel font-bold block">{mobileData.compoundTotal} / {mobileData.reducedTotal}</span>
-                <span className="text-[10px] text-[#BFC7D5] font-mono uppercase bg-white/5 px-2 py-0.5 rounded mt-1 inline-block">
+                <span className="text-[10px] text-slate-700 font-mono font-semibold uppercase bg-[#D97706]/10 px-2 py-0.5 rounded mt-1 inline-block">
                   {mobileData.reducedTotal === 1 ? 'Vibrates to Sun ☀️' :
                    mobileData.reducedTotal === 2 ? 'Vibrates to Moon 🌙' :
                    mobileData.reducedTotal === 3 ? 'Vibrates to Jupiter 🕉️' :
@@ -687,13 +693,13 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           <h3 className="font-cinzel text-xl md:text-2xl font-bold uppercase tracking-wider text-[#1F2937]">
             Sacred Positional Digit Breakdown
           </h3>
-          <p className="text-[#BFC7D5] text-xs max-w-xl">
+          <p className="text-slate-600 text-xs max-w-xl font-medium">
             Each numerical cell inside your device acts as an energetic transmitter. Evaluate the specific planetary nodes, strengths and lessons mapped to each location.
           </p>
         </div>
 
         {/* Large gold/slate digital tiles display */}
-        <div className="flex flex-wrap justify-between items-center gap-1.5 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm p-4 rounded-2xl border border-[#E5E7EB] shadow-md">
+        <div className="flex flex-wrap justify-between items-center gap-1.5 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm p-4 rounded-2xl border border-[#E5E7EB]/80 shadow-md">
           {digitsArray.map((digit, idx) => (
             <div
               key={idx}
@@ -727,7 +733,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
             return (
               <div
                 key={idx}
-                className={`rounded-3xl border border-[#E5E7EB] p-5 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:border-${planet.color}/30 transition-all duration-500`}
+                className={`rounded-3xl border border-[#E5E7EB] p-5 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between text-left relative overflow-hidden group hover:border-${planet.color}/30 transition-all duration-500`}
               >
                 {/* Visual Glow */}
                 <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${planet.gradient} rounded-full blur-xl pointer-events-none`}></div>
@@ -744,11 +750,11 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                       <span className="text-xs font-semibold text-[#1F2937]">{planet.name}</span>
                     </div>
                     
-                    <span className="text-[9px] font-mono uppercase bg-white/5 px-2 py-0.5 rounded text-[#6B7280] font-medium block w-max">
+                    <span className="text-[9px] font-mono uppercase bg-[#F8F4EF] px-2 py-0.5 rounded text-[#6B7280] font-medium block w-max border border-[#E5E7EB]/50">
                       {planet.energy}
                     </span>
                     
-                    <p className="text-[11px] text-[#BFC7D5] leading-relaxed">
+                    <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
                       {planet.influence}
                     </p>
                   </div>
@@ -756,12 +762,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
 
                 <div className="pt-4 mt-4 border-t border-[#E5E7EB]/70 text-[10px] space-y-1 font-mono">
                   <div className="flex justify-between">
-                    <span className="text-[#BFC7D5]">Strength:</span>
+                    <span className="text-slate-500">Strength:</span>
                     <span style={{ color: planet.color }} className="font-bold">{planet.strength.split(',')[0]}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Weakness:</span>
-                    <span className="text-rose-400 font-medium clamp-1">{planet.weakness.split(',')[0]}</span>
+                    <span className="text-rose-500 font-bold clamp-1">{planet.weakness.split(',')[0]}</span>
                   </div>
                 </div>
               </div>
@@ -933,7 +939,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           <h3 className="font-cinzel text-xl md:text-2xl font-bold uppercase tracking-wider text-[#1F2937]">
             Composite Vibration Diagnosis
           </h3>
-          <p className="text-[#BFC7D5] text-xs max-w-xl">
+          <p className="text-slate-650 text-xs max-w-xl font-medium">
             Vedic sages calculated physical effects of numbers using cross-vibrations and planetary interactions. Learn where power flows or is blocked.
           </p>
         </div>
@@ -942,9 +948,9 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           {/* Card 1: Core Frequency */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm text-left space-y-5 relative">
+          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm text-left space-y-5 relative">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-wider">01 • Core Frequency</span>
+              <span className="text-[10px] font-mono text-slate-500 font-semibold uppercase tracking-wider">01 • Core Frequency</span>
               <Activity className="w-4 h-4 text-amber-500" />
             </div>
             <div className="flex items-center gap-4">
@@ -961,26 +967,26 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 <span>Vedic Force Intensity:</span>
                 <span className="text-[#D97706] font-bold">{100 - (mobileData.hostileRelationships.length * 15)}%</span>
               </div>
-              <div className="w-full bg-white/[0.03] h-1.5 rounded-full overflow-hidden">
+              <div className="w-full bg-[#E5E7EB]/50 h-1.5 rounded-full overflow-hidden">
                 <div className="h-full bg-amber-400 rounded-full" style={{ width: `${100 - (mobileData.hostileRelationships.length * 15)}%` }}></div>
               </div>
             </div>
 
-            <ul className="text-xs text-[#BFC7D5] space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
-              <li>Your device resolves to the final cosmic identifier of <strong>{mobileData.reducedTotal}</strong>.</li>
+            <ul className="text-xs text-slate-600 font-medium space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
+              <li>Your device resolves to the final cosmic identifier of <strong className="text-slate-900">{mobileData.reducedTotal}</strong>.</li>
               <li>Calculates as a direct spiritual multiplier shaping 95% of your daily incoming and outgoing messages.</li>
               <li>Maintains stable electrical resonance, matching cleanly with physical goals.</li>
             </ul>
           </div>
 
           {/* Card 2: Dominant Energy */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm text-left space-y-5 relative">
+          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm text-left space-y-5 relative">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-wider">02 • Dominant Energy</span>
+              <span className="text-[10px] font-mono text-slate-500 font-semibold uppercase tracking-wider">02 • Dominant Energy</span>
               <Flame className="w-4 h-4 text-rose-500" />
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-4xl font-cinzel font-black text-rose-450">
+              <span className="text-4xl font-cinzel font-black text-rose-500">
                 {digitsArray.reduce((acc, current) => digitsArray.filter(d => d === current).length > digitsArray.filter(d => d === acc).length ? current : acc, digitsArray[0] || 5)}
               </span>
               <div>
@@ -993,14 +999,14 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
             <div className="space-y-1.5 pt-2">
               <div className="flex justify-between text-[10px] font-mono text-[#6B7280]">
                 <span>Concentration Intensity:</span>
-                <span className="text-rose-400 font-bold">85%</span>
+                <span className="text-rose-500 font-bold">85%</span>
               </div>
-              <div className="w-full bg-white/[0.03] h-1.5 rounded-full overflow-hidden">
+              <div className="w-full bg-[#E5E7EB]/50 h-1.5 rounded-full overflow-hidden">
                 <div className="h-full bg-rose-500 rounded-full" style={{ width: '85%' }}></div>
               </div>
             </div>
 
-            <ul className="text-xs text-[#BFC7D5] space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
+            <ul className="text-xs text-slate-600 font-medium space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
               <li>Represents the highest dense planetary coordinates in the phone matrix.</li>
               <li>Dictates spontaneous reactions and conversational tone qualities during emergencies.</li>
               <li>Aids in shaping public presentation and fast negotiation fields.</li>
@@ -1008,15 +1014,15 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card 3: Missing Energy */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm text-left space-y-5 relative">
+          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm text-left space-y-5 relative">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-wider">03 • Missing Energy</span>
+              <span className="text-[10px] font-mono text-slate-500 font-semibold uppercase tracking-wider">03 • Missing Energy</span>
               <ShieldAlert className="w-4 h-4 text-[#6B7280]" />
             </div>
             <div className="flex items-center gap-3">
               <div className="flex gap-1.5">
                 {missingInPhone.slice(0, 3).map((num, i) => (
-                  <span key={i} className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-cinzel text-xs text-slate-350 font-bold">
+                  <span key={i} className="w-8 h-8 rounded-full bg-[#F8F4EF] border border-[#E5E7EB] flex items-center justify-center font-cinzel text-xs text-slate-700 font-bold">
                     {num}
                   </span>
                 ))}
@@ -1033,22 +1039,22 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 <span>Deficit Impact:</span>
                 <span className="text-amber-500 font-bold">{missingInPhone.length * 10}%</span>
               </div>
-              <div className="w-full bg-white/[0.03] h-1.5 rounded-full overflow-hidden">
+              <div className="w-full bg-[#E5E7EB]/50 h-1.5 rounded-full overflow-hidden">
                 <div className="h-full bg-amber-500 rounded-full" style={{ width: `${missingInPhone.length * 10}%` }}></div>
               </div>
             </div>
 
-            <ul className="text-xs text-[#BFC7D5] space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
+            <ul className="text-xs text-slate-600 font-medium space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
               <li>Absence of these digits creates a cosmic filter block in specific aura dimensions.</li>
-              <li>Missing {missingInPhone.includes(5) ? '5 (Mercury)' : missingInPhone.includes(6) ? '6 (Venus)' : 'essential nodes'} limits support for instant cash flow remedies.</li>
+              <li>Missing <strong className="text-slate-800">{missingInPhone.includes(5) ? '5 (Mercury)' : missingInPhone.includes(6) ? '6 (Venus)' : 'essential nodes'}</strong> limits support for instant cash flow remedies.</li>
               <li>Compensate cleanly via signature tweaks, lucky gemstone placements or mantra chants.</li>
             </ul>
           </div>
 
           {/* Card 4: Repeating Digits Strain */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm text-left space-y-5 relative">
+          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm text-left space-y-5 relative">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-wider">04 • Repeating Digits Strain</span>
+              <span className="text-[10px] font-mono text-slate-500 font-semibold uppercase tracking-wider">04 • Repeating Digits Strain</span>
               <ShieldAlert className="w-4 h-4 text-amber-500" />
             </div>
             <div className="flex items-center gap-4">
@@ -1069,12 +1075,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 <span>Vibrational Stress Weight:</span>
                 <span className="text-amber-500 font-bold">{hasRepeating ? mobileData.repeatingAlarms[0].count * 20 : 0}%</span>
               </div>
-              <div className="w-full bg-white/[0.03] h-1.5 rounded-full overflow-hidden">
+              <div className="w-full bg-[#E5E7EB]/50 h-1.5 rounded-full overflow-hidden">
                 <div className="h-full bg-amber-500 rounded-full" style={{ width: `${hasRepeating ? mobileData.repeatingAlarms[0].count * 20 : 0}%` }}></div>
               </div>
             </div>
 
-            <ul className="text-xs text-[#BFC7D5] space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
+            <ul className="text-xs text-slate-600 font-medium space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
               <li>Overloaded values block easy progression loops inside administrative tasks.</li>
               <li>{hasRepeating ? mobileData.repeatingAlarms[0].meaning : 'No significant digit overload detected within standard Chaldeic boundaries.'}</li>
               <li>Stabilize stress with specific physical grounding activities on corresponding days.</li>
@@ -1082,13 +1088,13 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card 5: Hidden Power Pairs */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm text-left space-y-5 relative">
+          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm text-left space-y-5 relative">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-wider">05 • Hidden Power Pairs</span>
-              <Zap className="w-4 h-4 text-emerald-400" />
+              <span className="text-[10px] font-mono text-slate-500 font-semibold uppercase tracking-wider">05 • Hidden Power Pairs</span>
+              <Zap className="w-4 h-4 text-emerald-500" />
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-3xl font-cinzel font-black text-emerald-400">{hiddenPowerPairs[0].pair}</span>
+              <span className="text-3xl font-cinzel font-black text-emerald-500">{hiddenPowerPairs[0].pair}</span>
               <div>
                 <span className="text-sm font-semibold text-[#1F2937] block">{hiddenPowerPairs[0].title}</span>
                 <span className="text-[10px] font-mono text-slate-500 uppercase">Subsurface Cosmic Shield</span>
@@ -1099,14 +1105,14 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
             <div className="space-y-1.5 pt-2">
               <div className="flex justify-between text-[10px] font-mono text-[#6B7280]">
                 <span>Empowerment Coefficient:</span>
-                <span className="text-emerald-400 font-bold">{hiddenPowerPairs[0].power}%</span>
+                <span className="text-emerald-500 font-bold">{hiddenPowerPairs[0].power}%</span>
               </div>
-              <div className="w-full bg-white/[0.03] h-1.5 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${hiddenPowerPairs[0].power}%` }}></div>
+              <div className="w-full bg-[#E5E7EB]/50 h-1.5 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${hiddenPowerPairs[0].power}%` }}></div>
               </div>
             </div>
 
-            <ul className="text-xs text-[#BFC7D5] space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
+            <ul className="text-xs text-slate-600 font-medium space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
               <li>{hiddenPowerPairs[0].desc}</li>
               <li>Fosters sudden rescue patterns when tackling extreme market or litigation setbacks.</li>
               <li>Ensures communication flow remains highly persuasive under intense negotiation conditions.</li>
@@ -1114,13 +1120,13 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card 6: Karmic Influence */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm text-left space-y-5 relative">
+          <div className="rounded-[40px] border border-[#E5E7EB] p-6 lg:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm text-left space-y-5 relative">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-mono text-[#BFC7D5] uppercase tracking-wider">06 • Karmic Influence</span>
+              <span className="text-[10px] font-mono text-slate-500 font-semibold uppercase tracking-wider">06 • Karmic Influence</span>
               <Award className="w-4 h-4 text-purple-400" />
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-4xl font-cinzel font-black text-purple-400">
+              <span className="text-4xl font-cinzel font-black text-purple-500">
                 {hostileCount > 0 ? mobileData.hostileRelationships[0].pair : 'None'}
               </span>
               <div>
@@ -1137,12 +1143,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 <span>Lessons Concentration:</span>
                 <span className="text-purple-400 font-bold">{hostileCount * 25}%</span>
               </div>
-              <div className="w-full bg-white/[0.03] h-1.5 rounded-full overflow-hidden">
+              <div className="w-full bg-[#E5E7EB]/50 h-1.5 rounded-full overflow-hidden">
                 <div className="h-full bg-purple-500 rounded-full" style={{ width: `${hostileCount * 25 || 10}%` }}></div>
               </div>
             </div>
 
-            <ul className="text-xs text-[#BFC7D5] space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
+            <ul className="text-xs text-slate-600 font-medium space-y-2.5 pt-2 border-t border-[#E5E7EB] list-disc list-inside">
               <li>{hostileCount > 0 ? mobileData.hostileRelationships[0].meaning : 'No destructive planetary bridging blockages detected. Energy routes are clean.'}</li>
               <li>Aids in teaching patience, discipline, and practical wisdom structure adjustments.</li>
               <li>Excellent coordinates for spiritual development and deep inner truth seekers.</li>
@@ -1160,7 +1166,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
             <h3 className="font-cinzel text-xl md:text-2xl font-bold uppercase tracking-wider text-[#1F2937]">
               Vedic Aura Resonance Scoreboard
             </h3>
-            <p className="text-[#BFC7D5] text-xs max-w-xl">
+            <p className="text-slate-650 text-xs max-w-xl font-medium">
               Understand how individual life divisions react to the mobile device vibrational field in real-time.
             </p>
           </div>
@@ -1169,8 +1175,8 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
             {[
               { label: 'Overall Resonance', desc: 'Shoring up entire auric shield frequency', value: coreScore, color: 'bg-[#D97706]', colorText: 'text-[#D97706]' },
               { label: 'Career Impact', desc: 'Attracting corporate validation and title promotions', value: careerScore, color: 'bg-emerald-500', colorText: 'text-emerald-600' },
-              { label: 'Business Growth', desc: 'Promoting raw commerce, liquid assets & negotiation accuracy', value: wealthScore, color: 'bg-indigo-500', colorText: 'text-indigo-650' },
-              { label: 'Relationships Alignment', desc: 'Easing friction, marital bonds & domestic grace', value: relationshipScore, color: 'bg-rose-450', colorText: 'text-rose-500' },
+              { label: 'Business Growth', desc: 'Promoting raw commerce, liquid assets & negotiation accuracy', value: wealthScore, color: 'bg-[#D97706]', colorText: 'text-amber-700' },
+              { label: 'Relationships Alignment', desc: 'Easing friction, marital bonds & domestic grace', value: relationshipScore, color: 'bg-rose-500', colorText: 'text-rose-600' },
               { label: 'Health Energy Reserve', desc: 'Preventing sudden stress and support vitality fields', value: stabilityScore, color: 'bg-cyan-500', colorText: 'text-cyan-600' },
               { label: 'Spiritual Alignment Block', desc: 'Unlocking deep intuition, calm & cosmic awareness', value: commScore, color: 'bg-purple-500', colorText: 'text-purple-600' },
             ].map((score, index) => (
@@ -1191,138 +1197,6 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
         </div>
       </div>
 
-      {/* SECTION 5: CHARTS */}
-      <div ref={chartsRef} className="max-w-7xl mx-auto px-4 space-y-6">
-        <div className="text-left space-y-1">
-          <span className="text-[10px] font-mono text-amber-500/60 uppercase tracking-[0.45em]">Interactive Cosmic Charts</span>
-          <h3 className="font-cinzel text-xl md:text-2xl font-bold uppercase tracking-wider text-[#1F2937]">
-            Astro-Mathematical Analytics
-          </h3>
-          <p className="text-[#BFC7D5] text-xs max-w-xl">
-            Visually map out the physical weight, element forces, planetary structures and raw frequency counts found in your device parameters.
-          </p>
-        </div>
-
-        {/* 4 Chart Container Row-Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
-          {/* Chart 1: Radar Chart (Aura Power Vectors) */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between text-left space-y-4">
-            <div>
-              <span className="text-[9px] font-mono text-slate-500 uppercase block">Vector Mapping</span>
-              <h4 className="font-cinzel text-sm font-bold text-slate-200 uppercase">Aura Power Radar Coordinates</h4>
-            </div>
-            
-            <div className="w-full h-72 flex justify-center items-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" r="80%" data={radarData}>
-                  <PolarGrid stroke="rgba(255, 255, 255, 0.08)" />
-                  <PolarAngleAxis dataKey="subject" stroke="#BFC7D5" tick={{ fontSize: 9 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(255, 255, 255, 0.15)" tick={{ fontSize: 8 }} />
-                  <Radar name="Power Index" dataKey="value" stroke="#F5B52E" fill="#F5B52E" fillOpacity={0.25} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0B1220', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-            
-            <p className="text-[10px] text-slate-500 font-mono italic text-center">
-              *Displays directional alignment matching Chaldean elements (Ether, Wind, Water, Earth, Fire) rules.
-            </p>
-          </div>
-
-          {/* Chart 2: Energy Distribution Chart */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between text-left space-y-4">
-            <div>
-              <span className="text-[9px] font-mono text-slate-500 uppercase block">Dynamic Forces</span>
-              <h4 className="font-cinzel text-sm font-bold text-slate-200 uppercase">Fourfold Auric Forces Distribution</h4>
-            </div>
-
-            <div className="w-full h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={energyChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
-                  <XAxis dataKey="name" stroke="#BFC7D5" tick={{ fontSize: 9 }} />
-                  <YAxis stroke="#BFC7D5" tick={{ fontSize: 8 }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0B1220', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }} />
-                  <Bar dataKey="Power" fill="#F5B52E" radius={[6, 6, 0, 0]}>
-                    {energyChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <p className="text-[10px] text-slate-500 font-mono italic text-center">
-              *Evaluates alignment levels across Physical, Intellectual, Emotional and Spiritual forces.
-            </p>
-          </div>
-
-          {/* Chart 3: Planet Influence Chart */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between text-left space-y-4">
-            <div>
-              <span className="text-[9px] font-mono text-slate-500 uppercase block">Cosmic Weights</span>
-              <h4 className="font-cinzel text-sm font-bold text-slate-200 uppercase">Planetary Weight Influence Map</h4>
-            </div>
-
-            <div className="w-full h-72 flex justify-center items-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={planetInfluenceData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {planetInfluenceData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#0B1220', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }} />
-                  <Legend wrapperStyle={{ fontSize: 10, color: '#BFC7D5' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            <p className="text-[10px] text-slate-500 font-mono italic text-center">
-              *Percentage influence calculations determined by planetary rulers in the primary digits list.
-            </p>
-          </div>
-
-          {/* Chart 4: Number Frequency Chart */}
-          <div className="rounded-[40px] border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between text-left space-y-4">
-            <div>
-              <span className="text-[9px] font-mono text-slate-500 uppercase block">Vibrational Auditing</span>
-              <h4 className="font-cinzel text-sm font-bold text-slate-200 uppercase">Complete Number Value Frequency counts</h4>
-            </div>
-
-            <div className="w-full h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={frequencyChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
-                  <XAxis dataKey="digit" stroke="#BFC7D5" tick={{ fontSize: 9 }} />
-                  <YAxis stroke="#BFC7D5" tick={{ fontSize: 8 }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#0B1220', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }} />
-                  <Bar dataKey="Count" fill="rgba(245, 181, 46, 0.82)" radius={[4, 4, 0, 0]}>
-                    {frequencyChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <p className="text-[10px] text-slate-500 font-mono italic text-center">
-              *The gold-shaded bar represents your exact audited reduced total frequency coordinate.
-            </p>
-          </div>
-
-        </div>
-      </div>
-
       {/* SECTION 6: DETAILED REPORT */}
       <div ref={reportRef} className="max-w-7xl mx-auto px-4 space-y-6">
         <div className="text-left space-y-1">
@@ -1330,7 +1204,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           <h3 className="font-cinzel text-xl md:text-2xl font-bold uppercase tracking-wider text-[#1F2937]">
             Aura Portal Division Interpretations
           </h3>
-          <p className="text-[#BFC7D5] text-xs max-w-xl">
+          <p className="text-slate-650 text-xs max-w-xl font-medium">
             Click to expand and explore precise mathematical impacts shaping each aspect of your worldly activity.
           </p>
         </div>
@@ -1346,41 +1220,41 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
             {
               id: 'career',
               title: 'Career Impact & Corporate Advancements',
-              icon: <TrendingUp className="w-4 h-4 text-emerald-400" />,
+              icon: <TrendingUp className="w-4 h-4 text-emerald-500" />,
               content: "Career progression registers at a beautiful 92%. The intense presence of prominent digits in positions 3, 5, and 8 safeguards against institutional delays, easing administrative approvals, government contracts, and executive status preservation. It fosters direct authoritative command when dealing with supervisors."
             },
             {
               id: 'wealth',
               title: 'Wealth Potential & Asset Attraction',
-              icon: <Coins className="w-4 h-4 text-[#F5B52E]" />,
+              icon: <Coins className="w-4 h-4 text-amber-500" />,
               content: `Your abundance attraction score calculates at ${wealthScore}%. This evaluates the stable placements of the numbers 5, 8, and 6 inside the final positional grids. If present, it creates excellent support structures for investments, land deals, and retail commerce. It encourages persistent cash reserves but warns offset stress from zeroes.`
             },
             {
               id: 'relationships',
               title: 'Relationship Impact & Domestic Grace',
-              icon: <Heart className="w-4 h-4 text-pink-400" />,
+              icon: <Heart className="w-4 h-4 text-rose-500" />,
               content: "Registers at 85% stability. Excellent harmonious elements shape position 4 (partnerships) and position 6 (marriage alignments). It establishes robust friendly bridges, helps clear sudden doubts, and fosters deep emotional loyalty. Ensure to avoid repeating digits that spark rudeness traps."
             },
             {
               id: 'health',
               title: 'Health Vitality Reserves & Stress Prevention',
-              icon: <Activity className="w-4 h-4 text-teal-400" />,
+              icon: <Activity className="w-4 h-4 text-cyan-600" />,
               content: "Maintains a sturdy 80% resilience coordinate. Position 3 health calculations indicate stable sun vitality, ensuring fine digestive energy. Make sure to avoid late over-thinking loops during moon nodes and maintain active water intake patterns to support high spiritual vitality limits."
             },
             {
               id: 'spiritual',
               title: 'Spiritual Influence & Intuitive Resonance',
-              icon: <Sparkles className="w-4 h-4 text-purple-400" />,
+              icon: <Sparkles className="w-4 h-4 text-purple-500" />,
               content: "Unlocks a fine 90% spiritual alignment block. Strongly supported by Chaldean wisdom nodes (7 and 3), this configuration fosters excellent occult research aptitude, sharp intuitive insights during crisis controls, and deep, quiet meditation quality."
             }
           ].map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm overflow-hidden transition-all duration-300"
+              className="rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] shadow-sm overflow-hidden transition-all duration-300 hover:border-amber-500/20"
             >
               <button
                 onClick={() => toggleCollapsible(item.id)}
-                className="w-full flex items-center justify-between p-6 hover:bg-white/[0.02] transition"
+                className="w-full flex items-center justify-between p-6 hover:bg-slate-50/50 transition cursor-pointer"
               >
                 <div className="flex items-center gap-3.5">
                   <div className="p-2.5 bg-[#F8F4EF] border border-[#E5E7EB] rounded-xl">
@@ -1398,8 +1272,8 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
               </button>
               
               {expandedCollapsible[item.id] && (
-                <div className="p-6 pt-0 border-t border-[#E5E7EB]/50 text-xs text-[#BFC7D5] leading-relaxed animate-in fade-in duration-300 bg-[#F8F4EF]/30">
-                  <p>{item.content}</p>
+                <div className="p-6 pt-0 border-t border-[#E5E7EB]/50 text-xs text-slate-705 font-medium leading-relaxed animate-in fade-in duration-300 bg-[#FCDAA5]/5">
+                  <p className="text-slate-700 font-semibold leading-relaxed">{item.content}</p>
                 </div>
               )}
             </div>
@@ -1414,7 +1288,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           <h3 className="font-cinzel text-xl md:text-2xl font-bold uppercase tracking-wider text-[#1F2937]">
             Lal Kitab & Chaldean Remedies Panel
           </h3>
-          <p className="text-[#BFC7D5] text-xs max-w-xl">
+          <p className="text-slate-650 text-xs max-w-xl font-medium">
             Auspicious structural modifications designed to balance any vibrational holes identified in your diagnostics calculations.
           </p>
         </div>
@@ -1423,19 +1297,19 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
           
           {/* Card A: Colors */}
-          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
+          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-[#E5E7EB]/70">
                 <span className="text-[9px] font-mono text-slate-500 uppercase">Recommended Colors</span>
                 <Palette className="w-4 h-4 text-amber-500" />
               </div>
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 Empower your energetic aura shield by surrounding yourself with supportive colors matched to your Mercury-Venus coordinates.
               </p>
             </div>
             <div className="flex gap-2.5 pt-4 mt-4 border-t border-[#E5E7EB]/70">
               {internalRemedies.colors.map((color, i) => (
-                <span key={i} className="px-3 py-1 bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/10 rounded-full text-[10px] font-mono font-medium uppercase">
+                <span key={i} className="px-3 py-1 bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/20 rounded-full text-[10px] font-mono font-bold uppercase">
                   {color}
                 </span>
               ))}
@@ -1443,19 +1317,19 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card B: Lucky Days */}
-          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
+          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration duration-300">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-[#E5E7EB]/70">
                 <span className="text-[9px] font-mono text-slate-500 uppercase">Lucky Days</span>
-                <Calendar className="w-4 h-4 text-emerald-400" />
+                <Calendar className="w-4 h-4 text-emerald-500" />
               </div>
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 Conduct high stakes negotiation meetings, purchase assets, or register new legal documents on these days for maximum planetary support.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-[#E5E7EB]/70">
               {internalRemedies.luckyDays.map((day, i) => (
-                <span key={i} className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 rounded-full text-[10px] font-mono font-medium uppercase">
+                <span key={i} className="px-3 py-1 bg-emerald-500/10 text-emerald-600 border border-emerald-500/10 rounded-full text-[10px] font-mono font-bold uppercase">
                   {day}
                 </span>
               ))}
@@ -1463,19 +1337,19 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card C: Lucky Dates */}
-          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
+          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-[#E5E7EB]/70">
                 <span className="text-[9px] font-mono text-slate-500 uppercase">Lucky Monthly Dates</span>
-                <Hash className="w-4 h-4 text-sky-400" />
+                <Hash className="w-4 h-4 text-sky-500" />
               </div>
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 Dates that are chemically aligned with your birth single-digit portal and primary life paths coordinates.
               </p>
             </div>
             <div className="flex flex-wrap gap-1.5 pt-4 mt-4 border-t border-[#E5E7EB]/70">
               {internalRemedies.luckyDates.map((date, i) => (
-                <span key={i} className="w-7 h-7 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/10 flex items-center justify-center text-[10px] font-mono font-bold">
+                <span key={i} className="w-7 h-7 rounded-full bg-sky-500/10 text-sky-600 border border-sky-500/15 flex items-center justify-center text-[10px] font-mono font-bold">
                   {date}
                 </span>
               ))}
@@ -1483,37 +1357,43 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card D: Lucky Numbers */}
-          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
+          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-[#E5E7EB]/70">
                 <span className="text-[9px] font-mono text-slate-500 uppercase">Lucky Core Numbers</span>
-                <Star className="w-4 h-4 text-purple-400" />
+                <Star className="w-4 h-4 text-amber-500" />
               </div>
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 Auspicious digits that resonate with your inner auric vibration. Utilize them for accounts, cabins, and flight choices.
               </p>
             </div>
             <div className="flex gap-2 pt-4 mt-4 border-t border-[#E5E7EB]/70">
-              <span className="w-7 h-7 rounded-full bg-purple-500/10 text-purple-405 border border-purple-500/10 flex items-center justify-center text-[10px] font-mono font-bold">{dobData.birthNumber}</span>
-              <span className="w-7 h-7 rounded-full bg-purple-500/10 text-purple-405 border border-purple-500/10 flex items-center justify-center text-[10px] font-mono font-bold">{dobData.lifePathNumber}</span>
-              <span className="w-7 h-7 rounded-full bg-purple-500/10 text-purple-405 border border-purple-500/10 flex items-center justify-center text-[10px] font-mono font-bold">{mobileData.reducedTotal}</span>
+              <span className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/15 flex items-center justify-center text-[10px] font-mono font-bold" title={isQuickMode ? "Unlock in Advanced Scan" : "Birth Number"}>
+                {isQuickMode ? "🔒" : dobData.birthNumber}
+              </span>
+              <span className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/15 flex items-center justify-center text-[10px] font-mono font-bold" title={isQuickMode ? "Unlock in Advanced Scan" : "Life Path Number"}>
+                {isQuickMode ? "🔒" : dobData.lifePathNumber}
+              </span>
+              <span className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/15 flex items-center justify-center text-[10px] font-mono font-bold" title="Mobile Reduced Number">
+                {mobileData.reducedTotal}
+              </span>
             </div>
           </div>
 
           {/* Card E: Gemstones */}
-          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
+          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-[#E5E7EB]/70">
                 <span className="text-[9px] font-mono text-slate-500 uppercase">Vedic Gemstones</span>
-                <Gem className="w-4 h-4 text-pink-400" />
+                <Gem className="w-4 h-4 text-pink-500" />
               </div>
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 Gem minerals designed to act as magnifying glasses for positive cosmic radiation rays, reinforcing your weak houses.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 pt-4 mt-4 border-t border-[#E5E7EB]/70">
               {internalRemedies.gemstones.map((gem, i) => (
-                <span key={i} className="px-3 py-1 bg-pink-500/10 text-pink-400 border border-pink-500/10 rounded-full text-[10px] font-mono font-medium">
+                <span key={i} className="px-3 py-1 bg-pink-500/10 text-pink-600 border border-pink-500/10 rounded-full text-[10px] font-mono font-bold">
                   💎 {gem}
                 </span>
               ))}
@@ -1521,18 +1401,18 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card F: Solar Mantras */}
-          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300 lg:col-span-1">
+          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300 lg:col-span-1">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-[#E5E7EB]/70">
                 <span className="text-[9px] font-mono text-slate-500 uppercase">Vedic Sound Vibrators</span>
                 <Sparkles className="w-4 h-4 text-amber-500" />
               </div>
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 Chant the Mercury sound alignment 108 times daily to clear erratic lines:
               </p>
             </div>
             <div className="p-3 bg-[#F8F4EF] border border-[#E5E7EB]/70 rounded-xl text-left mt-4">
-              <span className="text-[10px] font-mono text-indigo-400 block mb-1">Mantra Trigger:</span>
+              <span className="text-[10px] font-mono text-indigo-500 block mb-1 font-semibold">Mantra Trigger:</span>
               <span className="text-[11px] font-bold text-[#D97706] leading-snug">
                 "Om Gram Greem Groum Sah Budhaye Namah"
               </span>
@@ -1540,36 +1420,36 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card G: Name Corrections */}
-          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300 lg:col-span-1">
+          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300 lg:col-span-1">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-[#E5E7EB]/70">
                 <span className="text-[9px] font-mono text-slate-500 uppercase">Name Spelling Correction</span>
-                <User className="w-4 h-4 text-emerald-400" />
+                <User className="w-4 h-4 text-emerald-500" />
               </div>
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 {internalRemedies.nameCorrection}
               </p>
             </div>
             <div className="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-left mt-4">
-              <span className="text-[10px] font-mono text-emerald-405 block font-bold">Actionable Step:</span>
-              <p className="text-[11px] text-[#BFC7D5] mt-0.5">Use on signatures and corporate social media boards.</p>
+              <span className="text-[10px] font-mono text-emerald-600 block font-bold">Actionable Step:</span>
+              <p className="text-[11px] text-slate-700 font-medium mt-0.5">Use on signatures and corporate social media boards.</p>
             </div>
           </div>
 
           {/* Card H: Mobile Suggetions */}
-          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
+          <div className="rounded-3xl border border-[#E5E7EB] p-6 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm flex flex-col justify-between relative group hover:border-[#D97706]/20 transition duration-300">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-2 border-b border-[#E5E7EB]/70">
                 <span className="text-[9px] font-mono text-slate-500 uppercase">Lucky Endings Sequence</span>
-                <Smartphone className="w-4 h-4 text-purple-400" />
+                <Smartphone className="w-4 h-4 text-purple-500" />
               </div>
-              <p className="text-xs text-[#BFC7D5] leading-relaxed">
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
                 If purchasing a second number, prefer endings with high abundance frequencies to match your aura.
               </p>
             </div>
             <div className="flex gap-2 pt-4 mt-4 border-t border-[#E5E7EB]/70">
               {internalRemedies.mobileEndings.map((ending, i) => (
-                <span key={i} className="px-2.5 py-1 bg-purple-500/10 text-purple-400 border border-purple-500/10 rounded-full text-[10px] font-mono font-bold">
+                <span key={i} className="px-2.5 py-1 bg-purple-500/10 text-purple-600 border border-purple-500/10 rounded-full text-[10px] font-mono font-bold">
                   {ending}
                 </span>
               ))}
@@ -1586,7 +1466,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           <h3 className="font-cinzel text-xl md:text-2xl font-bold uppercase tracking-wider text-[#1F2937]">
             Actionable AI-Powered Guidance
           </h3>
-          <p className="text-[#BFC7D5] text-xs max-w-xl">
+          <p className="text-slate-655 text-xs max-w-xl font-medium">
             Real intelligence synthesizing Chaldean astro-metrics into direct actionable directives.
           </p>
         </div>
@@ -1595,12 +1475,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
           
           {/* Card 1: What to Improve */}
-          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm border border-[#E5E7EB] rounded-3xl space-y-4">
-            <div className="flex gap-3 items-center pb-3 border-b border-[#E5E7EB]/70">
-              <span className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">👍</span>
-              <h4 className="font-cinzel text-xs font-black uppercase text-emerald-400 tracking-wider">What to Improve</h4>
+          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm rounded-3xl space-y-4">
+            <div className="flex gap-3 items-center pb-3 border-b border-[#E5E7EB]/70 bg-gradient-to-r from-transparent to-transparent">
+              <span className="p-2 bg-emerald-500/10 text-emerald-600 rounded-xl">👍</span>
+              <h4 className="font-cinzel text-xs font-black uppercase text-emerald-600 tracking-wider">What to Improve</h4>
             </div>
-            <ul className="text-xs text-[#BFC7D5] space-y-3 list-decimal list-inside">
+            <ul className="text-xs text-slate-655 font-semibold space-y-3 list-decimal list-inside leading-relaxed">
               <li>Increase usage of supportive color threads on Wednesdays and Fridays.</li>
               <li>Add customized letters manually to your primary signature as prescribed in remedies.</li>
               <li>Consolidate bank parameters so they resolve to abundance compound targets (e.g., sums of 1 or 5).</li>
@@ -1608,12 +1488,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card 2: What to Avoid */}
-          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm border border-[#E5E7EB] rounded-3xl space-y-4">
+          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm rounded-3xl space-y-4">
             <div className="flex gap-3 items-center pb-3 border-b border-[#E5E7EB]/70">
-              <span className="p-2 bg-rose-500/10 text-rose-400 rounded-xl">❌</span>
-              <h4 className="font-cinzel text-xs font-black uppercase text-rose-400 tracking-wider">What to Avoid</h4>
+              <span className="p-2 bg-rose-500/10 text-rose-600 rounded-xl">❌</span>
+              <h4 className="font-cinzel text-xs font-black uppercase text-rose-600 tracking-wider">What to Avoid</h4>
             </div>
-            <ul className="text-xs text-[#BFC7D5] space-y-3 list-decimal list-inside">
+            <ul className="text-xs text-slate-655 font-semibold space-y-3 list-decimal list-inside leading-relaxed">
               <li>Avoid starting major asset signatures or signing deeds in adverse lunar hours.</li>
               <li>Do not incorporate recurring zeroes in your official email headers.</li>
               <li>Avoid high-stakes physical confrontation tasks on Mars-influenced Tuesdays.</li>
@@ -1621,12 +1501,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card 3: Best Career Paths */}
-          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm border border-[#E5E7EB] rounded-3xl space-y-4">
+          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm rounded-3xl space-y-4">
             <div className="flex gap-3 items-center pb-3 border-b border-[#E5E7EB]/70">
               <span className="p-2 bg-[#D97706]/10 text-[#D97706] rounded-xl">💼</span>
-              <h4 className="font-cinzel text-xs font-black uppercase text-amber-500 tracking-wider">Best Career Paths</h4>
+              <h4 className="font-cinzel text-xs font-black uppercase text-amber-600 tracking-wider">Best Career Paths</h4>
             </div>
-            <ul className="text-xs text-[#BFC7D5] space-y-3 list-decimal list-inside">
+            <ul className="text-xs text-slate-655 font-semibold space-y-3 list-decimal list-inside leading-relaxed">
               <li>Administrative Lead or Corporate Management Counselor.</li>
               <li>Vedic Tech Advocate, Software Systems Audit lead.</li>
               <li>Luxury Brand PR Adviser or Public Relationship Specialist.</li>
@@ -1634,12 +1514,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card 4: Best Business Sectors */}
-          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm border border-[#E5E7EB] rounded-3xl space-y-4">
+          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm rounded-3xl space-y-4">
             <div className="flex gap-3 items-center pb-3 border-b border-[#E5E7EB]/70">
-              <span className="p-2 bg-sky-500/10 text-sky-400 rounded-xl">⚓</span>
-              <h4 className="font-cinzel text-xs font-black uppercase text-sky-450 tracking-wider">Best Business Sectors</h4>
+              <span className="p-2 bg-sky-500/10 text-sky-600 rounded-xl">⚓</span>
+              <h4 className="font-cinzel text-xs font-black uppercase text-sky-600 tracking-wider">Best Business Sectors</h4>
             </div>
-            <ul className="text-xs text-[#BFC7D5] space-y-3 list-decimal list-inside">
+            <ul className="text-xs text-slate-655 font-semibold space-y-3 list-decimal list-inside leading-relaxed">
               <li>Real estate development, construction machinery & planning.</li>
               <li>Agile marketing firms, telecom portals, and corporate consultation.</li>
               <li>Luxury jewelry, interior craft, and high-end apparel retail.</li>
@@ -1647,12 +1527,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card 5: Communication Advice */}
-          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm border border-[#E5E7EB] rounded-3xl space-y-4">
+          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm rounded-3xl space-y-4">
             <div className="flex gap-3 items-center pb-3 border-b border-[#E5E7EB]/70">
-              <span className="p-2 bg-purple-500/10 text-purple-400 rounded-xl">💬</span>
-              <h4 className="font-cinzel text-xs font-black uppercase text-purple-400 tracking-wider">Communication Advice</h4>
+              <span className="p-2 bg-purple-500/10 text-purple-600 rounded-xl">💬</span>
+              <h4 className="font-cinzel text-xs font-black uppercase text-purple-600 tracking-wider">Communication Advice</h4>
             </div>
-            <ul className="text-xs text-[#BFC7D5] space-y-3 list-decimal list-inside">
+            <ul className="text-xs text-slate-655 font-semibold space-y-3 list-decimal list-inside leading-relaxed">
               <li>Formulate decisions calmly during lunar emotional triggers to prevent mood slides.</li>
               <li>Deliver commands with absolute focus and clarity without scattering your target goals.</li>
               <li>Maintain soft, highly persuasive tones when negotiating complex asset agreements.</li>
@@ -1660,12 +1540,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           </div>
 
           {/* Card 6: Wealth Growth Advice */}
-          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB] shadow-sm border border-[#E5E7EB] rounded-3xl space-y-4">
+          <div className="p-6 md:p-8 bg-[#FFFFFF] border border-[#E5E7EB]/80 shadow-sm rounded-3xl space-y-4">
             <div className="flex gap-3 items-center pb-3 border-b border-[#E5E7EB]/70">
-              <span className="p-2 bg-pink-500/10 text-pink-400 rounded-xl">💵</span>
-              <h4 className="font-cinzel text-xs font-black uppercase text-pink-400 tracking-wider">Wealth Growth Advice</h4>
+              <span className="p-2 bg-pink-500/10 text-pink-600 rounded-xl">💵</span>
+              <h4 className="font-cinzel text-xs font-black uppercase text-pink-600 tracking-wider">Wealth Growth Advice</h4>
             </div>
-            <ul className="text-xs text-[#BFC7D5] space-y-3 list-decimal list-inside">
+            <ul className="text-xs text-slate-655 font-semibold space-y-3 list-decimal list-inside leading-relaxed">
               <li>Avoid high risky financial bets unless backed by strong legal terms.</li>
               <li>Re-invest continuous cash flow targets back into land, gold or stable bonds on lucky dates.</li>
               <li>Donate to deserving spiritual/educational centers to appease karmic nodes.</li>

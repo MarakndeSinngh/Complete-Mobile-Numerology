@@ -230,6 +230,92 @@ The output should look like a master-class, deeply personalized, premium consult
     }
   });
 
+  // API router for Loshu Grid Report generation
+  app.post("/api/loshu-report", async (req, res) => {
+    try {
+      const { personalDetails, mulank, bhagyank, loshuGrid, missingNumbers, strengthArrows, weaknessArrows, personalYear, currentMahadasha, currentAntardasha } = req.body;
+
+      if (!personalDetails?.name) {
+        return res.status(400).json({ error: "Missing personal details name" });
+      }
+
+      const client = getGeminiClient();
+
+      const prompt = `
+Generate an exhaustive, supreme quality, 10-15 page equivalent Astro-Numerology Life Advisory Report in traditional, dignified, and highly formatted Hindi.
+This is a standard "Complete Loshu Grid Analysis & Vedic-Chaldean Destiny Blueprint Report".
+
+Subject Credentials:
+- Name (नाम): ${personalDetails.name}
+- Birthdate (जन्म तारीख): ${personalDetails.dob}
+- Gender (लिंग): ${personalDetails.gender || 'निर्दिष्ट नहीं'}
+
+Loshu Grid Key Parameters (Calculated Coordinates):
+1. Psychic Number / Driver (मूलांक /जन्मांक): ${mulank} (Co-ruled by planet planetary alignments)
+2. Destiny Number / Conductor (भाग्यांक / जीवन पथ संख्या): ${bhagyank}
+3. Active Personal Year 2026 (सक्रिय व्यक्तिगत वर्ष): ${personalYear.number} - Title: ${personalYear.title}
+4. Active Planetary Cycles running currently:
+   - Current Mahadasha (वर्तमान महादशा): ${currentMahadasha?.planet || 'सक्रिय चक्र'} (Age: ${currentMahadasha?.startAge}-${currentMahadasha?.endAge} / Years: ${currentMahadasha?.startYear}-${currentMahadasha?.endYear})
+   - Current Antardasha (वर्तमान अंतर्दशा): ${currentAntardasha?.planet || 'सक्रिय उपचक्र'} (Duration: ${currentAntardasha?.durationMonths} months)
+
+Grid Map Analysis Details:
+- Strength Arrows/Planes present (सक्रिय राजयोग - बलशाली विमान):
+  ${strengthArrows.map((s: any) => `• ${s.name} (${s.title}): Digits: ${s.digits.join(', ')} (Description: ${s.description})`).join('\n  ') || 'कोई नहीं'}
+- Weakness Arrows/Planes present (दुर्बलता या शून्य विमान):
+  ${weaknessArrows.map((w: any) => `• ${w.name} (${w.title}): Digits: ${w.digits.join(', ')} (Remedy: ${w.remedy})`).join('\n  ') || 'कोई नहीं'}
+- Missing Numbers (लोशू ग्रिड में अनुपस्थित अंक एवं तत्त्व):
+  ${missingNumbers.map((m: any) => `• Digit ${m.digit} (Element: ${m.element}): ${m.meaning} -> Remedy Suggestion: ${m.remedy}`).join('\n  ') || 'कोई नहीं'}
+
+Active Grid Digit Counts (Loshu Representation):
+${Object.values(loshuGrid).map((g: any) => `Digit ${g.digit}: Element: ${g.element}, Direction: ${g.direction}, Count: ${g.count} times. (Lifeforce: ${g.meaning})`).join('\n')}
+
+Please output a majestic, highly professional report under the following chapters with maximum consulting length, containing deep analysis, ancient references, and practical steps. High-end Markdown tables, lists, and bold phrases in pure, respectful Vedic Hindi are necessary.
+
+Report Chapters to construct:
+- **1. मंगलाचरण एवं ब्रह्मांडीय प्रस्तावना (Divine Invocation & Cosmic Preface)**: Poetic greeting, invocation of divine vibrations, and overview of the subject's birth star alignments.
+- **2. मूलांक एवं भाग्यांक - आपके जीवन का दोहरा कम्पास (Psychic & Destiny - The Dual Compasses)**: Deep advisory analysis of Mulank (${mulank}) and Bhagyank (${bhagyank}) traits, career recommendations, spiritual lessons, and mutual alignment.
+- **3. लोशू ग्रिड चार्ट एवं तत्त्व मीमांसा (Loshu Grid Chart & Elemental Metaphysics)**: A complete diagnostic writeup on their 3x3 magic square. Discuss Wood, Water, Fire, Earth, Metal distribution inside their chart.
+- **4. राजयोग विमान एवं सक्रिय ऊर्जा प्रवाह (Sovereign Planes & Active Energies)**: Extensive assessment of active planes: ${strengthArrows.map((s: any) => s.name).join(', ') || 'सक्रिय राजयोग'}. Explain how these shape their material wealth, mental focus, and actions.
+- **5. शून्य विमान, अनुपस्थित अंक एवं सुधारत्मक वेध (Empty Planes, Missing Figures & Karmic Remedies)**: Full list of missing numbers. Detail the Lal Kitab remedies, direction activation (like North career zone, Northwest support), and gemstone rituals required.
+- **6. वर्तमान महादशा और अंतर्दशा चक्र विश्लेषण (Planetary Period Dasha Audit)**: Point out their running Mahadasha of ${currentMahadasha?.planet} and Antardasha of ${currentAntardasha?.planet}. Give a year-by-year checklist on how to conduct negotiations, financial investments, and maintain health during this period, plus what days/hours to avoid.
+- **7. वर्ष 2026-2030 आगामी मार्गदर्शन (5-Year Detailed Planetary Forecast)**: Provide structured annual predictions for the next 5 years based on shifting Personal Years.
+- **8. सर्वकल्याणकारी लाल किताब कवच (Comprehensive Altar Remedies Shield)**: Personalized signature guidelines (angle, underline), lucky dates, corporate metal structures placement, and customized home altar guidelines.
+
+Write with premium consulting mastery strictly following traditional Vedic Hindi, keeping the quality worthy of elite consultations.
+`;
+
+      const aiResponse = await client.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          systemInstruction: `You are an elite, compassionate astro-numerologist with 25 years of consulting experience in traditional Indian Vedic, Chaldean & Loshu Grid Numerology.
+
+CRITICAL LANGUAGE INSTRUCTION:
+The entire Loshu Numerology Report must be generated in PROFESSIONAL HINDI exactly in the style used in traditional premium Vedic/Loshu PDFs and consultations.
+
+Do NOT use:
+- Google-translated Hindi
+- Modern corporate Hinglish
+- Single English sentences inside content blocks
+
+Use:
+- Traditional Numerology Hindi (शास्त्रीय एवं पारंपरिक ज्योतिषीय हिंदी)
+- Deep, highly detailed, respectful, and authoritative tone ("आप", "आपका", "शुभम", "आशीर्वाद")
+- Authentic terms: मूलांक (Psychic), भाग्यांक (Destiny), लोशू ग्रिड (Loshu Grid), राजयोग (Sovereign Plane), महादशा (Major Cycle), अंतर्दशा (Sub Cycle), लाल किताब उपाय (Lal Kitab remedies).
+
+Structure the report with pristine Markdown layout, neat tables, divider lines, and elegant blockquotes. Make it look professional.`,
+          temperature: 0.70,
+        }
+      });
+
+      const responseText = aiResponse.text || "ब्रह्मांडीय ऊर्जा संचरण में बाधा के कारण वर्तमान में फलादेश अनुपलब्ध है।";
+      res.json({ report: responseText });
+    } catch (err: any) {
+      console.error("Gemini server error for Loshu: ", err);
+      res.status(500).json({ error: "ब्रह्मांडीय सर्वर से संपर्क विफल रहा। कृपया आवश्यक सेटिंग्स में अपनी GEMINI_API_KEY जांचें।" });
+    }
+  });
+
   // Vite integration
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
