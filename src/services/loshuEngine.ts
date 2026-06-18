@@ -555,7 +555,7 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
     bhagyank,
     loshuGridStructure: Object.values(loshuGrid).map(g => ({
       digit: g.digit,
-      represented: d,
+      represented: g.digit,
       count: g.count,
       sources: g.sources,
       element: g.element,
