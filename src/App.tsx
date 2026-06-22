@@ -16,13 +16,14 @@ import ReportTab from './components/ReportTab';
 import AdminPanel from './components/AdminPanel';
 import CompleteLoshuGridAnalysis from './components/CompleteLoshuGridAnalysis';
 import MarriageCompatibility from './components/MarriageCompatibility';
+import PremiumConsultations from './components/PremiumConsultations';
 
 type ViewTab = 'DASHBOARD' | 'MOBILE' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
 
 const App: React.FC = () => {
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null);
   const [activeTab, setActiveTab] = useState<ViewTab>('MOBILE');
-  const [currentPortal, setCurrentPortal] = useState<'MOBILE_NUMEROLOGY' | 'LOSHU_GRID' | 'MARRIAGE_COMPATIBILITY'>('MOBILE_NUMEROLOGY');
+  const [currentPortal, setCurrentPortal] = useState<'MOBILE_NUMEROLOGY' | 'LOSHU_GRID' | 'MARRIAGE_COMPATIBILITY' | 'PREMIUM_CONSULTATIONS'>('MOBILE_NUMEROLOGY');
   const [analysisMode, setAnalysisMode] = useState<'QUICK' | 'ADVANCED'>('QUICK');
 
   // Input states
@@ -182,6 +183,17 @@ const App: React.FC = () => {
             }`}
           >
             <Heart className="w-4 h-4 text-rose-500 fill-rose-500 animate-pulse" /> Marriage Compatibility 💕
+          </button>
+
+          <button
+            onClick={() => setCurrentPortal('PREMIUM_CONSULTATIONS')}
+            className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+              currentPortal === 'PREMIUM_CONSULTATIONS'
+                ? 'bg-[#1E3A8A] text-white shadow-md'
+                : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" /> Premium Tools 👑
           </button>
         </div>
 
@@ -739,8 +751,10 @@ const App: React.FC = () => {
         )
         ) : currentPortal === 'LOSHU_GRID' ? (
           <CompleteLoshuGridAnalysis initialProfile={personalDetails} />
-        ) : (
+        ) : currentPortal === 'MARRIAGE_COMPATIBILITY' ? (
           <MarriageCompatibility />
+        ) : (
+          <PremiumConsultations />
         )}
 
       </main>

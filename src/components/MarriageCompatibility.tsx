@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber } from '../services/numerologyEngine';
 import { computeLoshuAnalysis } from '../services/loshuEngine';
+import { calculateAdvancedCompatibility } from '../services/advancedCompatibilityEngine';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -125,42 +126,28 @@ export default function MarriageCompatibility() {
       const mob1 = partner1.mobile ? analyzeMobileNumber(partner1.mobile) : { reducedTotal: 5, compoundTotal: 23, score: 75, rating: 'GOOD' };
       const mob2 = partner2.mobile ? analyzeMobileNumber(partner2.mobile) : { reducedTotal: 6, compoundTotal: 24, score: 85, rating: 'EXCELLENT' };
 
-      // Mulank and Bhagyank
+      // Calculate Advanced Compatibility Layer scores
+      const advanced = calculateAdvancedCompatibility(partner1, partner2);
+
       const m1 = rawAna1.mulank;
       const m2 = rawAna2.mulank;
       const b1 = rawAna1.bhagyank;
       const b2 = rawAna2.bhagyank;
 
-      // 2. Compatibility Score Breakdown Math
-      const mulankScore = (MULANK_HARMONY[m1]?.[m2] || 6) * 10;
-      const bhagyankScore = (MULANK_HARMONY[b1]?.[b2] || 6) * 10;
+      const mulankScore = advanced.layers.driver.score;
+      const bhagyankScore = advanced.layers.conductor.score;
+      const nameScore = advanced.layers.name.score;
+      const mobileScore = advanced.layers.mobile.score;
 
-      // Unifying name frequencies under Chaldean values
-      const nameScore = nameSystems1.chaldeanNumber === nameSystems2.chaldeanNumber ? 95 : 
-                        (MULANK_HARMONY[nameSystems1.chaldeanNumber]?.[nameSystems2.chaldeanNumber] || 6) * 10;
+      const loveScore = advanced.layers.compound.score;
+      const emotionalScore = advanced.categories.emotional.score;
+      const communicationScore = advanced.categories.communication.score;
+      const financialScore = advanced.categories.financial.score;
+      const spiritualScore = advanced.categories.spiritual.score;
+      const overallStability = advanced.overallScore;
 
-      // Mobile integration score
-      const mobileScore = (MULANK_HARMONY[mob1.reducedTotal]?.[mob2.reducedTotal] || 6) * 10;
-
-      // Sub-domain scores
-      const loveScore = Math.min(100, Math.max(30, Math.round((mulankScore * 0.6) + (nameScore * 0.4) + 8)));
-      const emotionalScore = Math.min(100, Math.max(30, Math.round((mulankScore * 0.4) + (bhagyankScore * 0.3) + 20)));
-      const communicationScore = Math.min(100, Math.max(30, Math.round((mulankScore * 0.3) + (mobileScore * 0.5) + (nameScore * 0.2))));
-      const financialScore = Math.min(100, Math.max(30, Math.round((bhagyankScore * 0.6) + (mobileScore * 0.3) + 10)));
-      
-      // Spiritual compatibility (based on sum or shared numbers)
-      const spiritualScore = Math.min(100, Math.max(35, Math.round(85 - Math.abs(m1 - m2) * 5)));
-
-      // Overall Marriage Stability Score (out of 100)
-      const overallStability = Math.round((mulankScore * 0.25) + (bhagyankScore * 0.25) + (loveScore * 0.15) + (emotionalScore * 0.15) + (communicationScore * 0.1) + (financialScore * 0.1));
-
-      // 3. Karmic and soulmate indicators check
-      const karmicWarning = (m1 + m2 === 13 || m1 === 8 || m2 === 8 || b1 === 4 || b2 === 4);
-      const isSoulmate = (m1 === b2 && m2 === b1) || (m1 === m2 && b1 === b2) || (m1 === 9 && m2 === 1) || (m1 === 2 && m2 === 7);
-
-      // Synthesis & Report texts
-      const luckyDays = Array.from(new Set([...rawAna1.luckyDetails.colors, ...rawAna2.luckyDetails.colors])).slice(0, 4);
-      const coupleGemstones = [`Couple Harmony Ring: White Sapphire for ${partner1.name}`, `Rose Quartz for ${partner2.name}`];
+      const karmicWarning = advanced.indicators.karmicWarning;
+      const isSoulmate = advanced.indicators.isSoulmate;
 
       const reportId = customItem ? customItem.id : Date.now().toString();
 
@@ -174,6 +161,7 @@ export default function MarriageCompatibility() {
         nameSystems2,
         mob1,
         mob2,
+        advanced, // Include raw calculation for deep UI rendering
         metrics: {
           mulankScore,
           bhagyankScore,
@@ -210,8 +198,8 @@ export default function MarriageCompatibility() {
           score: overallStability,
           dob1: partner1.dob,
           dob2: partner2.dob,
-          mobile1: partner1.mobile,
-          mobile2: partner2.mobile
+          mobile1: partner1.mobile || '',
+          mobile2: partner2.mobile || ''
         });
       }
     }, 1000);
@@ -662,10 +650,7 @@ export default function MarriageCompatibility() {
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed font-sans">
-                Partner 1 resolves to Mulank {currentResult.rawAna1.mulank} (ruled by {currentResult.rawAna1.chaldeanMulank?.ruler}) matched against 
-                Partner 2's Mulank {currentResult.rawAna2.mulank} (ruled by {currentResult.rawAna2.chaldeanMulank?.ruler}). 
-                This produces a <strong>Compatibility score of {currentResult.metrics.mulankScore}%</strong>. 
-                This relationship forms a highly active structural link. Everyday actions between the couple will align cleanly, creating cohesive household coordination.
+                {currentResult.advanced ? currentResult.advanced.layers.driver.explanation : `Partner 1 resolves to Mulank ${currentResult.rawAna1.mulank} matched against Partner 2's Mulank ${currentResult.rawAna2.mulank}. This produces a Compatibility score of ${currentResult.metrics.mulankScore}%.`}
               </p>
             </motion.div>
 
@@ -696,9 +681,7 @@ export default function MarriageCompatibility() {
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed font-sans">
-                Partner 1 resolves to Destiny Bhagyank {currentResult.rawAna1.bhagyank} matched against Partner 2's Destiny Bhagyank {currentResult.rawAna2.bhagyank}, 
-                bringing an outstanding <strong>Bhagyank score of {currentResult.metrics.bhagyankScore}%</strong>. 
-                This axis defines long-term spiritual growth, retirement assets, and material luck. High synchronization here ensures smooth wealth sharing and persistent support during major career changes.
+                {currentResult.advanced ? currentResult.advanced.layers.conductor.explanation : `Partner 1 resolves to Destiny Bhagyank ${currentResult.rawAna1.bhagyank} matched against Partner 2's Destiny Bhagyank ${currentResult.rawAna2.bhagyank}, bringing an outstanding Bhagyank score of ${currentResult.metrics.bhagyankScore}%.`}
               </p>
             </motion.div>
 
