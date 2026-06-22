@@ -39,6 +39,121 @@ const App: React.FC = () => {
   const [mobileData, setMobileData] = useState<MobileAnalysis | null>(null);
   const [remedies, setRemedies] = useState<remediesAdvice | null>(null);
 
+
+  // Virtual URL & Hash Router for Professional SEO Pages & Dynamic Metadata/JSON-LD Injector
+  const [currentSEOPath, setCurrentSEOPath] = React.useState<string>('mobile-numerology');
+
+  React.useEffect(() => {
+    const handleRouteSync = () => {
+      const path = window.location.pathname.substring(1) || window.location.hash.substring(1) || 'mobile-numerology';
+      setCurrentSEOPath(path);
+
+      let title = "Leo Family Numerology - Premium Astro Destiny Portal";
+      let description = "Vedic Numerology & Chaldean Frequencies. Explore hidden planetary yogas, material blockages, and cosmic alignments curated by Rajiv Singh Chauhann.";
+      let schemaMarkup: any = null;
+
+      if (path.includes('mobile-numerology')) {
+        setCurrentPortal('MOBILE_NUMEROLOGY');
+        title = "Mobile Numerology Scanner - Chaldean Planetary Frequencies";
+        description = "Scan cumulative Chaldean vibrations, planetary yogas, material blockages, and cosmic remedies of your mobile number.";
+        schemaMarkup = {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": "Professional Mobile Numerology & Chaldean Vibrations Guide",
+          "description": "How mobile phone digits create resonance with Saturn, Rahu, and Venus under Chaldean rules.",
+          "author": { "@type": "Person", "name": "Raajeev Singh Chauhann" }
+        };
+      } else if (path.includes('name-numerology')) {
+        setCurrentPortal('MOBILE_NUMEROLOGY');
+        setAnalysisMode('ADVANCED');
+        title = "Chaldean Name Numerology - Pronunciation Vibration Corrector";
+        description = "Align your full brand name spelling with your birth driver or destiny numbers for ultimate success.";
+        schemaMarkup = {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": "Traditional Chaldean Name Spelling Correction Guidelines",
+          "description": "Adjusting letter frequencies using Vedic standard charts.",
+          "author": { "@type": "Person", "name": "Raajeev Singh Chauhann" }
+        };
+      } else if (path.includes('loshu-grid')) {
+        setCurrentPortal('LOSHU_GRID');
+        title = "Master Lo Shu Grid Kundali - traditional 3x3 Vedic Birth Grid";
+        description = "Generate your 3x3 Lo Shu birth grid, missing numbers remedies, and personalized arrows.";
+        schemaMarkup = {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": "Vedi Lo Shu Grid & Missing Coordinates Remedies",
+          "description": "Traditional analysis of present, missing, and repeated numbers.",
+          "author": { "@type": "Person", "name": "Raajeev Singh Chauhann" }
+        };
+      } else if (path.includes('marriage-compatibility')) {
+        setCurrentPortal('MARRIAGE_COMPATIBILITY');
+        title = "Vedic Marriage Compatibility - Driver Conductor Synastry v3.0";
+        description = "Calculate 7-layer marriage compatibility, emotional resonance, and dynamic yogas.";
+      } else if (path.includes('vehicle-numerology')) {
+        setCurrentPortal('PREMIUM_CONSULTATIONS');
+        window.dispatchEvent(new CustomEvent('switch-premium-module', { detail: 'VEHICLE' }));
+        title = "Pro Vehicle Numerology - License Plate Vastu & Accidental Risks";
+        description = "Analyze license plate frequencies, breakdown probabilities, and optimal service days.";
+      } else if (path.includes('house-numerology')) {
+        setCurrentPortal('PREMIUM_CONSULTATIONS');
+        window.dispatchEvent(new CustomEvent('switch-premium-module', { detail: 'HOUSE' }));
+        title = "Pro House & Flat Vastu Auditor - Flat Numbers Energy Vibration";
+        description = "Scan domestic energy vibrations, wealth flows, and placement remedies.";
+      } else if (path.includes('business-numerology')) {
+        setCurrentPortal('PREMIUM_CONSULTATIONS');
+        window.dispatchEvent(new CustomEvent('switch-premium-module', { detail: 'BUSINESS' }));
+        title = "Pro Business Firm Name Suite - Marketing Energy & Corporate Suitability";
+        description = "Align brand name spelling with owner driver numbers to guarantee rapid expansion.";
+      } else if (path.includes('signature-numerology')) {
+        setCurrentPortal('PREMIUM_CONSULTATIONS');
+        window.dispatchEvent(new CustomEvent('switch-premium-module', { detail: 'SIGNATURE' }));
+        title = "Signature Style Diagnostics - Handwriting Vastu & Financial Shielding";
+        description = "Audit trailing signature underlines, dots, and upward slopes.";
+      } else if (path.includes('child-numerology')) {
+        setCurrentPortal('PREMIUM_CONSULTATIONS');
+        window.dispatchEvent(new CustomEvent('switch-premium-module', { detail: 'CHILD' }));
+        title = "Child Auspicious Initial Letters Finder - Psychic Education Setup";
+        description = "Optimize child brand spelling and starting letters matching planetary intelligence.";
+      } else if (path.includes('lucky-date-finder')) {
+        setCurrentPortal('PREMIUM_CONSULTATIONS');
+        window.dispatchEvent(new CustomEvent('switch-premium-module', { detail: 'LUCKY_DATES' }));
+        title = "Auspicious Dates Finder - Personalized Business, Marriage & Travel Dates";
+        description = "Plan key lifestyle activities during friendly transits that reject Saturn delays.";
+      }
+
+      // Update head dynamically
+      document.title = title;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', description);
+      } else {
+        const meta = document.createElement('meta');
+        meta.name = "description";
+        meta.content = description;
+        document.head.appendChild(meta);
+      }
+
+      // Inject JSON-LD Schema
+      const existingSchema = document.getElementById('dynamic-seo-schema');
+      if (existingSchema) existingSchema.remove();
+
+      if (schemaMarkup) {
+        const script = document.createElement('script');
+        script.id = 'dynamic-seo-schema';
+        script.type = 'application/ld+json';
+        script.innerHTML = JSON.stringify(schemaMarkup);
+        document.head.appendChild(script);
+      }
+    };
+
+    handleRouteSync();
+    window.addEventListener('hashchange', handleRouteSync);
+    return () => {
+      window.removeEventListener('hashchange', handleRouteSync);
+    };
+  }, []);
+
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!mobile) return;
@@ -759,16 +874,127 @@ const App: React.FC = () => {
 
       </main>
 
+
+      {/* SEO & OCCULT AUTHORITY LIBRARY / INTERNAL LINKING SYSTEM */}
+      <section id="seo-authority-centre" className="border-t border-[#E5E7EB] bg-[#FDFCF7] py-16 px-6 relative z-30">
+        <div className="max-w-5xl mx-auto space-y-12 text-left font-sans text-xs">
+          
+          {/* Breadcrumbs Component */}
+          <div className="flex items-center gap-2 text-[10px] uppercase font-mono text-slate-400 tracking-wider">
+            <span>Home</span>
+            <span>&gt;</span>
+            <span>Vedic Occult Systems</span>
+            <span>&gt;</span>
+            <span className="text-[#D97706] font-bold">
+              {currentSEOPath === 'mobile-numerology' ? 'Mobile Phone Frequencies' :
+               currentSEOPath === 'name-numerology' ? 'Chaldean Name Correction Suite' :
+               currentSEOPath === 'loshu-grid' ? 'Vedic Lo Shu birth Grid' :
+               currentSEOPath === 'marriage-compatibility' ? '7-Layer Synastry Index' :
+               currentSEOPath === 'vehicle-numerology' ? 'Vehicle Plates & Accident Risk' :
+               currentSEOPath === 'house-numerology' ? 'Domestic House Vastu' :
+               currentSEOPath === 'business-numerology' ? 'Brand Name Alignment' :
+               currentSEOPath === 'signature-numerology' ? 'Handwriting Wealth Shield' :
+               currentSEOPath === 'child-numerology' ? 'Auspicious Spellings for Children' :
+               'Transit Lucky Date Finder'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 border-b pb-12 border-[#F2E8DC]">
+            {/* Header Column */}
+            <div className="md:col-span-4 space-y-2">
+              <h4 className="font-playfair text-xl font-bold text-slate-800">Grandmaster Occult Encyclopedia</h4>
+              <p className="text-slate-500 leading-relaxed text-[11px]">
+                Authorized Indian Numerology & Astrological reference library. Access classical Chaldean treatises, dynamic house grids, and signature corrections directly.
+              </p>
+            </div>
+
+            {/* Direct Navigation - Fully Active Links */}
+            <div className="md:col-span-8">
+              <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-widest font-bold block mb-4">Direct Portal Reference Registry</span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { hash: '#mobile-numerology', label: '1. Mobile Scanner', desc: 'Cumulative Chaldean analysis' },
+                  { hash: '#name-numerology', label: '2. Name Corrector', desc: 'Planetary spelling formulas' },
+                  { hash: '#loshu-grid', label: '3. Master Lo Shu Grid', desc: 'Vedic 3x3 birth grid' },
+                  { hash: '#marriage-compatibility', label: '4. Marriage Synastry', desc: '7-Layer relational scores' },
+                  { hash: '#vehicle-numerology', label: '5. Vehicle Plates', desc: 'Vastu limits & risk scales' },
+                  { hash: '#house-numerology', label: '6. House Address', desc: 'Domestic plot vibrations' },
+                  { hash: '#business-numerology', label: '7. Corporate Branding', desc: 'Marketing suitability keys' },
+                  { hash: '#signature-numerology', label: '8. Signature Audit', desc: 'Financial shielding curves' },
+                  { hash: '#child-numerology', label: '9. Child Lucky Names', desc: 'Wisdom starting letters' },
+                  { hash: '#lucky-date-finder', label: '10. Lucky Dates Finder', desc: 'Transit matching grids' },
+                ].map((lnk) => (
+                  <a
+                    key={lnk.hash}
+                    href={lnk.hash}
+                    className={`block p-3 rounded-2xl border transition-all ${
+                      currentSEOPath === lnk.hash.substring(1)
+                        ? 'bg-[#1E3A8A]/5 border-[#1E3A8A] text-[#1E3A8A]'
+                        : 'bg-white border-[#E5E7EB] hover:bg-slate-50 text-slate-600'
+                    }`}
+                  >
+                    <span className="font-bold block text-[11px] font-sans">{lnk.label}</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">{lnk.desc}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Structured FAQ & Articles Accordions */}
+          <div className="space-y-6">
+            <h4 className="font-playfair text-lg font-bold text-slate-800">Frequently Asked Questions & Treatises</h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div className="space-y-4">
+                <div className="p-5 bg-[#FDFCF7] border border-[#F2E8DC] rounded-3xl">
+                  <span className="font-bold block text-slate-800 text-[13px] font-playfair">Q: What is the primary difference between Driver and Conductor numbers?</span>
+                  <p className="text-slate-500 mt-2 leading-relaxed text-[11px]">
+                    The <strong>Driver Number</strong> corresponds directly to your birth day date (e.g. 23 reduced to 5), representing your conscious character, talents, and physical disposition. The <strong>Conductor Number</strong> (or Destiny Number) is the sum calculation of your entire birth blueprint (Day + Month + Year), dictating your divine purpose, karmic trajectory, and sudden opportunities.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-[#FDFCF7] border border-[#F2E8DC] rounded-3xl">
+                  <span className="font-bold block text-slate-800 text-[13px] font-playfair">Q: Why are house plates and vehicle sums evaluated using Chaldean instead of Pythagorean?</span>
+                  <p className="text-slate-500 mt-2 leading-relaxed text-[11px]">
+                    Traditional Chaldean Numerology was formulated around planetary phonetics and spiritual sound vibrations (from 1 to 8, with 9 left out as sacred). Since vehicles and homes possess high constant tactile interactions, phonetic vibrations correspond directly to their physical luck and shielding, whereas Pythagorean reflects standard alphabetical order.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-5 bg-[#FDFCF7] border border-[#F2E8DC] rounded-3xl">
+                  <span className="font-bold block text-slate-800 text-[13px] font-playfair">Q: Can a simple mobile number spelling change or digit replacement bypass a negative transit?</span>
+                  <p className="text-slate-500 mt-2 leading-relaxed text-[11px]">
+                    Yes. Under Rajiv Singh Chauhann principles, while the natal Lo Shu Grid is completely static, your mobile phone is a highly active modern device transiting thousands of cosmic frequencies daily. Choosing highly supportive supportive combinations (e.g., avoiding multiple 8s and 4s unless aligned) directly acts as a protective shield (Yantra).
+                  </p>
+                </div>
+
+                <div className="p-4 bg-[#D97706]/5 border border-[#D97706]/15 rounded-3xl space-y-2">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-[#D97706] font-bold block">Scientific Disclaimer</span>
+                  <p className="text-slate-600 leading-relaxed text-[11px]">
+                    These occult consultations represent ancient Indian Chaldean findings from Vedic sages. Use these planetary readings to complement modern planning, hard work, and rational decision-making for maximum prosperity.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       {/* Footer System Line */}
-      <footer id="main-footer" className="border-t border-[#E5E7EB] bg-[#F2E8DC]/50 py-10 relative z-20 mt-auto text-center space-y-2">
+      <footer id="main-footer" className="border-t border-[#E5E7EB] bg-[#F2E8DC]/40 py-10 relative z-20 mt-auto text-center space-y-2">
         <span className="font-playfair text-sm text-[#1F2937] font-bold block">Leo Family Occult Sciences</span>
         <span className="font-mono text-[9px] text-[#6B7280] uppercase tracking-[0.4em] block mx-4 leading-normal">
           Vedic Rules & Alignment Matrix • Raajeev Singh Chauhann Method • © {new Date().getFullYear()} All Rights Reserved
         </span>
       </footer>
-
     </div>
   );
 };
 
 export default App;
+

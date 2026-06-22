@@ -118,6 +118,7 @@ export function analyzeDateOfBirth(dobStr: string, name: string): DOBAnalysis {
 
   // Birth Number (Driver / Mulank)
   const birthNumber = dayReduced;
+  const birthNumberCompound = day;
 
   // Calculate expression, soul urge & personality from name using CHALDEAN_MAP primarily
   const normalizedName = name.toUpperCase().replace(/[^A-Z]/g, '');
@@ -191,6 +192,7 @@ export function analyzeDateOfBirth(dobStr: string, name: string): DOBAnalysis {
   return {
     lifePathNumber,
     birthNumber,
+    birthNumberCompound,
     destinyNumber,
     soulUrgeNumber,
     personalityNumber,

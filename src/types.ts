@@ -9,6 +9,7 @@ export interface PersonalDetails {
 export interface DOBAnalysis {
   lifePathNumber: number;
   birthNumber: number;
+  birthNumberCompound: number;
   destinyNumber: number;
   soulUrgeNumber: number;
   personalityNumber: number;
