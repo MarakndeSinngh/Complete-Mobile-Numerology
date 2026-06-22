@@ -1,4 +1,4 @@
-import { reduceToSingleDigit, reduceWithMaster } from './numerologyEngine';
+import { reduceToSingleDigit } from './numerologyEngine';
 
 export interface LoshuGridBox {
   digit: number;
@@ -212,16 +212,14 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
 
   // Calcul Mulank & Bhagyank
   const mulank = reduceToSingleDigit(bDay);
-  const bhagyank = reduceWithMaster(reduceToSingleDigit(bDay) + reduceToSingleDigit(bMonth) + reduceToSingleDigit(bYear));
-
-  // Count digits in date of birth (excluding zeros)
   const dobDigitsStr = dobStr.replace(/[^0-9]/g, '');
+  const chaldeanBhagyankCompound = dobDigitsStr.split('').map(d => parseInt(d, 10)).reduce((acc, v) => acc + v, 0);
+  const bhagyank = reduceToSingleDigit(chaldeanBhagyankCompound);
 
   // Chaldean psychic / destiny calculations
   const chaldeanMulankCompound = bDay;
   const chaldeanMulankReduced = mulank;
-  const chaldeanBhagyankCompound = dobDigitsStr.split('').map(d => parseInt(d, 10)).reduce((acc, v) => acc + v, 0);
-  const chaldeanBhagyankReduced = reduceToSingleDigit(chaldeanBhagyankCompound);
+  const chaldeanBhagyankReduced = bhagyank;
 
   const mComp = CHALDEAN_COMPOUNDS[chaldeanMulankCompound] || {
     title: `मूलांक ${chaldeanMulankCompound} कम्पाउंड`,

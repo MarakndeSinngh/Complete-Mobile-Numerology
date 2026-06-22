@@ -110,34 +110,37 @@ export function analyzeDateOfBirth(dobStr: string, name: string): DOBAnalysis {
   const monthReduced = reduceToSingleDigit(month);
   const yearReduced = reduceToSingleDigit(year);
 
-  // Life Path Number
-  const lifePathNumber = reduceWithMaster(dayReduced + monthReduced + yearReduced);
+  // Life Path Number (Conductor / Bhagyank)
+  // Sum of all digits of DOB (standard Indian style)
+  const cleanDob = dobStr.replace(/[^0-9]/g, '');
+  const dobSum = cleanDob.split('').reduce((acc, char) => acc + parseInt(char, 10), 0);
+  const lifePathNumber = reduceToSingleDigit(dobSum);
 
-  // Birth Number
+  // Birth Number (Driver / Mulank)
   const birthNumber = dayReduced;
 
-  // Calcul expression & soul urge from name (Pythagorean standard)
+  // Calculate expression, soul urge & personality from name using CHALDEAN_MAP primarily
   const normalizedName = name.toUpperCase().replace(/[^A-Z]/g, '');
-  let nameSum = 0;
-  let soulSum = 0;
-  let personalitySum = 0;
+  let chalSum = 0;
+  let chalVowelSum = 0;
+  let chalConsonantSum = 0;
 
-  for (let i = 0; i < name.length; i++) {
-    const char = name[i].toUpperCase();
-    if (PYTHAGOREAN_MAP[char]) {
-      const val = PYTHAGOREAN_MAP[char];
-      nameSum += val;
+  for (let i = 0; i < normalizedName.length; i++) {
+    const char = normalizedName[i];
+    if (CHALDEAN_MAP[char]) {
+      const val = CHALDEAN_MAP[char];
+      chalSum += val;
       if (VOWELS.includes(char)) {
-        soulSum += val;
+        chalVowelSum += val;
       } else {
-        personalitySum += val;
+        chalConsonantSum += val;
       }
     }
   }
 
-  const destinyNumber = reduceWithMaster(nameSum);
-  const soulUrgeNumber = reduceWithMaster(soulSum);
-  const personalityNumber = reduceWithMaster(personalitySum);
+  const destinyNumber = reduceToSingleDigit(chalSum);
+  const soulUrgeNumber = reduceToSingleDigit(chalVowelSum);
+  const personalityNumber = reduceToSingleDigit(chalConsonantSum);
 
   // Maturity Number = LP + Destiny
   const maturityNumber = reduceToSingleDigit(lifePathNumber + destinyNumber);
@@ -178,8 +181,8 @@ export function analyzeDateOfBirth(dobStr: string, name: string): DOBAnalysis {
     if ([13, 14, 16, 19].includes(day)) karmicDebts.push(day);
   }
 
-  // Karmic Lessons (missing letters in name)
-  const letterValuesSet = new Set(normalizedName.split('').map(c => PYTHAGOREAN_MAP[c]));
+  // Karmic Lessons (missing letters in name under Chaldean format or standard)
+  const letterValuesSet = new Set(normalizedName.split('').map(c => CHALDEAN_MAP[c]).filter(Boolean));
   const karmicLessons: number[] = [];
   for (let d = 1; d <= 9; d++) {
     if (!letterValuesSet.has(d)) karmicLessons.push(d);
@@ -205,24 +208,39 @@ export function analyzeDateOfBirth(dobStr: string, name: string): DOBAnalysis {
 }
 
 export function analyzeNameSystems(name: string): NameAnalysis {
-  const norm = name.toUpperCase();
+  const norm = name.toUpperCase().replace(/[^A-Z]/g, '');
   let chalSum = 0;
   let pythSum = 0;
   let indSum = 0;
 
-  let soulSum = 0;
-  let personalitySum = 0;
+  let chalVowelSum = 0;
+  let chalConsonantSum = 0;
+
+  let pythVowelSum = 0;
+  let pythConsonantSum = 0;
 
   for (let i = 0; i < norm.length; i++) {
     const char = norm[i];
-    if (CHALDEAN_MAP[char]) chalSum += CHALDEAN_MAP[char];
+    
+    // Chaldean mapping
+    if (CHALDEAN_MAP[char]) {
+      const cVal = CHALDEAN_MAP[char];
+      chalSum += cVal;
+      if (VOWELS.includes(char)) {
+        chalVowelSum += cVal;
+      } else {
+        chalConsonantSum += cVal;
+      }
+    }
+
+    // Pythagorean mapping for comparative section
     if (PYTHAGOREAN_MAP[char]) {
       const pVal = PYTHAGOREAN_MAP[char];
       pythSum += pVal;
       if (VOWELS.includes(char)) {
-        soulSum += pVal;
+        pythVowelSum += pVal;
       } else {
-        personalitySum += pVal;
+        pythConsonantSum += pVal;
       }
     }
   }
@@ -234,11 +252,11 @@ export function analyzeNameSystems(name: string): NameAnalysis {
   const pythagoreanNumber = reduceToSingleDigit(pythSum);
   const indianNumber = reduceToSingleDigit(indSum);
 
-  // Missing numbers in name
-  const presentPY = new Set(norm.split('').map(c => PYTHAGOREAN_MAP[c]).filter(Boolean));
+  // Missing numbers in name under Chaldean map
+  const presentChaldeanLetters = new Set(norm.split('').map(c => CHALDEAN_MAP[c]).filter(Boolean));
   const missingNumbers: number[] = [];
   for (let d = 1; d <= 9; d++) {
-    if (!presentPY.has(d)) missingNumbers.push(d);
+    if (!presentChaldeanLetters.has(d)) missingNumbers.push(d);
   }
 
   // Traits mappings based on core name number
@@ -290,16 +308,16 @@ export function analyzeNameSystems(name: string): NameAnalysis {
     }
   };
 
-  const traits = traitsMap[pythagoreanNumber] || traitsMap[1];
+  const traits = traitsMap[chaldeanNumber] || traitsMap[1];
 
   return {
     chaldeanNumber,
     pythagoreanNumber,
     indianNumber,
     missingNumbers,
-    expressionNumber: pythagoreanNumber,
-    soulUrgeNumber: reduceToSingleDigit(soulSum),
-    personalityNumber: reduceToSingleDigit(personalitySum),
+    expressionNumber: chaldeanNumber,
+    soulUrgeNumber: reduceToSingleDigit(chalVowelSum),
+    personalityNumber: reduceToSingleDigit(chalConsonantSum),
     traits
   };
 }

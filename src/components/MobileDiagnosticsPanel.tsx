@@ -684,6 +684,220 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
           })()}
 
         </div>
+
+        {/* VASTU-CHALDEAN MOBILE FREQUENCY MATRIX */}
+        <div className="mt-12 bg-white border border-[#E5E7EB] rounded-[40px] p-8 md:p-12 shadow-sm text-left relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div className="border-b border-[#F2E8DC] pb-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono text-amber-500 font-bold uppercase tracking-[0.3em] block">Cosmic Spatial Alignment</span>
+              <h3 className="font-cinzel text-xl md:text-2xl font-bold text-[#1F2937] tracking-wide uppercase">Vastu-Chaldean Mobile Frequency Grid</h3>
+              <p className="text-xs text-slate-505 max-w-2xl">
+                A visual 3x3 spatial mapping showing where the active digits of your mobile number align within the energetic zones of your life. Color-coded by their planetary frequency under Chaldean cosmic rules.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 text-[#D97706] border border-[#D97706]/20 rounded-full font-mono text-[9px] uppercase tracking-wider font-extrabold bg-[#FDFCF7]">
+                <Compass className="w-3.5 h-3.5 text-amber-600" /> Active Grid Telemetry
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* 3x3 Grid Visualizer */}
+            <div className="lg:col-span-6 flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-100/80 rounded-3xl relative">
+              <div className="grid grid-cols-3 gap-3 w-full max-w-md aspect-square">
+                {[
+                  { digit: 4, name: "Rahu", direction: "South-East", significance: "Wealth & Power" },
+                  { digit: 9, name: "Mars", direction: "South", significance: "Fame & Passion" },
+                  { digit: 2, name: "Moon", direction: "South-West", significance: "Harmony & Relations" },
+                  { digit: 3, name: "Jupiter", direction: "East", significance: "Growth & Wisdom" },
+                  { digit: 5, name: "Mercury", direction: "Center", significance: "Stability & PR" },
+                  { digit: 7, name: "Ketu", direction: "West", significance: "Intuition & Skill" },
+                  { digit: 8, name: "Saturn", direction: "North-East", significance: "Knowledge & Law" },
+                  { digit: 1, name: "Sun", direction: "North", significance: "Career & Leadership" },
+                  { digit: 6, name: "Venus", direction: "North-West", significance: "Luxury & Supports" },
+                ].map((cell) => {
+                  const count = digitsArray.filter(d => d === cell.digit).length;
+                  const isPresent = count > 0;
+                  const planet = planetMapping[cell.digit];
+                  const planetColor = planet?.color || "#D97706";
+                  
+                  return (
+                    <div 
+                      key={cell.digit}
+                      className={`relative flex flex-col justify-between p-3 rounded-xl border transition-all duration-300 ${
+                        isPresent 
+                          ? 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.03)] scale-[1.02]' 
+                          : 'bg-white/40 border-slate-200/65 opacity-60'
+                      }`}
+                      style={{
+                        borderColor: isPresent ? planetColor : undefined,
+                        borderWidth: isPresent ? '1.5px' : '1px',
+                        boxShadow: isPresent ? `0 6px 16px -4px ${planetColor}15` : undefined
+                      }}
+                    >
+                      {/* Grid numbering indicator */}
+                      <div className="flex justify-between items-start">
+                        <span className="text-[9px] font-mono text-[#4B5563] font-bold">
+                          {cell.direction.split('-').map(w => w[0]).join('')}
+                        </span>
+                        
+                        {/* Core planet icon */}
+                        {isPresent && (
+                          <span className="text-xs filter drop-shadow-sm">{planet?.icon}</span>
+                        )}
+                      </div>
+
+                      {/* Giant Number Indicator */}
+                      <div className="my-auto text-center flex flex-col items-center">
+                        <span 
+                          className="text-2xl md:text-3xl font-cinzel font-black tracking-tight"
+                          style={{ color: isPresent ? planetColor : '#9CA3AF' }}
+                        >
+                          {cell.digit}
+                        </span>
+                        <span className="text-[7px] font-semibold text-slate-500 uppercase tracking-widest mt-0.5">
+                          {planet?.name.split(' ')[0]}
+                        </span>
+                      </div>
+
+                      {/* Frequency Badge and Vastu Corner Name */}
+                      <div className="flex flex-col items-center text-center mt-1 border-t border-slate-100 pt-1">
+                        <span className={`text-[7px] font-mono font-bold tracking-wider px-1 py-0.2 rounded-full leading-none inline-block ${
+                          isPresent 
+                            ? 'bg-amber-500/10 text-[#D97706] border border-amber-500/15'
+                            : 'bg-slate-100 text-[#6B7280]'
+                        }`}>
+                          {isPresent ? `×${count}` : 'Empty'}
+                        </span>
+                        <span className="text-[6px] text-slate-400 font-bold uppercase mt-1 tracking-wider leading-none">
+                          {cell.significance}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Zero Indicator Annotation */}
+              {digitsArray.includes(0) && (
+                <div className="mt-4 px-3 py-1.5 bg-[#F8F4EF] border border-[#E5E7EB] rounded-full text-[9px] font-mono text-slate-700 flex items-center gap-1.5">
+                  <span className="inline-block w-2.5 h-2.5 bg-slate-400 rounded-full animate-pulse"></span>
+                  <span><strong>Neutral Amplifier 0:</strong> Active in your phone string, adding heavy volume to neighboring planetary nodes!</span>
+                </div>
+              )}
+            </div>
+
+            {/* Vastu Spatial Interpretation Column */}
+            <div className="lg:col-span-6 space-y-6">
+              <h4 className="font-cinzel text-sm font-bold text-[#1F2937] tracking-wider uppercase border-b border-slate-150 pb-2 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-amber-500" /> Vastu-Planetary Energy Audit
+              </h4>
+              
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin">
+                {(() => {
+                  // Direct interpretative analysis of empty vs high frequency zones
+                  const missingList = [4, 9, 2, 3, 5, 7, 8, 1, 6].filter(d => !digitsArray.includes(d));
+                  
+                  return (
+                    <div className="space-y-3.5 text-xs text-[#6B7280] leading-relaxed">
+                      
+                      {/* High Frequency Zones */}
+                      <div className="bg-[#FFFFFF] p-4 rounded-2xl border border-emerald-100 shadow-sm/50">
+                        <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-emerald-50 text-emerald-700 font-bold">
+                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                          <span>Highly Energized Vastu Quadrants</span>
+                        </div>
+                        {digitsArray.filter(d => d > 0).length === 0 ? (
+                          <p>No non-zero digits are flagged in the standard string analysis.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {Array.from(new Set(digitsArray.filter(d => d > 0))).map(digit => {
+                              const planet = planetMapping[digit];
+                              const count = digitsArray.filter(d => d === digit).length;
+                              let vastuZone = "";
+                              let influence = "";
+                              
+                              if (digit === 4) { vastuZone = "South-East (Wealth Corner)"; influence = "Rahu unleashes sudden cash gates, unconventional PR streams, and electric status."; }
+                              else if (digit === 9) { vastuZone = "South (Fame Corner)"; influence = "Mars strengthens courage, fast leadership steps, and status defense dynamics."; }
+                              else if (digit === 2) { vastuZone = "South-West (Relationship Corner)"; influence = "Moon supports extreme empathy, peace, and client agreement bridges."; }
+                              else if (digit === 3) { vastuZone = "East (Growth & Family Corner)"; influence = "Jupiter attracts divine academic support, health wealth, and corporate counsel."; }
+                              else if (digit === 5) { vastuZone = "Center (Stability / Brahmasthan)"; influence = "Mercury aligns perfect negotiations, PR flexibility, and active business status."; }
+                              else if (digit === 7) { vastuZone = "West (Creativity & Children Corner)"; influence = "Ketu creates sharp analytical and research focus but isolates client dialogues."; }
+                              else if (digit === 8) { vastuZone = "North-East (Knowledge Corner)"; influence = "Saturn develops legacy discipline, steady investments, and heavy duty persistence."; }
+                              else if (digit === 1) { vastuZone = "North (Career Corner)"; influence = "Sun delivers strong government ties, command focus, and high authority status."; }
+                              else if (digit === 6) { vastuZone = "North-West (Luxury & Relators Corner)"; influence = "Venus injects luxurious brand placement, fine taste, and supportive relationships."; }
+                              
+                              return (
+                                <div key={digit} className="flex gap-2.5 items-start text-left">
+                                  <span className="text-base leading-none mt-0.5">{planet?.icon}</span>
+                                  <div>
+                                    <span className="font-bold text-slate-800 font-mono">Digit {digit} ({planet?.name.split(' ')[0]} in {vastuZone}) × {count}:</span>
+                                    <p className="text-[11px] text-slate-600 mt-0.5">{influence}</p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Empty Zones needing remediation */}
+                      {missingList.length > 0 && (
+                        <div className="bg-[#FFFFFF] p-4 rounded-2xl border border-rose-100 shadow-sm/50">
+                          <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-rose-50 text-rose-700 font-bold">
+                            <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0" />
+                            <span>Vastu Empty/Vulnerable Sectors</span>
+                          </div>
+                          <p className="text-[11px] text-slate-600 mb-2">
+                            The following spatial elements are missing in your phone string. This can lead to sluggish movement in these specific fields of life:
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                            {missingList.map(digit => {
+                              const planet = planetMapping[digit];
+                              let vastuZone = "";
+                              let lackDesc = "";
+                              if (digit === 4) { vastuZone = "SE (Wealth Flow)"; lackDesc = "Cash stagnation risk."; }
+                              else if (digit === 9) { vastuZone = "South (Fame & Courage)"; lackDesc = "Low command authority."; }
+                              else if (digit === 2) { vastuZone = "SW (Marriage & Peace)"; lackDesc = "Relationship hurdles."; }
+                              else if (digit === 3) { vastuZone = "East (Wisdom / Health)"; lackDesc = "Scattered life guidance."; }
+                              else if (digit === 5) { vastuZone = "Center (Core Balance)"; lackDesc = "PR instability."; }
+                              else if (digit === 7) { vastuZone = "West (Intuitive Research)"; lackDesc = "Weak crisis analysis."; }
+                              else if (digit === 8) { vastuZone = "NE (Knowledge/Funds)"; lackDesc = "Slow savings buildup."; }
+                              else if (digit === 1) { vastuZone = "North (Career Gates)"; lackDesc = "Slow career progress."; }
+                              else if (digit === 6) { vastuZone = "NW (Luxury & Supports)"; lackDesc = "Lack of luxury comforts."; }
+                              
+                              return (
+                                <div key={digit} className="flex gap-2 items-center text-left bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                  <span className="text-sm shrink-0">{planet?.icon}</span>
+                                  <div>
+                                    <span className="text-[11px] font-bold text-slate-700 block leading-none">Digit {digit} - {vastuZone}</span>
+                                    <span className="text-[9px] text-slate-405 mt-0.5 block leading-none">{lackDesc}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Summary Advice */}
+                      <p className="text-[11px] bg-[#FDFCF7] border border-amber-100 rounded-xl p-3 text-amber-805 leading-relaxed text-left font-medium">
+                        <strong>Vedic Master's Advice:</strong> Every phone number carries a distinct energy map. If you suffer from major missing elements, place a brass metal Vastu Pyramid or a copper cosmic planetary yantra under your phone case charger to anchor and complete these digital grids safely.
+                      </p>
+
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
       {/* SECTION 2: MOBILE NUMBER BREAKDOWN */}
