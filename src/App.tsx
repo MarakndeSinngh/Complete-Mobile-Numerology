@@ -17,13 +17,14 @@ import AdminPanel from './components/AdminPanel';
 import CompleteLoshuGridAnalysis from './components/CompleteLoshuGridAnalysis';
 import MarriageCompatibility from './components/MarriageCompatibility';
 import PremiumConsultations from './components/PremiumConsultations';
+import AIConsultationPortal from './components/AIConsultationPortal';
 
 type ViewTab = 'DASHBOARD' | 'MOBILE' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
 
 const App: React.FC = () => {
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null);
   const [activeTab, setActiveTab] = useState<ViewTab>('MOBILE');
-  const [currentPortal, setCurrentPortal] = useState<'MOBILE_NUMEROLOGY' | 'LOSHU_GRID' | 'MARRIAGE_COMPATIBILITY' | 'PREMIUM_CONSULTATIONS'>('MOBILE_NUMEROLOGY');
+  const [currentPortal, setCurrentPortal] = useState<'MOBILE_NUMEROLOGY' | 'LOSHU_GRID' | 'MARRIAGE_COMPATIBILITY' | 'PREMIUM_CONSULTATIONS' | 'AI_CONSULTATION'>('AI_CONSULTATION');
   const [analysisMode, setAnalysisMode] = useState<'QUICK' | 'ADVANCED'>('QUICK');
 
   // Input states
@@ -268,6 +269,17 @@ const App: React.FC = () => {
         {/* Top-Level Portal Navigation - Separate page and menu items */}
         <div className="flex flex-col md:flex-row border border-[#E5E7EB] mb-8 bg-white p-2 rounded-3xl gap-2 shadow-sm border-t-slate-100 print:hidden">
           <button
+            onClick={() => setCurrentPortal('AI_CONSULTATION')}
+            className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+              currentPortal === 'AI_CONSULTATION'
+                ? 'bg-[#D97706] text-white shadow-md'
+                : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50 border border-dashed border-[#D97706]/20'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" /> AI Grand Consultation Hub 🔮
+          </button>
+
+          <button
             onClick={() => setCurrentPortal('MOBILE_NUMEROLOGY')}
             className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
               currentPortal === 'MOBILE_NUMEROLOGY'
@@ -312,7 +324,9 @@ const App: React.FC = () => {
           </button>
         </div>
 
-        {currentPortal === 'MOBILE_NUMEROLOGY' ? (
+        {currentPortal === 'AI_CONSULTATION' ? (
+          <AIConsultationPortal initialProfile={personalDetails} onProfileUpdate={(p) => setPersonalDetails(p)} />
+        ) : currentPortal === 'MOBILE_NUMEROLOGY' ? (
           !personalDetails ? (
           <div id="landing-stage" className="space-y-20 animate-in fade-in duration-800">
             
