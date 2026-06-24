@@ -603,7 +603,7 @@ export function generateRemedies(dobStr: string, name: string): remediesAdvice {
     5: 'Name spelling sum 5 or 6 is extremely auspicious for business acceleration.',
     6: 'AUSPICIOUS: Spelling summing to 6, 1, or 5. Ensure vowels align to 1.',
     7: 'Adjust name speller so total resolves to 1, 5, or 6. Avoid 2.',
-    8: 'Spelling adjustment should strictly bring the Destiny to 3, 5, or 6.',
+    8: 'Spelling adjustment should strictly bring the Conductor (Bhagyank) to 3, 5, or 6.',
     9: 'Spelling correction: change to sum up to 9, 3, or 1. Keep vowels on odd numbers.'
   };
 

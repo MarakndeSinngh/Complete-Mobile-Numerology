@@ -299,6 +299,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
     setDownloadingState(true);
     setTimeout(() => {
       setDownloadingState(false);
+      window.focus();
       window.print();
     }, 1500);
   };
@@ -1150,6 +1151,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
               let displayNegative = lookupResult ? lookupResult.negative : 'Ensure supportive remedies for custom balancing.';
               let displayArea = lookupResult ? lookupResult.area : 'General';
               let severity = lookupResult ? lookupResult.severity : 65;
+              const isNegativePair = ['16', '61', '65', '56', '79', '97'].includes(finalPair);
 
               return (
                 <div
@@ -1158,9 +1160,16 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 >
                   <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-[#E5E7EB]/70 pb-3">
-                      <span className="text-[10px] font-mono text-slate-500 font-bold uppercase tracking-widest">
-                        {pair.label} • {displayArea}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-slate-500 font-bold uppercase tracking-widest">
+                          {pair.label} • {displayArea}
+                        </span>
+                        {isNegativePair && (
+                          <span className="px-1.5 py-0.5 bg-rose-50 text-rose-700 text-[8px] font-mono border border-rose-200 rounded font-bold uppercase tracking-wider shrink-0">
+                            ⚠️ Hostile Pair
+                          </span>
+                        )}
+                      </div>
                       <span className="px-2.5 py-0.5 rounded text-[10px] font-mono border bg-white/5 text-[#D97706] border-white/10">
                         {pair.indexLabel}
                       </span>

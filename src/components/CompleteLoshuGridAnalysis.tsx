@@ -194,6 +194,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
   };
 
   const handlePrint = () => {
+    window.focus();
     window.print();
   };
 

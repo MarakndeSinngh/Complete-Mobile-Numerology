@@ -738,7 +738,14 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
         
       </div>
     `;
+    document.body.classList.add('print-custom-report');
+    window.focus();
     window.print();
+    const cleanup = () => {
+      document.body.classList.remove('print-custom-report');
+    };
+    window.addEventListener('afterprint', cleanup, { once: true });
+    setTimeout(cleanup, 800);
   };
 
   return (

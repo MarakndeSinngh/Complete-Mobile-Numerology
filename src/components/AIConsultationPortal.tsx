@@ -290,6 +290,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
   // Trigger master PDF print (Phase 8)
   const handlePrintMasterReport = () => {
     if (!activeProfile || !reportData || !scoreExplanations) return;
+    window.focus();
     window.print();
   };
 
@@ -1321,7 +1322,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                 <div className="bg-white p-8 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-2">
                   <h3 className="font-playfair text-2.5xl font-black text-[#1F2937]">Your Personalized Altar</h3>
                   <p className="text-xs text-[#6B7280] font-sans">
-                    Auspicious daily days, dates, directions, industries, and cities vibrationally calculated for your destiny path.
+                    Auspicious daily days, dates, directions, industries, and cities vibrationally calculated for your Conductor path (Bhagyank).
                   </p>
                 </div>
 
