@@ -241,7 +241,7 @@ const App: React.FC = () => {
                 <div className="hidden md:block text-right">
                   <span className="text-xs font-semibold text-[#1F2937] block">{personalDetails.name}</span>
                   <span className="text-[9px] font-mono text-[#D97706] block uppercase font-bold">
-                    LP: {dobData?.lifePathNumber} | DN: {dobData?.destinyNumber}
+                    Mulank: {dobData?.birthNumber} | Bhagyank: {dobData?.lifePathNumber}
                   </span>
                 </div>
                 <button
@@ -434,6 +434,29 @@ const App: React.FC = () => {
                         />
                       </div>
                     </div>
+
+                    {/* Optional DOB input for Quick Mode */}
+                    {analysisMode === 'QUICK' && (
+                      <div className="space-y-2 pt-2 border-t border-[#E5E7EB]/50 animate-in fade-in duration-300">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">
+                            Date of Birth (Optional - Checks Compatibility)
+                          </label>
+                          <span className="text-[9px] font-sans text-[#D97706]">Check alignment with your mobile number</span>
+                        </div>
+                        <div className="relative">
+                          <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
+                            <Calendar className="h-4 w-4" />
+                          </span>
+                          <input
+                            type="date"
+                            className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] transition-all font-mono"
+                            value={dob}
+                            onChange={(e) => setDob(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     {/* Show only for Advanced Analysis Mode */}
                     {analysisMode === 'ADVANCED' && (
@@ -849,7 +872,7 @@ const App: React.FC = () => {
                   nameData={nameData}
                   mobileData={mobileData}
                   remedies={remedies}
-                  isQuickMode={analysisMode === 'QUICK'}
+                  isQuickMode={analysisMode === 'QUICK' && !dob}
                 />
               )}
 

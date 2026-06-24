@@ -629,3 +629,94 @@ export function generateRemedies(dobStr: string, name: string): remediesAdvice {
     luckyDays: ['Monday', 'Wednesday', 'Sunday']
   };
 }
+
+export function checkMobileDOBCompatibility(
+  mobileReduced: number,
+  driver: number,
+  conductor: number
+): {
+  score: number;
+  rating: string;
+  driverRel: string;
+  conductorRel: string;
+  verdict: string;
+  explanations: string[];
+} {
+  const friendly: Record<number, number[]> = {
+    1: [1, 2, 3, 5, 9],
+    2: [1, 2, 3, 5],
+    3: [1, 2, 3, 5, 7, 9],
+    4: [1, 5, 6, 7],
+    5: [1, 2, 3, 5, 6],
+    6: [1, 5, 6, 7],
+    7: [1, 3, 4, 5, 6],
+    8: [3, 5, 6, 7],
+    9: [1, 3, 5, 9]
+  };
+
+  const enemies: Record<number, number[]> = {
+    1: [8],
+    2: [8, 9],
+    3: [6],
+    4: [8, 9, 2],
+    5: [],
+    6: [3],
+    7: [2, 9, 8],
+    8: [1, 2, 4, 9],
+    9: [2, 4, 7, 8]
+  };
+
+  // Check relationship with Driver (Mulank)
+  const isDriverFriendly = friendly[driver]?.includes(mobileReduced) || false;
+  const isDriverEnemy = enemies[driver]?.includes(mobileReduced) || false;
+  const driverRel = isDriverFriendly ? 'Friendly' : isDriverEnemy ? 'Enemy / Hostile' : 'Neutral';
+
+  // Check relationship with Conductor (Bhagyank)
+  const isConductorFriendly = friendly[conductor]?.includes(mobileReduced) || false;
+  const isConductorEnemy = enemies[conductor]?.includes(mobileReduced) || false;
+  const conductorRel = isConductorFriendly ? 'Friendly' : isConductorEnemy ? 'Enemy / Hostile' : 'Neutral';
+
+  // Calculate Compatibility Score
+  let score = 70; // baseline neutral
+  if (isDriverFriendly) score += 15;
+  if (isConductorFriendly) score += 15;
+  if (isDriverEnemy) score -= 20;
+  if (isConductorEnemy) score -= 20;
+
+  score = Math.max(10, Math.min(100, score));
+
+  let rating = 'Neutral';
+  let verdict = '';
+  if (score >= 85) {
+    rating = 'Highly Compatible (Auspicious) 🌟';
+    verdict = `Your mobile total ${mobileReduced} forms an exceptionally favorable planetary alignment with your Driver #${driver} and Conductor #${conductor}. This amplifies active material vibrations and clears financial bottlenecks.`;
+  } else if (score >= 70) {
+    rating = 'Compatible (Favorable) 👍';
+    verdict = `The mobile total ${mobileReduced} has a balanced, supportive energy with your core charts. It remains a reliable channel for business and daily communications.`;
+  } else if (score >= 50) {
+    rating = 'Average (Adjustments Suggested) ⚖️';
+    verdict = `Your mobile total ${mobileReduced} is neutral or slightly frictional. Spelling modifications or a revised primary digit ending can help bypass the structural static.`;
+  } else {
+    rating = 'Hostile / Incompatible (Remedies Required) ⚠️';
+    verdict = `Significant energetic resistance exists. Mobile total ${mobileReduced} clashes with either your Driver #${driver} or Conductor #${conductor}. This can trigger unexpected career delays or miscommunications. Planetary corrections are highly advised.`;
+  }
+
+  const explanations: string[] = [];
+  explanations.push(`Your Driver Number (Mulank) is ${driver}, which has a ${driverRel.toLowerCase()} vibration with your mobile root number ${mobileReduced}.`);
+  explanations.push(`Your Conductor Number (Bhagyank) is ${conductor}, which has a ${conductorRel.toLowerCase()} relationship with the mobile total.`);
+
+  if (isDriverEnemy || isConductorEnemy) {
+    explanations.push(`Warning: Planetary friction is active. The clashing frequency can introduce auric noise or slow down the clearance of karmic transits.`);
+  } else if (isDriverFriendly && isConductorFriendly) {
+    explanations.push(`Auspicious Double-Resonance: The mobile root number harmonizes with both core birthday coordinates, forming a strong protective shield (Yantra).`);
+  }
+
+  return {
+    score,
+    rating,
+    driverRel,
+    conductorRel,
+    verdict,
+    explanations
+  };
+}

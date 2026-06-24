@@ -14,6 +14,7 @@ import {
 import { PersonalDetails, DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdvice } from '../types';
 import { PAIR_MEANINGS } from '../services/pairMeanings';
 import { HINDI_PAIR_MEANINGS } from '../services/hindiPairs';
+import { checkMobileDOBCompatibility } from '../services/numerologyEngine';
 
 interface MobileDiagnosticsPanelProps {
   personalDetails: PersonalDetails;
@@ -192,6 +193,12 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
   // Section 1: Calculate Richer metrics dynamically based on standard data
   const coreScore = mobileData.score;
   const wealthScore = Math.max(45, Math.min(100, Math.floor(coreScore * 1.05) - (mobileData.hostileRelationships.length * 8)));
+
+  const compatibility = checkMobileDOBCompatibility(
+    mobileData.reducedTotal,
+    dobData?.birthNumber || 1,
+    dobData?.lifePathNumber || 1
+  );
   const commScore = Math.max(50, Math.min(100, Math.floor(coreScore * 0.95) + (digitsArray.filter(d => d === 5 || d === 6 || d === 1).length * 6)));
   
   // Custom Career, Relationship, and Stability score formulas based on digits and hostile nodes
@@ -433,6 +440,87 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Mobile to Birth-Grid Compatibility Section */}
+        {personalDetails && dobData && !isQuickMode && (
+          <div className="bg-white border border-[#E5E7EB] p-6 md:p-8 rounded-[30px] md:rounded-[40px] shadow-sm text-left relative overflow-hidden group hover:border-[#D97706]/20 transition-all duration-500">
+            <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-gradient-to-br from-[#D97706]/5 to-[#F59E0B]/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-[#E5E7EB]/70">
+              <div className="space-y-1">
+                <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-widest block font-bold flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-[#D97706] animate-pulse" /> Indian Numerology Alignment Report
+                </span>
+                <h3 className="font-playfair text-xl md:text-2xl font-black text-[#1F2937]">
+                  Mobile & Birth Grid Compatibility Check
+                </h3>
+              </div>
+              <div className="flex items-center gap-3 bg-[#FDFCF7] border border-[#D97706]/20 px-4 py-2.5 rounded-2xl shrink-0">
+                <div className="text-right">
+                  <span className="block text-[8px] font-mono text-[#6B7280] uppercase tracking-wider font-bold">Planetary Alignment</span>
+                  <span className="text-xs font-bold text-[#D97706] block">
+                    {compatibility.rating}
+                  </span>
+                </div>
+                <div className="w-10 h-10 bg-[#D97706] text-white rounded-xl flex items-center justify-center font-playfair text-base font-black shadow-md shadow-[#D97706]/20">
+                  {compatibility.score}%
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 pt-6">
+              <div className="lg:col-span-2 space-y-4">
+                <h4 className="font-sans text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Vibrational Compatibility Analysis
+                </h4>
+                <p className="text-base text-slate-800 leading-relaxed font-sans">
+                  {compatibility.verdict}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="bg-[#FDFCF7] border border-[#E5D7C6]/40 p-4 rounded-2xl space-y-1">
+                    <span className="text-[9px] font-mono text-[#6B7280] uppercase tracking-wider font-bold block">Driver Number (Mulank) Match</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-slate-900">Mulank #{dobData.birthNumber}</span>
+                      <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full ${
+                        compatibility.driverRel === 'Friendly' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                        compatibility.driverRel === 'Enemy / Hostile' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                        'bg-slate-50 text-slate-700 border border-slate-200'
+                      }`}>
+                        {compatibility.driverRel}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-[#FDFCF7] border border-[#E5D7C6]/40 p-4 rounded-2xl space-y-1">
+                    <span className="text-[9px] font-mono text-[#6B7280] uppercase tracking-wider font-bold block">Conductor Number (Bhagyank) Match</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-slate-900">Bhagyank #{dobData.lifePathNumber}</span>
+                      <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-full ${
+                        compatibility.conductorRel === 'Friendly' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                        compatibility.conductorRel === 'Enemy / Hostile' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                        'bg-slate-50 text-slate-700 border border-slate-200'
+                      }`}>
+                        {compatibility.conductorRel}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-[#FDFCF7] border border-[#D97706]/10 p-6 rounded-3xl space-y-4">
+                <h4 className="font-mono text-[10px] text-[#D97706] uppercase tracking-widest font-bold">
+                  Core Planetary Pillars
+                </h4>
+                <ul className="space-y-3">
+                  {compatibility.explanations.map((exp, index) => (
+                    <li key={index} className="text-xs text-slate-700 flex items-start gap-2.5 leading-relaxed font-sans">
+                      <span className="text-amber-500 mt-0.5">✦</span>
+                      <span>{exp}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 6 Premium Luxury Summary Cards with progress bars, score indicators, badges and descriptions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

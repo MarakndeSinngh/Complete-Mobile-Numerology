@@ -287,7 +287,7 @@ const generateCombinationDetails = (x: number, y: number): CombinationResult => 
 
   // Specific Names & Details for key combinations
   let name = `The ${rulerX}-${rulerY} Amalgam`;
-  let meaning = `Vibrational resonance linking the power of the ${rulerX} with the wisdom of the ${rulerY}. Accentuates destiny path ${sum}.`;
+  let meaning = `Vibrational resonance linking the power of the ${rulerX} with the wisdom of the ${rulerY}. Accentuates Conductor path ${sum}.`;
   let strength = `A balanced alignment facilitating high execution drive, creative expression, and intellectual curiosity.`;
   let weakness = `Potential internal conflicts where the motivations of ${rulerX} override the strategic requirements of ${rulerY}.`;
   let careerImpact = `Highly positive for positions demanding intellectual depth, advising, or leadership execution.`;
@@ -487,18 +487,18 @@ export function computeLoshuMasterReport(
   // Archetype logic
   let archetypeTitle = "The Strategist";
   let archetypeDesc = "Combining systematic planning with intuitive human understanding.";
-  let archetypeReasoning = "Driven by a balanced mental plane and a firm destiny path.";
+  let archetypeReasoning = "Driven by a balanced mental plane and a firm Conductor path (Bhagyank).";
   let archetypeMantra = "OM BRIM BRHASPATAYE NAMAH";
 
   if (driver === 1 || driver === 9) {
     archetypeTitle = "The Leader (शासक)";
     archetypeDesc = "An organic initiator of structures, motivating public crowds towards singular vision paths.";
-    archetypeReasoning = `Formulated by Psychic Driver #${driver} and destiny Conductor #${conductor}. Indicates fire-water structural force.`;
+    archetypeReasoning = `Formulated by Driver Number (Mulank) #${driver} and Conductor Number (Bhagyank) #${conductor}. Indicates fire-water structural force.`;
     archetypeMantra = "OM ADITYAYA NAMAH • OM KEM KETAVE NAMAH";
   } else if (driver === 3 || driver === 5) {
     archetypeTitle = "The Teacher & Advisor (गुरु)";
     archetypeDesc = "Brings academic study, advisors skills, and deep systemic balance to growing systems.";
-    archetypeReasoning = `Active growth numbers are present in core quadrants with a destiny Conductor #${conductor}.`;
+    archetypeReasoning = `Active growth numbers are present in core quadrants with a Conductor Number (Bhagyank) #${conductor}.`;
     archetypeMantra = "OM GURAVE NAMAH";
   } else if (driver === 2 || driver === 7) {
     archetypeTitle = "The Mystic Healer (योगी)";
@@ -804,12 +804,12 @@ export function computeLoshuMasterReport(
       repeated,
       dominant,
       weak,
-      mostInfluential: { digit: mostInfluentialDigit, reason: `Matches your birth Psychic Driver planet #${driver}.` },
+      mostInfluential: { digit: mostInfluentialDigit, reason: `Matches your birth Driver Number (Mulank) planet #${driver}.` },
       leastInfluential: { digit: leastInfluentialDigit, reason: `Completely missing node inside the 3x3 birth grid.` },
       lifeThemeNum: conductor,
-      lifeThemeText: `Governed by destiny Conductor #${conductor}. Indicates structural movement toward target growth.`,
+      lifeThemeText: `Governed by Conductor Number (Bhagyank) #${conductor}. Indicates structural movement toward target growth.`,
       corePersonalityNum: driver,
-      corePersonalityText: `Governed by psychic Driver #${driver}. Denotes default emotional reactions.`
+      corePersonalityText: `Governed by Driver Number (Mulank) #${driver}. Denotes default emotional reactions.`
     },
     activeCombinations,
     archetype: {

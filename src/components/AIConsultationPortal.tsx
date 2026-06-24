@@ -520,7 +520,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                           ♛ Professional Vedic Consultation
                         </span>
                         <h2 className="font-playfair text-3xl md:text-4xl font-black text-[#1F2937] tracking-tight leading-tight">
-                          Executive Destiny & Alignment Summary
+                          Executive Driver-Conductor Alignment Summary
                         </h2>
                         <p className="text-base text-slate-700 leading-relaxed max-w-2xl">
                           This master coordination report synthesizes your natal birth coordinates, name vibration frequencies, and current mobile numbers to reveal your active auric field alignment.
@@ -561,7 +561,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#D97706]"></div>
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
-                            <span className="text-xs font-mono font-extrabold text-[#6B7280] uppercase tracking-wider block">Psychic Driver (Mulank)</span>
+                            <span className="text-xs font-mono font-extrabold text-[#6B7280] uppercase tracking-wider block">Driver Number (Mulank)</span>
                             <span className="text-xl">☀️</span>
                           </div>
                           <div className="flex items-baseline gap-2">
@@ -586,7 +586,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#1E3A8A]"></div>
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
-                            <span className="text-xs font-mono font-extrabold text-[#6B7280] uppercase tracking-wider block">Destiny Conductor (Bhagyank)</span>
+                            <span className="text-xs font-mono font-extrabold text-[#6B7280] uppercase tracking-wider block">Conductor Number (Bhagyank)</span>
                             <span className="text-xl">⚖️</span>
                           </div>
                           <span className="text-4xl md:text-5xl font-black text-[#1E3A8A] font-serif block">
