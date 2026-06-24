@@ -11,6 +11,8 @@ import { generateLeoConsultation, LeoConsultationReport, ProbabilityMetric, Grow
 import { generateNameCorrections, NameCorrectionResult, NameVariation } from '../services/NameCorrectionAI';
 import { PersonalDetails } from '../types';
 import { computeLoshuMasterReport } from '../services/loshuMasterEngine';
+import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber } from '../services/numerologyEngine';
+import { generateLeoAdvisorActions } from '../services/leoAdvisorEngine';
 
 interface AIConsultationPortalProps {
   initialProfile: PersonalDetails | null;
@@ -161,6 +163,13 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
   const reportData = activeProfile ? generateLeoConsultation(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
   const scoreExplanations = activeProfile ? getScoreExplanations(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
   const masterGrid = activeProfile ? computeLoshuMasterReport(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
+  
+  const advisorActions = activeProfile ? (() => {
+    const dobAnalysis = analyzeDateOfBirth(activeProfile.dob, activeProfile.name);
+    const nameAnalysis = analyzeNameSystems(activeProfile.name);
+    const mobileAnalysis = analyzeMobileNumber(activeProfile.mobile);
+    return generateLeoAdvisorActions(dobAnalysis, nameAnalysis, mobileAnalysis);
+  })() : null;
 
   // Handle Ask Leo AI response (Phase 7)
   const handleSendMessage = () => {
@@ -818,6 +827,81 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                     </div>
                   ))}
                 </div>
+
+                {/* Leo AI Advisor Section */}
+                {advisorActions && (
+                  <div className="glass-panel p-6 md:p-8 rounded-[35px] bg-gradient-to-br from-amber-50/40 via-white to-amber-50/10 border border-[#E5E7EB] shadow-sm text-left space-y-6 mt-8 animate-in fade-in duration-500">
+                    <div className="flex items-center gap-3 border-b border-amber-200/50 pb-4">
+                      <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 text-[#D97706] flex items-center justify-center text-xl shadow-sm">
+                        <Sparkles className="w-5 h-5 animate-pulse" />
+                      </div>
+                      <div>
+                        <h3 className="font-playfair text-lg font-bold text-[#1F2937]">Leo AI Advisor Guidance</h3>
+                        <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-widest font-bold block">Actionable Strategic Focus</span>
+                      </div>
+                    </div>
+
+                    <p className="text-[#4B5563] text-xs leading-relaxed font-sans">
+                      Based on your complete numerology profile, here are the 3 most important things to focus on this month. This turns your celestial map into concrete, daily, and weekly actions to drive tangible success.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                      {/* Career Focus */}
+                      <div className="bg-white border border-[#FEF3C7] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 text-[#B45309]">
+                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                              <Briefcase className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-mono uppercase font-black tracking-wider">Career Focus</span>
+                          </div>
+                          <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.career.title}</h4>
+                          <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.career.description}</p>
+                        </div>
+                        <div className="bg-[#FEF3C7]/60 p-3.5 rounded-2xl text-[11px] text-[#B45309] font-medium leading-relaxed font-sans">
+                          <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-amber-800">Transit Remedy:</strong>
+                          {advisorActions.career.remedy}
+                        </div>
+                      </div>
+
+                      {/* Relationship Focus */}
+                      <div className="bg-white border border-[#FCE7F3] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 text-[#BE185D]">
+                            <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                              <Heart className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-mono uppercase font-black tracking-wider">Relationship Focus</span>
+                          </div>
+                          <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.relationship.title}</h4>
+                          <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.relationship.description}</p>
+                        </div>
+                        <div className="bg-[#FCE7F3]/60 p-3.5 rounded-2xl text-[11px] text-[#BE185D] font-medium leading-relaxed font-sans">
+                          <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-pink-800">Transit Remedy:</strong>
+                          {advisorActions.relationship.remedy}
+                        </div>
+                      </div>
+
+                      {/* Health Focus */}
+                      <div className="bg-white border border-[#D1FAE5] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 text-[#047857]">
+                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                              <Activity className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-mono uppercase font-black tracking-wider">Wellness Focus</span>
+                          </div>
+                          <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.health.title}</h4>
+                          <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.health.description}</p>
+                        </div>
+                        <div className="bg-[#D1FAE5]/60 p-3.5 rounded-2xl text-[11px] text-[#047857] font-medium leading-relaxed font-sans">
+                          <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-emerald-800">Transit Remedy:</strong>
+                          {advisorActions.health.remedy}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
