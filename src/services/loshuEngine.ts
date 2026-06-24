@@ -53,7 +53,7 @@ export interface LoshuAnalysisResult {
     gender: string;
   };
   mulank: number; // Psychic
-  bhagyank: number; // Destiny / Conductor
+  bhagyank: number; // Conductor (Bhagyank)
   loshuGrid: Record<number, LoshuGridBox>;
   missingNumbers: {
     digit: number;
@@ -113,7 +113,7 @@ export interface LoshuAnalysisResult {
 
 // Elemental properties
 const ELEMENT_MAP: Record<number, { element: string; direction: string; lifeArea: string; gridMeaning: string }> = {
-  1: { element: 'Water', direction: 'North', lifeArea: 'Career & Life Path', gridMeaning: 'Communication & Planning' },
+  1: { element: 'Water', direction: 'North', lifeArea: 'Career & Conductor Path', gridMeaning: 'Communication & Planning' },
   2: { element: 'Earth', direction: 'Southwest', lifeArea: 'Marriage, Love & Partnerships', gridMeaning: 'Relationships & Sensitivity' },
   3: { element: 'Wood', direction: 'East', lifeArea: 'Family & Health', gridMeaning: 'Growth & Wisdom' },
   4: { element: 'Wood', direction: 'Southeast', lifeArea: 'Wealth & Prosperity', gridMeaning: 'Discipline & Organization' },
@@ -782,7 +782,7 @@ export function performLoshuCompatibility(dob1: string, name1: string, dob2: str
 
   if (isM_friendly && isB_friendly) {
     baseScore += 15;
-    mutualStrengths.push('Planetary Psychic & Destiny Alignment (Highly Friendly)');
+    mutualStrengths.push('Planetary Driver & Conductor Alignment (Highly Friendly)');
   } else if (isM_friendly || isB_friendly) {
     baseScore += 8;
     mutualStrengths.push('Selective Astrological Affinity');

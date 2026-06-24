@@ -1419,7 +1419,7 @@ export default function PremiumConsultations() {
                   </button>
                   {showDashaWhy && (
                     <div className="mt-2 p-3 bg-slate-50 rounded-xl border text-[11px] text-slate-500 space-y-1 font-sans">
-                      <p><strong>Vedic Timeline Cycles:</strong> Traditional Indian numerology structures human destiny in repeating 9-year intervals. The first era is ruled by your birth core Driver planet. The second period triggers your destiny life-path Conductor planet frequency. Shifting transits keep the individual within the magnetic rays of Saturn (delay/tests), Sun (fame/vertical progress), or Venus (splendor/luxury).</p>
+                      <p><strong>Vedic Timeline Cycles:</strong> Traditional Indian numerology structures human trajectories in repeating 9-year intervals. The first era is ruled by your birth core Driver planet. The second period triggers your Conductor (Bhagyank) planet frequency. Shifting transits keep the individual within the magnetic rays of Saturn (delay/tests), Sun (fame/vertical progress), or Venus (splendor/luxury).</p>
                     </div>
                   )}
                 </div>

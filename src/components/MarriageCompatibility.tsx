@@ -658,7 +658,7 @@ export default function MarriageCompatibility() {
             <motion.div variants={itemVariants} className="bg-white border border-[#E5E7EB] rounded-3xl p-8 shadow-sm space-y-6 text-left">
               <div className="flex items-center justify-between border-b border-slate-150 pb-4">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono bg-blue-50 border border-blue-200 text-blue-600 font-extrabold px-2 py-0.5 rounded-full uppercase">Bhagyank (Destiny Axis)</span>
+                  <span className="text-[9px] font-mono bg-blue-50 border border-blue-200 text-blue-600 font-extrabold px-2 py-0.5 rounded-full uppercase">Bhagyank (Conductor Axis)</span>
                   <h3 className="font-playfair text-lg font-bold text-slate-800">Conductor Compatibility Match</h3>
                 </div>
                 <Award className="w-8 h-8 text-blue-500" />
@@ -681,7 +681,7 @@ export default function MarriageCompatibility() {
               </div>
 
               <p className="text-xs text-slate-600 leading-relaxed font-sans">
-                {currentResult.advanced ? currentResult.advanced.layers.conductor.explanation : `Partner 1 resolves to Destiny Bhagyank ${currentResult.rawAna1.bhagyank} matched against Partner 2's Destiny Bhagyank ${currentResult.rawAna2.bhagyank}, bringing an outstanding Bhagyank score of ${currentResult.metrics.bhagyankScore}%.`}
+                {currentResult.advanced ? currentResult.advanced.layers.conductor.explanation : `Partner 1 resolves to Conductor Bhagyank ${currentResult.rawAna1.bhagyank} matched against Partner 2's Conductor Bhagyank ${currentResult.rawAna2.bhagyank}, bringing an outstanding Bhagyank score of ${currentResult.metrics.bhagyankScore}%.`}
               </p>
             </motion.div>
 

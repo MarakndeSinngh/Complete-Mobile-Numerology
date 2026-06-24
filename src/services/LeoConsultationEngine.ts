@@ -85,7 +85,7 @@ export function generateLeoConsultation(dob: string, name: string, gender: strin
   if (driver === 5 || conductor === 5) {
     summary += "With the central Mercury pivot (Digit 5) activated, you possess a natural financial resilience, commercial intelligence, and communication bridge that stabilizes your entire grid. ";
   } else {
-    summary += "Because the central grid node (Digit 5) is empty, your life path experiences periodic structural resets. You must actively establish stability anchors through spelling upgrades and daily Mercury Vastu rituals. ";
+    summary += "Because the central grid node (Digit 5) is empty, your conductor journey experiences periodic structural resets. You must actively establish stability anchors through spelling upgrades and daily Mercury Vastu rituals. ";
   }
   summary += "This consultation synthesizes Chaldean research, Vedic astrology transits, and Lal Kitab remediation paths to design your ultimate multi-year growth roadmap. Trust your numbers—they merely map current celestial highways, which you can master with deliberate action.";
 

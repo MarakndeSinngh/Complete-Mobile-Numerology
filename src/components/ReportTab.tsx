@@ -396,7 +396,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
               The Grand Cosmic<br />Astrological Blueprint
             </h1>
             <p style="font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; color: #D97706; margin: 15px 0 0 0;">
-              A High-Fidelity Synthesized Vedic Destiny & Vibrations Mapping
+              A High-Fidelity Synthesized Vedic Astro-Numerology & Vibrations Mapping
             </p>
             <div style="width: 140px; height: 1px; background-color: #E5E7EB; margin: 25px auto;"></div>
           </div>
@@ -467,17 +467,35 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
                     <td style="font-weight: bold; text-align: right; color: #111827;">${personalDetails.dob}</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #F3F4F6;">
-                    <td style="color: #6B7280;">Psychic Number (Mulank):</td>
+                    <td style="color: #6B7280;">Driver Number (Mulank):</td>
                     <td style="font-weight: bold; text-align: right; color: #D97706;">
-                      <span class="astro-badge">M-${analysis.mulank}</span>
-                      # ${analysis.mulank}
+                      <span class="astro-badge">M-${dobData.birthNumber}</span>
+                      # ${dobData.birthNumber}
                     </td>
                   </tr>
                   <tr style="border-bottom: 1px solid #F3F4F6;">
-                    <td style="color: #6B7280;">Destiny Number (Bhagyank):</td>
+                    <td style="color: #6B7280;">Conductor Number (Bhagyank):</td>
                     <td style="font-weight: bold; text-align: right; color: #1E40AF;">
-                      <span class="astro-badge" style="background-color: #DBEAFE; color: #1E40AF; border-color: #BFDBFE;">B-${analysis.bhagyank}</span>
-                      # ${analysis.bhagyank}
+                      <span class="astro-badge" style="background-color: #DBEAFE; color: #1E40AF; border-color: #BFDBFE;">B-${dobData.lifePathNumber}</span>
+                      # ${dobData.lifePathNumber}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="color: #6B7280;">Birth Compound Number:</td>
+                    <td style="font-weight: bold; text-align: right; color: #111827;">
+                      # ${dobData.birthNumberCompound}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="color: #6B7280;">Mobile Compound Number:</td>
+                    <td style="font-weight: bold; text-align: right; color: #047857;">
+                      # ${mobileData.compoundTotal}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="color: #6B7280;">Mobile Root Number:</td>
+                    <td style="font-weight: bold; text-align: right; color: #047857;">
+                      # ${mobileData.reducedTotal}
                     </td>
                   </tr>
                   <tr style="border-bottom: 1px solid #F3F4F6;">
@@ -487,12 +505,6 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
                   <tr style="border-bottom: 1px solid #F3F4F6;">
                     <td style="color: #6B7280;">Pythagorean Expression:</td>
                     <td style="font-weight: bold; text-align: right; color: #111827;">${nameData.pythagoreanNumber}</td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #F3F4F6;">
-                    <td style="color: #6B7280;">Mobile Core Vibration:</td>
-                    <td style="font-weight: bold; text-align: right; color: #047857;">
-                      ${mobileData.compoundTotal} (Reduced: ${mobileData.reducedTotal})
-                    </td>
                   </tr>
                   <tr>
                     <td style="color: #6B7280;">Mobile Rating Status:</td>
@@ -649,7 +661,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
         <!-- PAGE 5+: DETAILED COSMIC READING -->
         <div class="pdf-flow-page">
           <div class="pdf-header">
-            <span class="pdf-header-title">IV. Synthesized Destiny & Predictive Insights</span>
+            <span class="pdf-header-title">IV. Synthesized Conductor & Predictive Insights</span>
             <span class="pdf-header-tag">${reportId} • AI Analysis</span>
           </div>
           
@@ -738,9 +750,9 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
             📜
           </div>
           <div className="space-y-2">
-            <h3 className="font-playfair text-xl font-bold text-[#1F2937] tracking-wider">Vedic Astrology & AI Destiny Report</h3>
+            <h3 className="font-playfair text-xl font-bold text-[#1F2937] tracking-wider">Vedic Astrology & AI Conductor Report</h3>
             <p className="text-[#6B7280] text-sm max-w-md mx-auto leading-relaxed font-sans">
-              Consolidate your numerological readings into a single comprehensive destiny report. This synthesis aligns certified planetary calculations with advanced artificial intelligence (Gemini AI) for precise life path insights.
+              Consolidate your numerological readings into a single comprehensive Indian Numerology report. This synthesis aligns certified planetary calculations with advanced artificial intelligence (Gemini AI) for precise Driver and Conductor insights.
             </p>
           </div>
 
@@ -765,7 +777,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       ) : (
         <div className="space-y-6 animate-in slide-in-from-bottom-6 duration-700">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Your Personalized Destiny Report</h3>
+            <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Your Personalized Indian Numerology Report</h3>
             <div className="flex gap-3">
               <button
                 onClick={() => setReportText(null)}

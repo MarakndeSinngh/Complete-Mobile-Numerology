@@ -6,7 +6,7 @@ const AdminPanel: React.FC = () => {
     { name: 'Planetary Relations & Remedies Matrix.pdf', size: '4.8 MB', status: 'INDEXED & ACTIVATED', date: '2026-06-07' }
   ]);
   const [newBookName, setNewBookName] = useState('');
-  const [editingRemedy, setEditingRemedy] = useState('Lal Kitab Gemstone Remedy: Pukhraj for Life Path 3, Ruby for Life Path 1.');
+  const [editingRemedy, setEditingRemedy] = useState('Lal Kitab Gemstone Remedy: Pukhraj for Conductor (Bhagyank) 3, Ruby for Conductor (Bhagyank) 1.');
 
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault();

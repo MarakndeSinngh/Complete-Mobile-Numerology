@@ -392,18 +392,18 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 <div className="flex items-center gap-2.5">
                   <Activity className="w-4 h-4 text-[#D97706]" />
                   <div>
-                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">Life Path Power</span>
+                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">Driver Number (Mulank)</span>
                     <span className="text-xs text-[#D97706] font-bold">
-                      {isQuickMode ? "Not Computed 🔒" : `LP #${dobData.lifePathNumber}`}
+                      {isQuickMode ? "Not Computed 🔒" : `Mulank #${dobData.birthNumber}`}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Award className="w-4 h-4 text-[#D97706]" />
                   <div>
-                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">Destiny Power</span>
+                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">Conductor Number (Bhagyank)</span>
                     <span className="text-xs text-[#D97706] font-bold">
-                      {isQuickMode ? "Not Computed 🔒" : `DN #${dobData.destinyNumber}`}
+                      {isQuickMode ? "Not Computed 🔒" : `Bhagyank #${dobData.lifePathNumber}`}
                     </span>
                   </div>
                 </div>
@@ -1558,7 +1558,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 <Hash className="w-4 h-4 text-sky-500" />
               </div>
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                Dates that are chemically aligned with your birth single-digit portal and primary life paths coordinates.
+                Dates that are chemically aligned with your birth single-digit portal and primary conductor coordinates.
               </p>
             </div>
             <div className="flex flex-wrap gap-1.5 pt-4 mt-4 border-t border-[#E5E7EB]/70">
@@ -1582,10 +1582,10 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
               </p>
             </div>
             <div className="flex gap-2 pt-4 mt-4 border-t border-[#E5E7EB]/70">
-              <span className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/15 flex items-center justify-center text-[10px] font-mono font-bold" title={isQuickMode ? "Unlock in Advanced Scan" : "Birth Number"}>
+              <span className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/15 flex items-center justify-center text-[10px] font-mono font-bold" title={isQuickMode ? "Unlock in Advanced Scan" : "Driver Number (Mulank)"}>
                 {isQuickMode ? "🔒" : dobData.birthNumber}
               </span>
-              <span className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/15 flex items-center justify-center text-[10px] font-mono font-bold" title={isQuickMode ? "Unlock in Advanced Scan" : "Life Path Number"}>
+              <span className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/15 flex items-center justify-center text-[10px] font-mono font-bold" title={isQuickMode ? "Unlock in Advanced Scan" : "Conductor Number (Bhagyank)"}>
                 {isQuickMode ? "🔒" : dobData.lifePathNumber}
               </span>
               <span className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/15 flex items-center justify-center text-[10px] font-mono font-bold" title="Mobile Reduced Number">

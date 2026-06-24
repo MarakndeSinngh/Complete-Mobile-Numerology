@@ -381,7 +381,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
             >
               <div className="flex items-start justify-between w-full gap-4">
                 <div className="space-y-2 text-left">
-                  <span className="text-[9px] font-mono uppercase bg-blue-50 text-[#1E3A8A] border border-blue-200 px-2.5 py-0.5 rounded-full font-bold">Conductor / Destiny Number</span>
+                  <span className="text-[9px] font-mono uppercase bg-blue-50 text-[#1E3A8A] border border-blue-200 px-2.5 py-0.5 rounded-full font-bold">Conductor Number (Bhagyank)</span>
                   <h3 className="font-playfair text-2xl font-black text-[#1F2937]">भाग्यांक #{analysisResult.bhagyank}</h3>
                   <p className="text-slate-500 text-xs leading-relaxed max-w-xs">
                     Governs life purpose, core destiny, career achievements, and major planetary direction changes.
@@ -613,7 +613,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
 
                     <div className="p-5 bg-white border border-slate-200 rounded-3xl space-y-3">
                       <div>
-                        <span className="text-[10px] font-mono text-slate-400 uppercase">Life Theme Number (Destiny Root):</span>
+                        <span className="text-[10px] font-mono text-slate-400 uppercase">Life Theme Number (Conductor Root):</span>
                         <p className="text-sm font-black text-slate-800 mt-1"># {masterReport.gridAnalysis.lifeThemeNum}</p>
                         <p className="text-[11px] text-slate-500 leading-relaxed italic">"{masterReport.gridAnalysis.lifeThemeText}"</p>
                       </div>
@@ -1432,7 +1432,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
 
                   <div className="space-y-6 text-xs text-slate-300 leading-relaxed font-sans select-all">
                     <p className="text-sm font-semibold text-[#F59E0B] pb-2 border-b border-slate-850">I. Executive Consultation Summary</p>
-                    <p className="font-lora italic text-slate-400 text-center text-sm">"The subject, <strong>{masterReport.personal.name}</strong>, casted with Psychic Driver #{masterReport.personal.driver} and Destiny Conductor #{masterReport.personal.conductor}, manifests an aura aligning with <strong>{masterReport.archetype.title}</strong> archetype configurations. Grounded physical structures should be paired with deep meditative remediation to bridge empty grid sectors."</p>
+                    <p className="font-lora italic text-slate-400 text-center text-sm">"The subject, <strong>{masterReport.personal.name}</strong>, casted with Driver (Mulank) #{masterReport.personal.driver} and Conductor (Bhagyank) #{masterReport.personal.conductor}, manifests an aura aligning with <strong>{masterReport.archetype.title}</strong> archetype configurations. Grounded physical structures should be paired with deep meditative remediation to bridge empty grid sectors."</p>
 
                     <div className="grid grid-cols-2 gap-6 pt-4">
                       <div>

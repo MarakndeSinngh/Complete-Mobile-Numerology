@@ -116,8 +116,8 @@ export function calculateAdvancedCompatibility(
   const condMetric: CompatibilityMetric = {
     score: condScore,
     rating: condScore >= 90 ? 'EXCELLENT' : condScore >= 70 ? 'GOOD' : 'CHALLENGING',
-    explanation: `Destiny Conductor ${b1} met with Partner's Conductor ${b2} governs core material and spiritual expansion. This forms an axis of ${relCond === 2 ? 'seamless long-term planning' : relCond === 1 ? 'average supportive coordination' : 'critical delays in family building'}.`,
-    whyThisResult: `Because Conductor ${b1} & ${b2} are planetary ${relCond === 2 ? 'Friends' : relCond === 1 ? 'Neutral' : 'Opposition'} which influences career and destiny synastry.`
+    explanation: `Conductor (Bhagyank) ${b1} met with Partner's Conductor ${b2} governs core material and spiritual expansion. This forms an axis of ${relCond === 2 ? 'seamless long-term planning' : relCond === 1 ? 'average supportive coordination' : 'critical delays in family building'}.`,
+    whyThisResult: `Because Conductor ${b1} & ${b2} are planetary ${relCond === 2 ? 'Friends' : relCond === 1 ? 'Neutral' : 'Opposition'} which influences career and conductor synastry.`
   };
 
   // LAYER 3: Compound Number Compatibility

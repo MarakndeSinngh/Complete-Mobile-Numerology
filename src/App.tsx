@@ -49,7 +49,7 @@ const App: React.FC = () => {
       const path = window.location.pathname.substring(1) || window.location.hash.substring(1) || 'mobile-numerology';
       setCurrentSEOPath(path);
 
-      let title = "Leo Family Numerology - Premium Astro Destiny Portal";
+      let title = "Leo Family Numerology - Premium Indian Numerology Portal";
       let description = "Vedic Numerology & Chaldean Frequencies. Explore hidden planetary yogas, material blockages, and cosmic alignments curated by Rajiv Singh Chauhann.";
       let schemaMarkup: any = null;
 
@@ -68,7 +68,7 @@ const App: React.FC = () => {
         setCurrentPortal('MOBILE_NUMEROLOGY');
         setAnalysisMode('ADVANCED');
         title = "Chaldean Name Numerology - Pronunciation Vibration Corrector";
-        description = "Align your full brand name spelling with your birth driver or destiny numbers for ultimate success.";
+        description = "Align your full brand name spelling with your birth driver or conductor numbers for ultimate success.";
         schemaMarkup = {
           "@context": "https://schema.org",
           "@type": "Article",
@@ -230,7 +230,7 @@ const App: React.FC = () => {
                 </span>
               </div>
               <span className="block text-[9px] font-mono text-[#6B7280] tracking-[0.25em] uppercase">
-                Premium Astral Destiny Portal
+                Premium Indian Numerology Portal
               </span>
             </div>
           </div>
@@ -507,9 +507,9 @@ const App: React.FC = () => {
                     <div className="pt-2">
                       <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] hover:from-[#B45309] hover:to-[#D97706] text-white font-bold py-4.5 rounded-2xl transition-all duration-300 text-xs tracking-[0.25em] uppercase hover:shadow-lg hover:shadow-[#D97706]/20 flex items-center justify-center gap-2 cursor-pointer outline-none font-sans"
+                        className="w-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] hover:from-[#B45309] hover:to-[#D97706] text-white font-bold py-3 rounded-xl transition-all duration-300 text-xs tracking-wider uppercase hover:shadow-lg hover:shadow-[#D97706]/20 flex items-center justify-center gap-2 cursor-pointer outline-none font-sans"
                       >
-                        Begin Planetary Resonance Analysis <ArrowRight className="w-4 h-4" />
+                        Calculate <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   </form>
@@ -671,7 +671,7 @@ const App: React.FC = () => {
                   <div className="text-[#D97706]"><ShieldCheck className="w-5 h-5 mt-1" /></div>
                   <div>
                     <h5 className="font-playfair font-bold text-[#1F2937] text-md">Friend/Enemy Matches</h5>
-                    <p className="text-[#6B7280] text-[11px] mt-1 leading-relaxed">Matches your phone's sum value to your life path and birthday ruler values.</p>
+                    <p className="text-[#6B7280] text-[11px] mt-1 leading-relaxed">Matches your phone's sum value to your conductor and driver values.</p>
                   </div>
                 </div>
 
@@ -965,7 +965,7 @@ const App: React.FC = () => {
                 <div className="p-5 bg-[#FDFCF7] border border-[#F2E8DC] rounded-3xl">
                   <span className="font-bold block text-slate-800 text-[13px] font-playfair">Q: What is the primary difference between Driver and Conductor numbers?</span>
                   <p className="text-slate-500 mt-2 leading-relaxed text-[11px]">
-                    The <strong>Driver Number</strong> corresponds directly to your birth day date (e.g. 23 reduced to 5), representing your conscious character, talents, and physical disposition. The <strong>Conductor Number</strong> (or Destiny Number) is the sum calculation of your entire birth blueprint (Day + Month + Year), dictating your divine purpose, karmic trajectory, and sudden opportunities.
+                    The <strong>Driver Number</strong> corresponds directly to your birth day date (e.g. 23 reduced to 5), representing your conscious character, talents, and physical disposition. The <strong>Conductor Number</strong> (or Bhagyank) is the sum calculation of your entire birth blueprint (Day + Month + Year), dictating your divine purpose, karmic trajectory, and sudden opportunities.
                   </p>
                 </div>
 

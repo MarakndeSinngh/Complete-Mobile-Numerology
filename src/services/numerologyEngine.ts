@@ -110,7 +110,7 @@ export function analyzeDateOfBirth(dobStr: string, name: string): DOBAnalysis {
   const monthReduced = reduceToSingleDigit(month);
   const yearReduced = reduceToSingleDigit(year);
 
-  // Life Path Number (Conductor / Bhagyank)
+  // Conductor Number (Bhagyank)
   // Sum of all digits of DOB (standard Indian style)
   const cleanDob = dobStr.replace(/[^0-9]/g, '');
   const dobSum = cleanDob.split('').reduce((acc, char) => acc + parseInt(char, 10), 0);

@@ -67,7 +67,7 @@ export function generateFullConsultationReport(
   const coPlanet = planets[rCond] || 'Jupiter (गुरु)';
 
   // 1. SUMMARY
-  const summary = `Professional Indian Numerology blueprint crafted on the 22nd of June, 2026. This comprehensive evaluation is personalized for scholar ${name}, born on Day ${day} (Compound Day ${day} reducing to Driver ${rDay}) with Conductor (Bhagyank) ${rCond}. Your core vibration is ruled by the ${drPlanet} acting as your Active Driver and guided by ${coPlanet} as your Destiny Conductor. This forms an authoritative, highly customized matrix that dictates your administrative prowess, private relationship habits, and monetary capacity.`;
+  const summary = `Professional Indian Numerology blueprint crafted on the 22nd of June, 2026. This comprehensive evaluation is personalized for scholar ${name}, born on Day ${day} (Compound Day ${day} reducing to Driver ${rDay}) with Conductor (Bhagyank) ${rCond}. Your core vibration is ruled by the ${drPlanet} acting as your Active Driver and guided by ${coPlanet} as your Conductor (Bhagyank). This forms an authoritative, highly customized matrix that dictates your administrative prowess, private relationship habits, and monetary capacity.`;
 
   // 2. BIRTH DETAIL NOTES
   const birthDetailNotes = `Based on traditional Chaldean standards, your physical birth date is ${day}. Traditional Indian calculations show that you are influenced heavily by Compound Number ${day}. ${
@@ -90,13 +90,13 @@ export function generateFullConsultationReport(
   };
 
   const syncText = syncs[rDay]?.[rCond] || 
-    `Active Synastry between Driver ${rDay} and Conductor ${rCond} forms an average cooperative stream. Your Driver ${rDay} steers daily immediate reactions while Conductor ${rCond} governs long-term career outcomes. Working together, they direct your life path towards stable maturation around age 34.`;
+    `Active Synastry between Driver ${rDay} and Conductor ${rCond} forms an average cooperative stream. Your Driver ${rDay} steers daily immediate reactions while Conductor ${rCond} governs long-term career outcomes. Working together, they direct your trajectory towards stable maturation around age 34.`;
 
   // 4. COMPOUND FREQUENCIES
   const compoundFrequencies = `Reviewing your birth date Compound Number ${day} reveals a highly personalized profile. According to the Traditional Chaldean Master Database:
   - Title: ${compDetails.title}
   - Core Essence: ${compDetails.meaning}
-  - Destiny Forecast: ${compDetails.prediction}
+  - Future Trajectory Forecast: ${compDetails.prediction}
   - Major Talents: ${compDetails.positiveTraits.join(', ')}
   - Risks to Avoid: ${compDetails.negativeTraits.join(', ')}`;
 
@@ -131,8 +131,8 @@ export function generateFullConsultationReport(
   const missingNumbersRemedies = `Your grid reveals empty nodes for numbers: [${missingString}]. In the Indian system, missing frequencies represent areas where your energy body is less naturally shielded:
   ${missingDetails}`;
 
-  // 8. DESTINED CAREER PATH
-  const destinedCareerPath = `Aligning your Driver ${rDay} (psychic impulse) with Destiny Conductor ${rCond} reveals outstanding success in:
+  // 8. ALIGNED CAREER PATH
+  const destinedCareerPath = `Aligning your Driver ${rDay} (psychic impulse) with Conductor (Bhagyank) ${rCond} reveals outstanding success in:
   - Primary Sector: ${compDetails.careerImpact}
   - Secondary Sector: ${rDay === 1 || rCond === 1 ? 'Government projects, corporate leadership, public services' : 
                           rDay === 5 || rCond === 5 ? 'Global trade, software applications, trading, PR, media relations' :

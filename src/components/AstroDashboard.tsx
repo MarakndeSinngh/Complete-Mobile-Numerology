@@ -33,29 +33,35 @@ const AstroDashboard: React.FC<AstroDashboardProps> = ({ dobData, nameData, mobi
     <div id="dashboard-tab-panel" className="space-y-8 animate-in fade-in duration-500 text-left">
       
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="glass-panel p-6 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
-          <span className="text-xs font-mono uppercase text-[#D97706]/80 block tracking-widest font-semibold">Life Path</span>
-          <span className="text-5xl font-playfair font-bold text-[#D97706] mt-2 block">{dobData.lifePathNumber}</span>
-          <p className="text-[#6B7280] text-xs mt-3 leading-relaxed">The prime blueprint of your journey & lessons.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="glass-panel p-5 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
+          <span className="text-[10px] font-mono uppercase text-[#D97706]/80 block tracking-wider font-bold">Driver Number (Mulank)</span>
+          <span className="text-4xl font-playfair font-bold text-[#D97706] mt-2 block">{dobData.birthNumber}</span>
+          <p className="text-[#6B7280] text-[10px] mt-2 leading-relaxed">Your conscious character, talent, and physical disposition.</p>
         </div>
 
-        <div className="glass-panel p-6 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
-          <span className="text-xs font-mono uppercase text-[#D97706]/80 block tracking-widest font-semibold">Destiny (Expression)</span>
-          <span className="text-5xl font-playfair font-bold text-[#D97706] mt-2 block">{dobData.destinyNumber}</span>
-          <p className="text-[#6B7280] text-xs mt-3 leading-relaxed">The active purpose projected through your name.</p>
+        <div className="glass-panel p-5 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
+          <span className="text-[10px] font-mono uppercase text-[#D97706]/80 block tracking-wider font-bold">Conductor Number (Bhagyank)</span>
+          <span className="text-4xl font-playfair font-bold text-[#D97706] mt-2 block">{dobData.lifePathNumber}</span>
+          <p className="text-[#6B7280] text-[10px] mt-2 leading-relaxed">Your divine purpose, karmic trajectory, and path in life.</p>
         </div>
 
-        <div className="glass-panel p-6 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
-          <span className="text-xs font-mono uppercase text-[#D97706]/80 block tracking-widest font-semibold">Birth (Psychic)</span>
-          <span className="text-5xl font-playfair font-bold text-[#D97706] mt-2 block">{dobData.birthNumber}</span>
-          <p className="text-[#6B7280] text-xs mt-3 leading-relaxed">Your basic persona inherited on the day of birth.</p>
+        <div className="glass-panel p-5 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
+          <span className="text-[10px] font-mono uppercase text-[#D97706]/80 block tracking-wider font-bold">Birth Compound Number</span>
+          <span className="text-4xl font-playfair font-bold text-[#D97706] mt-2 block">{dobData.birthNumberCompound}</span>
+          <p className="text-[#6B7280] text-[10px] mt-2 leading-relaxed">The unreduced daily birth vibration representing core heritage.</p>
         </div>
 
-        <div className="glass-panel p-6 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
-          <span className="text-xs font-mono uppercase text-[#D97706]/80 block tracking-widest font-semibold">Soul Urge</span>
-          <span className="text-5xl font-playfair font-bold text-[#D97706] mt-2 block">{dobData.soulUrgeNumber}</span>
-          <p className="text-[#6B7280] text-xs mt-3 leading-relaxed">Your innermost desires & unconscious drive.</p>
+        <div className="glass-panel p-5 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
+          <span className="text-[10px] font-mono uppercase text-[#D97706]/80 block tracking-wider font-bold">Mobile Compound Number</span>
+          <span className="text-4xl font-playfair font-bold text-[#D97706] mt-2 block">{mobileData.compoundTotal}</span>
+          <p className="text-[#6B7280] text-[10px] mt-2 leading-relaxed">The collective total of your 10-digit mobile number.</p>
+        </div>
+
+        <div className="glass-panel p-5 rounded-3xl relative overflow-hidden bg-white hover:border-[#D97706]/30 border-[#E5E7EB] shadow-sm">
+          <span className="text-[10px] font-mono uppercase text-[#D97706]/80 block tracking-wider font-bold">Mobile Root Number</span>
+          <span className="text-4xl font-playfair font-bold text-[#D97706] mt-2 block">{mobileData.reducedTotal}</span>
+          <p className="text-[#6B7280] text-[10px] mt-2 leading-relaxed">The single-digit primary mobile vibration influencing success.</p>
         </div>
       </div>
 

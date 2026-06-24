@@ -269,15 +269,15 @@ export function calculateAdvancedCompatibility(
   } else if (strongPairs.includes(pairKeyD) && strongPairs.includes(pairKeyC)) {
     traditionalStatus = 'Strong';
     traditionalScore = 94;
-    tradExplanation = `Traditional Vedic Chaldean Synastry reveals exceptional birth coordinate resonance. The ruling planets of your conscious drivers and destiny conductors operate in deep mutual support, fostering strong domestic prosperity, spontaneous mutual affection, and high marital peace.`;
+    tradExplanation = `Traditional Vedic Chaldean Synastry reveals exceptional birth coordinate resonance. The ruling planets of your conscious drivers and conductors (bhagyank) operate in deep mutual support, fostering strong domestic prosperity, spontaneous mutual affection, and high marital peace.`;
   } else if (strongPairs.includes(pairKeyD) || strongPairs.includes(pairKeyC)) {
     traditionalStatus = 'Strong';
     traditionalScore = 84;
-    tradExplanation = `Traditional Vedic Synastry highlights a stable connection. One of the core behavioral or destiny pillars runs under a highly supportive planetary relationship, shielding your union from other minor communication delays.`;
+    tradExplanation = `Traditional Vedic Synastry highlights a stable connection. One of the core behavioral or conductor pillars runs under a highly supportive planetary relationship, shielding your union from other minor communication delays.`;
   } else {
     traditionalStatus = 'Neutral';
     traditionalScore = 68;
-    tradExplanation = `Traditional Vedic Synastry indicates a neutral planetary relationship. Your daily driver and life path conductors neither assist nor oppose each other directly. Harmony will depend on spelling correctness and local Vastu alignments.`;
+    tradExplanation = `Traditional Vedic Synastry indicates a neutral planetary relationship. Your daily driver and conductors (bhagyank) neither assist nor oppose each other directly. Harmony will depend on spelling correctness and local Vastu alignments.`;
   }
 
   const modernScore = overallScore;
@@ -374,7 +374,7 @@ function generateCategoryDesc(cat: string, score: number, n1: number, n2: number
   if (cat === 'spiritual') {
     if (score >= 85) return `Amazing spiritual and moral values convergence. High-level occult connection. Both encourage quiet development, deep studies, meditation, and temple visits together.`;
     if (score >= 70) return `Good moral integrity and standard values support. The couple respects traditional customs and collaborates on charity tasks easily.`;
-    return `Distinct life paths and philosophical outlooks. One is heavily logical or materialistic while the other leans toward deep spiritual metaphysics, requiring respectful distance.`;
+    return `Distinct conductor trajectories and philosophical outlooks. One is heavily logical or materialistic while the other leans toward deep spiritual metaphysics, requiring respectful distance.`;
   }
   // stability
   if (score >= 85) return `Permanent long-term resilience. Exceptional structural anchor from planetary drivers and conductors ensures high marital longevity, withstanding the toughest transits.`;

@@ -14,6 +14,18 @@ import { computeLoshuMasterReport } from '../services/loshuMasterEngine';
 import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber } from '../services/numerologyEngine';
 import { generateLeoAdvisorActions } from '../services/leoAdvisorEngine';
 
+const PLANETS_DB: Record<number, { name: string; icon: string; description: string }> = {
+  1: { name: "Sun (Surya) ☀️", icon: "☀️", description: "Leadership, Ambition, Conscious Will" },
+  2: { name: "Moon (Chandra) 🌙", icon: "🌙", description: "Intuition, Creative Mind, Receptivity" },
+  3: { name: "Jupiter (Guru) 🕉️", icon: "🕉️", description: "Intellect, Blessings, Inner Wisdom" },
+  4: { name: "Rahu (Shadow) ⚡", icon: "⚡", description: "Sudden Breakouts, Practical Focus" },
+  5: { name: "Mercury (Budha) 💬", icon: "💬", description: "Business Intellect, PR, Sharp Speech" },
+  6: { name: "Venus (Shukra) ✨", icon: "✨", description: "Luxury, Magnetism, Art & Relationships" },
+  7: { name: "Ketu (Shadow) 🧩", icon: "🧩", description: "Spiritual Research, Metaphysical Insight" },
+  8: { name: "Saturn (Shani) ⚖️", icon: "⚖️", description: "Karmic Lessons, Persistence, Legacy" },
+  9: { name: "Mars (Mangala) 🛡️", icon: "🛡️", description: "Dynamic Energy, Action, Fiery Courage" }
+};
+
 interface AIConsultationPortalProps {
   initialProfile: PersonalDetails | null;
   onProfileUpdate?: (profile: PersonalDetails) => void;
@@ -160,16 +172,17 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
   };
 
   // Generate engines based on selected profile
+  const dobAnalysis = activeProfile ? analyzeDateOfBirth(activeProfile.dob, activeProfile.name) : null;
+  const nameAnalysis = activeProfile ? analyzeNameSystems(activeProfile.name) : null;
+  const mobileAnalysis = activeProfile ? analyzeMobileNumber(activeProfile.mobile) : null;
+
   const reportData = activeProfile ? generateLeoConsultation(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
   const scoreExplanations = activeProfile ? getScoreExplanations(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
   const masterGrid = activeProfile ? computeLoshuMasterReport(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
   
-  const advisorActions = activeProfile ? (() => {
-    const dobAnalysis = analyzeDateOfBirth(activeProfile.dob, activeProfile.name);
-    const nameAnalysis = analyzeNameSystems(activeProfile.name);
-    const mobileAnalysis = analyzeMobileNumber(activeProfile.mobile);
-    return generateLeoAdvisorActions(dobAnalysis, nameAnalysis, mobileAnalysis);
-  })() : null;
+  const advisorActions = activeProfile && dobAnalysis && nameAnalysis && mobileAnalysis
+    ? generateLeoAdvisorActions(dobAnalysis, nameAnalysis, mobileAnalysis)
+    : null;
 
   // Handle Ask Leo AI response (Phase 7)
   const handleSendMessage = () => {
@@ -440,7 +453,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                 { id: 'PROBABILITY', label: 'Success Probabilities', icon: TrendingUp },
                 { id: 'NAME_CORRECT', label: 'AI Name Spell Correction', icon: User },
                 { id: 'RECOMMEND', label: 'Personalized Altar', icon: Award },
-                { id: 'TIMELINE', label: 'Life Path Timeline', icon: Compass },
+                { id: 'TIMELINE', label: 'Bhagyank (Conductor) Timeline', icon: Compass },
                 { id: 'GROWTH', label: 'Personal Growth Index', icon: Activity },
                 { id: 'MONETIZE', label: 'Expert Bookings & Shops', icon: ShoppingBag }
               ].map((subTab) => {
@@ -492,44 +505,222 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
             {activeSubTab === 'COUNSEL' && reportData && (
               <div className="space-y-8 animate-in fade-in duration-400 print:block">
                 
-                {/* Executive Summary Card */}
-                <div className="bg-white p-8 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 text-left relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 opacity-5 pointer-events-none text-amber-600 select-none font-serif text-8xl">☸️</div>
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-playfair text-2xl font-black text-[#1F2937]">Grand Master Executive Summary</h3>
-                    <span className="text-[10px] font-mono font-bold bg-[#FDFCF7] border border-amber-600/10 text-[#D97706] px-3 py-1 rounded-full uppercase tracking-wider">
-                      Active Guidance
-                    </span>
+                {/* LUXURY MASTER EXECUTIVE SUMMARY DOSSIER CARD - PERSISTENT AT TOP OF REPORT */}
+                {activeProfile && reportData && masterGrid && mobileAnalysis && (
+                  <div id="executive-summary-dossier" className="bg-[#FCFAF6] border-2 border-[#EADCC6] rounded-[35px] p-8 md:p-10 shadow-xl space-y-8 text-left relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#D97706]/[0.02] rounded-full blur-3xl pointer-events-none"></div>
+                    <div className="absolute -top-10 -left-10 w-40 h-40 border border-[#D97706]/10 rounded-full flex items-center justify-center pointer-events-none">
+                      <div className="w-28 h-28 border border-[#D97706]/5 rounded-full"></div>
+                    </div>
+
+                    {/* Header & Overall Rating Section */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-[#EADCC6]/60 pb-6">
+                      <div className="space-y-2">
+                        <span className="text-xs font-mono font-bold tracking-[0.2em] text-[#D97706] uppercase block">
+                          ♛ Professional Vedic Consultation
+                        </span>
+                        <h2 className="font-playfair text-3xl md:text-4xl font-black text-[#1F2937] tracking-tight leading-tight">
+                          Executive Destiny & Alignment Summary
+                        </h2>
+                        <p className="text-base text-slate-700 leading-relaxed max-w-2xl">
+                          This master coordination report synthesizes your natal birth coordinates, name vibration frequencies, and current mobile numbers to reveal your active auric field alignment.
+                        </p>
+                      </div>
+
+                      {/* Visual Overall Rating Ring */}
+                      <div className="flex items-center gap-4 bg-white border border-[#EADCC6]/40 p-4 rounded-3xl shadow-sm shrink-0 w-full md:w-auto">
+                        <div className="relative w-20 h-20 flex items-center justify-center">
+                          <svg className="w-20 h-20 transform -rotate-90">
+                            <circle cx="40" cy="40" r="34" stroke="#F1EADF" strokeWidth="6" fill="transparent" />
+                            <circle cx="40" cy="40" r="34" stroke="#D97706" strokeWidth="6" fill="transparent"
+                              strokeDasharray={2 * Math.PI * 34}
+                              strokeDashoffset={2 * Math.PI * 34 * (1 - (masterGrid.scores.overallLoshuScore || 75) / 100)}
+                            />
+                          </svg>
+                          <span className="absolute text-xl font-bold text-slate-800 font-mono">
+                            {masterGrid.scores.overallLoshuScore}%
+                          </span>
+                        </div>
+                        <div className="text-left">
+                          <span className="text-xs font-mono font-bold text-[#6B7280] uppercase block">Overall Alignment</span>
+                          <span className="text-lg font-bold text-[#D97706] uppercase block tracking-wider font-playfair">
+                            {mobileAnalysis.rating === 'EXCELLENT' ? '🏆 Excellent' :
+                             mobileAnalysis.rating === 'GOOD' ? '⭐ Highly Favorable' :
+                             mobileAnalysis.rating === 'AVOID' ? '⚠️ Hostile / Caution' :
+                             '✨ Balanced'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Prominent Numerology Values Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      
+                      {/* Driver Card */}
+                      <div className="bg-white border border-[#EADCC6]/40 p-6 rounded-3xl shadow-sm flex flex-col justify-between hover:shadow-md transition duration-300 relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-[#D97706]"></div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-mono font-extrabold text-[#6B7280] uppercase tracking-wider block">Psychic Driver (Mulank)</span>
+                            <span className="text-xl">☀️</span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-4xl md:text-5xl font-black text-[#D97706] font-serif">
+                              {dobAnalysis?.birthNumber}
+                            </span>
+                            {dobAnalysis?.birthNumberCompound && dobAnalysis.birthNumberCompound !== dobAnalysis.birthNumber && (
+                              <span className="text-lg text-[#6B7280] font-mono">({dobAnalysis.birthNumberCompound})</span>
+                            )}
+                          </div>
+                          <p className="text-base font-semibold text-slate-800 font-playfair">
+                            Planet: {dobAnalysis ? PLANETS_DB[dobAnalysis.birthNumber]?.name : "Loading"}
+                          </p>
+                          <p className="text-base text-slate-700 leading-relaxed">
+                            Governs your conscious personality, instant drivers, temperament, and immediate behavioral reactions.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Conductor Card */}
+                      <div className="bg-white border border-[#EADCC6]/40 p-6 rounded-3xl shadow-sm flex flex-col justify-between hover:shadow-md transition duration-300 relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-[#1E3A8A]"></div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-mono font-extrabold text-[#6B7280] uppercase tracking-wider block">Destiny Conductor (Bhagyank)</span>
+                            <span className="text-xl">⚖️</span>
+                          </div>
+                          <span className="text-4xl md:text-5xl font-black text-[#1E3A8A] font-serif block">
+                            {dobAnalysis?.lifePathNumber}
+                          </span>
+                          <p className="text-base font-semibold text-slate-800 font-playfair">
+                            Planet: {dobAnalysis ? PLANETS_DB[dobAnalysis.lifePathNumber]?.name : "Loading"}
+                          </p>
+                          <p className="text-base text-slate-700 leading-relaxed">
+                            Dictates your divine purpose, long-term karma path, ultimate challenges, and sudden lifecycle opportunities.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Mobile Vibration Card */}
+                      <div className="bg-white border border-[#EADCC6]/40 p-6 rounded-3xl shadow-sm flex flex-col justify-between hover:shadow-md transition duration-300 relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-amber-600"></div>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-mono font-extrabold text-[#6B7280] uppercase tracking-wider block">Mobile Vibrational Total</span>
+                            <span className="text-xl">📱</span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-4xl md:text-5xl font-black text-amber-600 font-mono">
+                              {mobileAnalysis?.compoundTotal}
+                            </span>
+                            <span className="text-xl text-[#6B7280] font-mono">/ {mobileAnalysis?.reducedTotal}</span>
+                          </div>
+                          <p className="text-base font-semibold text-slate-800 font-playfair">
+                            Vibrates to: {mobileAnalysis ? PLANETS_DB[mobileAnalysis.reducedTotal]?.name : "Loading"}
+                          </p>
+                          <p className="text-base text-slate-700 leading-relaxed">
+                            Represents the digital resonance constantly broadcasted through your active smartphone, shifting prosperity fields.
+                          </p>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Primary Archetype Visual Display */}
+                    <div className="bg-amber-50/35 border border-[#EADCC6]/50 rounded-3xl p-6 md:p-8 space-y-4 text-left relative overflow-hidden">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-amber-500/10 text-[#D97706] rounded-2xl">
+                          <Sparkles className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <span className="text-xs font-mono font-extrabold text-[#6B7280] uppercase tracking-wider block">Primary Cosmic Archetype</span>
+                          <h3 className="font-playfair text-xl md:text-2xl font-black text-[#1F2937]">
+                            {masterGrid.archetype.title}
+                          </h3>
+                        </div>
+                      </div>
+                      <p className="text-lg md:text-xl font-medium text-slate-800 font-serif leading-relaxed italic border-l-4 border-[#D97706] pl-4 py-1">
+                        Mantra: "{masterGrid.archetype.mantra}"
+                      </p>
+                      <p className="text-base text-slate-700 leading-relaxed font-sans">
+                        {masterGrid.archetype.description}
+                      </p>
+                    </div>
+
+                    {/* Biggest Strength and Challenge Shown Immediately */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      
+                      {/* Biggest Strength Column */}
+                      <div className="bg-[#F0FDF4] border-2 border-emerald-200 p-6 md:p-8 rounded-3xl space-y-4 shadow-sm hover:shadow-md transition">
+                        <div className="flex items-center gap-2.5 text-emerald-900 font-bold text-lg md:text-xl font-playfair">
+                          <div className="p-1.5 bg-emerald-100 text-emerald-800 rounded-lg">
+                            <CheckCircle className="w-5 h-5" />
+                          </div>
+                          <span>Biggest Spiritual Strength</span>
+                        </div>
+                        <p className="text-base text-emerald-950 font-medium leading-relaxed font-sans">
+                          {reportData.biggestStrengths?.[0] || "Your planetary alignments protect your conscious drivers from negative delays, ensuring a persistent energy focus."}
+                        </p>
+                        <p className="text-base text-emerald-800/95 leading-relaxed font-sans">
+                          This core solar-mercurial shield ensures high clarity and continuous forward momentum in business and domestic decisions.
+                        </p>
+                      </div>
+
+                      {/* Biggest Challenge Column */}
+                      <div className="bg-[#FEF2F2] border-2 border-rose-200 p-6 md:p-8 rounded-3xl space-y-4 shadow-sm hover:shadow-md transition">
+                        <div className="flex items-center gap-2.5 text-rose-900 font-bold text-lg md:text-xl font-playfair">
+                          <div className="p-1.5 bg-rose-100 text-rose-800 rounded-lg">
+                            <AlertTriangle className="w-5 h-5" />
+                          </div>
+                          <span>Biggest Karmic Challenge</span>
+                        </div>
+                        <p className="text-base text-rose-950 font-medium leading-relaxed font-sans">
+                          {reportData.biggestWeaknesses?.[0] || "Absence of balanced anchoring coordinates in the mental plane triggers sudden obstacles and communication resets."}
+                        </p>
+                        <p className="text-base text-rose-800/95 leading-relaxed font-sans">
+                          Karmic delays run in repeating planetary cycles. Ensure spellings and phone total rules are corrected to neutralize these frictional blockages.
+                        </p>
+                      </div>
+
+                    </div>
+
+                    {/* Grand Consultation Summary Text */}
+                    <div className="border-t border-[#EADCC6]/60 pt-6 space-y-3">
+                      <h3 className="font-playfair text-xl md:text-2xl font-extrabold text-slate-800">
+                        Grand Master's Consultation Insight
+                      </h3>
+                      <p className="text-lg md:text-xl text-slate-800 leading-relaxed font-serif italic bg-white p-5 rounded-3xl border border-[#EADCC6]/30 shadow-inner">
+                        "{reportData.summary}"
+                      </p>
+                    </div>
+
                   </div>
-                  <p className="text-xs md:text-sm text-[#4B5563] leading-relaxed font-lora italic">
-                    "{reportData.summary}"
-                  </p>
-                </div>
+                )}
 
                 {/* Grid of Helping vs Blocking */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid">
-                  <div className="bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100 space-y-4">
-                    <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
-                      <CheckCircle className="w-5 h-5 text-emerald-600" /> WHAT IS HELPING YOU
+                  <div className="bg-emerald-50/75 p-6 md:p-8 rounded-[30px] border-2 border-emerald-100 space-y-6">
+                    <div className="flex items-center gap-2.5 text-emerald-950 font-black text-lg md:text-xl font-playfair border-b border-emerald-200/60 pb-3">
+                      <CheckCircle className="w-6 h-6 text-emerald-600" /> WHAT IS HELPING YOU
                     </div>
-                    <ul className="space-y-2.5">
+                    <ul className="space-y-4">
                       {reportData.whatIsHelping.map((item, idx) => (
-                        <li key={idx} className="text-xs text-emerald-700 flex gap-2 items-start">
-                          <span className="text-emerald-500 font-black">•</span>
+                        <li key={idx} className="text-base font-medium text-emerald-900 flex gap-2.5 items-start leading-relaxed">
+                          <span className="text-emerald-500 font-black text-lg">•</span>
                           <span>{item}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="bg-rose-50/50 p-6 rounded-3xl border border-rose-100 space-y-4">
-                    <div className="flex items-center gap-2 text-rose-800 font-bold text-sm">
-                      <AlertTriangle className="w-5 h-5 text-rose-600" /> WHAT IS BLOCKING YOU (KARMIC DELAYS)
+                  <div className="bg-rose-50/75 p-6 md:p-8 rounded-[30px] border-2 border-rose-100 space-y-6">
+                    <div className="flex items-center gap-2.5 text-rose-950 font-black text-lg md:text-xl font-playfair border-b border-rose-200/60 pb-3">
+                      <AlertTriangle className="w-6 h-6 text-rose-600" /> WHAT IS BLOCKING YOU (KARMIC DELAYS)
                     </div>
-                    <ul className="space-y-2.5">
+                    <ul className="space-y-4">
                       {reportData.whatIsBlocking.map((item, idx) => (
-                        <li key={idx} className="text-xs text-rose-700 flex gap-2 items-start">
-                          <span className="text-rose-400 font-black">•</span>
+                        <li key={idx} className="text-base font-medium text-rose-900 flex gap-2.5 items-start leading-relaxed">
+                          <span className="text-rose-400 font-black text-lg">•</span>
                           <span>{item}</span>
                         </li>
                       ))}
@@ -539,48 +730,48 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
 
                 {/* Bento layout of Strengths, Weaknesses, Opportunities, Karmic Lessons */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid">
-                  <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] space-y-3 shadow-sm">
-                    <h4 className="text-xs font-mono font-black uppercase text-slate-400 tracking-wider">Core Strengths</h4>
-                    <ul className="space-y-2">
+                  <div className="bg-[#FAFBFD] p-6 md:p-8 rounded-[30px] border border-[#E5E7EB] space-y-4 shadow-sm">
+                    <h4 className="text-sm font-mono font-bold uppercase text-slate-800 tracking-wider border-b pb-2">Core Strengths</h4>
+                    <ul className="space-y-3">
                       {reportData.biggestStrengths.map((s, idx) => (
-                        <li key={idx} className="text-xs text-[#4B5563] flex gap-2 items-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <li key={idx} className="text-base text-slate-800 flex gap-3 items-center leading-relaxed font-sans">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
                           <span>{s}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] space-y-3 shadow-sm">
-                    <h4 className="text-xs font-mono font-black uppercase text-slate-400 tracking-wider">Core Weaknesses</h4>
-                    <ul className="space-y-2">
+                  <div className="bg-[#FCFCFC] p-6 md:p-8 rounded-[30px] border border-[#E5E7EB] space-y-4 shadow-sm">
+                    <h4 className="text-sm font-mono font-bold uppercase text-slate-800 tracking-wider border-b pb-2">Core Weaknesses</h4>
+                    <ul className="space-y-3">
                       {reportData.biggestWeaknesses.map((w, idx) => (
-                        <li key={idx} className="text-xs text-[#4B5563] flex gap-2 items-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        <li key={idx} className="text-base text-slate-800 flex gap-3 items-center leading-relaxed font-sans">
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0"></span>
                           <span>{w}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] space-y-3 shadow-sm">
-                    <h4 className="text-xs font-mono font-black uppercase text-slate-400 tracking-wider">Strategic Opportunities</h4>
-                    <ul className="space-y-2">
+                  <div className="bg-[#FCFAF7] p-6 md:p-8 rounded-[30px] border border-[#E5E7EB] space-y-4 shadow-sm">
+                    <h4 className="text-sm font-mono font-bold uppercase text-slate-800 tracking-wider border-b pb-2">Strategic Opportunities</h4>
+                    <ul className="space-y-3">
                       {reportData.immediateOpportunities.map((o, idx) => (
-                        <li key={idx} className="text-xs text-[#4B5563] flex gap-2 items-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <li key={idx} className="text-base text-slate-800 flex gap-3 items-center leading-relaxed font-sans">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span>
                           <span>{o}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="bg-white p-6 rounded-3xl border border-[#E5E7EB] space-y-3 shadow-sm">
-                    <h4 className="text-xs font-mono font-black uppercase text-slate-400 tracking-wider">Main Karmic Lessons</h4>
-                    <ul className="space-y-2">
+                  <div className="bg-[#FAF8FD] p-6 md:p-8 rounded-[30px] border border-[#E5E7EB] space-y-4 shadow-sm">
+                    <h4 className="text-sm font-mono font-bold uppercase text-slate-800 tracking-wider border-b pb-2">Main Karmic Lessons</h4>
+                    <ul className="space-y-3">
                       {reportData.mainKarmicLessons.map((l, idx) => (
-                        <li key={idx} className="text-xs text-[#4B5563] flex gap-2 items-center">
-                          <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                        <li key={idx} className="text-base text-slate-800 flex gap-3 items-center leading-relaxed font-sans">
+                          <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0"></span>
                           <span>{l}</span>
                         </li>
                       ))}
@@ -670,8 +861,8 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
             {activeSubTab === 'SCORES' && scoreExplanations && (
               <div className="space-y-6 animate-in fade-in duration-400 text-left">
                 <div className="bg-white p-8 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-2">
-                  <h3 className="font-playfair text-2.5xl font-black text-[#1F2937]">"Why This Result?" Engine</h3>
-                  <p className="text-xs text-[#6B7280] font-sans">
+                  <h3 className="font-playfair text-2.5xl md:text-3xl font-black text-[#1F2937]">"Why This Result?" Engine</h3>
+                  <p className="text-base text-slate-800 leading-relaxed font-sans">
                     We do not believe in black-box ratings. Click any life score below to inspect the planetary calculations, positive amplifiers, blocking limits, and standard mathematical weighting equations.
                   </p>
                 </div>
@@ -689,8 +880,8 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                       onClick={() => setSelectedScoreExplain(key)}
                     >
                       <div className="flex justify-between items-center mb-3">
-                        <span className="text-xs font-mono font-black uppercase text-slate-400 tracking-widest">{key} score</span>
-                        <span className={`text-[9px] font-mono font-bold px-2.5 py-1 rounded-full ${
+                        <span className="text-xs font-mono font-bold uppercase text-slate-700 tracking-widest">{key} score</span>
+                        <span className={`text-xs font-mono font-bold px-3 py-1 rounded-full ${
                           explain.grade === 'EXCELLENT' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                           explain.grade === 'STRONG' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
                           explain.grade === 'AVERAGE' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
@@ -702,14 +893,14 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
 
                       <div className="flex items-baseline gap-2 mb-2">
                         <span className="text-3xl font-playfair font-black text-[#1F2937]">{explain.score}</span>
-                        <span className="text-xs text-[#9CA3AF]">/100</span>
+                        <span className="text-xs text-[#6B7280]">/100</span>
                       </div>
 
-                      <p className="text-[11px] text-[#6B7280] line-clamp-2 leading-relaxed mb-4">
+                      <p className="text-base text-slate-800 leading-relaxed mb-4 font-sans">
                         {explain.summary}
                       </p>
 
-                      <div className="text-[10px] text-[#D97706] font-semibold flex items-center gap-1">
+                      <div className="text-sm text-[#D97706] font-bold flex items-center gap-1">
                         View Calculation Formula <ChevronRight className="w-3.5 h-3.5" />
                       </div>
                     </div>
@@ -723,49 +914,49 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="bg-[#FDFCF7] border border-[#D97706]/20 rounded-3xl p-6 md:p-8 space-y-6"
+                      className="bg-[#FDFCF7] border border-[#D97706]/20 rounded-3xl p-6 md:p-8 space-y-6 animate-in duration-300"
                     >
                       <div className="flex justify-between items-start border-b border-[#E5D7C6]/50 pb-4">
                         <div>
-                          <h4 className="font-playfair text-xl font-bold text-[#1F2937] uppercase tracking-wide">
+                          <h4 className="font-playfair text-xl md:text-2xl font-bold text-[#1F2937] uppercase tracking-wide">
                             {selectedScoreExplain} Calculation Blueprint
                           </h4>
-                          <span className="text-[10px] text-[#D97706] font-mono tracking-widest uppercase">Scientific Formula Analysis</span>
+                          <span className="text-xs text-[#D97706] font-mono tracking-widest uppercase">Scientific Formula Analysis</span>
                         </div>
                         <button 
                           onClick={() => setSelectedScoreExplain(null)}
-                          className="text-[#6B7280] hover:text-[#1F2937] text-xs font-bold font-sans"
+                          className="text-[#6B7280] hover:text-[#1F2937] text-sm font-bold font-sans cursor-pointer"
                         >
                           ✕ Close Detail
                         </button>
                       </div>
 
-                      <div className="bg-white p-4 rounded-2xl border border-slate-100 font-mono text-[10px] text-slate-600">
+                      <div className="bg-white p-5 rounded-2xl border border-slate-200 font-mono text-sm text-slate-900 leading-relaxed">
                         <strong className="text-[#D97706]">PLANETARY WEIGHTING:</strong><br />
                         {scoreExplanations[selectedScoreExplain].scientificFormula}
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-3">
-                          <strong className="text-xs text-emerald-700 font-bold flex items-center gap-1.5">
-                            <CheckCircle className="w-4 h-4 text-emerald-500" /> POSITIVE MULTIPLIERS:
+                        <div className="space-y-4">
+                          <strong className="text-sm text-emerald-900 font-extrabold flex items-center gap-1.5 uppercase tracking-wider">
+                            <CheckCircle className="w-5 h-5 text-emerald-600 animate-pulse" /> Positive Multipliers:
                           </strong>
-                          <ul className="space-y-2">
+                          <ul className="space-y-3">
                             {scoreExplanations[selectedScoreExplain].helpingFactors.map((item, idx) => (
-                              <li key={idx} className="text-xs text-[#4B5563] bg-white p-3 rounded-xl border border-slate-100 leading-relaxed">
+                              <li key={idx} className="text-base text-slate-900 bg-white p-4 rounded-xl border border-slate-200 leading-relaxed shadow-sm font-sans">
                                 {item}
                               </li>
                             ))}
                           </ul>
                         </div>
 
-                        <div className="space-y-3">
-                          <strong className="text-xs text-rose-700 font-bold flex items-center gap-1.5">
-                            <AlertTriangle className="w-4 h-4 text-rose-500" /> INHIBITING LIMITS:
+                        <div className="space-y-4">
+                          <strong className="text-sm text-rose-900 font-extrabold flex items-center gap-1.5 uppercase tracking-wider">
+                            <AlertTriangle className="w-5 h-5 text-rose-600 animate-pulse" /> Inhibiting Limits:
                           </strong>
-                          <ul className="space-y-2">
+                          <ul className="space-y-3">
                             {scoreExplanations[selectedScoreExplain].blockingFactors.map((item, idx) => (
-                              <li key={idx} className="text-xs text-[#4B5563] bg-white p-3 rounded-xl border border-slate-100 leading-relaxed">
+                              <li key={idx} className="text-base text-slate-900 bg-white p-4 rounded-xl border border-slate-200 leading-relaxed shadow-sm font-sans">
                                 {item}
                               </li>
                             ))}
