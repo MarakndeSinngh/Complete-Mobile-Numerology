@@ -115,6 +115,8 @@ export default function PremiumConsultations() {
   const [savedProfiles, setSavedProfiles] = useState<any[]>([]);
   const [selectedProfileIndex, setSelectedProfileIndex] = useState<number>(-1);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
+  const [fileUploadSuccess, setFileUploadSuccess] = useState(false);
 
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
@@ -246,21 +248,93 @@ export default function PremiumConsultations() {
     }
   };
 
-  // Convert uploaded image or PDF to base64
+  // Convert uploaded image to base64 with validation and Canvas compression to avoid large payloads
   const processSignatureFile = (file: File) => {
     if (!file) return;
-    setSigFileName(file.name);
+
+    // Validate type (PNG, JPG, JPEG, WEBP)
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setSigError("कृपया केवल वैध छवि फ़ाइलें (PNG, JPG, JPEG, WEBP) अपलोड करें। (Please upload only valid image files: PNG, JPG, JPEG, WEBP.)");
+      setFileUploadSuccess(false);
+      return;
+    }
+
+    // Validate size (max 10MB)
+    const MAX_SIZE_MB = 10;
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setSigError(`फ़ाइल बहुत बड़ी है। कृपया ${MAX_SIZE_MB}MB से छोटी फ़ाइल अपलोड करें। (File is too large. Please upload a file smaller than ${MAX_SIZE_MB}MB.)`);
+      setFileUploadSuccess(false);
+      return;
+    }
+
+    setIsProcessingFile(true);
     setSigError(null);
+    setFileUploadSuccess(false);
+    setSigFileName(file.name);
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const result = e.target?.result;
-      if (typeof result === 'string') {
-        setSigImage(result);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Downscale to a maximum of 800px on either side to maintain detail while drastically reducing payload size (~50-100KB)
+          const MAX_DIM = 800;
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Compress with jpeg format and 0.8 quality
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            setSigImage(compressedBase64);
+            setFileUploadSuccess(true);
+          } else {
+            // Fallback to original read if canvas context fails
+            if (typeof e.target?.result === 'string') {
+              setSigImage(e.target.result);
+              setFileUploadSuccess(true);
+            }
+          }
+        } catch (err) {
+          console.error("Canvas compression failed, using original base64:", err);
+          if (typeof e.target?.result === 'string') {
+            setSigImage(e.target.result);
+            setFileUploadSuccess(true);
+          }
+        } finally {
+          setIsProcessingFile(false);
+        }
+      };
+      img.onerror = () => {
+        setSigError("छवि लोड करने में असमर्थ। कृपया फ़ाइल की जाँच करें। (Unable to load image. Please check the file.)");
+        setIsProcessingFile(false);
+        setFileUploadSuccess(false);
+      };
+      if (typeof e.target?.result === 'string') {
+        img.src = e.target.result;
+      } else {
+        setIsProcessingFile(false);
       }
     };
     reader.onerror = () => {
-      setSigError("सिग्नेचर फ़ाइल पढ़ने में विफल। कृपया कोई अन्य छवि या पीडीएफ फ़ाइल आज़माएं।");
+      setSigError("सिग्नेचर फ़ाइल पढ़ने में विफल। (Failed to read signature file.)");
+      setIsProcessingFile(false);
+      setFileUploadSuccess(false);
     };
     reader.readAsDataURL(file);
   };
@@ -314,6 +388,7 @@ export default function PremiumConsultations() {
         const dataUrl = canvas.toDataURL('image/png');
         setSigImage(dataUrl);
         setSigFileName("Camera_Capture.png");
+        setFileUploadSuccess(true);
       }
       stopCamera();
     } catch (err) {
@@ -337,6 +412,8 @@ export default function PremiumConsultations() {
     setIsAnalyzingSig(true);
     setSigError(null);
 
+    const fallbackErrorMessage = "LeoFamily Signature Analysis temporarily unavailable. Please use manual signature style selection.";
+
     try {
       const response = await fetch('/api/signature-audit', {
         method: 'POST',
@@ -353,16 +430,48 @@ export default function PremiumConsultations() {
         })
       });
 
-      if (!response.ok) {
-        const errJson = await response.json();
-        throw new Error(errJson.error || "सिग्नेचर ऑडिट विफल रहा।");
+      // Safely validate content-type headers before calling response.json()
+      const contentType = response.headers.get("content-type") || "";
+      let result: any = null;
+
+      if (contentType.includes("application/json")) {
+        try {
+          result = await response.json();
+        } catch (jsonErr) {
+          console.error("Failed to parse JSON response payload:", jsonErr);
+        }
+      } else {
+        // Log actual response text to aid in debugging without exposing to the user
+        try {
+          const rawText = await response.text();
+          console.error("Non-JSON Server Error Response Detected:", {
+            status: response.status,
+            statusText: response.statusText,
+            bodySample: rawText.slice(0, 1000)
+          });
+        } catch (textErr) {
+          console.error("Failed to read non-JSON response text:", textErr);
+        }
       }
 
-      const result = await response.json();
+      if (!response.ok || !result) {
+        // If the AI image analysis API fails, log details internally
+        console.error("Signature Audit failed with status:", response.status, "and parsed result:", result);
+        
+        // Automatically switch to manual signature style selection as a fallback
+        handleSignatureTrigger(signatureStyle || 'RISING_UNDERLINE');
+        
+        throw new Error(fallbackErrorMessage);
+      }
+
       setSigAuditResult(result);
     } catch (err: any) {
-      console.error("Signature Audit API Error:", err);
-      setSigError(err.message || "सिग्नेचर ऑडिट करने में समस्या आई। कृपया पुनः प्रयास करें।");
+      console.error("Signature Audit API Flow Error:", err);
+      // Ensure we display the exact user-friendly message requested
+      setSigError(fallbackErrorMessage);
+      
+      // Automatically switch to manual signature style selection on any failure
+      handleSignatureTrigger(signatureStyle || 'RISING_UNDERLINE');
     } finally {
       setIsAnalyzingSig(false);
     }
@@ -936,7 +1045,7 @@ export default function PremiumConsultations() {
                   <input
                     type="file"
                     id="sig-file-input"
-                    accept="image/*,application/pdf"
+                    accept="image/png, image/jpeg, image/jpg, image/webp"
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
@@ -945,24 +1054,33 @@ export default function PremiumConsultations() {
                     }}
                   />
 
-                  {sigImage ? (
+                  {isProcessingFile ? (
+                    <div className="flex flex-col items-center space-y-2 py-4">
+                      <div className="w-8 h-8 border-4 border-[#1E3A8A]/30 border-t-[#1E3A8A] rounded-full animate-spin"></div>
+                      <p className="text-xs font-semibold text-[#1E3A8A]">Processing & compressing signature image...</p>
+                      <p className="text-[10px] text-slate-400">Optimizing resolution for astro-numerological audit...</p>
+                    </div>
+                  ) : sigImage ? (
                     <div className="space-y-2 w-full flex flex-col items-center">
-                      {sigFileName?.endsWith('.pdf') ? (
-                        <FileText className="w-10 h-10 text-red-500 animate-pulse" />
-                      ) : (
-                        <img
-                          src={sigImage}
-                          alt="Signature Preview"
-                          className="max-h-24 max-w-full object-contain rounded border shadow-sm p-1 bg-white"
-                          referrerPolicy="no-referrer"
-                        />
+                      <img
+                        src={sigImage}
+                        alt="Signature Preview"
+                        className="max-h-24 max-w-full object-contain rounded border-2 border-emerald-500 shadow-sm p-1 bg-white"
+                        referrerPolicy="no-referrer"
+                      />
+                      {fileUploadSuccess && (
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200 mt-1">
+                          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+                          ✓ Signature Loaded & optimized
+                        </div>
                       )}
-                      <p className="text-xs font-mono text-slate-600 truncate max-w-[200px]">{sigFileName || 'signature.png'}</p>
+                      <p className="text-xs font-mono text-slate-600 truncate max-w-[200px] mt-1">{sigFileName || 'signature.png'}</p>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setSigImage(null);
                           setSigFileName(null);
+                          setFileUploadSuccess(false);
                         }}
                         className="text-[10px] font-bold text-red-600 hover:underline flex items-center gap-1 mt-1 cursor-pointer"
                       >
@@ -973,7 +1091,7 @@ export default function PremiumConsultations() {
                     <>
                       <Upload className="w-8 h-8 text-slate-400" />
                       <p className="text-xs font-semibold text-slate-600">Drag & drop your signature here, or <span className="text-[#1E3A8A] underline">browse files</span></p>
-                      <p className="text-[10px] text-slate-400">Accepts JPG, PNG, or PDF signatures (max 10MB)</p>
+                      <p className="text-[10px] text-slate-400">Accepts PNG, JPG, JPEG, WEBP signatures (max 10MB)</p>
                     </>
                   )}
                 </div>
