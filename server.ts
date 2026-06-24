@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { PAIR_MEANINGS } from "./src/services/pairMeanings";
 import { generateMedicalNumerologyReport } from "./src/services/medicalNumerologyEngine";
 import { generateNumeroVaastuReport } from "./src/services/numeroVaastuEngine";
@@ -11,8 +11,9 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // JSON parser
-  app.use(express.json());
+  // JSON parser with high payload limit for base64 image uploads
+  app.use(express.json({ limit: "15mb" }));
+  app.use(express.urlencoded({ limit: "15mb", extended: true }));
 
   // Lazy initialize Gemini client safely
   const getGeminiClient = () => {
@@ -332,6 +333,161 @@ Structure the report with pristine Markdown layout, neat tables, divider lines, 
     } catch (err: any) {
       console.error("Gemini server error for Loshu: ", err);
       res.status(500).json({ error: "ब्रह्मांडीय सर्वर से संपर्क विफल रहा। कृपया आवश्यक सेटिंग्स में अपनी GEMINI_API_KEY जांचें।" });
+    }
+  });
+
+  // API router for AI Signature Audit Pro System
+  app.post("/api/signature-audit", async (req, res) => {
+    try {
+      const { image, personalDetails, manualSelection, driver, conductor, nameNumber } = req.body;
+
+      const client = getGeminiClient();
+
+      const contents: any[] = [];
+
+      if (image) {
+        try {
+          // general base64 data clean up
+          const base64Data = image.replace(/^data:[^;]+;base64,/, "");
+          const mimeType = image.match(/^data:([^;]+);base64,/)?.[1] || "image/png";
+          contents.push({
+            inlineData: {
+              mimeType: mimeType,
+              data: base64Data
+            }
+          });
+        } catch (e) {
+          console.error("Failed to parse base64 image data, running with textual descriptors only:", e);
+        }
+      }
+
+      const promptText = `
+Perform a highly professional and rigorous Signature Handwriting Vastu & Chaldean Numerology Audit.
+${personalDetails?.name ? `Subject Name: ${personalDetails.name}` : ""}
+${personalDetails?.dob ? `Date of Birth: ${personalDetails.dob}` : ""}
+
+Subject's Numerological Vibration Grid:
+- Driver Number (Mulank): ${driver || 1}
+- Conductor Number (Bhagyank): ${conductor || 1}
+- Name Spelling Total (Destiny/Expression): ${nameNumber || 1}
+
+Current Selected Signature Attribute Style (Fallback or reference metadata):
+- Style Identifier: ${manualSelection?.styleId || "RISING_UNDERLINE"}
+
+Detailed Hand Writing Vastu Parameters to Audit:
+1. Signature Direction: Rising, flat, declining, wavy, or climbing.
+2. Signature Size: Overly large, tiny, standard, medium.
+3. First Letter Size: Capitalization level, scale relative to other letters.
+4. Underline Style: Single line, double line, no line, cutting through tail loops.
+5. End Stroke: Upward flick, downward tail, horizontal stroke, hooked block.
+6. Dot Placement: No dots, trailing dot, underline dots, dots below names.
+7. Letter Legibility: Legible characters, scribble style, thread-like lines, chaotic overlap.
+8. Name Completion: Complete first and last names, initials, only first name, crossed out name.
+9. Overall Flow: Harmonious, aggressive angles, standard balance, high negative space.
+
+Generate a comprehensive assessment, occult scores (0 to 100), risk areas, and concrete remedies.
+The output MUST strictly match the required JSON structure and be written in deep, professional, consulting-grade English with elegant astrological vocabulary.
+
+Return data in the EXACT JSON format matching the schema properties:
+- 'analysis': Deep breakdown of the 9 visual handwriting parameters.
+- 'scores': Specific numerological alignment scores (0-100).
+- 'assessment': Highly detailed narrative, list of strengths, list of weaknesses, risk areas, recommended corrections, ideal signature style tailored to Driver/Conductor, and the physical blueprint instructions.
+- 'beforeAfter': Visual/textual descriptions explaining current negative traits (Before) and ideal restructured blueprint traits (After).
+`;
+
+      contents.push(promptText);
+
+      const signatureAuditSchema = {
+        type: Type.OBJECT,
+        properties: {
+          analysis: {
+            type: Type.OBJECT,
+            properties: {
+              direction: { type: Type.STRING, description: "Detailed Handwriting Vastu analysis of signature direction" },
+              size: { type: Type.STRING, description: "Analysis of physical signature size and space utilization" },
+              firstLetterSize: { type: Type.STRING, description: "Audit of the first letter's projection and scale" },
+              underlineStyle: { type: Type.STRING, description: "Vastu analysis of the underline and support curves" },
+              endStroke: { type: Type.STRING, description: "Energy analysis of the signature's termination and exit angles" },
+              dotPlacement: { type: Type.STRING, description: "Analysis of trailing dots or blocking anchor points" },
+              letterLegibility: { type: Type.STRING, description: "Clear commentary on letter legibility and transparency" },
+              nameCompletion: { type: Type.STRING, description: "Vastu impact of partial vs full name utilization in signature" },
+              overallFlow: { type: Type.STRING, description: "General energetic rhythm, spikes, loops, and fluid velocity" }
+            },
+            required: ["direction", "size", "firstLetterSize", "underlineStyle", "endStroke", "dotPlacement", "letterLegibility", "nameCompletion", "overallFlow"]
+          },
+          scores: {
+            type: Type.OBJECT,
+            properties: {
+              careerScore: { type: Type.INTEGER },
+              financialFlowScore: { type: Type.INTEGER },
+              recognitionScore: { type: Type.INTEGER },
+              leadershipScore: { type: Type.INTEGER },
+              businessSuccessScore: { type: Type.INTEGER },
+              relationshipHarmonyScore: { type: Type.INTEGER },
+              overallSignatureScore: { type: Type.INTEGER }
+            },
+            required: ["careerScore", "financialFlowScore", "recognitionScore", "leadershipScore", "businessSuccessScore", "relationshipHarmonyScore", "overallSignatureScore"]
+          },
+          assessment: {
+            type: Type.OBJECT,
+            properties: {
+              currentSignatureAssessment: { type: Type.STRING, description: "Comprehensive, deeply detailed executive paragraph on their current handwriting" },
+              strengths: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of 2-3 positive vibrational aspects" },
+              weaknesses: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of 2-3 blocking aspects" },
+              riskAreas: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of 2-3 critical risks (e.g. monetary leaks, delayed fame)" },
+              recommendedCorrections: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of 3-4 exact actionable correction steps" },
+              idealSignatureStyle: { type: Type.STRING, description: "Detailed description of the perfect signature tailored to their birth numbers" },
+              personalizedSignatureBlueprint: { type: Type.STRING, description: "Comprehensive step-by-step physical blueprint (e.g. ideal angle, pen, starting letter)" }
+            },
+            required: ["currentSignatureAssessment", "strengths", "weaknesses", "riskAreas", "recommendedCorrections", "idealSignatureStyle", "personalizedSignatureBlueprint"]
+          },
+          beforeAfter: {
+            type: Type.OBJECT,
+            properties: {
+              before: {
+                type: Type.OBJECT,
+                properties: {
+                  visualDescription: { type: Type.STRING, description: "Visual description of the current layout flaws" },
+                  impact: { type: Type.STRING, description: "Vibrational/financial/career blockages caused by current style" }
+                },
+                required: ["visualDescription", "impact"]
+              },
+              after: {
+                type: Type.OBJECT,
+                properties: {
+                  visualDescription: { type: Type.STRING, description: "Visual blueprint of the corrected ideal style" },
+                  impact: { type: Type.STRING, description: "Positive planetary alignments and cash flows unlocked by corrected layout" }
+                },
+                required: ["visualDescription", "impact"]
+              }
+            },
+            required: ["before", "after"]
+          }
+        },
+        required: ["analysis", "scores", "assessment", "beforeAfter"]
+      };
+
+      const aiResponse = await client.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: contents,
+        config: {
+          systemInstruction: "You are an elite, highly experienced Astro-Numerologist and Vastu Handwriting Specialist. You deliver comprehensive, non-generic, deep-dive signature analyses and audits that look like premium masterclass dossiers.",
+          responseMimeType: "application/json",
+          responseSchema: signatureAuditSchema,
+          temperature: 0.2,
+        }
+      });
+
+      const responseText = aiResponse.text;
+      if (!responseText) {
+        throw new Error("Empty response received from Gemini.");
+      }
+
+      const parsedResult = JSON.parse(responseText);
+      res.json(parsedResult);
+    } catch (err: any) {
+      console.error("AI Signature Audit server error: ", err);
+      res.status(500).json({ error: "ब्रह्मांडीय सर्वर से सिग्नेचर ऑडिट रिपोर्ट तैयार करने में विफलता। कृपया सेटिंग्स में अपनी GEMINI_API_KEY जांचें।" });
     }
   });
 

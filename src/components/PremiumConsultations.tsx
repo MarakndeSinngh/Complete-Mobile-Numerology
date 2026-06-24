@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
-  Car, Home, Briefcase, FileText, UserPlus, TrendingUp, Calendar, ChevronRight, Sparkles, Award, ShieldAlert, CheckCircle, RefreshCw, Star, ArrowRight, Info, Eye, Clock, User, Heart, Compass, Activity
+  Car, Home, Briefcase, FileText, UserPlus, TrendingUp, Calendar, ChevronRight, Sparkles, Award, ShieldAlert, CheckCircle, RefreshCw, Star, ArrowRight, Info, Eye, Clock, User, Heart, Compass, Activity,
+  Camera, Upload, X, Check, AlertTriangle, Trash2, FileImage, Shield
 } from 'lucide-react';
 import { 
   analyzeVehicleNumerology, 
@@ -42,6 +43,30 @@ export default function PremiumConsultations() {
     };
   }, []);
 
+  // Load saved profiles from localStorage and handle camera cleanup on unmount
+  React.useEffect(() => {
+    try {
+      const stored = localStorage.getItem('leo_saved_consultation_profiles');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSavedProfiles(parsed);
+          setSelectedProfileIndex(0);
+          setSigName(parsed[0].name || '');
+          setSigDob(parsed[0].dob || '');
+        }
+      }
+    } catch (e) {
+      console.error("Error loading saved consultation profiles:", e);
+    }
+
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
   // Input States
   const [vehiclePlate, setVehiclePlate] = useState('');
   const [vehicleDriver, setVehicleDriver] = useState<number>(1);
@@ -77,6 +102,22 @@ export default function PremiumConsultations() {
   const [dashaDob, setDashaDob] = useState('');
   const [dashaYear, setDashaYear] = useState<number>(2026);
   const [dashaResult, setDashaResult] = useState<DashaAnalysisReport | null>(null);
+
+  // AI Signature Audit states
+  const [sigName, setSigName] = useState('');
+  const [sigDob, setSigDob] = useState('');
+  const [sigImage, setSigImage] = useState<string | null>(null);
+  const [sigFileName, setSigFileName] = useState<string | null>(null);
+  const [isAnalyzingSig, setIsAnalyzingSig] = useState(false);
+  const [sigAuditResult, setSigAuditResult] = useState<any | null>(null);
+  const [sigCameraActive, setSigCameraActive] = useState(false);
+  const [sigError, setSigError] = useState<string | null>(null);
+  const [savedProfiles, setSavedProfiles] = useState<any[]>([]);
+  const [selectedProfileIndex, setSelectedProfileIndex] = useState<number>(-1);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const streamRef = React.useRef<MediaStream | null>(null);
 
   // Expanded explanations states ("Why This Result?")
   const [showVehicleWhy, setShowVehicleWhy] = useState(false);
@@ -143,6 +184,188 @@ export default function PremiumConsultations() {
     const report = analyzeSignatureStyle(style);
     setSignatureResult(report);
     setShowSignatureWhy(false);
+  };
+
+  // Helper calculations for Signature Numerology Integration
+  const getDriverNumber = (dateStr: string): number => {
+    if (!dateStr) return 1;
+    const parts = dateStr.split('-');
+    if (parts.length < 3) return 1;
+    const day = parseInt(parts[2], 10);
+    if (isNaN(day)) return 1;
+    const sum = String(day).split('').reduce((acc, digit) => acc + parseInt(digit, 10), 0);
+    return sum > 9 ? String(sum).split('').reduce((acc, digit) => acc + parseInt(digit, 10), 0) : sum;
+  };
+
+  const getConductorNumber = (dateStr: string): number => {
+    if (!dateStr) return 1;
+    const digits = dateStr.replace(/[^0-9]/g, '');
+    let sum = digits.split('').reduce((acc, digit) => acc + parseInt(digit, 10), 0);
+    while (sum > 9) {
+      sum = String(sum).split('').reduce((acc, digit) => acc + parseInt(digit, 10), 0);
+    }
+    return sum;
+  };
+
+  const getChaldeanNameNumber = (nameStr: string): number => {
+    if (!nameStr) return 1;
+    const CHALDEAN_MAP: Record<string, number> = {
+      A: 1, I: 1, J: 1, Q: 1, Y: 1,
+      B: 2, K: 2, R: 2,
+      C: 3, G: 3, L: 3, S: 3,
+      D: 4, M: 4, T: 4,
+      E: 5, H: 5, N: 5, X: 5,
+      U: 6, V: 6, W: 6,
+      O: 7, Z: 7,
+      F: 8, P: 8
+    };
+    const norm = nameStr.toUpperCase().replace(/[^A-Z]/g, '');
+    let sum = norm.split('').reduce((acc, char) => acc + (CHALDEAN_MAP[char] || 0), 0);
+    return sum;
+  };
+
+  const getSingleDigit = (num: number): number => {
+    let temp = num;
+    while (temp > 9) {
+      temp = String(temp).split('').reduce((acc, digit) => acc + parseInt(digit, 10), 0);
+    }
+    return temp;
+  };
+
+  // Profile selection
+  const handleProfileSelectChange = (idx: number) => {
+    setSelectedProfileIndex(idx);
+    if (idx >= 0 && idx < savedProfiles.length) {
+      const p = savedProfiles[idx];
+      setSigName(p.name || '');
+      setSigDob(p.dob || '');
+      setSigError(null);
+    } else {
+      setSigName('');
+      setSigDob('');
+    }
+  };
+
+  // Convert uploaded image or PDF to base64
+  const processSignatureFile = (file: File) => {
+    if (!file) return;
+    setSigFileName(file.name);
+    setSigError(null);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result;
+      if (typeof result === 'string') {
+        setSigImage(result);
+      }
+    };
+    reader.onerror = () => {
+      setSigError("सिग्नेचर फ़ाइल पढ़ने में विफल। कृपया कोई अन्य छवि या पीडीएफ फ़ाइल आज़माएं।");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Camera Support
+  const startCamera = async () => {
+    setSigError(null);
+    setSigImage(null);
+    setSigFileName(null);
+    setSigCameraActive(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(err => console.error("Video play failed:", err));
+      }
+    } catch (err: any) {
+      console.error("Camera access failed:", err);
+      setSigError("कैमरा एक्सेस करने में असमर्थ। कृपया जांचें कि आपने कैमरा अनुमति दी है या नहीं।");
+      setSigCameraActive(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setSigCameraActive(false);
+  };
+
+  const captureSignature = () => {
+    if (!videoRef.current) return;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth || 640;
+      canvas.height = videoRef.current.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        // Horizontal flip for mirror video preview
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        
+        // Reset transform
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        const dataUrl = canvas.toDataURL('image/png');
+        setSigImage(dataUrl);
+        setSigFileName("Camera_Capture.png");
+      }
+      stopCamera();
+    } catch (err) {
+      console.error("Capture failed:", err);
+      setSigError("सिग्नेचर कैप्चर करने में विफलता। कृपया मैन्युअल रूप से फ़ाइल अपलोड करें।");
+    }
+  };
+
+  // AI Signature Audit trigger
+  const handleAISignatureAudit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!sigName.trim()) {
+      setSigError("कृपया नाम दर्ज करें या ऊपर से एक सहेजा गया प्रोफ़ाइल चुनें।");
+      return;
+    }
+    if (!sigDob) {
+      setSigError("कृपया जन्म तिथि दर्ज करें।");
+      return;
+    }
+
+    setIsAnalyzingSig(true);
+    setSigError(null);
+
+    try {
+      const response = await fetch('/api/signature-audit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          image: sigImage || undefined,
+          personalDetails: { name: sigName, dob: sigDob },
+          manualSelection: { styleId: signatureStyle },
+          driver: getDriverNumber(sigDob),
+          conductor: getConductorNumber(sigDob),
+          nameNumber: getChaldeanNameNumber(sigName)
+        })
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json();
+        throw new Error(errJson.error || "सिग्नेचर ऑडिट विफल रहा।");
+      }
+
+      const result = await response.json();
+      setSigAuditResult(result);
+    } catch (err: any) {
+      console.error("Signature Audit API Error:", err);
+      setSigError(err.message || "सिग्नेचर ऑडिट करने में समस्या आई। कृपया पुनः प्रयास करें।");
+    } finally {
+      setIsAnalyzingSig(false);
+    }
   };
 
   const handleChildSubmit = (e: React.FormEvent) => {
@@ -594,35 +817,547 @@ export default function PremiumConsultations() {
         {activeModule === 'SIGNATURE' && (
           <motion.div variants={cardVariants} initial="hidden" animate="visible" className="space-y-6">
             <div className="border-b border-[#F2E8DC] pb-4">
-              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">Signature Style Diagnostics</h3>
-              <p className="text-xs text-slate-500 font-sans">Audit how different signature trailing coordinates or ending lines directly block or accelerate career wealth flow.</p>
+              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">AI Signature Audit Pro</h3>
+              <p className="text-xs text-slate-500 font-sans">Audit how different signature trailing coordinates or ending lines directly block or accelerate career wealth flow under Handwriting Vastu & Chaldean Numerology.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Select Your Current Signature Outline</label>
-                {[
-                  { id: 'RISING_UNDERLINE', label: '15-Degree Rising Line + Underline' },
-                  { id: 'TRAILING_DOT_BELOW', label: 'First letter large + trailing dot below' },
-                  { id: 'FALLING_LINE', label: 'Downward sloping trailing segment' },
-                  { id: 'DOUBLE_UNDERLINE', label: 'Straight horizontal line + two support underlines' },
-                ].map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => handleSignatureTrigger(s.id)}
-                    className={`w-full text-left py-3 px-4 rounded-xl text-xs font-bold border font-sans block transition-all cursor-pointer ${
-                      signatureStyle === s.id ? 'bg-[#1E3A8A]/10 border-[#1E3A8A] text-[#1E3A8A]' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
+            {/* PROFILE SYNCHRONIZATION AND DETAILS */}
+            <div className="bg-slate-50 border rounded-3xl p-6 space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-playfair text-base font-bold text-slate-800">1. Birth Profile & Planetary Grid</h4>
+                  <p className="text-[11px] text-slate-500">Sync birth coordinates to personalize Handwriting Vastu alignment.</p>
+                </div>
+                {savedProfiles.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-slate-500 uppercase font-bold">Profile Sync:</span>
+                    <select
+                      value={selectedProfileIndex}
+                      onChange={(e) => handleProfileSelectChange(parseInt(e.target.value, 10))}
+                      className="bg-white border text-xs px-3 py-1.5 rounded-xl text-slate-700 font-medium focus:ring-1 focus:ring-[#1E3A8A] focus:outline-none"
+                    >
+                      {savedProfiles.map((p, idx) => (
+                        <option key={idx} value={idx}>{p.name} ({p.dob})</option>
+                      ))}
+                      <option value={-1}>+ Use Custom Credentials</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
-              {signatureResult && (
-                <div className="p-6 bg-white border rounded-3xl flex flex-col justify-between space-y-4 animate-in fade-in duration-500">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Subject's Full Name</label>
+                  <input
+                    type="text"
+                    value={sigName}
+                    onChange={(e) => {
+                      setSigName(e.target.value);
+                      setSelectedProfileIndex(-1);
+                    }}
+                    placeholder="e.g. Raajeev Singh"
+                    className="w-full bg-white border border-slate-200 text-xs px-4 py-2.5 rounded-xl text-slate-800 font-sans focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 focus:border-[#1E3A8A]"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Birth Date</label>
+                  <input
+                    type="date"
+                    value={sigDob}
+                    onChange={(e) => {
+                      setSigDob(e.target.value);
+                      setSelectedProfileIndex(-1);
+                    }}
+                    className="w-full bg-white border border-slate-200 text-xs px-4 py-2.5 rounded-xl text-slate-800 font-sans focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 focus:border-[#1E3A8A]"
+                  />
+                </div>
+              </div>
+
+              {sigDob && sigName && (
+                <div className="bg-white border rounded-2xl p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div className="border-r border-slate-100 last:border-none">
+                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Mulank (Driver)</span>
+                    <span className="font-playfair text-lg font-extrabold text-[#D97706] mt-0.5 block">{getDriverNumber(sigDob)}</span>
+                    <span className="text-[9px] text-slate-400">Planet: {
+                      ['Sun', 'Moon', 'Jupiter', 'Rahu', 'Mercury', 'Venus', 'Ketu', 'Saturn', 'Mars'][getDriverNumber(sigDob) - 1]
+                    }</span>
+                  </div>
+                  <div className="border-r border-slate-100 last:border-none">
+                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Bhagyank (Conductor)</span>
+                    <span className="font-playfair text-lg font-extrabold text-[#1E3A8A] mt-0.5 block">{getConductorNumber(sigDob)}</span>
+                    <span className="text-[9px] text-slate-400">Karma Destiny</span>
+                  </div>
+                  <div className="border-r border-slate-100 last:border-none">
+                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Name Chaldean</span>
+                    <span className="font-playfair text-lg font-extrabold text-indigo-800 mt-0.5 block">{getChaldeanNameNumber(sigName)}</span>
+                    <span className="text-[9px] text-slate-400">Expression Root {getSingleDigit(getChaldeanNameNumber(sigName))}</span>
+                  </div>
+                  <div className="last:border-none">
+                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Mercury Stabilizer</span>
+                    <span className="text-xs font-semibold mt-1 block">
+                      {getDriverNumber(sigDob) === 5 || getConductorNumber(sigDob) === 5 ? (
+                        <span className="text-emerald-600 flex items-center justify-center gap-1">Present (Strong)</span>
+                      ) : (
+                        <span className="text-amber-600 flex items-center justify-center gap-1">Requires Support</span>
+                      )}
+                    </span>
+                    <span className="text-[8px] text-slate-400">Central 5 alignment status</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* SIGNATURE SUBMISSION / CAPTURE BOARD */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Submission Area */}
+              <div className="bg-white border rounded-3xl p-6 space-y-4">
+                <h4 className="font-playfair text-base font-bold text-slate-800">2. Upload Signature or Use Camera</h4>
+                <p className="text-[11px] text-slate-500">Provide a sample of your current handwritten signature for AI Handwriting Vastu diagnostics.</p>
+
+                {/* Drag and Drop Zone */}
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragOver(true);
+                  }}
+                  onDragLeave={() => setIsDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragOver(false);
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                      processSignatureFile(e.dataTransfer.files[0]);
+                    }
+                  }}
+                  onClick={() => document.getElementById('sig-file-input')?.click()}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center space-y-2 min-h-[160px] ${
+                    isDragOver ? 'border-[#1E3A8A] bg-[#1E3A8A]/5' : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <input
+                    type="file"
+                    id="sig-file-input"
+                    accept="image/*,application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        processSignatureFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+
+                  {sigImage ? (
+                    <div className="space-y-2 w-full flex flex-col items-center">
+                      {sigFileName?.endsWith('.pdf') ? (
+                        <FileText className="w-10 h-10 text-red-500 animate-pulse" />
+                      ) : (
+                        <img
+                          src={sigImage}
+                          alt="Signature Preview"
+                          className="max-h-24 max-w-full object-contain rounded border shadow-sm p-1 bg-white"
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
+                      <p className="text-xs font-mono text-slate-600 truncate max-w-[200px]">{sigFileName || 'signature.png'}</p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSigImage(null);
+                          setSigFileName(null);
+                        }}
+                        className="text-[10px] font-bold text-red-600 hover:underline flex items-center gap-1 mt-1 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove file
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-slate-400" />
+                      <p className="text-xs font-semibold text-slate-600">Drag & drop your signature here, or <span className="text-[#1E3A8A] underline">browse files</span></p>
+                      <p className="text-[10px] text-slate-400">Accepts JPG, PNG, or PDF signatures (max 10MB)</p>
+                    </>
+                  )}
+                </div>
+
+                {/* Camera Capture Section */}
+                <div className="space-y-2">
+                  {!sigCameraActive ? (
+                    <button
+                      type="button"
+                      onClick={startCamera}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold border border-slate-200 hover:bg-slate-50 text-slate-700 transition-all cursor-pointer"
+                    >
+                      <Camera className="w-4 h-4 text-slate-500" /> Capture signature using camera
+                    </button>
+                  ) : (
+                    <div className="border rounded-2xl p-4 bg-slate-900 space-y-3 relative overflow-hidden">
+                      <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
+                        <video
+                          ref={videoRef}
+                          className="w-full h-full object-cover scale-x-[-1]"
+                          playsInline
+                          muted
+                        />
+                        <div className="absolute inset-4 border border-dashed border-white/40 pointer-events-none rounded flex items-center justify-center">
+                          <span className="text-[9px] text-white/50 uppercase tracking-widest font-mono">Align signature inside box</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          type="button"
+                          onClick={stopCamera}
+                          className="py-1.5 px-3 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={captureSignature}
+                          className="py-1.5 px-4 rounded-lg text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1 transition-all cursor-pointer"
+                        >
+                          <Check className="w-3 h-3" /> Capture sample
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Textual Fallback Reference Card */}
+              <div className="bg-white border rounded-3xl p-6 space-y-4">
+                <h4 className="font-playfair text-base font-bold text-slate-800">Or: Choose Current General Style</h4>
+                <p className="text-[11px] text-slate-500">No image? Choose the closest style of your current signature to run the AI engine with fallback descriptors.</p>
+                
+                <div className="space-y-2">
+                  {[
+                    { id: 'RISING_UNDERLINE', label: '15-Degree Rising Line + Underline', desc: 'Positive, ascending confidence line.' },
+                    { id: 'TRAILING_DOT_BELOW', label: 'First Letter Large + Trailing Dot Below', desc: 'Subconscious lock blockages.' },
+                    { id: 'FALLING_LINE', label: 'Downward Sloping Trailing Segment', desc: 'Declining cellular forces, delays.' },
+                    { id: 'DOUBLE_UNDERLINE', label: 'Straight Line + Two Support Underlines', desc: 'Strong structure, corporate base.' },
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      onClick={() => handleSignatureTrigger(s.id)}
+                      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer block ${
+                        signatureStyle === s.id ? 'bg-[#1E3A8A]/5 border-[#1E3A8A] ring-1 ring-[#1E3A8A]' : 'bg-white border-slate-100 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-700">{s.label}</span>
+                        {signatureStyle === s.id && <Check className="w-4 h-4 text-[#1E3A8A]" />}
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{s.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* ERROR DISPLAY */}
+            {sigError && (
+              <div className="bg-red-50 border border-red-100 rounded-2xl p-4 text-xs text-red-800 flex gap-2 items-center">
+                <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                <p className="font-medium">{sigError}</p>
+              </div>
+            )}
+
+            {/* ACTION TRIGGERS */}
+            <div className="flex justify-center pt-2">
+              <button
+                onClick={() => handleAISignatureAudit()}
+                disabled={isAnalyzingSig}
+                className={`py-3.5 px-8 rounded-full text-xs font-bold tracking-wider uppercase shadow-md flex items-center gap-2 cursor-pointer transition-all ${
+                  isAnalyzingSig
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    : 'bg-[#1E3A8A] text-white hover:bg-[#1e3a8a]/90 hover:shadow-lg active:scale-95'
+                }`}
+              >
+                {isAnalyzingSig ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" /> Analyzing Handwriting Vastu...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-300" /> Start AI Signature Audit Pro
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* AUDIT RESULTS DOSSIER */}
+            {sigAuditResult ? (
+              <div className="bg-white border rounded-3xl p-6 space-y-8 animate-in fade-in duration-500 mt-6" id="signature-dossier-report">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
+                  <div>
+                    <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">
+                      AI Handwriting Vastu Completed
+                    </span>
+                    <h3 className="font-playfair text-xl font-bold text-[#1E3A8A] mt-2">Personalized Signature Vastu Dossier</h3>
+                    <p className="text-xs text-slate-500">Tailored to Driver {getDriverNumber(sigDob)} & Conductor {getConductorNumber(sigDob)} cosmic coordinates.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        window.print();
+                      }}
+                      className="py-1.5 px-4 rounded-xl text-xs font-bold border hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5" /> Print Report
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSigAuditResult(null);
+                        setSigImage(null);
+                        setSigFileName(null);
+                      }}
+                      className="py-1.5 px-4 rounded-xl text-xs font-bold bg-slate-50 border hover:bg-slate-100 text-slate-600 transition-all cursor-pointer"
+                    >
+                      Reset Audit
+                    </button>
+                  </div>
+                </div>
+
+                {/* SCORES AND RADIAL DASHBOARD */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Circular Score Gauge */}
+                  <div className="lg:col-span-4 bg-gradient-to-br from-indigo-50/50 to-slate-50 border rounded-3xl p-6 flex flex-col items-center justify-center text-center">
+                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold mb-4">Overall Vastu Alignment</span>
+                    <div className="relative w-36 h-36 flex items-center justify-center">
+                      <svg className="absolute w-full h-full transform -rotate-90">
+                        <circle
+                          cx="72"
+                          cy="72"
+                          r="60"
+                          className="stroke-slate-200"
+                          strokeWidth="8"
+                          fill="transparent"
+                        />
+                        <circle
+                          cx="72"
+                          cy="72"
+                          r="60"
+                          className="stroke-[#1E3A8A]"
+                          strokeWidth="8"
+                          fill="transparent"
+                          strokeDasharray={2 * Math.PI * 60}
+                          strokeDashoffset={2 * Math.PI * 60 * (1 - (sigAuditResult.scores?.overallSignatureScore || 50) / 100)}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="flex flex-col items-center">
+                        <span className="font-playfair text-4xl font-black text-slate-800">{sigAuditResult.scores?.overallSignatureScore}</span>
+                        <span className="text-[10px] text-slate-400 font-mono mt-0.5">/ 100 Points</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-650 mt-4 font-medium leading-relaxed text-center">
+                      {(sigAuditResult.scores?.overallSignatureScore || 50) >= 80 ? (
+                        <span className="text-emerald-700 font-bold flex items-center justify-center gap-1">
+                          <CheckCircle className="w-4 h-4" /> Highly Auspicious Vastu Alignment
+                        </span>
+                      ) : (sigAuditResult.scores?.overallSignatureScore || 50) >= 60 ? (
+                        <span className="text-[#D97706] font-bold flex items-center justify-center gap-1">
+                          <Info className="w-4 h-4" /> Moderate Karmic Blockages Found
+                        </span>
+                      ) : (
+                        <span className="text-rose-700 font-bold flex items-center justify-center gap-1">
+                          <AlertTriangle className="w-4 h-4" /> Severe Energy Leakages Detected
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Astro-Numerology Alignment Bento Box */}
+                  <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {[
+                      { label: 'Career & Authority', val: sigAuditResult.scores?.careerScore || 65, desc: 'Fame & hierarchical growth' },
+                      { label: 'Wealth Protection', val: sigAuditResult.scores?.financialFlowScore || 60, desc: 'Locks leakage, preserves savings' },
+                      { label: 'Public Recognition', val: sigAuditResult.scores?.recognitionScore || 70, desc: 'Social brand & circle status' },
+                      { label: 'Leadership Flow', val: sigAuditResult.scores?.leadershipScore || 65, desc: 'Command & team compliance' },
+                      { label: 'Enterprise Suitability', val: sigAuditResult.scores?.businessSuccessScore || 60, desc: 'Corporate expansion & deeds' },
+                      { label: 'Relationship Harmony', val: sigAuditResult.scores?.relationshipHarmonyScore || 75, desc: 'Vocal composure & household vibes' },
+                    ].map((item, idx) => (
+                      <div key={idx} className="bg-white border rounded-2xl p-4 flex flex-col justify-between">
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-700 block">{item.label}</span>
+                          <span className="text-[9px] text-slate-400 block mt-0.5 leading-tight">{item.desc}</span>
+                        </div>
+                        <div className="mt-4 flex items-baseline gap-1">
+                          <span className="font-playfair text-xl font-bold text-slate-800">{item.val}</span>
+                          <span className="text-[9px] text-slate-400">/100</span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-1.5">
+                          <div
+                            className={`h-full rounded-full ${
+                              item.val >= 85 ? 'bg-emerald-500' : item.val >= 65 ? 'bg-indigo-500' : 'bg-amber-500'
+                            }`}
+                            style={{ width: `${item.val}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 9 PARAMETERS VASTU AUDIT DETAIL */}
+                <div className="space-y-4">
+                  <h4 className="font-playfair text-base font-bold text-slate-800">3. Vastu Handwriting Audit Breakdown</h4>
+                  <p className="text-[11px] text-slate-500">A rigorous evaluation of 9 structural handwriting coordinates detected in your signature.</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { title: 'Signature Direction', val: sigAuditResult.analysis?.direction, icon: TrendingUp },
+                      { title: 'Physical Size', val: sigAuditResult.analysis?.size, icon: Compass },
+                      { title: 'First Letter Size', val: sigAuditResult.analysis?.firstLetterSize, icon: Award },
+                      { title: 'Underline Style', val: sigAuditResult.analysis?.underlineStyle, icon: Activity },
+                      { title: 'End Stroke Angle', val: sigAuditResult.analysis?.endStroke, icon: ArrowRight },
+                      { title: 'Dot Placement', val: sigAuditResult.analysis?.dotPlacement, icon: Star },
+                      { title: 'Letter Legibility', val: sigAuditResult.analysis?.letterLegibility, icon: Eye },
+                      { title: 'Name Completion', val: sigAuditResult.analysis?.nameCompletion, icon: User },
+                      { title: 'Subconscious Flow', val: sigAuditResult.analysis?.overallFlow, icon: Sparkles },
+                    ].map((param, idx) => {
+                      const IconComp = param.icon;
+                      return (
+                        <div key={idx} className="bg-slate-50/50 border rounded-2xl p-4 space-y-2">
+                          <div className="flex items-center gap-1.5 text-slate-700 font-bold text-xs">
+                            <IconComp className="w-4 h-4 text-[#1E3A8A]" />
+                            <span>{param.title}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-600 leading-relaxed font-sans">{param.val}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* EXECUTIVE CLINICAL REPORT */}
+                <div className="bg-slate-50 border rounded-3xl p-6 space-y-6">
+                  <div>
+                    <h4 className="font-playfair text-base font-bold text-slate-800">4. Astro-Vastu Diagnostic Assessment</h4>
+                    <p className="text-[11px] text-slate-500">Executive diagnostic summary prepared by the AI master astrologer.</p>
+                  </div>
+
+                  <div className="text-xs text-slate-700 leading-relaxed font-sans bg-white border rounded-2xl p-4">
+                    <p className="font-bold text-[#1E3A8A] mb-1">Current State Analysis:</p>
+                    {sigAuditResult.assessment?.currentSignatureAssessment}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Strengths */}
+                    <div className="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 space-y-2">
+                      <span className="text-[10px] font-mono text-emerald-800 uppercase tracking-wider font-extrabold flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" /> Present Strengths
+                      </span>
+                      <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-650 font-sans">
+                        {sigAuditResult.assessment?.strengths?.map((item: string, idx: number) => <li key={idx}>{item}</li>)}
+                      </ul>
+                    </div>
+
+                    {/* Weaknesses */}
+                    <div className="bg-amber-50/40 border border-amber-100 rounded-2xl p-4 space-y-2">
+                      <span className="text-[10px] font-mono text-amber-800 uppercase tracking-wider font-extrabold flex items-center gap-1">
+                        <Info className="w-3.5 h-3.5" /> Energy Blockages
+                      </span>
+                      <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-650 font-sans">
+                        {sigAuditResult.assessment?.weaknesses?.map((item: string, idx: number) => <li key={idx}>{item}</li>)}
+                      </ul>
+                    </div>
+
+                    {/* Risk Areas */}
+                    <div className="bg-rose-50/40 border border-rose-100 rounded-2xl p-4 space-y-2">
+                      <span className="text-[10px] font-mono text-rose-800 uppercase tracking-wider font-extrabold flex items-center gap-1">
+                        <ShieldAlert className="w-3.5 h-3.5" /> Critical Risk Traps
+                      </span>
+                      <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-650 font-sans">
+                        {sigAuditResult.assessment?.riskAreas?.map((item: string, idx: number) => <li key={idx}>{item}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* BEFORE VS AFTER REDESIGN VIEW */}
+                <div className="space-y-4">
+                  <h4 className="font-playfair text-base font-bold text-slate-800">5. Before vs After Vastu Recommendations</h4>
+                  <p className="text-[11px] text-slate-500">Visual comparison of energy traps in current style versus redesigned cosmic blueprint.</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Before */}
+                    <div className="bg-rose-50/30 border border-rose-100 rounded-3xl p-5 space-y-3">
+                      <div className="flex items-center gap-2 border-b border-rose-100 pb-2">
+                        <span className="p-1 rounded-lg bg-rose-100 text-rose-700">
+                          <X className="w-4 h-4" />
+                        </span>
+                        <div>
+                          <h5 className="text-xs font-bold text-slate-800">Current Handwriting Traps (Before)</h5>
+                          <p className="text-[10px] text-rose-700">Blocks, leakages, and planetary delays.</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-[11px]">
+                        <p className="text-slate-700"><strong>Visual Blueprint:</strong> {sigAuditResult.beforeAfter?.before?.visualDescription}</p>
+                        <p className="text-slate-600 bg-white border border-rose-50 p-2.5 rounded-xl"><strong>Energy Drag:</strong> {sigAuditResult.beforeAfter?.before?.impact}</p>
+                      </div>
+                    </div>
+
+                    {/* After */}
+                    <div className="bg-emerald-50/30 border border-emerald-100 rounded-3xl p-5 space-y-3">
+                      <div className="flex items-center gap-2 border-b border-emerald-100 pb-2">
+                        <span className="p-1 rounded-lg bg-emerald-100 text-emerald-700">
+                          <Check className="w-4 h-4" />
+                        </span>
+                        <div>
+                          <h5 className="text-xs font-bold text-slate-800">Cosmic Shielded Script (After)</h5>
+                          <p className="text-[10px] text-emerald-700">Unlocks wealth vaults & public status.</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-[11px]">
+                        <p className="text-slate-700"><strong>Corrected Blueprint:</strong> {sigAuditResult.beforeAfter?.after?.visualDescription}</p>
+                        <p className="text-slate-600 bg-white border border-emerald-50 p-2.5 rounded-xl"><strong>Vibrational Flow:</strong> {sigAuditResult.beforeAfter?.after?.impact}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* THE REMEDIAL FORMULA & EXECUTION BLUEPRINT */}
+                <div className="bg-[#1E3A8A]/5 border border-[#1E3A8A]/10 rounded-3xl p-6 space-y-4">
+                  <div className="flex items-center gap-2 border-b border-[#1E3A8A]/10 pb-3">
+                    <Shield className="w-5 h-5 text-[#1E3A8A]" />
+                    <div>
+                      <h4 className="font-playfair text-base font-bold text-[#1E3A8A]">6. Ideal Redesigned Execution & Formula</h4>
+                      <p className="text-[11px] text-slate-500">Exact handwriting modifications prescribed for daily practice.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-700 font-sans">
+                    <div className="space-y-3">
+                      <div className="bg-white p-4 rounded-2xl border">
+                        <span className="text-[9px] font-mono text-[#D97706] uppercase tracking-wider block font-bold mb-1">Your Lucky Redesigned Vastu Style</span>
+                        <p className="font-medium text-slate-800 leading-relaxed">{sigAuditResult.assessment?.idealSignatureStyle}</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-2xl border">
+                        <span className="text-[9px] font-mono text-indigo-700 uppercase tracking-wider block font-bold mb-1">Physical Execution Guidelines</span>
+                        <p className="text-slate-600 leading-relaxed font-sans">{sigAuditResult.assessment?.personalizedSignatureBlueprint}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border rounded-2xl p-4 space-y-3">
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Step-by-Step Handwriting Remediation</span>
+                      <ol className="space-y-2 text-[11px] text-slate-650">
+                        {sigAuditResult.assessment?.recommendedCorrections?.map((step: string, idx: number) => (
+                          <li key={idx} className="flex gap-2 items-start font-sans">
+                            <span className="w-4 h-4 rounded-full bg-slate-100 text-[#1E3A8A] font-extrabold flex items-center justify-center text-[9px] flex-shrink-0 mt-0.5">{idx + 1}</span>
+                            <span className="leading-relaxed">{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              /* Fallback style selection display if no AI audit has run yet */
+              signatureResult && (
+                <div className="p-6 bg-slate-50 border rounded-3xl flex flex-col justify-between space-y-4 animate-in fade-in duration-500 mt-6">
                   <div className="border-b pb-3">
-                    <span className="text-[9px] font-mono bg-indigo-50 text-[#1E3A8A] font-extrabold px-2 py-0.5 rounded-full uppercase">Signature Audit Active</span>
+                    <span className="text-[9px] font-mono bg-indigo-50 text-[#1E3A8A] font-extrabold px-2 py-0.5 rounded-full uppercase">Signature General Profile</span>
                     <h4 className="font-playfair text-base font-bold text-slate-800 mt-2">Style: {signatureResult.directionStyle}</h4>
                     <p className="text-[11px] text-slate-500">Planetary Force: {signatureResult.planetaryEnergy}</p>
                   </div>
@@ -654,15 +1389,14 @@ export default function PremiumConsultations() {
                       <Info className="w-3.5 h-3.5" /> Explain why signature lines matter
                     </button>
                     {showSignatureWhy && (
-                      <div className="mt-2 p-3 bg-slate-50 rounded-xl border text-[11px] text-slate-500 space-y-1">
+                      <div className="mt-2 p-3 bg-white rounded-xl border text-[11px] text-slate-500 space-y-1">
                         <p><strong>Vastu for Handwriting:</strong> Under Indian occult dynamics, signatures are direct outlets of self-projecting subconscious. An ascending line signals high cellular energy, while terminal dots at bottom act like locks that freeze active capital flow.</p>
                       </div>
                     )}
                   </div>
-
                 </div>
-              )}
-            </div>
+              )
+            )}
           </motion.div>
         )}
 
