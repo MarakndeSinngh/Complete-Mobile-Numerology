@@ -3,6 +3,14 @@ import { computeLoshuAnalysis } from './loshuEngine';
 
 export interface CompatibilityAnalysisResult {
   overallScore: number;
+  modernScore: number;
+  traditionalScore: number;
+  combinedScore: number;
+  traditional: {
+    status: 'Strong' | 'Weak' | 'Neutral';
+    score: number;
+    explanation: string;
+  };
   layers: {
     driver: { score: number; explanation: string };
     conductor: { score: number; explanation: string };
@@ -226,6 +234,55 @@ export function calculateAdvancedCompatibility(
   const karmicWarning = (d1 + d2 === 13 || d1 === 8 || d2 === 8 || c1 === 4 || c2 === 4 || comp1 === 13 || comp2 === 13);
   const isSoulmate = (d1 === c2 && d2 === c1) || (d1 === d2 && c1 === c2) || (d1 === 9 && d2 === 1) || (d1 === 2 && d2 === 7);
 
+  // Traditional Vedic Marriage Synastry Matrices
+  const strongPairs = [
+    '1-1', '1-3', '1-5', '1-9', '3-1', '5-1', '9-1',
+    '2-2', '2-3', '2-1', '3-2', '1-2',
+    '3-3', '3-5', '3-7', '3-9', '5-3', '7-3', '9-3',
+    '5-5', '5-6', '6-5',
+    '6-1', '6-6', '6-7', '1-6', '7-6',
+    '7-1', '7-3', '1-7',
+    '8-3', '8-5', '8-6', '8-7', '3-8', '5-8', '6-8', '7-8',
+    '9-5', '9-9'
+  ];
+  const weakPairs = [
+    '1-8', '8-1',
+    '2-8', '8-2',
+    '2-9', '9-2',
+    '3-6', '6-3',
+    '4-4', '4-8', '8-4',
+    '4-9', '9-4',
+    '8-8', '8-9', '9-8'
+  ];
+
+  const pairKeyD = `${d1}-${d2}`;
+  const pairKeyC = `${c1}-${c2}`;
+
+  let traditionalStatus: 'Strong' | 'Weak' | 'Neutral' = 'Neutral';
+  let tradExplanation = '';
+  let traditionalScore = 70;
+
+  if (weakPairs.includes(pairKeyD) || weakPairs.includes(pairKeyC)) {
+    traditionalStatus = 'Weak';
+    traditionalScore = 48;
+    tradExplanation = `Traditional Vedic Chaldean Synastry identifies direct planetary conflicts (such as Sun-Saturn opposition or Moon-Mars hot frequencies) in your birth numbers. This calls for regular remedial fasts and signature alignments to dissolve the karmic drag.`;
+  } else if (strongPairs.includes(pairKeyD) && strongPairs.includes(pairKeyC)) {
+    traditionalStatus = 'Strong';
+    traditionalScore = 94;
+    tradExplanation = `Traditional Vedic Chaldean Synastry reveals exceptional birth coordinate resonance. The ruling planets of your conscious drivers and destiny conductors operate in deep mutual support, fostering strong domestic prosperity, spontaneous mutual affection, and high marital peace.`;
+  } else if (strongPairs.includes(pairKeyD) || strongPairs.includes(pairKeyC)) {
+    traditionalStatus = 'Strong';
+    traditionalScore = 84;
+    tradExplanation = `Traditional Vedic Synastry highlights a stable connection. One of the core behavioral or destiny pillars runs under a highly supportive planetary relationship, shielding your union from other minor communication delays.`;
+  } else {
+    traditionalStatus = 'Neutral';
+    traditionalScore = 68;
+    tradExplanation = `Traditional Vedic Synastry indicates a neutral planetary relationship. Your daily driver and life path conductors neither assist nor oppose each other directly. Harmony will depend on spelling correctness and local Vastu alignments.`;
+  }
+
+  const modernScore = overallScore;
+  const combinedScore = Math.round((traditionalScore * 0.4) + (modernScore * 0.6));
+
   // Compute Categories with exact mathematical links to layers
   const emotionalRes = (driverScore * 0.5) + (loshuScore * 0.3) + (karmicScore * 0.2);
   const communicationRes = isMobileAvailable 
@@ -266,7 +323,15 @@ export function calculateAdvancedCompatibility(
   };
 
   return {
-    overallScore,
+    overallScore: combinedScore, // Set combined as the primary score for backward compatibility
+    modernScore,
+    traditionalScore,
+    combinedScore,
+    traditional: {
+      status: traditionalStatus,
+      score: traditionalScore,
+      explanation: tradExplanation
+    },
     layers: {
       driver: { score: driverScore, explanation: driverExplanation },
       conductor: { score: conductorScore, explanation: conductorExplanation },

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
-  Car, Home, Briefcase, FileText, UserPlus, TrendingUp, Calendar, ChevronRight, Sparkles, Award, ShieldAlert, CheckCircle, RefreshCw, Star, ArrowRight, Info, Eye, Clock, User
+  Car, Home, Briefcase, FileText, UserPlus, TrendingUp, Calendar, ChevronRight, Sparkles, Award, ShieldAlert, CheckCircle, RefreshCw, Star, ArrowRight, Info, Eye, Clock, User, Heart, Compass, Activity
 } from 'lucide-react';
 import { 
   analyzeVehicleNumerology, 
@@ -17,6 +17,9 @@ import {
   SignatureReport,
   LuckyDatesSuite
 } from '../services/premiumModules';
+import { generateMedicalNumerologyReport, MedicalNumerologyResult } from '../services/medicalNumerologyEngine';
+import { generateNumeroVaastuReport, NumeroVaastuResult } from '../services/numeroVaastuEngine';
+import { calculateDashaAndYearForecast, DashaAnalysisReport } from '../services/dashaEngine';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 15 },
@@ -24,7 +27,7 @@ const cardVariants = {
 };
 
 export default function PremiumConsultations() {
-  const [activeModule, setActiveModule] = useState<'VEHICLE' | 'HOUSE' | 'BUSINESS' | 'SIGNATURE' | 'CHILD' | 'LUCKY_DATES'>('VEHICLE');
+  const [activeModule, setActiveModule] = useState<'VEHICLE' | 'HOUSE' | 'BUSINESS' | 'SIGNATURE' | 'CHILD' | 'LUCKY_DATES' | 'MEDICAL' | 'VAASTU' | 'DASHA'>('VEHICLE');
 
   React.useEffect(() => {
     const handleSwitch = (e: Event) => {
@@ -61,6 +64,20 @@ export default function PremiumConsultations() {
   const [luckyDatesConductor, setLuckyDatesConductor] = useState<number>(1);
   const [luckySuiteResult, setLuckySuiteResult] = useState<LuckyDatesSuite | null>(null);
 
+  // New Engines Input States
+  const [medicalDob, setMedicalDob] = useState('');
+  const [medicalName, setMedicalName] = useState('');
+  const [medicalResult, setMedicalResult] = useState<MedicalNumerologyResult | null>(null);
+
+  const [vaastuDob, setVaastuDob] = useState('');
+  const [vaastuGender, setVaastuGender] = useState<'MALE' | 'FEMALE' | 'OTHER'>('MALE');
+  const [vaastuName, setVaastuName] = useState('');
+  const [vaastuResult, setVaastuResult] = useState<NumeroVaastuResult | null>(null);
+
+  const [dashaDob, setDashaDob] = useState('');
+  const [dashaYear, setDashaYear] = useState<number>(2026);
+  const [dashaResult, setDashaResult] = useState<DashaAnalysisReport | null>(null);
+
   // Expanded explanations states ("Why This Result?")
   const [showVehicleWhy, setShowVehicleWhy] = useState(false);
   const [showHouseWhy, setShowHouseWhy] = useState(false);
@@ -68,7 +85,34 @@ export default function PremiumConsultations() {
   const [showSignatureWhy, setShowSignatureWhy] = useState(false);
   const [showChildWhy, setShowChildWhy] = useState(false);
   const [showDatesWhy, setShowDatesWhy] = useState(false);
+  const [showMedicalWhy, setShowMedicalWhy] = useState(false);
+  const [showVaastuWhy, setShowVaastuWhy] = useState(false);
+  const [showDashaWhy, setShowDashaWhy] = useState(false);
 
+  // Handlers
+  const handleMedicalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!medicalDob) return;
+    const report = generateMedicalNumerologyReport(medicalDob, medicalName || 'Seeker');
+    setMedicalResult(report);
+    setShowMedicalWhy(false);
+  };
+
+  const handleVaastuSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vaastuDob) return;
+    const report = generateNumeroVaastuReport(vaastuDob, vaastuGender, vaastuName || 'Seeker');
+    setVaastuResult(report);
+    setShowVaastuWhy(false);
+  };
+
+  const handleDashaSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dashaDob) return;
+    const report = calculateDashaAndYearForecast(dashaDob, dashaYear);
+    setDashaResult(report);
+    setShowDashaWhy(false);
+  };
   // Handlers
   const handleVehicleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,6 +176,9 @@ export default function PremiumConsultations() {
             { id: 'SIGNATURE', label: 'Signature Style Diagnostics', icon: FileText },
             { id: 'CHILD', label: 'Child Auspicious Names', icon: UserPlus },
             { id: 'LUCKY_DATES', label: 'Auspicious Dates Finder', icon: Calendar },
+            { id: 'MEDICAL', label: 'Medical Numerology Scanner', icon: Activity },
+            { id: 'VAASTU', label: 'Numero Vaastu Pro', icon: Compass },
+            { id: 'DASHA', label: 'Annual Dasha Forecast', icon: Clock },
           ].map((m) => (
             <button
               key={m.id}
@@ -806,6 +853,573 @@ export default function PremiumConsultations() {
                   {showDatesWhy && (
                     <div className="mt-2 p-3 bg-slate-50 rounded-xl border text-[11px] text-slate-500 space-y-1">
                       <p><strong>Friendly Reductions:</strong> Each date is filtered mathematically so that its reduced root number matches your friendly planetary rulers (e.g. 1, 3, 5, 6) while strictly weeding out obstructive or inimical totals to guarantee maximum smooth transit protection.</p>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* MEDICAL MODULE */}
+        {activeModule === 'MEDICAL' && (
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" className="space-y-6">
+            <div className="border-b border-[#F2E8DC] pb-4">
+              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">Ayurvedic Medical Numerology Scanner</h3>
+              <p className="text-xs text-slate-500 font-sans">Map your birth psychic coordinates and name harmonics to diagnose latent bodily doshas (Vata, Pitta, Kapha) and receive personalized preventative health advice.</p>
+            </div>
+
+            <form onSubmit={handleMedicalSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Seeker Date of Birth</label>
+                  <input
+                    type="date"
+                    required
+                    value={medicalDob}
+                    onChange={(e) => setMedicalDob(e.target.value)}
+                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Seeker Full Name (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Amit Sharma"
+                    value={medicalName}
+                    onChange={(e) => setMedicalName(e.target.value)}
+                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white py-3.5 rounded-xl font-mono text-xs uppercase tracking-widest font-bold cursor-pointer transition-all"
+              >
+                Scan My Medical Doshas & Health Index
+              </button>
+            </form>
+
+            {medicalResult && (
+              <div className="p-6 md:p-8 bg-white border rounded-3xl space-y-6 animate-in fade-in duration-500 leading-relaxed font-sans text-xs">
+                
+                {/* MEDICAL DISCLAIMER */}
+                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-[10px] flex gap-2 font-sans font-medium">
+                  <ShieldAlert className="w-4 h-4 shrink-0 text-rose-500" />
+                  <div>
+                    <strong>MEDICAL DISCLAIMER:</strong> {medicalResult.disclaimer}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                  
+                  {/* Dosha Breakdown Panel */}
+                  <div className="space-y-4 border p-5 rounded-2xl bg-amber-50/10">
+                    <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Ayurvedic Dosha Composition</h4>
+                    <div className="space-y-3 font-semibold text-[11px]">
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sky-700">Vata (वायु एवं आकाश - Senses, Movement)</span>
+                          <span>{medicalResult.doshaComposition.vata}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2">
+                          <div className="bg-sky-500 h-2 rounded-full" style={{ width: `${medicalResult.doshaComposition.vata}%` }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-red-700">Pitta (अग्नि - Digestive Fire, Energy)</span>
+                          <span>{medicalResult.doshaComposition.pitta}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2">
+                          <div className="bg-red-500 h-2 rounded-full" style={{ width: `${medicalResult.doshaComposition.pitta}%` }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-emerald-700">Kapha (जल एवं पृथ्वी - Structure, Lubricant)</span>
+                          <span>{medicalResult.doshaComposition.kapha}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2">
+                          <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${medicalResult.doshaComposition.kapha}%` }}></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-2 text-[10px] text-slate-500 leading-relaxed font-medium">
+                      Primary Dominance is governed by **{medicalResult.dominantDosha}**, causing tendencies toward cold-dry blockages or warm respiratory delays. Secondary planetary influence is **{medicalResult.secondaryDosha}**.
+                    </div>
+                  </div>
+
+                  {/* Health Scores Panel */}
+                  <div className="space-y-4 border p-5 rounded-2xl bg-amber-50/5">
+                    <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Planetary Vitality Sub-Scores</h4>
+                    <div className="space-y-2.5 text-xs">
+                      <div className="flex justify-between items-center border-b pb-1.5">
+                        <span className="text-slate-600 font-medium font-sans">Core Health Wellness Index</span>
+                        <span className="font-mono font-bold bg-amber-100 text-[#D97706] px-2.5 py-0.5 rounded-full">{medicalResult.scores.healthScore}/100</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b pb-1.5">
+                        <span className="text-slate-600 font-medium font-sans">Agni digestive Index</span>
+                        <span className="font-mono font-bold bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full">{medicalResult.scores.digestiveScore}/100</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b pb-1.5">
+                        <span className="text-slate-600 font-medium font-sans">Karmic Stress vulnerability</span>
+                        <span className="font-mono font-bold bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full">{medicalResult.scores.stressLevel}/100</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b pb-1.5">
+                        <span className="text-slate-600 font-medium font-sans">Sleep depth Index</span>
+                        <span className="font-mono font-bold bg-sky-100 text-sky-850 px-2.5 py-0.5 rounded-full">{medicalResult.scores.sleepQuality}/100</span>
+                      </div>
+                      <div className="flex justify-between items-center pb-0.5">
+                        <span className="text-slate-600 font-medium font-sans">Ojas Immunological Shield</span>
+                        <span className="font-mono font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">{medicalResult.scores.immunityScore}/100</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Weak body organs */}
+                  <div className="p-4 bg-rose-50/20 border border-rose-100/70 rounded-2xl space-y-2 text-left">
+                    <span className="font-bold font-mono text-[10px] uppercase text-rose-800 flex items-center gap-1.5 font-sans">
+                      ⚠️ Weak Body Organs & Systems
+                    </span>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {medicalResult.weakBodySystems.map((sys, idx) => (
+                        <span key={idx} className="bg-rose-50 border border-rose-100 text-rose-800 text-[9px] px-2.5 py-0.5 rounded-full font-semibold font-sans">{sys}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Fasting Day */}
+                  <div className="p-4 bg-amber-50/30 border border-amber-100 rounded-2xl space-y-2 text-left">
+                    <span className="font-bold font-mono text-[10px] uppercase text-amber-800 flex items-center gap-1.5 font-sans">
+                      ☀️ Recommended Planetary Fasting Day
+                    </span>
+                    <p className="text-xs font-bold text-slate-850 pt-1 leading-relaxed">
+                      We highly recommend practicing intermittent or complete planetary fasting on **{medicalResult.dietRecommendations.recommendedFastingDay}** to clear any blocked channel energies.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Dietary suggestions bento */}
+                <div className="p-5 border rounded-2xl space-y-4">
+                  <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Vedic Diet Adjustments</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5 text-left">
+                      <span className="text-[10px] font-mono uppercase text-emerald-700 font-bold block">🍽️ Recommended Health Foods</span>
+                      <ul className="list-disc pl-4 space-y-1 text-slate-600">
+                        {medicalResult.dietRecommendations.recommendedFoods.map((f, i) => <li key={i}>{f}</li>)}
+                      </ul>
+                    </div>
+
+                    <div className="space-y-1.5 text-left">
+                      <span className="text-[10px] font-mono uppercase text-red-700 font-bold block">🚫 Strictly Avoid / Cut Off Foods</span>
+                      <ul className="list-disc pl-4 space-y-1 text-slate-600">
+                        {medicalResult.dietRecommendations.foodsToAvoid.map((f, i) => <li key={i}>{f}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* YogaSuggestions and pranayama suggestions */}
+                <div className="p-5 border rounded-2xl bg-slate-50/50 space-y-4">
+                  <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Ayurvedic Dinacharya Lifestyle Suggestions</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-[11px]">
+                    <div className="space-y-2 text-left">
+                      <span className="font-bold text-slate-750 uppercase font-mono block">🧘 Recommended Asanas & Exercises</span>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {medicalResult.ayurvedicLifestyle.yogaSuggestions.map((yo, i) => (
+                          <span key={i} className="bg-slate-100 border text-slate-700 px-2 py-0.5 rounded-lg">{yo}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-left">
+                      <span className="font-bold text-slate-750 uppercase font-mono block">🌬️ Pranayama Channel Cleansers</span>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {medicalResult.ayurvedicLifestyle.pranayamaSuggestions.map((pr, i) => (
+                          <span key={i} className="bg-amber-50 border border-amber-100 text-amber-900 px-2 py-0.5 rounded-lg">{pr}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 col-span-1 sm:col-span-2 border-t pt-3 text-left">
+                      <span className="font-bold text-slate-750 uppercase font-mono block">⏰ Custom Sleep Guide & Morning Alarm</span>
+                      <p className="text-slate-600 mt-1 leading-relaxed text-xs">
+                        **Sleep Timing:** {medicalResult.ayurvedicLifestyle.sleepHygieneTip}. <br />
+                        **Morning Routine:** {medicalResult.ayurvedicLifestyle.morningRoutine}.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expandable Why */}
+                <div className="border-t pt-2 text-left">
+                  <button
+                    type="button"
+                    onClick={() => setShowMedicalWhy(!showMedicalWhy)}
+                    className="flex items-center gap-1 text-[11px] font-bold text-[#1E3A8A] hover:underline cursor-pointer"
+                  >
+                    <Info className="w-3.5 h-3.5" /> Explain medical calculation rule
+                  </button>
+                  {showMedicalWhy && (
+                    <div className="mt-2 p-3 bg-slate-50 rounded-xl border text-[11px] text-slate-500 space-y-1">
+                      <p><strong>Birthday-Dosha Map:</strong> Birth dates map to celestial ruler planets with established physical properties in Ayurveda. Odd numbers (1-Sun, 9-Mars) govern Pitta. Soft even digits (2-Moon, 6-Venus) rule Kapha hydration. Delayed numbers (4-Rahu, 8-Saturn) govern dryness and neural Vata blockages.</p>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* VAASTU MODULE */}
+        {activeModule === 'VAASTU' && (
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" className="space-y-6">
+            <div className="border-b border-[#F2E8DC] pb-4">
+              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">Numero Vaastu Pro Scanner</h3>
+              <p className="text-xs text-slate-500 font-sans">Calculate your cosmic Kua direction number matching the Eight Mansion (BaBazi) school. Find your positive spatial zones (Success, Health, Family, Growth) and place color placements inside your flats.</p>
+            </div>
+
+            <form onSubmit={handleVaastuSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1 text-left">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Date of Birth</label>
+                  <input
+                    type="date"
+                    required
+                    value={vaastuDob}
+                    onChange={(e) => setVaastuDob(e.target.value)}
+                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1 text-left">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Gender (Crucial for Kua Sums)</label>
+                  <select
+                    value={vaastuGender}
+                    onChange={(e: any) => setVaastuGender(e.target.value)}
+                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none cursor-pointer"
+                  >
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div className="space-y-1 text-left">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Full Name (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Raajeev Singh"
+                    value={vaastuName}
+                    onChange={(e) => setVaastuName(e.target.value)}
+                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white py-3.5 rounded-xl font-mono text-xs uppercase tracking-widest font-bold cursor-pointer transition-all"
+              >
+                Scan Spatial Vastu Zones & Kua Number
+              </button>
+            </form>
+
+            {vaastuResult && (
+              <div className="p-6 md:p-8 bg-white border rounded-3xl space-y-6 animate-in fade-in duration-500 leading-relaxed font-sans text-xs text-left">
+                
+                {/* Kua Number Core badge */}
+                <div className="bg-amber-50/40 p-5 rounded-2xl border border-amber-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-left">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-[#D97706] uppercase tracking-wider font-mono font-bold block">Your Magnetic Vastu Signature</span>
+                    <h4 className="font-playfair text-md font-bold text-slate-800">
+                      Kua Number: <strong className="text-[#D97706] text-xl font-mono">{vaastuResult.kuaNumber}</strong> (Co-ruled by Element: {vaastuResult.rulingElement})
+                    </h4>
+                    <p className="text-[10px] text-slate-500 leading-relaxed font-sans">
+                      Your birthday coordinates belong to the **{vaastuResult.groupType === 'EAST_GROUP' ? 'East Mansion Group (पूर्व दिशा समूह)' : 'West Mansion Group (पश्चिम दिशा समूह)'}**. Aligning bed and desks matching this group activates rapid monetary luck.
+                    </p>
+                  </div>
+                  <div className="bg-[#1E3A8A] text-white px-5 py-2 rounded-xl text-center shrink-0 font-sans">
+                    <span className="text-[9px] block uppercase tracking-wider font-semibold font-mono">Orient Group</span>
+                    <span className="font-bold text-xs">{vaastuResult.groupType === 'EAST_GROUP' ? 'EAST' : 'WEST'} GROUP</span>
+                  </div>
+                </div>
+
+                {/* 2x2 Lucky directions bento */}
+                <div className="space-y-4">
+                  <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Eight Mansion Favorable Directions Grid</h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    <div className="p-4 bg-emerald-50/25 border border-emerald-100/70 rounded-2xl space-y-1 text-left">
+                      <span className="font-bold font-mono text-[10px] uppercase text-emerald-800 flex items-center gap-1 font-sans">
+                        🚀 Success Direction (Sheng Chi)
+                      </span>
+                      <p className="text-sm font-bold text-slate-850 font-mono">{vaastuResult.directions.success.direction}</p>
+                      <p className="text-[10px] text-slate-500 font-medium leading-relaxed font-sans">{vaastuResult.directions.success.description}</p>
+                    </div>
+
+                    <div className="p-4 bg-[#D97706]/5 border border-[#D97706]/10 rounded-2xl space-y-1 text-left">
+                      <span className="font-bold font-mono text-[10px] uppercase text-[#D97706] flex items-center gap-1 font-sans">
+                        ➕ Health Direction (Tien Yi)
+                      </span>
+                      <p className="text-sm font-bold text-slate-855 font-mono">{vaastuResult.directions.health.direction}</p>
+                      <p className="text-[10px] text-slate-500 font-medium leading-relaxed font-sans">{vaastuResult.directions.health.description}</p>
+                    </div>
+
+                    <div className="p-4 bg-pink-50/20 border border-pink-100/70 rounded-2xl space-y-1 text-left">
+                      <span className="font-bold font-mono text-[10px] uppercase text-pink-700 flex items-center gap-1 font-sans">
+                        💕 Relationship Direction (Nien Yen)
+                      </span>
+                      <p className="text-sm font-bold text-slate-850 font-mono">{vaastuResult.directions.family.direction}</p>
+                      <p className="text-[10px] text-slate-500 font-medium leading-relaxed font-sans">{vaastuResult.directions.family.description}</p>
+                    </div>
+
+                    <div className="p-4 bg-blue-50/25 border border-blue-100/70 rounded-2xl space-y-1 text-left">
+                      <span className="font-bold font-mono text-[10px] uppercase text-blue-800 flex items-center gap-1 font-sans">
+                        🌱 Personal Development (Fu Wei)
+                      </span>
+                      <p className="text-sm font-bold text-slate-850 font-mono">{vaastuResult.directions.personalDev.direction}</p>
+                      <p className="text-[10px] text-slate-500 font-medium leading-relaxed font-sans">{vaastuResult.directions.personalDev.description}</p>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Spatial placements */}
+                <div className="p-4 bg-indigo-50/10 border border-indigo-100 rounded-2xl space-y-3 text-left">
+                  <span className="font-bold font-mono text-[10px] uppercase text-indigo-800 flex items-center gap-1.5 font-sans">
+                    🛏️ Bed Head & Office Desk Facing Guidelines
+                  </span>
+                  <div className="font-semibold text-slate-700 space-y-1 text-[11px] leading-relaxed">
+                    • **Bedroom & Bed orientation:** Headboard position must project towards the face direction **{vaastuResult.remedies.idealBedFacing}** to promote deeper sleep. <br />
+                    • **Office Desk Facing:** Always sit facing **{vaastuResult.remedies.idealDeskFacing}** to activate rapid sales and prevent communication blockages.
+                  </div>
+                </div>
+
+                {/* Colour Correction Suite */}
+                <div className="p-5 border rounded-2xl space-y-4">
+                  <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">House, Bedding, and Vehicle Paint Correction</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
+                    <div className="p-3 bg-emerald-50 rounded-xl space-y-1">
+                      <span className="text-[10px] font-mono text-emerald-800 uppercase font-bold">🎨 Primary Lucky Colours</span>
+                      <p className="text-slate-600 font-semibold">{vaastuResult.colourCorrection.luckyColours.join(', ')}</p>
+                    </div>
+
+                    <div className="p-3 bg-amber-50 rounded-xl space-y-1">
+                      <span className="text-[10px] font-mono text-amber-800 uppercase font-bold">🎨 Stabilizing Balance Colours</span>
+                      <p className="text-slate-600 font-semibold">{vaastuResult.colourCorrection.balanceColours.join(', ')}</p>
+                    </div>
+
+                    <div className="p-3 bg-red-50 rounded-xl space-y-1">
+                      <span className="text-[10px] font-mono text-red-800 uppercase font-bold">🚫 Hostile / Anti Colours to Avoid</span>
+                      <p className="text-red-800 font-semibold">{vaastuResult.colourCorrection.antiColours.join(', ')}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vastu Zone Remedies */}
+                <div className="p-5 border rounded-2xl space-y-4">
+                  <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Actionable Directional Altar Enhancements</h4>
+                  <div className="space-y-3 text-[11px] leading-relaxed">
+                    <div className="border-b pb-2">
+                      <span className="font-bold text-slate-800 uppercase font-mono block text-[10px] text-cyan-800">💼 Business & Career Zone (उत्तर - Career direction):</span>
+                      <p className="text-slate-600 mt-0.5">{vaastuResult.zonesReport.careerZone.enhancement}</p>
+                    </div>
+                    <div className="border-b pb-2">
+                      <span className="font-bold text-slate-800 uppercase font-mono block text-[10px] text-emerald-800">💰 Financial Cash Flow Zone (दक्षिण-पूर्व - Money direction):</span>
+                      <p className="text-slate-600 mt-0.5">{vaastuResult.zonesReport.moneyZone.enhancement}</p>
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-800 uppercase font-mono block text-[10px] text-pink-800">💖 Relationship Zone (दक्षिण-पश्चिम - Relationships direction):</span>
+                      <p className="text-slate-600 mt-0.5">{vaastuResult.zonesReport.relationshipZone.enhancement}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lo Shu grid + Vastu remedies */}
+                <div className="p-5 border rounded-2xl bg-amber-50/5 space-y-4">
+                  <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Vedic Missing Nodes Remedies (Lo Shu Grid Integration)</h4>
+                  <p className="text-slate-500 text-[10px] leading-relaxed pb-1 italic font-sans animate-pulse">Based on missing numbers from your date of birth, apply these specific spatial corrections inside your living rooms:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[11px] leading-relaxed font-sans">
+                    {vaastuResult.loShuVaastuRemedies.map((re, idx) => (
+                      <div key={idx} className="p-3 bg-slate-50 border rounded-xl space-y-1">
+                        <span className="font-bold font-mono text-[10px] text-[#D97706] uppercase block">Node {re.digit} Missing ({re.title})</span>
+                        <p className="text-slate-600 font-semibold text-xs">✨ {re.remedy}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bad directions warning */}
+                <div className="p-4 bg-red-50/20 border border-rose-100 rounded-2xl space-y-2 text-left">
+                  <span className="font-bold text-slate-755 font-mono text-[10px] uppercase text-rose-800 flex items-center gap-1.5 font-sans">
+                    🚫 Avoid Facing / Bad Directions Hazard Alert
+                  </span>
+                  <div className="text-xs text-slate-600 space-y-1 text-[11px] leading-relaxed font-sans font-medium">
+                    Never face these directions during important corporate meetings or property closings: <br />
+                    <span className="font-bold text-rose-800 font-mono text-center block pt-1.5">{vaastuResult.directions.avoidList.join(', ')}</span>
+                  </div>
+                </div>
+
+                {/* Expandable Why */}
+                <div className="border-t pt-2 text-left">
+                  <button
+                    type="button"
+                    onClick={() => setShowVaastuWhy(!showVaastuWhy)}
+                    className="flex items-center gap-1 text-[11px] font-bold text-[#1E3A8A] hover:underline cursor-pointer"
+                  >
+                    <Info className="w-3.5 h-3.5" /> Explain Kua directions maths
+                  </button>
+                  {showVaastuWhy && (
+                    <div className="mt-2 p-3 bg-slate-50 rounded-xl border text-[11px] text-slate-500 space-y-1 font-sans">
+                      <p><strong>Kua Calculation Rules:</strong> Kua represents your celestial frequency matching local magnetic directions: <br />
+                      • For Males: Sum the final two digits of the birth year, reduce to a single digit, and subtract from 11. <br />
+                      • For Females: Sum the final two digits of the birth year, reduce to a single digit, and add 4.</p>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* DASHA MODULE */}
+        {activeModule === 'DASHA' && (
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" className="space-y-6">
+            <div className="border-b border-[#F2E8DC] pb-4">
+              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">Annual Dasha & Shifting Forecast Engine</h3>
+              <p className="text-xs text-slate-500 font-sans">Break down your lifespans into exact 9-year major planetary epochs (Mahadashas), discover your current yearly sub-period (Antardasha), and see predictions for 2026-2030.</p>
+            </div>
+
+            <form onSubmit={handleDashaSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1 text-left">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Seeker Date of Birth</label>
+                  <input
+                    type="date"
+                    required
+                    value={dashaDob}
+                    onChange={(e) => setDashaDob(e.target.value)}
+                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1 text-left">
+                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Target Transit Year</label>
+                  <select
+                    value={dashaYear}
+                    onChange={(e) => setDashaYear(parseInt(e.target.value, 10))}
+                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none cursor-pointer"
+                  >
+                    {[2026, 2027, 2028, 2029, 2030].map(y => <option key={y} value={y}>Transit Year {y}</option>)}
+                  </select>
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white py-3.5 rounded-xl font-mono text-xs uppercase tracking-widest font-bold cursor-pointer transition-all"
+              >
+                Calculate My Planetary Dashas & Forecast
+              </button>
+            </form>
+
+            {dashaResult && (
+              <div className="p-6 md:p-8 bg-white border rounded-3xl space-y-6 animate-in fade-in duration-500 leading-relaxed font-sans text-xs text-left">
+                
+                {/* Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Current Mahadasha */}
+                  <div className="p-4 bg-[#D97706]/5 border border-[#D97706]/15 rounded-2xl text-left space-y-1">
+                    <span className="text-[10px] text-[#D97706] tracking-wider uppercase font-mono font-bold block">Active running Mahadasha</span>
+                    <h5 className="font-playfair font-bold text-slate-850 text-sm">{dashaResult.currentMahadasha.planetName}</h5>
+                    <p className="text-[10px] text-slate-500 font-medium pt-0.5">Focus Years: {dashaResult.currentMahadasha.startYear} - {dashaResult.currentMahadasha.endYear} (Age {dashaResult.currentMahadasha.startAge}-{dashaResult.currentMahadasha.endAge})</p>
+                  </div>
+
+                  {/* Current Antardasha */}
+                  <div className="p-4 bg-blue-50/25 border border-blue-100 rounded-2xl text-left space-y-1">
+                    <span className="text-[10px] text-blue-750 tracking-wider uppercase font-mono font-bold block">Active annual Antardasha sub-period</span>
+                    <h5 className="font-playfair font-bold text-slate-850 text-sm">{dashaResult.currentAntardasha.subPlanetName}</h5>
+                    <p className="text-[10px] text-slate-500 font-medium pt-0.5">Running in year: {dashaResult.currentAntardasha.calendarYear} (Influence age: {dashaResult.currentAntardasha.ageOfInfluence})</p>
+                  </div>
+                </div>
+
+                {/* Antardasha forecast text */}
+                <div className="p-4 bg-blue-50/10 border rounded-2xl">
+                  <span className="text-[10px] text-blue-800 tracking-wider uppercase font-mono font-bold block mb-1">Sub period influence advice</span>
+                  <p className="text-xs font-semibold text-slate-700 leading-relaxed">{dashaResult.currentAntardasha.forecast}</p>
+                </div>
+
+                {/* Category impacts of current dasha */}
+                <div className="space-y-4">
+                  <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Dasha Shifting Life-Category Impacts</h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    <div className="p-3 bg-slate-55 rounded-xl border">
+                      <span className="font-bold text-[#D97706] font-mono text-[9px] uppercase">💼 Career & Business Impact</span>
+                      <p className="text-[11px] text-slate-600 mt-1">{dashaResult.currentMahadasha.careerImpact}</p>
+                    </div>
+
+                    <div className="p-3 bg-slate-55 rounded-xl border">
+                      <span className="font-bold text-[#D97706] font-mono text-[9px] uppercase">💰 Financial Growth & Savings</span>
+                      <p className="text-[11px] text-slate-600 mt-1">{dashaResult.currentMahadasha.financialImpact}</p>
+                    </div>
+
+                    <div className="p-3 bg-slate-55 rounded-xl border">
+                      <span className="font-bold text-[#D97706] font-mono text-[9px] uppercase">🏥 Physical Body Vitality</span>
+                      <p className="text-[11px] text-slate-600 mt-1">{dashaResult.currentMahadasha.healthImpact}</p>
+                    </div>
+
+                    <div className="p-3 bg-slate-55 rounded-xl border">
+                      <span className="font-bold text-[#D97706] font-mono text-[9px] uppercase">💖 Marital & Relationship Harmony</span>
+                      <p className="text-[11px] text-slate-600 mt-1">{dashaResult.currentMahadasha.relationshipImpact}</p>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Personal year transit */}
+                <div className="p-5 border rounded-2xl bg-amber-50/10 space-y-2">
+                  <span className="font-bold text-[#D97706] font-mono text-[10px] uppercase block">📅 Personal Year Transit Forecast (Year {dashaResult.currentYear})</span>
+                  <div className="text-xs font-semibold text-slate-800 leading-relaxed font-sans bg-white p-4.5 border rounded-2xl shadow-inner">
+                    {dashaResult.personalYearForecast}
+                  </div>
+                </div>
+
+                {/* Timeline visual section */}
+                <div className="p-5 border rounded-2xl space-y-4">
+                  <h4 className="font-playfair text-sm uppercase text-[#D97706] tracking-wider font-bold">Your Lifetime Dasha Master Roadmap</h4>
+                  <div className="space-y-2 text-[11px]">
+                    {dashaResult.mahadashasList.map((ds, idx) => {
+                      const isCurrent = ds.planet === dashaResult.currentMahadasha.planet && ds.startYear === dashaResult.currentMahadasha.startYear;
+                      return (
+                        <div key={idx} className={`flex items-center justify-between p-2 rounded-xl border transition-all ${isCurrent ? 'bg-[#1E3A8A] text-white border-[#1E3A8A] shadow-md font-bold' : 'bg-slate-50/55 hover:bg-slate-50/90 text-slate-700'}`}>
+                          <span>Age {ds.startAge} - {ds.endAge} ({ds.startYear} - {ds.endYear})</span>
+                          <span className="uppercase text-[10px] tracking-wider font-mono shrink-0">{ds.planetName}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Expandable Why */}
+                <div className="border-t pt-2 text-left">
+                  <button
+                    type="button"
+                    onClick={() => setShowDashaWhy(!showDashaWhy)}
+                    className="flex items-center gap-1 text-[11px] font-bold text-[#1E3A8A] hover:underline cursor-pointer"
+                  >
+                    <Info className="w-3.5 h-3.5" /> Explain dasha math logic
+                  </button>
+                  {showDashaWhy && (
+                    <div className="mt-2 p-3 bg-slate-50 rounded-xl border text-[11px] text-slate-500 space-y-1 font-sans">
+                      <p><strong>Vedic Timeline Cycles:</strong> Traditional Indian numerology structures human destiny in repeating 9-year intervals. The first era is ruled by your birth core Driver planet. The second period triggers your destiny life-path Conductor planet frequency. Shifting transits keep the individual within the magnetic rays of Saturn (delay/tests), Sun (fame/vertical progress), or Venus (splendor/luxury).</p>
                     </div>
                   )}
                 </div>

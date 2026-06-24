@@ -7,10 +7,16 @@ import {
   LoshuGridBox, 
   CompatibilityAnalysisResult 
 } from '../services/loshuEngine';
+import {
+  computeLoshuMasterReport,
+  LoshuMasterReport,
+  CombinationResult,
+  ArrowMasterResult
+} from '../services/loshuMasterEngine';
 import { 
   Calendar, User, Compass, HelpCircle, Sparkles, RefreshCw, Star, 
   Trash2, Heart, Shield, BookOpen, Layers, Award, FileText, Download, 
-  Check, AlertCircle, Eye, Info, ShieldCheck, ArrowRight, CheckCircle, Flame, Droplet, Trees, Hammer, Landmark, Printer
+  Check, AlertCircle, Eye, Info, ShieldCheck, ArrowRight, CheckCircle, Flame, Droplet, Trees, Hammer, Landmark, Printer, Phone, TrendingUp, Activity
 } from 'lucide-react';
 
 const containerVariants = {
@@ -38,9 +44,11 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('MALE');
   const [analysisResult, setAnalysisResult] = useState<LoshuAnalysisResult | null>(null);
+  const [masterReport, setMasterReport] = useState<LoshuMasterReport | null>(null);
+  const [mobileNumber, setMobileNumber] = useState('');
   
   // Tab control inside Loshu Analysis
-  const [activeSubTab, setActiveSubTab] = useState<'GRID' | 'PLANES' | 'REMEDIES' | 'PERIODS' | 'COMPATIBILITY' | 'AI_REPORT' | 'HISTORY'>('GRID');
+  const [activeSubTab, setActiveSubTab] = useState<'MASTER_CONSULTATION' | 'GRID' | 'PLANES' | 'REMEDIES' | 'PERIODS' | 'COMPATIBILITY' | 'AI_REPORT' | 'HISTORY'>('MASTER_CONSULTATION');
   
   // History list
   const [history, setHistory] = useState<{ id: string; name: string; dob: string; date: string }[]>([]);
@@ -77,6 +85,9 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
       
       const analysis = computeLoshuAnalysis(initialProfile.dob, initialProfile.name, initialProfile.gender);
       setAnalysisResult(analysis);
+
+      const master = computeLoshuMasterReport(initialProfile.dob, initialProfile.name, initialProfile.gender || 'MALE', mobileNumber);
+      setMasterReport(master);
     }
   }, [initialProfile]);
 
@@ -87,6 +98,9 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
     const finalName = name.trim() || 'Fate seeker';
     const analysis = computeLoshuAnalysis(dob, finalName, gender);
     setAnalysisResult(analysis);
+
+    const master = computeLoshuMasterReport(dob, finalName, gender, mobileNumber);
+    setMasterReport(master);
     
     // Save to history list
     const newHistoryItem = {
@@ -113,6 +127,10 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
     setDob(item.dob);
     const analysis = computeLoshuAnalysis(item.dob, item.name, gender);
     setAnalysisResult(analysis);
+    
+    const master = computeLoshuMasterReport(item.dob, item.name, gender, mobileNumber);
+    setMasterReport(master);
+
     setPartnerResult(null);
     setAiReport('');
   };
@@ -410,6 +428,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
           {/* SECTION 4: SUBTAB MENU */}
           <div className="border-b border-[#E5E7EB] pt-2 flex flex-wrap gap-2 print:hidden">
             {[
+              { id: 'MASTER_CONSULTATION', label: 'Master Consultation 5.0 🏆' },
               { id: 'GRID', label: 'Loshu Magic Grid' },
               { id: 'PLANES', label: 'Planes & Arrows' },
               { id: 'REMEDIES', label: 'Lal Kitab remedies' },
@@ -430,6 +449,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                     : 'text-[#6B7280] hover:text-[#1F2937] bg-transparent'
                 }`}
               >
+                {subTab.id === 'MASTER_CONSULTATION' && <Award className="w-4 h-4 text-[#D97706] animate-pulse" />}
                 {subTab.id === 'GRID' && <Compass className="w-4 h-4" />}
                 {subTab.id === 'PLANES' && <Layers className="w-4 h-4" />}
                 {subTab.id === 'REMEDIES' && <Shield className="w-4 h-4" />}
@@ -443,6 +463,1035 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
           </div>
 
           {/* TAB AREA STAGE */}
+
+          {/* TAB 0: MASTER CONSULTATION SYSTEM 5.0 */}
+          {activeSubTab === 'MASTER_CONSULTATION' && masterReport && (
+            <div className="space-y-12 animate-in fade-in duration-500 text-left print:p-0">
+              
+              {/* Premium Consultation Overview Banner */}
+              <div className="bg-gradient-to-br from-[#1F2937] via-[#111827] to-[#030712] text-white p-8 md:p-10 rounded-[40px] border border-slate-800 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#D97706]/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10 space-y-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="bg-[#D97706]/20 text-[#F59E0B] border border-[#D97706]/30 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest">
+                      ★ GRAND MASTER CONSULTATION ARCHITECTURE v5.0
+                    </span>
+                    <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest">
+                      ● EXPERT DIAGNOSTICS ACTIVE
+                    </span>
+                  </div>
+                  <h3 className="font-cinzel text-3xl md:text-5xl font-black tracking-widest text-[#FDFCF7] uppercase leading-tight">
+                    Professional Numerology Consultation Map
+                  </h3>
+                  <p className="text-slate-300 text-xs md:text-sm font-lora italic leading-relaxed max-w-3xl pt-1">
+                    Welcome to your ultimate 19-Dimensional Astrological blueprint. Built upon ancient Lo Shu grids, Chaldean vibration mathematics, and traditional Ayurvedic Dosha wellness parameters. Complete with Lal Kitab action guides.
+                  </p>
+                  
+                  {/* Dynamic Subject Quick Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-slate-800/80">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block">Consultation Subject</span>
+                      <p className="text-sm font-bold text-white font-sans">{masterReport.personal.name}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block">Cosmic Driver</span>
+                      <p className="text-sm font-bold text-[#F59E0B] font-sans"># {masterReport.personal.driver} (मूलांक)</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block">Cosmic Conductor</span>
+                      <p className="text-sm font-bold text-blue-400 font-sans"># {masterReport.personal.conductor} (भाग्यांक)</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block">Aura Archetype</span>
+                      <p className="text-sm font-bold text-emerald-400 font-sans">{masterReport.archetype.title}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* QUICK NAV BAR */}
+              <div className="p-4 bg-amber-50/50 border border-amber-200/60 rounded-3xl flex flex-wrap gap-2 text-xs font-semibold text-slate-700 print:hidden items-center">
+                <span className="font-mono text-[10px] uppercase text-[#D97706] px-2 font-bold select-none">Quick Jump:</span>
+                <a href="#master-sec-scores" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition">1. Scores</a>
+                <a href="#master-sec-grid" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition">2. Complete Grid</a>
+                <a href="#master-sec-combs" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition">3. Pairs</a>
+                <a href="#master-sec-profile" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition">4. Profile</a>
+                <a href="#master-[#master-sec-relations]" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition" onClick={(e) => { e.preventDefault(); document.getElementById('master-sec-relations')?.scrollIntoView({ behavior: 'smooth' }); }}>5. Love & Karma</a>
+                <a href="#master-[#master-sec-wealth]" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition" onClick={(e) => { e.preventDefault(); document.getElementById('master-sec-wealth')?.scrollIntoView({ behavior: 'smooth' }); }}>6. Money & Careers</a>
+                <a href="#master-[#master-sec-karmic]" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition" onClick={(e) => { e.preventDefault(); document.getElementById('master-sec-karmic')?.scrollIntoView({ behavior: 'smooth' }); }}>7. Karmic Lessons</a>
+                <a href="#master-[#master-sec-fusions]" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition" onClick={(e) => { e.preventDefault(); document.getElementById('master-sec-fusions')?.scrollIntoView({ behavior: 'smooth' }); }}>8. Mobile & Vastu</a>
+                <a href="#master-[#master-sec-health]" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition" onClick={(e) => { e.preventDefault(); document.getElementById('master-sec-health')?.scrollIntoView({ behavior: 'smooth' }); }}>9. Health & Year</a>
+                <a href="#master-[#master-sec-remedies]" className="hover:text-[#D97706] bg-white border border-[#E5E7EB] px-3 py-1.5 rounded-xl transition" onClick={(e) => { e.preventDefault(); document.getElementById('master-sec-remedies')?.scrollIntoView({ behavior: 'smooth' }); }}>10. Remedies</a>
+              </div>
+
+              {/* SECTION 1: LOSHU SUMMARY DASHBOARD */}
+              <div id="master-sec-scores" className="space-y-6 scroll-mt-6">
+                <div className="flex gap-2.5 items-center pb-2 border-b border-[#E5E7EB]">
+                  <span className="w-8 h-8 rounded-full bg-[#D97706]/10 text-[#D97706] flex items-center justify-center font-mono font-bold text-xs">01</span>
+                  <h4 className="font-cinzel text-xl font-bold text-slate-800 uppercase tracking-widest">Lo Shu Summary Dashboard</h4>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {Object.entries({
+                    "Mental Strength Score": { val: masterReport.scores.mentalStrength, field: 'mentalStrength', c: 'border-t-purple-600 bg-purple-50/10' },
+                    "Emotional Strength Score": { val: masterReport.scores.emotionalStrength, field: 'emotionalStrength', c: 'border-t-rose-600 bg-rose-50/10' },
+                    "Practical Strength Score": { val: masterReport.scores.practicalStrength, field: 'practicalStrength', c: 'border-t-indigo-600 bg-indigo-50/10' },
+                    "Leadership Score": { val: masterReport.scores.leadershipScore, field: 'leadershipScore', c: 'border-t-amber-600 bg-amber-50/10' },
+                    "Communication Score": { val: masterReport.scores.communicationScore, field: 'communicationScore', c: 'border-t-teal-600 bg-teal-50/10' },
+                    "Spiritual Score": { val: masterReport.scores.spiritualScore, field: 'spiritualScore', c: 'border-t-violet-600 bg-violet-50/10' },
+                    "Relationship Score": { val: masterReport.scores.relationshipScore, field: 'relationshipScore', c: 'border-t-pink-600 bg-pink-50/10' },
+                    "Career Potential Score": { val: masterReport.scores.careerPotentialScore, field: 'careerPotentialScore', c: 'border-t-blue-600 bg-blue-50/10' },
+                    "Overall Lo Shu Score": { val: masterReport.scores.overallLoshuScore, field: 'overallLoshuScore', c: 'border-t-[#D97706] bg-amber-50/20' }
+                  }).map(([title, item]) => (
+                    <div key={title} className={`p-6 rounded-[30px] border border-slate-200 shadow-sm border-t-4 flex flex-col justify-between gap-4 ${item.c}`}>
+                      <div className="space-y-1.5 text-left">
+                        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-bold">{title}</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-playfair font-black text-slate-800">{item.val}</span>
+                          <span className="text-[10px] font-mono text-slate-400">/ 100</span>
+                        </div>
+                      </div>
+                      
+                      {/* Visual score bar */}
+                      <div className="w-full bg-slate-100 rounded-full h-2">
+                        <div 
+                          className="bg-current h-2 rounded-full transition-all duration-1000" 
+                          style={{ 
+                            width: `${item.val}%`, 
+                            color: item.field === 'overallLoshuScore' ? '#D97706' : '#4B5563' 
+                          }} 
+                        />
+                      </div>
+                      
+                      <p className="text-[11px] text-slate-600 leading-relaxed font-sans mt-1">
+                        {masterReport.scores.reasons[item.field]}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SECTION 2: COMPLETE GRID ANALYSIS */}
+              <div id="master-sec-grid" className="glass-panel p-8 md:p-10 rounded-[40px] bg-white border border-[#E5E7EB] shadow-sm space-y-8 scroll-mt-6">
+                <div className="flex gap-2.5 items-center pb-2 border-b border-[#E5E7EB]">
+                  <span className="w-8 h-8 rounded-full bg-[#D97706]/10 text-[#D97706] flex items-center justify-center font-mono font-bold text-xs">02</span>
+                  <h4 className="font-cinzel text-xl font-bold text-slate-800 uppercase tracking-widest">Complete Grid Parameters</h4>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                  
+                  {/* Left Specs List */}
+                  <div className="space-y-6 text-left text-xs leading-relaxed text-slate-700">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                        <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-wider block font-bold">Present Numbers</span>
+                        <p className="text-lg font-black text-slate-800 mt-1">{masterReport.gridAnalysis.present.join(', ') || 'None'}</p>
+                        <p className="text-[10px] text-slate-400">Your core elemental configurations.</p>
+                      </div>
+                      <div className="p-4 bg-red-50/30 border border-red-200/50 rounded-2xl">
+                        <span className="text-[10px] font-mono text-red-600 uppercase tracking-wider block font-bold">Missing Numbers</span>
+                        <p className="text-lg font-black text-red-800 mt-1">{masterReport.gridAnalysis.missing.join(', ') || 'None'}</p>
+                        <p className="text-[10px] text-slate-400">Nodes needing active remediation.</p>
+                      </div>
+                    </div>
+
+                    <div className="p-5 bg-[#FBD784]/10 border border-[#D97706]/10 rounded-3xl space-y-3">
+                      <h4 className="text-xs font-bold text-slate-800 uppercase font-mono tracking-widest text-[#D97706]">Ruler Influence Audits</h4>
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-[10px] font-mono text-slate-400 uppercase">Most Influential Number:</span>
+                          <span className="font-bold text-slate-800 ml-2">Digit #{masterReport.gridAnalysis.mostInfluential.digit}</span>
+                          <p className="text-[10px] text-slate-500">{masterReport.gridAnalysis.mostInfluential.reason}</p>
+                        </div>
+                        <div className="pt-2 border-t border-slate-200/50">
+                          <span className="text-[10px] font-mono text-slate-400 uppercase">Least Influential Number:</span>
+                          <span className="font-bold text-slate-800 ml-2">Digit #{masterReport.gridAnalysis.leastInfluential.digit}</span>
+                          <p className="text-[10px] text-slate-500">{masterReport.gridAnalysis.leastInfluential.reason}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-5 bg-white border border-slate-200 rounded-3xl space-y-3">
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-400 uppercase">Life Theme Number (Destiny Root):</span>
+                        <p className="text-sm font-black text-slate-800 mt-1"># {masterReport.gridAnalysis.lifeThemeNum}</p>
+                        <p className="text-[11px] text-slate-500 leading-relaxed italic">"{masterReport.gridAnalysis.lifeThemeText}"</p>
+                      </div>
+                      <div className="pt-3 border-t border-slate-200">
+                        <span className="text-[10px] font-mono text-slate-400 uppercase">Core Personality Orientation:</span>
+                        <p className="text-sm font-black text-slate-800 mt-1"># {masterReport.gridAnalysis.corePersonalityNum}</p>
+                        <p className="text-[11px] text-slate-500 leading-relaxed italic">"{masterReport.gridAnalysis.corePersonalityText}"</p>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Right: Grid Representation & Repeated Values meanings */}
+                  <div className="space-y-6">
+                    <div className="p-6 bg-[#FDFCF7] border border-amber-200/80 rounded-[35px] space-y-4">
+                      <h4 className="text-xs font-bold text-slate-800 uppercase font-mono tracking-widest text-center text-[#D97706]">Repetitive Vibration Intensity</h4>
+                      
+                      {masterReport.gridAnalysis.repeated.length > 0 ? (
+                        <div className="space-y-4 text-left">
+                          {masterReport.gridAnalysis.repeated.map(rep => (
+                            <div key={rep.digit} className="p-3 bg-white border border-slate-200 rounded-2xl flex gap-3.5 items-start">
+                              <div className="w-9 h-9 shrink-0 rounded-full bg-amber-500/10 text-[#D97706] font-mono font-black text-sm flex items-center justify-center border border-amber-500/20">
+                                {rep.digit}
+                              </div>
+                              <div className="space-y-0.5 text-xs">
+                                <span className="font-bold text-slate-800">Digit {rep.digit} active x{rep.count} times</span>
+                                <p className="text-slate-500 leading-relaxed text-[11px]">
+                                  {rep.count === 2 && "Generates highly balanced expression, dynamic coordination and strong communicative intellect."}
+                                  {rep.count === 3 && "Extravagant expression boundaries, subject to mild talkative outbursts or severe emotional waves."}
+                                  {rep.count >= 4 && "Congested focus values; blocks immediate external guidance. Highly stubborn and requires strict peaceful meditation remediation."}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-slate-400 text-center py-4">No repetitive digits present. Your elements align harmoniously without congestion.</p>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* SECTION 3: 81 COMBINATION ANALYSIS */}
+              <div id="master-sec-combs" className="space-y-6 scroll-mt-6">
+                <div className="flex gap-2.5 items-center pb-2 border-b border-[#E5E7EB]">
+                  <span className="w-8 h-8 rounded-full bg-[#D97706]/10 text-[#D97706] flex items-center justify-center font-mono font-bold text-xs">03</span>
+                  <h4 className="font-cinzel text-xl font-bold text-slate-800 uppercase tracking-widest">81 Combinations Master Matrix</h4>
+                </div>
+
+                <div className="p-5 bg-amber-50/40 border border-amber-200/50 rounded-3xl text-left">
+                  <p className="text-xs text-slate-700 leading-relaxed italic font-lora">
+                    "Every cosmic blueprint maps complex energy pathways. Below are the key double-digit combinations active inside your specific birth grid, describing the direct impact behind planetary intersections."
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {masterReport.activeCombinations.map((comb, index) => (
+                    <div key={comb.code + index} className="p-6 bg-white border border-slate-200 rounded-[35px] shadow-sm space-y-4 text-left border-l-4 border-l-[#D97706]">
+                      <div className="flex justify-between items-center gap-4 pb-2 border-b border-slate-100">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono text-slate-400 uppercase">Combination Node #{comb.code}</span>
+                          <h4 className="text-sm font-black text-slate-800">{comb.name}</h4>
+                        </div>
+                        <div className="bg-[#D97706]/10 text-[#D97706] font-mono font-black text-lg px-4 py-2 rounded-2xl border border-[#D97706]/20">
+                          {comb.code}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2.5 text-xs text-slate-600 leading-relaxed">
+                        <p className="font-medium text-slate-800">{comb.meaning}</p>
+                        
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                          <div>
+                            <span className="text-[9px] font-mono text-[#D97706] uppercase tracking-wider block font-bold">Strengths</span>
+                            <p className="text-[11px] text-slate-600 font-sans mt-0.5">{comb.strength}</p>
+                          </div>
+                          <div>
+                            <span className="text-[9px] font-mono text-red-600 uppercase tracking-wider block font-bold">Weaknesses</span>
+                            <p className="text-[11px] text-slate-600 font-sans mt-0.5">{comb.weakness}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 pt-2 border-t border-slate-50">
+                          <div className="flex justify-between gap-4 text-[11px]">
+                            <span className="font-semibold text-slate-700 font-sans">Career Impact:</span>
+                            <span className="text-slate-500 font-sans">{comb.careerImpact}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 text-[11px]">
+                            <span className="font-semibold text-slate-700 font-sans">Relationships:</span>
+                            <span className="text-slate-500 font-sans">{comb.relationshipImpact}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 text-[11px]">
+                            <span className="font-semibold text-slate-700 font-sans">Financial Flow:</span>
+                            <span className="text-slate-500 font-sans">{comb.financialImpact}</span>
+                          </div>
+                          <div className="flex justify-between gap-4 text-[11px]">
+                            <span className="font-semibold text-slate-700 font-sans">Spiritual Influence:</span>
+                            <span className="text-slate-500 font-sans">{comb.spiritualImpact}</span>
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-[#FDFCF7] border border-[#D97706]/20 rounded-xl mt-2">
+                          <span className="text-[9px] font-mono text-[#D97706] uppercase tracking-wider block font-bold mb-0.5">Siddha Remedy</span>
+                          <p className="italic text-[#B45309] font-medium leading-relaxed font-sans text-[11px]">"{comb.remedy}"</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SECTION 4 & 5: ARCHETYPE & CHARACTER PROFILING */}
+              <div id="master-sec-profile" className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start scroll-mt-6">
+                
+                {/* SECTION 4: ARCHETYPE CARD (Left 1 Span) */}
+                <div className="bg-gradient-to-b from-[#FFFDF5] to-[#FFF7E3] p-8 rounded-[40px] border border-amber-200/70 shadow-md text-center space-y-6 flex flex-col justify-between h-full border-t-8 border-t-[#D97706]">
+                  <div className="space-y-2 relative">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-widest block font-black">YOUR DOMINANT ARCHETYPE</span>
+                    <div className="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center text-4xl shadow-md border-2 border-amber-200">
+                      🔮
+                    </div>
+                    <h3 className="font-cinzel text-2xl font-black text-slate-900 uppercase tracking-widest">{masterReport.archetype.title}</h3>
+                    <p className="text-xs text-slate-500 font-lora italic">"{masterReport.archetype.description}"</p>
+                  </div>
+
+                  <div className="p-4 bg-white/80 border border-[#D97706]/20 rounded-2xl text-left space-y-2">
+                    <span className="text-[9px] font-mono text-[#D97706] uppercase font-bold tracking-widest block">Celestial Logic Mapping</span>
+                    <p className="text-xs leading-relaxed text-slate-700 font-sans">{masterReport.archetype.reasoning}</p>
+                  </div>
+
+                  <div className="p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl space-y-2 text-center">
+                    <span className="text-[9px] font-mono text-amber-400 uppercase font-bold tracking-widest block">Active Siddha Mantra</span>
+                    <p className="text-[11px] font-black tracking-widest text-[#FDFCF7] font-mono">{masterReport.archetype.mantra}</p>
+                    <span className="text-[8px] font-mono text-slate-400 block tracking-wider">Chant 27 times face East in the silent hours.</span>
+                  </div>
+                </div>
+
+                {/* SECTION 5: CHARACTER PROFILING GRID (Right 2 Spans) */}
+                <div className="lg:col-span-2 bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 text-left">
+                  <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest pb-2 border-b border-slate-100">Subject Psychological Profiling</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs leading-relaxed">
+                    {[
+                      { l: "Thinking Style", d: masterReport.profiling.thinkingStyle },
+                      { l: "Decision Making Style", d: masterReport.profiling.decisionMakingStyle },
+                      { l: "Communication Style", d: masterReport.profiling.communicationStyle },
+                      { l: "Learning Style", d: masterReport.profiling.learningStyle },
+                      { l: "Leadership Style", d: masterReport.profiling.leadershipStyle },
+                      { l: "Work Style", d: masterReport.profiling.workStyle },
+                      { l: "Problem Solving Style", d: masterReport.profiling.problemSolvingStyle },
+                      { l: "Stress Response Pattern", d: masterReport.profiling.stressResponsePattern },
+                      { l: "Motivation Pattern", d: masterReport.profiling.motivationPattern },
+                      { l: "Self Discipline Level", d: masterReport.profiling.selfDisciplineLevel },
+                      { l: "Confidence Level", d: masterReport.profiling.confidenceLevel },
+                      { l: "Public Image Status", d: masterReport.profiling.publicImage },
+                    ].map(prof => (
+                      <div key={prof.l} className="p-4 bg-slate-50 border border-slate-200/70 rounded-2xl hover:border-amber-200 transition">
+                        <span className="text-[10px] font-mono text-[#D97706] uppercase block font-bold mb-1">{prof.l}</span>
+                        <p className="text-slate-600 font-sans leading-relaxed text-[11px]">{prof.d}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl block">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase block font-bold mb-1">Recommended Personal Growth Areas</span>
+                    <p className="text-xs leading-relaxed text-slate-700 italic font-medium font-sans">"{masterReport.profiling.personalGrowthAreas}"</p>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* SECTION 6 & 7: RELATIONSHIP BEHAVIOUR & FAMILY KARMA */}
+              <div id="master-sec-relations" className="grid grid-cols-1 lg:grid-cols-2 gap-8 scroll-mt-6">
+                
+                {/* SECTION 6: RELATIONSHIP BEHAVIOUR */}
+                <div className="bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 text-left border-t-8 border-t-pink-500">
+                  <div className="flex gap-2 items-center">
+                    <Heart className="w-5 h-5 text-pink-500" />
+                    <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Love & Relationship Psychology</h4>
+                  </div>
+                  
+                  <div className="space-y-4 text-xs leading-relaxed text-slate-600">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-pink-50/20 border border-pink-100 rounded-xl">
+                        <span className="text-[10px] font-mono text-pink-600 block uppercase font-bold">Love Language</span>
+                        <p className="font-sans leading-relaxed text-[11px] mt-0.5">{masterReport.relationshipBehaviour.loveLanguage}</p>
+                      </div>
+                      <div className="p-3 bg-pink-50/20 border border-pink-100 rounded-xl">
+                        <span className="text-[10px] font-mono text-pink-600 block uppercase font-bold">Emotional Needs</span>
+                        <p className="font-sans leading-relaxed text-[11px] mt-0.5">{masterReport.relationshipBehaviour.emotionalNeeds}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      <p><strong className="text-slate-800 font-sans">Commitment Style:</strong> {masterReport.relationshipBehaviour.commitmentStyle}</p>
+                      <p><strong className="text-slate-800 font-sans">Trust Pattern:</strong> {masterReport.relationshipBehaviour.trustPattern}</p>
+                      <p><strong className="text-slate-800 font-sans">Conflict Behaviour:</strong> {masterReport.relationshipBehaviour.conflictBehaviour}</p>
+                      <p><strong className="text-slate-800 font-sans">Marriage Expectations:</strong> {masterReport.relationshipBehaviour.marriageExpectations}</p>
+                      <p><strong className="text-slate-800 font-sans">Partner Expectations:</strong> {masterReport.relationshipBehaviour.partnerExpectations}</p>
+                      <p><strong className="text-slate-800 font-sans">Emotional Compatibility Style:</strong> {masterReport.relationshipBehaviour.emotionalCompatibilityStyle}</p>
+                    </div>
+
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
+                      <p className="text-slate-800 text-[11px] font-semibold font-sans">Relation Strengths & Challenges</p>
+                      <p className="text-[11px] font-sans text-slate-600 leading-relaxed"><strong className="text-emerald-600 font-sans">Strengths:</strong> {masterReport.relationshipBehaviour.strengths}</p>
+                      <p className="text-[11px] font-sans text-slate-600 leading-relaxed"><strong className="text-red-500 font-sans">Challenges:</strong> {masterReport.relationshipBehaviour.challenges}</p>
+                    </div>
+
+                    <p className="p-3 bg-pink-50/20 border border-pink-200/50 rounded-xl text-pink-700 italic font-medium font-sans text-[11px]">
+                      💡 Growth Suggestion: "{masterReport.relationshipBehaviour.growthSuggestions}"
+                    </p>
+                  </div>
+                </div>
+
+                {/* SECTION 7: FAMILY KARMA ANALYSIS */}
+                <div className="bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 text-left border-t-8 border-t-purple-600">
+                  <div className="flex gap-2 items-center">
+                    <ShieldCheck className="w-5 h-5 text-purple-600" />
+                    <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Generational Family Karma</h4>
+                  </div>
+                  
+                  <div className="space-y-4 text-xs leading-relaxed text-slate-600">
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                      <p><strong className="text-slate-800 font-sans">Father Figure Influence:</strong> {masterReport.familyKarma.fatherInfluence}</p>
+                      <p className="pt-2 border-t border-slate-200/60"><strong className="text-slate-800 font-sans">Mother Figure Influence:</strong> {masterReport.familyKarma.motherInfluence}</p>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      <p><strong className="text-slate-800 font-sans">Ancestral Influence:</strong> {masterReport.familyKarma.ancestralInfluence}</p>
+                      <p><strong className="text-slate-800 font-sans">Family Responsibilities:</strong> {masterReport.familyKarma.familyResponsibilities}</p>
+                      <p><strong className="text-slate-800 font-sans">Inherited Strengths:</strong> {masterReport.familyKarma.inheritedStrengths}</p>
+                      <p><strong className="text-slate-800 font-sans">Inherited Challenges:</strong> {masterReport.familyKarma.inheritedChallenges}</p>
+                    </div>
+
+                    <div className="p-4 bg-purple-50/20 border border-purple-200/50 rounded-2xl">
+                      <span className="text-[10px] font-mono text-purple-600 uppercase block font-bold mb-1">Family Karma Lessons</span>
+                      <p className="italic text-purple-900 leading-relaxed font-sans font-medium text-[11px]">"{masterReport.familyKarma.familyKarmaLessons}"</p>
+                    </div>
+
+                    <p className="text-[11px] font-sans text-slate-500 leading-relaxed">
+                      <strong>Generational Growth Areas:</strong> {masterReport.familyKarma.generationalGrowthAreas}
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* SECTION 8, 9 & 10: WEALTH PSYCHOLOGY, CAREER BLUEPRINT, HIDDEN TALENTS */}
+              <div id="master-sec-wealth" className="space-y-12 scroll-mt-6">
+                
+                {/* SECTION 8: WEALTH PSYCHOLOGY CARD */}
+                <div className="bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 text-left border-t-8 border-t-emerald-600">
+                  <div className="flex justify-between items-center flex-wrap gap-4 pb-2 border-b border-slate-100">
+                    <div className="flex gap-2 items-center">
+                      <Landmark className="w-5 h-5 text-emerald-600" />
+                      <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Wealth Psychology & Mindset Dashboard</h4>
+                    </div>
+                    <div className="flex gap-3 text-xs font-mono font-bold uppercase">
+                      <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">
+                        Wealth Potential: {masterReport.wealthPsychology.wealthPotentialScore}/100
+                      </span>
+                      <span className="bg-slate-50 text-slate-700 px-3 py-1 rounded-full border border-slate-200">
+                        Discipline: {masterReport.wealthPsychology.financialDisciplineScore}/100
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed text-slate-600">
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
+                      <span className="text-[10px] font-mono text-emerald-600 uppercase font-black tracking-wider block">Money Mindset</span>
+                      <p className="font-sans leading-relaxed text-[11px]">{masterReport.wealthPsychology.moneyMindset}</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
+                      <span className="text-[10px] font-mono text-emerald-600 uppercase font-black tracking-wider block">Business Mindset Suitability</span>
+                      <p className="font-sans leading-relaxed text-[11px]">{masterReport.wealthPsychology.businessMindset}</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
+                      <span className="text-[10px] font-mono text-emerald-600 uppercase font-black tracking-wider block">Wealth Creation Style</span>
+                      <p className="font-sans leading-relaxed text-[11px]">{masterReport.wealthPsychology.wealthCreationStyle}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3.5 text-xs text-slate-600 leading-relaxed">
+                    <p><strong className="text-slate-800 font-sans">Risk Taking Behaviour:</strong> {masterReport.wealthPsychology.riskTakingBehaviour}</p>
+                    <p><strong className="text-slate-800 font-sans">Spending Behaviour Patterns:</strong> {masterReport.wealthPsychology.spendingBehaviour}</p>
+                    <p><strong className="text-slate-800 font-sans">Saving Behaviour Guidelines:</strong> {masterReport.wealthPsychology.savingBehaviour}</p>
+                    <p><strong className="text-slate-800 font-sans">Investment Placements:</strong> {masterReport.wealthPsychology.investmentBehaviour}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div className="p-4 bg-red-50/20 border border-red-200/50 rounded-2xl">
+                      <span className="text-[10px] font-mono text-red-600 uppercase block font-bold mb-1">Money Energy Blockages</span>
+                      <p className="font-sans leading-relaxed text-[11px] text-slate-700">{masterReport.wealthPsychology.moneyBlockages}</p>
+                    </div>
+                    <div className="p-4 bg-emerald-50/20 border border-emerald-200/50 rounded-2xl">
+                      <span className="text-[10px] font-mono text-emerald-600 uppercase block font-bold mb-1">Financial Energy Remedies</span>
+                      <p className="font-sans leading-relaxed text-[11px] text-slate-700">{masterReport.wealthPsychology.financialRemedies}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECTION 9: CAREER BLUEPRINT CARD */}
+                <div className="bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-8 text-left border-t-8 border-t-blue-600">
+                  <div className="flex gap-2 items-center pb-2 border-b border-slate-100">
+                    <TrendingUp className="w-5 h-5 text-blue-600" />
+                    <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Cosmic Career Blueprint</h4>
+                  </div>
+
+                  {/* Career Suitability Metrics Wheel */}
+                  <div className="grid grid-cols-2 lg:grid-cols-7 gap-3 text-center">
+                    {Object.entries({
+                      "Teaching": masterReport.careerBlueprint.suitabilityScores.teaching,
+                      "Technology": masterReport.careerBlueprint.suitabilityScores.technology,
+                      "Management": masterReport.careerBlueprint.suitabilityScores.management,
+                      "Sales": masterReport.careerBlueprint.suitabilityScores.sales,
+                      "Creative": masterReport.careerBlueprint.suitabilityScores.creative,
+                      "Spiritual": masterReport.careerBlueprint.suitabilityScores.spiritual,
+                      "Leadership": masterReport.careerBlueprint.suitabilityScores.leadership
+                    }).map(([label, score]) => (
+                      <div key={label} className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1 hover:border-blue-200 transition">
+                        <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block font-bold">{label}</span>
+                        <p className="text-lg font-black text-[#1E3A8A] font-playfair">{score}%</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Suitability guidelines */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-600 leading-relaxed">
+                    <p><strong className="text-slate-800 font-sans block mb-0.5">Primary Best Sectors:</strong> {masterReport.careerBlueprint.bestCareers.join(', ')}</p>
+                    <p><strong className="text-slate-800 font-sans block mb-0.5">Government Job Alignment:</strong> {masterReport.careerBlueprint.governmentJobs}</p>
+                    <p><strong className="text-slate-800 font-sans block mb-0.5">Private Sector suitability:</strong> {masterReport.careerBlueprint.privateJobs}</p>
+                  </div>
+
+                  {/* Top 10 recommended Careers lists */}
+                  <div className="space-y-3.5">
+                    <span className="text-[10px] font-mono text-blue-600 uppercase tracking-widest block font-black">TOP 10 RECOMMENDED CAREER ASSIGNMENTS SUMMARY</span>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {masterReport.careerBlueprint.recommendedCareers.map((rec, idx) => (
+                        <div key={rec.title} className="p-4 bg-blue-50/10 border border-blue-100 rounded-2xl flex gap-3.5 items-start text-xs text-left">
+                          <span className="w-6 h-6 shrink-0 rounded-full bg-blue-600/10 text-[#1E3A8A] font-mono font-black text-[11px] flex items-center justify-center border border-blue-600/10">
+                            {idx+1}
+                          </span>
+                          <div className="space-y-0.5">
+                            <span className="font-bold text-slate-800 leading-relaxed">{rec.title}</span>
+                            <p className="text-slate-500 leading-relaxed font-sans text-[11px]">{rec.explanation}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* SECTION 10: HIDDEN TALENTS ENGINE */}
+                <div className="bg-[#FFFDF5] p-8 md:p-10 rounded-[40px] border border-amber-200/60 shadow-sm space-y-6 text-left border-l-4 border-l-amber-600">
+                  <div className="space-y-1 text-left">
+                    <span className="text-[9px] font-mono text-[#D97706] uppercase tracking-wider block font-bold">SECTION 10: HIDDEN TALENT DETECTOR</span>
+                    <h4 className="font-cinzel text-lg font-black text-slate-900 uppercase tracking-widest">NATURAL GIFTS & COGNITIVE TALENTS</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs leading-relaxed text-slate-600">
+                    {Object.entries({
+                      "Creative": masterReport.hiddenTalents.talents.creative,
+                      "Communication": masterReport.hiddenTalents.talents.communication,
+                      "Business": masterReport.hiddenTalents.talents.business,
+                      "Teaching": masterReport.hiddenTalents.talents.teaching,
+                      "Leadership": masterReport.hiddenTalents.talents.leadership,
+                      "Spiritual": masterReport.hiddenTalents.talents.spiritual,
+                      "Artistic": masterReport.hiddenTalents.talents.artistic,
+                      "Entrepreneurial": masterReport.hiddenTalents.talents.entrepreneurial
+                    }).map(([tName, desc]) => (
+                      <div key={tName} className="p-4 bg-white border border-slate-200 rounded-2xl">
+                        <span className="font-bold text-slate-800 font-sans block mb-1">{tName} Talent</span>
+                        <p className="text-[11px] text-slate-500 leading-relaxed font-sans">{desc}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-5 bg-white border-2 border-dashed border-[#D97706]/40 rounded-3xl space-y-1.5">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase font-bold tracking-widest block">MOST POWERFUL HIDDEN COGNITIVE TALENT</span>
+                    <p className="text-sm font-bold text-slate-800 font-sans">"{masterReport.hiddenTalents.mostPowerfulTalent}"</p>
+                    <p className="text-slate-500 leading-relaxed text-[11px] font-sans">Always focus your primary career tasks around this talent vector to experience fluid, stress-free money accumulations.</p>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* SECTION 11 & 12: KARMIC LESSON ANALYSIS & SOUL MISSION */}
+              <div id="master-sec-karmic" className="space-y-12 scroll-mt-6">
+                
+                {/* SECTION 11: KARMIC LESSONS */}
+                <div className="space-y-6">
+                  <div className="flex gap-2.5 items-center pb-2 border-b border-[#E5E7EB]">
+                    <span className="w-8 h-8 rounded-full bg-[#D97706]/10 text-[#D97706] flex items-center justify-center font-mono font-bold text-xs">07</span>
+                    <h4 className="font-cinzel text-xl font-bold text-slate-800 uppercase tracking-widest">Karmic Lesson Engine (Missing Grids Audits)</h4>
+                  </div>
+
+                  {masterReport.karmicLessons.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                      {masterReport.karmicLessons.map(lesson => (
+                        <div key={lesson.digit} className="p-6 bg-white border border-slate-200 rounded-[35px] shadow-sm space-y-4 border-t-4 border-t-red-500 hover:border-red-500/35 transition">
+                          <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                            <div>
+                              <span className="text-[10px] font-mono text-red-500 uppercase tracking-wider block font-bold">MISSING ELEMENT ROADWAY</span>
+                              <h4 className="text-sm font-black text-slate-800">Karmic Lesson for Digit #{lesson.digit}</h4>
+                            </div>
+                            <div className="w-10 h-10 shrink-0 rounded-full bg-red-100/50 text-red-700 font-mono font-black text-base flex items-center justify-center border border-red-500/20 shadow-inner">
+                              {lesson.digit}
+                            </div>
+                          </div>
+
+                          <div className="space-y-3 text-xs text-slate-600 leading-relaxed font-sans">
+                            <p><strong className="text-slate-800 font-sans block mb-0.5">Core Karmic Challenge:</strong> {lesson.lifeChallenge}</p>
+                            <p><strong className="text-slate-800 font-sans block mb-0.5">Life Growth Opportunity:</strong> {lesson.growthOpportunity}</p>
+                            <p><strong className="text-slate-800 font-sans block mb-0.5">Practical Life Advice:</strong> {lesson.practicalAdvice}</p>
+                            <p><strong className="text-slate-800 font-sans block mb-0.5">Development Daily Strategy:</strong> {lesson.developmentStrategy}</p>
+                            
+                            <div className="p-3.5 bg-red-50/20 border border-red-200/50 rounded-xl mt-2 block">
+                              <span className="text-[10px] font-mono text-red-600 uppercase font-black tracking-widest block mb-0.5">Personalised Siddha Remedy</span>
+                              <p className="italic text-red-900 leading-relaxed font-sans font-medium text-[11px]">{lesson.personalizedRemedy}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 py-4 italic text-center">Incredible! You have zero missing numbers. All earthly configuration planes are fully active inside your birth blueprint.</p>
+                  )}
+                </div>
+
+                {/* SECTION 12: SOUL MISSION ANALYSIS */}
+                <div className="bg-[#FFFDF5] p-8 md:p-10 rounded-[40px] border border-amber-200/70 shadow-sm space-y-6 text-left">
+                  <div className="flex gap-2 items-center">
+                    <Sparkles className="w-5 h-5 text-amber-500 animate-spin-slow" />
+                    <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Soul Mission & Purpose Space</h4>
+                  </div>
+
+                  <div className="p-6 bg-white border border-amber-200/40 rounded-3xl space-y-1 text-center">
+                    <span className="text-[9px] font-mono text-[#D97706] uppercase tracking-widest font-black block">HIGHER CALLING STATEMENTS</span>
+                    <p className="font-serif italic font-semibold text-lg text-slate-800 leading-relaxed">
+                      " {masterReport.soulMission.purposeStatement} "
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 leading-relaxed font-sans mt-4">
+                    <div className="p-4 bg-white border border-slate-200 rounded-2xl">
+                      <span className="font-bold text-slate-800 font-sans block mb-1">Life Purpose Roadways</span>
+                      <p className="text-slate-500 leading-relaxed font-sans text-[11px]">{masterReport.soulMission.lifePurpose}</p>
+                    </div>
+                    <div className="p-4 bg-white border border-slate-200 rounded-2xl">
+                      <span className="font-bold text-slate-800 font-sans block mb-1">Soul Mission Target</span>
+                      <p className="text-slate-500 leading-relaxed font-sans text-[11px]">{masterReport.soulMission.soulMissionText}</p>
+                    </div>
+                    <div className="p-4 bg-white border border-slate-200 rounded-2xl">
+                      <span className="font-bold text-slate-800 font-sans block mb-1">Higher Calling Framework</span>
+                      <p className="text-slate-500 leading-relaxed font-sans text-[11px]">{masterReport.soulMission.higherCalling}</p>
+                    </div>
+                    <div className="p-4 bg-white border border-slate-200 rounded-2xl">
+                      <span className="font-bold text-slate-800 font-sans block mb-1">Legacy Potential Index</span>
+                      <p className="text-slate-500 leading-relaxed font-sans text-[11px]">{masterReport.soulMission.legacyPotential}</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* SECTION 13: ARROW MASTER ANALYSIS */}
+              <div id="master-sec-arrows" className="space-y-6">
+                <div className="flex gap-2.5 items-center pb-2 border-b border-[#E5E7EB]">
+                  <span className="w-8 h-8 rounded-full bg-[#D97706]/10 text-[#D97706] flex items-center justify-center font-mono font-bold text-xs">13</span>
+                  <h4 className="font-cinzel text-xl font-bold text-slate-800 uppercase tracking-widest">12 Arrow Master Analysis</h4>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left text-xs leading-relaxed">
+                  {masterReport.arrowsAnalysis.map(arrow => (
+                    <div key={arrow.name} className={`p-6 bg-white border rounded-[35px] shadow-sm space-y-3 border-l-4 ${arrow.isActive ? 'border-l-emerald-600' : 'border-l-slate-300'}`}>
+                      <div className="flex justify-between items-center gap-4 border-b border-slate-100 pb-2">
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider block">PLANE ALIGNMENT</span>
+                          <h4 className="text-sm font-black text-slate-800 leading-relaxed">{arrow.name}</h4>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-mono tracking-widest font-black ${
+                          arrow.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-50 text-slate-400 border border-slate-200'
+                        }`}>
+                          {arrow.status}
+                        </span>
+                      </div>
+
+                      <p className="italic text-slate-600 font-lora leading-relaxed text-[11px]">"{arrow.meaning}"</p>
+                      
+                      <div className="grid grid-cols-2 gap-3 pt-1.5">
+                        <div>
+                          <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Strengths</span>
+                          <p className="text-slate-600 text-[11px] leading-relaxed font-sans">{arrow.strength}</p>
+                        </div>
+                        <div>
+                          <span className="text-[9px] font-mono text-red-500 uppercase tracking-wider block">Risk Points</span>
+                          <p className="text-slate-600 text-[11px] leading-relaxed font-sans">{arrow.risk}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 pt-2 border-t border-slate-50">
+                        <p className="text-[11px] font-sans text-slate-600"><strong className="text-slate-700 font-sans">Career Impact:</strong> {arrow.careerImpact}</p>
+                        <p className="text-[11px] font-sans text-slate-600"><strong className="text-slate-700 font-sans">Relations Impact:</strong> {arrow.relationshipImpact}</p>
+                      </div>
+
+                      <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                        <span className="text-[9px] font-mono uppercase text-[#D97706] tracking-wider block font-bold mb-0.5">Remedial Direction</span>
+                        <p className="text-slate-800 leading-relaxed font-medium font-sans text-[11px]">"{arrow.remedy}"</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* SECTION 14 & 15: INTERACTIVE FUSION STATION (MOBILE & VAASTU) */}
+              <div id="master-sec-fusions" className="grid grid-cols-1 lg:grid-cols-2 gap-8 scroll-mt-6">
+                
+                {/* SECTION 14: INTERACTIVE MOBILE FUSION */}
+                <div className="bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 text-left border-t-8 border-t-amber-600">
+                  <div className="flex gap-2 items-center">
+                    <Phone className="w-5 h-5 text-amber-600" />
+                    <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Lo Shu + Mobile Fusion (Live)</h4>
+                  </div>
+
+                  <p className="text-xs text-slate-500 leading-relaxed font-sans">
+                    Vibrational compensation mapping. Interlocking your 10-digit primary mobile number with the empty coordinates of your birth chart to clear communicative gridlocks.
+                  </p>
+
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase text-slate-400 font-bold">Input Subject Mobile Nom.:</label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        value={mobileNumber}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                          setMobileNumber(val);
+                          const master = computeLoshuMasterReport(masterReport.personal.dob, masterReport.personal.name, masterReport.personal.gender, val);
+                          setMasterReport(master);
+                        }}
+                        placeholder="e.g. 9810574362"
+                        className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 focus:border-amber-500 focus:bg-white rounded-2xl text-xs outline-none focus:ring-4 focus:ring-amber-500/15 font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {mobileNumber.length >= 8 ? (
+                    <div className="space-y-4 text-xs leading-relaxed text-slate-600 border-t border-slate-100 pt-4">
+                      <p><strong className="text-slate-800 font-sans">Mobile Strengths:</strong> {masterReport.mobileFusion.strengths}</p>
+                      <p><strong className="text-slate-800 font-sans">Mobile Weaknesses:</strong> {masterReport.mobileFusion.weaknesses}</p>
+                      <p><strong className="text-slate-800 font-sans">Compensation Analysis:</strong> {masterReport.mobileFusion.compensationAnalysis}</p>
+                      <p><strong className="text-slate-800 font-sans">Planetary Support:</strong> {masterReport.mobileFusion.supportAnalysis}</p>
+                      
+                      <div className="p-3.5 bg-amber-50/20 border border-amber-200/50 rounded-xl space-y-1 font-sans">
+                        <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-widest block font-black">RECOMMENDED MOBILE IMPROVEMENTS</span>
+                        <p className="text-slate-800 leading-relaxed font-sans text-[11px]">{masterReport.mobileFusion.improvements}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-slate-400 bg-slate-50 border border-dashed rounded-3xl text-xs font-sans">
+                      Type your 10-digit mobile phone number above to activate the real-time Compensating Fusion Engine.
+                    </div>
+                  )}
+                </div>
+
+                {/* SECTION 15: NUMERO VAASTU FUSION */}
+                <div className="bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 text-left border-t-8 border-t-indigo-600">
+                  <div className="flex gap-2 items-center">
+                    <Compass className="w-5 h-5 text-indigo-600" />
+                    <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Lo Shu + Numero Vaastu Fusion</h4>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs leading-relaxed">
+                    <span className="text-[10px] font-mono text-indigo-600 uppercase block font-bold mb-1">Mansion Directional Analysis</span>
+                    <p className="font-sans text-slate-800 font-semibold">{masterReport.vaastuFusion.directionAnalysis}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 text-xs leading-relaxed font-sans">
+                    <div className="p-4 bg-emerald-50/10 border border-emerald-100 rounded-xl">
+                      <span className="text-[10px] font-mono text-emerald-600 block uppercase font-bold">Best Directions (फायदेमंद दिशाएं)</span>
+                      <ul className="list-disc list-inside mt-1 space-y-1 font-sans text-[11px] text-slate-600">
+                        {masterReport.vaastuFusion.bestDirections.map(d => <li key={d}>{d}</li>)}
+                      </ul>
+                    </div>
+                    <div className="p-4 bg-red-50/10 border border-red-100 rounded-xl">
+                      <span className="text-[10px] font-mono text-red-600 block uppercase font-bold">Avoid Directions (अशुभ दिशाएं)</span>
+                      <ul className="list-disc list-inside mt-1 space-y-1 font-sans text-[11px] text-slate-600">
+                        {masterReport.vaastuFusion.avoidDirections.map(d => <li key={d}>{d}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3.5 text-xs text-slate-600 leading-relaxed font-sans">
+                    <p><strong className="text-slate-800 block mb-0.5">Career Zone mapping:</strong> {masterReport.vaastuFusion.zones.career}</p>
+                    <p><strong className="text-slate-800 block mb-0.5">Money/Wealth Zone mapping:</strong> {masterReport.vaastuFusion.zones.money}</p>
+                    <p><strong className="text-slate-800 block mb-0.5">Health Zone mapping:</strong> {masterReport.vaastuFusion.zones.health}</p>
+                    <p><strong className="text-slate-800 block mb-0.5">Relationship Zone mapping:</strong> {masterReport.vaastuFusion.zones.relationship}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs leading-relaxed font-sans pt-2 border-t border-slate-100">
+                    <div>
+                      <span className="text-[10px] font-mono text-indigo-600 uppercase block font-bold mb-0.5">Home Energy Remedies</span>
+                      <p className="font-sans leading-relaxed text-[11px] text-slate-500">{masterReport.vaastuFusion.homeRemedies}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono text-indigo-600 uppercase block font-bold mb-0.5">Office Work-space Remedies</span>
+                      <p className="font-sans leading-relaxed text-[11px] text-slate-500">{masterReport.vaastuFusion.officeRemedies}</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* SECTION 16 & 17: HEALTH & DOSH ANALYSIS + ANNUAL FORECAST */}
+              <div id="master-sec-health" className="grid grid-cols-1 lg:grid-cols-3 gap-8 scroll-mt-6">
+                
+                {/* SECTION 16: HEALTH & ayurveda DOSHA */}
+                <div className="lg:col-span-2 bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 text-left border-t-8 border-t-teal-600">
+                  <div className="flex gap-2 items-center pb-2 border-b border-slate-150">
+                    <Activity className="w-5 h-5 text-teal-600" />
+                    <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Ayurveda Dosha & Wellness Profile</h4>
+                  </div>
+
+                  {/* Health indexes */}
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="p-3 bg-teal-50/10 border border-teal-150 rounded-2xl">
+                      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Health Score</span>
+                      <p className="text-xl font-black text-teal-800 font-sans">{masterReport.healthAnalysis.healthScore}/100</p>
+                    </div>
+                    <div className="p-3 bg-rose-50/10 border border-rose-150 rounded-2xl">
+                      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Stress Index</span>
+                      <p className="text-xl font-black text-rose-800 font-sans">{masterReport.healthAnalysis.stressScore}/100</p>
+                    </div>
+                    <div className="p-3 bg-amber-50/10 border border-amber-150 rounded-2xl">
+                      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Vitality Energy</span>
+                      <p className="text-xl font-black text-amber-800 font-sans">{masterReport.healthAnalysis.energyScore}/100</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs leading-relaxed text-slate-600 font-sans">
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                      <span className="text-[10px] font-mono text-teal-600 uppercase block font-bold mb-1">Primary Dosha Configuration</span>
+                      <p className="text-slate-800 font-semibold font-sans">Saraswati Rulers: {masterReport.healthAnalysis.primaryDosha} (प्रधान दोष)</p>
+                      <p className="text-[11px] font-sans text-slate-500 leading-relaxed mt-1">
+                        {masterReport.healthAnalysis.primaryDosha === 'PITTA' && "Pitta dosha relates to digestion fire codes. Congestion inside South grid coordinates can elevate acidity."}
+                        {masterReport.healthAnalysis.primaryDosha === 'VATA' && "Vata dosha represents wind and dry elements. Ignites neural hyper activity and sleepless nights."}
+                        {masterReport.healthAnalysis.primaryDosha === 'KAPHA' && "Kapha dosha is water and earth elements, inducing slower metabolic rates and delayed cycles."}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                      <span className="text-[10px] font-mono text-teal-600 uppercase block font-bold mb-1">Health Tendencies</span>
+                      <p className="text-[11px] font-sans text-slate-500 leading-relaxed">{masterReport.healthAnalysis.healthTendencies}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3.5">
+                    <span className="text-[10px] font-mono text-teal-600 uppercase tracking-widest block font-black">PREVENTATIVE LIFESTYLE RECOMMENDATIONS</span>
+                    
+                    <ul className="list-disc list-inside space-y-1.5 text-xs text-slate-600 leading-relaxed font-sans">
+                      {masterReport.healthAnalysis.lifestyleRecommendations.map((rec, idx) => (
+                        <li key={idx} className="font-sans text-slate-600 text-[11px]">{rec}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <p className="p-3.5 bg-teal-50/20 border border-teal-200/50 rounded-xl text-teal-800 italic font-medium font-sans text-[11px]">
+                    🛡️ Wellness Guidance Only: "{masterReport.healthAnalysis.preventiveWellness}" (No medical diagnosis provided).
+                  </p>
+                </div>
+
+                {/* SECTION 17: TRANSIT/ANNUAL FORECAST */}
+                <div className="bg-[#FFFDF5] p-8 md:p-10 rounded-[40px] border border-amber-200/70 shadow-sm space-y-6 text-left border-t-8 border-t-amber-600">
+                  <div className="space-y-1 pb-2 border-b border-amber-200/40 text-left">
+                    <span className="text-[9px] font-mono text-[#D97706] uppercase block font-bold">SECTION 17: TRANSIT CODES</span>
+                    <h4 className="font-cinzel text-lg font-black text-slate-900 uppercase tracking-widest">PERSONAL YEAR FORECAST</h4>
+                  </div>
+
+                  <div className="space-y-3 font-mono text-xs text-slate-700">
+                    <div className="flex justify-between border-b border-amber-200/20 pb-1.5">
+                      <span>Personal Year:</span>
+                      <span className="font-bold text-[#D97706]"># {masterReport.forecasts.personalYear}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-amber-300/25 pb-1.5">
+                      <span>Current Month:</span>
+                      <span className="font-bold text-slate-800"># {masterReport.forecasts.personalMonth}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-amber-300/25 pb-1.5">
+                      <span>Current Day:</span>
+                      <span className="font-bold text-slate-800"># {masterReport.forecasts.personalDay}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 text-[11px] leading-relaxed text-slate-600 font-sans">
+                    <p><strong className="text-slate-800 font-sans block">Career Transit:</strong> {masterReport.forecasts.career}</p>
+                    <p><strong className="text-slate-800 font-sans block animate-pulse">Financial Space:</strong> {masterReport.forecasts.money}</p>
+                    <p><strong className="text-slate-800 font-sans block">Marriage & Love:</strong> {masterReport.forecasts.relationships}</p>
+                    <p><strong className="text-slate-800 font-sans block">Business & Trade:</strong> {masterReport.forecasts.business}</p>
+                  </div>
+
+                  <div className="pt-2 border-t border-amber-200/30 text-[11px] font-sans">
+                    <span className="text-[#D97706] uppercase tracking-wider block font-bold mb-1 font-mono text-[9px]">Celestial Opportunities</span>
+                    <ul className="list-disc list-inside mt-0.5 space-y-0.5 text-slate-500 font-sans">
+                      {masterReport.forecasts.opportunities.map(o => <li key={o}>{o}</li>)}
+                    </ul>
+                  </div>
+
+                  <div className="pt-2 border-t border-amber-300/25 text-[11px] font-sans">
+                    <span className="text-red-500 uppercase tracking-wider block font-bold mb-1 font-mono text-[9px]">Operational Warnings</span>
+                    <ul className="list-disc list-inside mt-0.5 space-y-0.5 text-slate-500 font-sans">
+                      {masterReport.forecasts.warnings.map(w => <li key={w}>{w}</li>)}
+                    </ul>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* SECTION 18: LAL KITAB & 90-DAY ACTION REMEDIES PLAN */}
+              <div id="master-sec-remedies" className="bg-white p-8 md:p-10 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-8 text-left border-t-8 border-t-[#D97706] scroll-mt-6">
+                
+                <div className="flex justify-between items-center pb-2 border-b border-slate-100 flex-wrap gap-4">
+                  <div className="flex gap-2 items-center">
+                    <Shield className="w-5 h-5 text-[#D97706]" />
+                    <h4 className="font-cinzel text-lg font-bold text-slate-800 uppercase tracking-widest">Siddha Remedies Altar</h4>
+                  </div>
+                  
+                  <div className="flex gap-3 text-xs font-mono font-bold uppercase text-[#D97706]">
+                    <span>Lucky Planet Colors: {masterReport.remedies.luckyColours.join(', ')}</span>
+                  </div>
+                </div>
+
+                {/* Lucky coordinates */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold font-sans">
+                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase block font-bold mb-0.5">Lucky Numbers</span>
+                    <p className="text-slate-800 font-black">{masterReport.remedies.luckyNumbers.join(', ')}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase block font-bold mb-0.5">Lucky Dates</span>
+                    <p className="text-slate-800 font-black text-[11px]">{masterReport.remedies.luckyDates.join(', ')}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase block font-bold mb-0.5">Lucky Weekdays</span>
+                    <p className="text-slate-800 font-black text-[11px]">{masterReport.remedies.luckyDays.join(', ')}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase block font-bold mb-0.5">Lucky Direction Zones</span>
+                    <p className="text-slate-800 font-black text-[11px]">{masterReport.remedies.luckyDirections[0]}</p>
+                  </div>
+                </div>
+
+                {/* Remedies split lists */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 font-sans">
+                  <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl space-y-1.5">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase font-black tracking-widest block">Personal & Career remedies</span>
+                    <ul className="list-disc list-inside mt-1 space-y-1 text-slate-500 font-sans text-[11px]">
+                      {masterReport.remedies.personalRemedies.map((r, i) => <li key={i}>{r}</li>)}
+                      {masterReport.remedies.careerRemedies.map((r, i) => <li key={i}>{r}</li>)}
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl space-y-1.5">
+                    <span className="text-[10px] font-mono text-[#D97706] uppercase font-black tracking-widest block">Financial & Spiritual remedies</span>
+                    <ul className="list-disc list-inside mt-1 space-y-1 text-slate-500 font-sans text-[11px]">
+                      {masterReport.remedies.financialRemedies.map((r, i) => <li key={i}>{r}</li>)}
+                      {masterReport.remedies.spiritualRemedies.map((r, i) => <li key={i}>{r}</li>)}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Highly Structured 90-Day Plan block */}
+                <div className="p-6 bg-amber-50/20 border border-amber-200/60 rounded-[35px] space-y-4 font-sans text-xs">
+                  <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-widest font-black block text-center">Highly Structured 90-Day Action Execution Plan</span>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="p-4 bg-white border border-[#D97706]/15 rounded-2xl space-y-1.5">
+                      <span className="bg-[#D97706]/10 text-[#D97706] px-3.5 py-1 rounded-full text-[9px] font-mono uppercase font-bold block w-max">Days 1 - 30 (Preparation Zone)</span>
+                      <p className="text-[11px] text-slate-600 leading-relaxed font-sans">{masterReport.remedies.plan90Days.days1_30}</p>
+                    </div>
+                    <div className="p-4 bg-white border border-[#D97706]/15 rounded-2xl space-y-1.5">
+                      <span className="bg-[#D97706]/10 text-[#D97706] px-3.5 py-1 rounded-full text-[9px] font-mono uppercase font-bold block w-max">Days 31 - 60 (Remediation Zone)</span>
+                      <p className="text-[11px] text-slate-600 leading-relaxed font-sans">{masterReport.remedies.plan90Days.days31_60}</p>
+                    </div>
+                    <div className="p-4 bg-white border border-[#D97706]/15 rounded-2xl space-y-1.5">
+                      <span className="bg-[#D97706]/10 text-[#D97706] px-3.5 py-1 rounded-full text-[9px] font-mono uppercase font-bold block w-max">Days 61 - 90 (Observation Zone)</span>
+                      <p className="text-[11px] text-slate-600 leading-relaxed font-sans">{masterReport.remedies.plan90Days.days61_90}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 19: PREMIUM PDF BRAND PRINTABLE REPORT MODULE */}
+              <div className="border-t-4 border-dashed border-slate-300 pt-12 space-y-6">
+                <div className="text-center space-y-4">
+                  <span className="text-4xl text-[#D97706]/20">⚜️</span>
+                  <h3 className="font-cinzel text-xl md:text-2xl font-black text-slate-800 uppercase tracking-widest">Section 19: Premium Consultation Report</h3>
+                  <p className="text-slate-400 text-xs max-w-lg mx-auto">This pristine printable artifact binds all computed 19 channels, formatted elegantly for professional Grand Master handovers.</p>
+                </div>
+
+                <div className="bg-[#111827] text-slate-100 p-8 md:p-12 rounded-[40px] border border-slate-800 shadow-xl max-w-4xl mx-auto space-y-10 relative select-all scroll-mt-6 print:border-none print:shadow-none print:p-0">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500" />
+                  
+                  {/* Watermark sign */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-2 font-cinzel text-[160px] pointer-events-none select-none select-all uppercase">☯️</div>
+
+                  {/* Header page */}
+                  <div className="text-center space-y-4 pb-8 border-b border-slate-800/80">
+                    <span className="text-amber-500 font-mono text-[9px] tracking-widest uppercase font-bold border border-amber-500/20 px-4 py-1.5 rounded-full bg-amber-500/5">
+                      Official Numerology Advisory Map
+                    </span>
+                    <h2 className="font-cinzel text-3xl font-black tracking-widest uppercase text-[#FDFCF7]">LO SHU REPORT PRESET</h2>
+                    <p className="text-slate-400 font-lora italic text-xs">"Structured advisory synthesis for sovereign candidate transitions."</p>
+                  </div>
+
+                  <div className="space-y-6 text-xs text-slate-300 leading-relaxed font-sans select-all">
+                    <p className="text-sm font-semibold text-[#F59E0B] pb-2 border-b border-slate-850">I. Executive Consultation Summary</p>
+                    <p className="font-lora italic text-slate-400 text-center text-sm">"The subject, <strong>{masterReport.personal.name}</strong>, casted with Psychic Driver #{masterReport.personal.driver} and Destiny Conductor #{masterReport.personal.conductor}, manifests an aura aligning with <strong>{masterReport.archetype.title}</strong> archetype configurations. Grounded physical structures should be paired with deep meditative remediation to bridge empty grid sectors."</p>
+
+                    <div className="grid grid-cols-2 gap-6 pt-4">
+                      <div>
+                        <p className="font-bold text-slate-100 mb-1">Grid Coordinates</p>
+                        <p className="text-slate-400">Present Digits: {masterReport.gridAnalysis.present.join(', ')}</p>
+                        <p className="text-slate-400">Missing Digits: {masterReport.gridAnalysis.missing.join(', ')}</p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-100 mb-1">Mansion Coordinates</p>
+                        <p className="text-slate-400">Kua Code: #{masterReport.vaastuFusion.kuaNumber} ({masterReport.vaastuFusion.groupType === 'EAST_GROUP' ? 'East Group' : 'West Group'})</p>
+                        <p className="text-slate-400">Zone Direction: {masterReport.vaastuFusion.bestDirections[0]}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-slate-800 space-y-2">
+                      <p className="font-semibold text-[#F59E0B]">II. Grand Advisor Counseling Notes</p>
+                      <p className="italic text-slate-400">"The alignment requires focus in South-East Wealth Zones and South-West marital zones. Carry corresponding crystals daily and water a green leafy plant relative to Mercury days. Avoid speculative trading formatted inside delayed transits."</p>
+                    </div>
+
+                    {/* Counselor signature block */}
+                    <div className="pt-8 flex justify-between items-end flex-wrap gap-6 text-[10px]">
+                      <div>
+                        <span className="text-slate-500 block uppercase font-mono tracking-wider">Date of Cast</span>
+                        <span className="font-bold font-mono text-slate-305">June 2026</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-slate-500 block uppercase font-mono tracking-wider">Consultant Signature</span>
+                        <span className="font-cinzel text-amber-500 block font-bold text-sm mt-1">LEO Grand Master Vedic System</span>
+                        <span className="text-[9px] text-slate-600 block">Cast Complete • Authenticated Blueprint</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-slate-800 flex justify-center gap-4 print:hidden">
+                    <button
+                      onClick={handlePrint}
+                      className="bg-[#D97706] hover:bg-[#B45309] text-white px-6 py-3 rounded-xl text-xs font-semibold uppercase tracking-widest cursor-pointer transition shadow-lg"
+                    >
+                      <Printer className="w-4 h-4 inline mr-1.5" /> Start Physical Printing Print
+                    </button>
+                    <button
+                      onClick={() => {
+                        const contentBlob = new Blob([JSON.stringify(masterReport, null, 2)], { type: 'application/json' });
+                        const dlUrl = URL.createObjectURL(contentBlob);
+                        const trigger = document.createElement('a');
+                        trigger.href = dlUrl;
+                        trigger.download = `Consultation_Report_${masterReport.personal.name.replace(/\s+/g,'_')}.json`;
+                        trigger.click();
+                      }}
+                      className="bg-slate-800 text-slate-300 hover:text-white px-6 py-3 rounded-xl text-xs font-semibold uppercase tracking-widest cursor-pointer transition"
+                    >
+                      Export Data Schema
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
 
           {/* TAB 1: GRID & BOX AUDITING */}
           {activeSubTab === 'GRID' && (

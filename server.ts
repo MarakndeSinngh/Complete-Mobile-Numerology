@@ -3,6 +3,9 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { PAIR_MEANINGS } from "./src/services/pairMeanings";
+import { generateMedicalNumerologyReport } from "./src/services/medicalNumerologyEngine";
+import { generateNumeroVaastuReport } from "./src/services/numeroVaastuEngine";
+import { calculateDashaAndYearForecast } from "./src/services/dashaEngine";
 
 async function startServer() {
   const app = express();
@@ -36,8 +39,13 @@ async function startServer() {
         return res.status(400).json({ error: "Missing personal details name" });
       }
 
+      // Compute additional premium modules for the report
+      const dobStr = personalDetails.dob || "1990-01-01";
+      const medReport = generateMedicalNumerologyReport(dobStr, personalDetails.name);
+      const vaastuReport = generateNumeroVaastuReport(dobStr, personalDetails.gender || 'MALE', personalDetails.name);
+      const dashaReport = calculateDashaAndYearForecast(dobStr, 2026);
+
       // Calculate or extract consecutive pairs from the mobile number digits
-      // (Using Zero-replacement logic matching the design engine)
       const mobileRaw = personalDetails.mobile || "";
       const digits = mobileRaw.replace(/[^0-9]/g, '');
       let modifiedChars: string[] = [];
@@ -79,55 +87,67 @@ Stability/Severity Score: ${item.severity}%`;
 
       const prompt = `
 Generate an exhaustive, highly detailed, professional, and empathetic traditional Numerology Life Advisory Report in pure, respectful Hindi.
+This must reads like a 15-25 page premium consulting portfolio booklet.
 
 Subject Auditable Credentials:
-- Aura Name (नाम): ${personalDetails.name}
-- Source Birthdate (जन्म तारीख): ${personalDetails.dob}
+- Name (नाम): ${personalDetails.name}
+- Date of Birth (जन्म तारीख): ${personalDetails.dob}
 - Gender (लिंग): ${personalDetails.gender || 'निर्दिष्ट नहीं'}
-- Focal Phone Line (मोबाईल नंबर): ${personalDetails.mobile} (संशोधित कंपन धारा: ${modifiedNumber})
+- Focal Phone Line (मोबाईल नंबर): ${personalDetails.mobile} (সংशोधित कंपन: ${modifiedNumber})
 
-Primary Grid Coordinates Calculated by Vedic Math (Use these values exactly):
+Primary Grid Coordinates Calculated by Design Engines (Use these values exactly):
 1. Date of Birth Grid (जन्मांक एवं भाग्यांक विश्लेषण):
    - Life Path Number (जीवन पथ संख्या / भाग्यांक): ${dobAnalysis.lifePathNumber}
    - Birth Number (जन्मांक / मूलांक): ${dobAnalysis.birthNumber}
    - Destiny Number (नामांक / भाग्य संख्या): ${dobAnalysis.destinyNumber}
-   - Soul Urge Number (आत्मिक इच्छा संख्या): ${dobAnalysis.soulUrgeNumber}
-   - Personality Number (व्यक्तित्व संख्या): ${dobAnalysis.personalityNumber}
-   - Maturity Number (परिपक्वता संख्या): ${dobAnalysis.maturityNumber}
-   - Attitude Number (दृष्टिकोण संख्या): ${dobAnalysis.attitudeNumber}
-   - Pinnacles (शिखर काल चक्र): ${dobAnalysis.pinnacles.join(', ')}
-   - Challenges (चुनौतियाँ): ${dobAnalysis.challenges.join(', ')}
-   - Personal Year 2026 (व्यक्तिगत वर्ष): ${dobAnalysis.personalYear}
-   - Missing Numbers in Birth grid (लोशू ग्रिड में अनुपस्थित अंक): ${dobAnalysis.missingNumbers.join(', ')}
-   - Karmic Debt Numbers (कर्मिक ऋण संख्या): ${dobAnalysis.karmicDebtNumbers.join(', ')}
-   - Karmic Lessons (कर्मिक पाठ): ${dobAnalysis.karmicLessons.join(', ')}
+   - Soul Urge Number: ${dobAnalysis.soulUrgeNumber}
+   - Personality Number: ${dobAnalysis.personalityNumber}
+   - Maturity Number: ${dobAnalysis.maturityNumber}
+   - Attitude Number: ${dobAnalysis.attitudeNumber}
+   - Personal Year: ${dobAnalysis.personalYear}
+   - Missing Numbers in Birth grid: ${dobAnalysis.missingNumbers.join(', ')}
 
-2. Name Vibration Coordinates (नाम कंपन विश्लेषण):
-   - Chaldean Name number (काल्डियन नामांक): ${nameAnalysis.chaldeanNumber}
-   - Pythagorean Name number (पाइथागोरियन नामांक): ${nameAnalysis.pythagoreanNumber}
-   - Indian/Vedic phonetic value (वैदिक स्वर नामांक): ${nameAnalysis.indianNumber}
-   - Positive Traits: ${nameAnalysis.traits.positive.join(', ')}
-   - Negative Traits: ${nameAnalysis.traits.negative.join(', ')}
-   - Suitable Careers: ${nameAnalysis.traits.careers.join(', ')}
+2. Medical Numerology & Ayurvedic Doshas:
+   - Dominant Dosha: ${medReport.dominantDosha}
+   - Secondary Dosha: ${medReport.secondaryDosha}
+   - Prakriti Constitution: ${medReport.prakritiType} (Vata: ${medReport.doshaComposition.vata}%, Pitta: ${medReport.doshaComposition.pitta}%, Kapha: ${medReport.doshaComposition.kapha}%)
+   - Health Wellness Score: ${medReport.scores.healthScore}/100, Digestive: ${medReport.scores.digestiveScore}/100, Immunity: ${medReport.scores.immunityScore}/100
+   - Weak body organs/systems: ${medReport.weakBodySystems.join(', ')}
+   - Recommended Foods: ${medReport.dietRecommendations.recommendedFoods.join(', ')}
+   - Foods to Avoid: ${medReport.dietRecommendations.foodsToAvoid.join(', ')}
+   - Recommended Fasting Day: ${medReport.dietRecommendations.recommendedFastingDay}
+   - Recommended Yoga & Pranayama: ${medReport.ayurvedicLifestyle.yogaSuggestions.join(', ')}; ${medReport.ayurvedicLifestyle.pranayamaSuggestions.join(', ')}
 
-3. Mobile Phone Vibrational Diagnostics:
-   - Suggestive lucky ending frequencies (अनुशंसित मोबाईल अंतिम अंक): ${remedies.mobileEndings.join(', ')}
-   - Compound vibration score (संयुक्त मोबाईल कंपन योग): ${mobileAnalysis.compoundTotal}
-   - Reduced core frequency (घटित मूल अंक प्रभाव): ${mobileAnalysis.reducedTotal}
-   - Vibrational Rating Category (कंपन मूल्यांकन): ${mobileAnalysis.rating} (Score: ${mobileAnalysis.score}/100)
-   - Repeating digit alarms (तीन या अधिक बार दोहराए गए अंक): ${mobileAnalysis.repeatingAlarms.map((a: any) => `${a.digit} (बार: ${a.count})`).join(', ') || 'कोई नहीं'}
-   - Hostile planetary pairs triggered (विरोधी ग्रहों के प्रतिकूल योग): ${mobileAnalysis.hostileRelationships.map((h: any) => h.title).join(', ') || 'कोई नहीं'}
+3. Numero Vaastu Pro Parameters:
+   - Kua Number (कुआ अंक): ${vaastuReport.kuaNumber} (Group: ${vaastuReport.groupType === 'EAST_GROUP' ? 'पूर्व दिशा समूह' : 'पश्चिम दिशा समूह'})
+   - Lucky Directions: Success -> ${vaastuReport.directions.success.direction}, Health -> ${vaastuReport.directions.health.direction}, Family -> ${vaastuReport.directions.family.direction}, Growth -> ${vaastuReport.directions.personalDev.direction}
+   - Avoid Directions: ${vaastuReport.directions.avoidList.join(', ')}
+   - Lucky Colours: ${vaastuReport.colourCorrection.luckyColours.join(', ')}, Balance: ${vaastuReport.colourCorrection.balanceColours.join(', ')}, Anti: ${vaastuReport.colourCorrection.antiColours.join(', ')}
+   - Vastu zone recommendations: Career: ${vaastuReport.zonesReport.careerZone.enhancement}, Money: ${vaastuReport.zonesReport.moneyZone.enhancement}, Relationships: ${vaastuReport.zonesReport.relationshipZone.enhancement}
 
-Active Consecutive Pairs Discovered inside User's Mobile (Focal transitions):
+4. Dasha Engine & Personal Year Forecast:
+   - Current running Mahadasha (9-year Master Cycle): Rulership by ${dashaReport.currentMahadasha.planetName} from year ${dashaReport.currentMahadasha.startYear} to ${dashaReport.currentMahadasha.endYear}
+   - Current running Antardasha (1-year Sub Cycle): Sub planet ${dashaReport.currentAntardasha.subPlanetName} (Forecast: ${dashaReport.currentAntardasha.forecast})
+   - Shifting Personal Year Transit for 2026: Personal Year ${dashaReport.personalYearNumber} (${dashaReport.personalYearForecast})
+
+5. Mobile Phone Vibrational Diagnostics:
+   - Suggestive lucky ending frequencies: ${remedies.mobileEndings.join(', ')}
+   - Compound vibration score: ${mobileAnalysis.compoundTotal}
+   - Reduced core frequency: ${mobileAnalysis.reducedTotal} (Rating Category: ${mobileAnalysis.rating}, Score: ${mobileAnalysis.score}/100)
+   - Hostile planetary pairs triggered: ${mobileAnalysis.hostileRelationships.map((h: any) => h.title).join(', ') || 'कोई नहीं'}
+
+Active Consecutive Pairs Discovered inside User's Mobile:
 ${pairsDataString || 'कोई नहीं'}
 
 Please lay out the report with the following exact chapters in professional, rich, and highly formatted Markdown. All text must be in elite traditional Hindi:
 
 - **1. मुख्य व्यक्तिगत सारांश (Executive Personal Summary)**: A majestic, poetic birds-eye view of their alignment, cosmic destiny, and general aura state.
 - **2. मूल व्यक्तित्व एवं खगोलीय-अंक ज्योतिष ब्लूप्रिंट (Core Personality & Astro-Numerology Blueprint)**: Dive deeply into Life Path (भाग्यांक), Birth Number (मूलांक), Destiny Number (नामांक), and Soul Urge frequency analysis in supreme consulting detail.
-- **3. कर्मिक ऋण और जीवन की चुनौतियाँ (Karmic Debts and Lifelong Challenges)**: Deep breakdown of karmic numbers and Pinnacles/Challenge transitions.
-- **4. काल्डियन बनाम पाइथागोरियन अंक प्रणाली विश्लेषण (Chaldean vs Pythagorean System Audit)**: Comparative examination of their name values under both systems.
-- **5. मोबाईल अंक निदान एवं सुधारात्मक उपाय (Mobile Diagnostics & Audit Remedies)**:
+- **3. चिकित्सा अंकशास्त्र एवं आयुर्वेदिक दोष निदान (Medical Numerology & Ayurvedic Dosha Diagnosis)**: Translate their medical numerology profile into deep Vedic wellness insights. Mention their dominant doshas, health strength, digestive indices, weak body systems, comprehensive dietary guidelines (recommended foods, avoid foods, recommended fruits and vegetables), sleep guides, and custom morning routine. 
+  *ADD A STRICT PROFESSIONAL DISCLAIMER AT THE START OF THIS CHAPTER: "यह रिपोर्ट केवल अंकशास्त्र-आधारित कल्याण अंतर्दृष्टि और जीवनशैली मार्गदर्शन प्रदान करती है। यह पेशेवर चिकित्सा सलाह, निदान या उपचार का विकल्प नहीं है।"*
+- **4. न्यूमरो वास्तु प्रो एवं चुंबकीय दिशा संरेखण (Numero Vaastu Pro & Spatial Direction Coordinates)**: Analyze space vibrations using their Kua number and group. Provide their Success, Health, and Career directions, lucky/anti colors suggestions for home, bedroom, office, and vehicles, and discuss active zone enhancement remedies (Career, Money, Relationship, and Spiritual). Include detailed Lo Shu + Vaastu remedies for their missing numbers!
+- **5. आगामी दशा चक्र एवं व्यक्तिगत वर्ष फलादेश (Planetary Dasha Cycles & Personal Year Forecast)**: Break down their current running Mahadasha and Antardasha influences. Map the exact health, career, relationship, and financial impacts of this cycle, followed by their Personal Year 2026 forecast and predictions for the next 5 years (2026 to 2030).
+- **6. मोबाईल अंक निदान एवं सुधारात्मक उपाय (Mobile Diagnostics & Audit Remedies)**:
   Examine the user's mobile total vibrations, repeating alarms, and hostile relationships.
   
   For EVERY pair listed in the "Active Consecutive Pairs Discovered" above, you MUST display it in this exact format. Do NOT combine them. Keep them formatted as individual cards using clean, elegant blockquotes or styled markdown:
@@ -150,8 +170,7 @@ Please lay out the report with the following exact chapters in professional, ric
   स्थिरता स्कोर:
   [X]%
   
-- **6. लाल किताब एवं ज्योतिषीय उपाय मैट्रिक्स (Lal Kitab & Astrological Remedies Matrix)**: Comprehensive consulting on Name correction spelling, lucky colors, signature advice, gemstones, and lucky days in Hindi.
-- **7. आगामी 5 वर्षों का भविष्यफल (5-Year Forecast)**: Comprehensive guide from year 2026 to 2030 (वर्ष-वार फलादेश).
+- **7. सर्वकल्याणकारी लाल किताब कवच (Comprehensive Altar Remedies Shield)**: Personalized signature guidelines (angle, underline), lucky dates, corporate metal structures placement, and customized home altar guidelines. Includes gemstone rituals and lucky colors.
 `;
 
       const aiResponse = await client.models.generateContent({
