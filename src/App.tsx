@@ -895,7 +895,7 @@ const App: React.FC = () => {
               )}
 
               {activeTab === 'ADMIN' && (
-                <AdminPanel />
+                <AdminPanel personalDetails={personalDetails} />
               )}
             </div>
 

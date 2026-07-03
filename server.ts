@@ -144,10 +144,43 @@ Please lay out the report with the following exact chapters in professional, ric
 
 - **1. मुख्य व्यक्तिगत सारांश (Executive Personal Summary)**: A majestic, poetic birds-eye view of their alignment, cosmic destiny, and general aura state.
 - **2. मूल व्यक्तित्व एवं खगोलीय-अंक ज्योतिष ब्लूप्रिंट (Core Personality & Astro-Numerology Blueprint)**: Dive deeply into Life Path (भाग्यांक), Birth Number (मूलांक), Destiny Number (नामांक), and Soul Urge frequency analysis in supreme consulting detail.
+
+  महत्वपूर्ण निर्देश (CRITICAL INSTRUCTION - NO SHALLOW OUTPUT):
+  इस अध्याय में शामिल प्रत्येक अंक (Life Path Number, Birth Number, Destiny Number, Soul Urge Number, Personality Number, Maturity Number, और Attitude Number) के लिए आपको बिना किसी अपवाद के निम्नलिखित पाँचों अनुभागों (five sections) को पूरी तरह से विस्तृत रूप में प्रस्तुत करना होगा। सामान्य या संक्षिप्त वाक्य (generic filler/shallow sentences) बिल्कुल न लिखें:
+  
+  A) **गणना एवं स्रोत (Derivation & Calculation)**:
+     स्पष्ट रूप से दिखाएं कि यह अंक कैसे प्राप्त किया गया है। उदाहरण के लिए:
+     - जन्मांक (Birth Number): "23 -> 2 + 3 = 5"
+     - भाग्यांक (Life Path): "1984-11-23 -> 1+9+8+4+1+1+2+3 = 29 -> 2+9 = 11 -> 1+1 = 2"
+     - नामांक (Destiny): "M-A-R-K-A-N-D-E → 4+1+2+2+1+5+4+1 = 20 → 2+0 = 2" (चैल्डियन पद्धति के वास्तविक मानों के साथ पूरी वर्ण-दर-वर्ण जोड़ श्रृंखला दर्शाएं)।
+  
+  B) **गहन फलादेश (In-depth Interpretation)**:
+     प्रत्येक अंक के लिए न्यूनतम 100-150 शब्दों का एक आत्मीय, गहरा और व्यक्तिगत फलादेश द्वितीय-पुरुष स्वर ("आप", "आपकी प्रकृति", "आपके जीवन में...") में होना चाहिए। यह व्याख्या पूरी तरह से उस विशिष्ट अंक और संबंधित ज्योतिषीय परंपरा (चैल्डियन/वैदिक) के अनुकूल होनी चाहिए। इसमें कोई सामान्य जेनेरिक वाक्य दोहराया नहीं जाना चाहिए।
+  
+  C) **सकारात्मक शक्तियाँ (Strengths)**:
+     कम से कम 3 से 5 अत्यधिक व्यावहारिक, वास्तविक और विशिष्ट बुलेट बिंदु जो आपकी अद्वितीय शक्तियों और प्रतिभाओं को दर्शाते हों।
+  
+  D) **नकारात्मक पहलू / छाया प्रतिरूप (Challenges / Shadow Side)**:
+     कम से कम 3 से 5 विशिष्ट बुलेट बिंदु जो आपकी कमजोरियों, छिपी हुई आदतों और उन छाया पक्षों को दर्शाते हों जिन्हें सुधारने की आवश्यकता है।
+  
+  E) **जीवन के महत्वपूर्ण क्षेत्रों में प्रकटीकरण (Expressions)**:
+     - **पेशेवर जीवन एवं करियर (Career)**: इस अंक का आपके करियर, व्यवसाय और धन उपार्जन शैली पर विस्तृत प्रभाव (1 लघु पैराग्राफ)।
+     - **प्रेम एवं पारस्परिक संबंध (Relationships)**: इस अंक का आपके विवाह, प्रेम, और पारिवारिक संबंधों में संवाद शैली पर प्रभाव (1 लघु पैराग्राफ)।
+     - **व्यक्तिगत एवं आत्मिक विकास (Personal Growth)**: इस अंक का आपके आंतरिक आध्यात्मिक उत्थान, आत्म-जागरूकता और जीवन के वास्तविक उद्देश्यों पर प्रभाव (1 लघु पैराग्राफ)।
+
 - **3. चिकित्सा अंकशास्त्र एवं आयुर्वेदिक दोष निदान (Medical Numerology & Ayurvedic Dosha Diagnosis)**: Translate their medical numerology profile into deep Vedic wellness insights. Mention their dominant doshas, health strength, digestive indices, weak body systems, comprehensive dietary guidelines (recommended foods, avoid foods, recommended fruits and vegetables), sleep guides, and custom morning routine. 
   *ADD A STRICT PROFESSIONAL DISCLAIMER AT THE START OF THIS CHAPTER: "यह रिपोर्ट केवल अंकशास्त्र-आधारित कल्याण अंतर्दृष्टि और जीवनशैली मार्गदर्शन प्रदान करती है। यह पेशेवर चिकित्सा सलाह, निदान या उपचार का विकल्प नहीं है।"*
 - **4. न्यूमरो वास्तु प्रो एवं चुंबकीय दिशा संरेखण (Numero Vaastu Pro & Spatial Direction Coordinates)**: Analyze space vibrations using their Kua number and group. Provide their Success, Health, and Career directions, lucky/anti colors suggestions for home, bedroom, office, and vehicles, and discuss active zone enhancement remedies (Career, Money, Relationship, and Spiritual). Include detailed Lo Shu + Vaastu remedies for their missing numbers!
 - **5. आगामी दशा चक्र एवं व्यक्तिगत वर्ष फलादेश (Planetary Dasha Cycles & Personal Year Forecast)**: Break down their current running Mahadasha and Antardasha influences. Map the exact health, career, relationship, and financial impacts of this cycle, followed by their Personal Year 2026 forecast and predictions for the next 5 years (2026 to 2030).
+
+  महत्वपूर्ण निर्देश (CRITICAL INSTRUCTION - NO SHALLOW OUTPUT):
+  सक्रिय व्यक्तिगत वर्ष (Personal Year 2026) के लिए आपको बिना किसी अपवाद के निम्नलिखित पाँचों अनुभागों (five sections) को पूरी तरह से विस्तृत रूप में प्रस्तुत करना होगा:
+  A) **गणना एवं स्रोत (Derivation)**: जन्म तिथि और माह के साथ वर्ष 2026 को जोड़कर गणना दर्शाएं (जैसे: 23+11+2026 = 2+3+1+1+2+0+2+6 = 17 -> 1+7 = 8)।
+  B) **गहन फलादेश (In-depth Interpretation)**: न्यूनतम 100-150 शब्दों में हिन्दी में लिखी व्याख्या जो इस वर्ष की विशिष्ट ऊर्जा कम्पन को दर्शाए।
+  C) **सकारात्मक प्रभाव (Strengths/Opportunities)**: इस वर्ष के लिए 3 से 5 विशिष्ट बुलेट बिंदु।
+  D) **सावधानी एवं संभावित चुनौतियाँ (Challenges/Shadow Side)**: इस वर्ष आपके समक्ष आने वाले संभावित जोखिमों और सावधानियों के 3 से 5 बुलेट बिंदु।
+  E) **जीवन के महत्वपूर्ण क्षेत्रों में अभिव्यक्ति (Expressions)**: करियर, संबंधों, और आत्मिक विकास पर प्रभाव (प्रत्येक का 1 संक्षिप्त पैराग्राफ)।
+
 - **6. मोबाईल अंक निदान एवं सुधारात्मक उपाय (Mobile Diagnostics & Audit Remedies)**:
   Examine the user's mobile total vibrations, repeating alarms, and hostile relationships.
   
@@ -294,11 +327,43 @@ Please output a majestic, highly professional report under the following chapter
 Report Chapters to construct:
 - **1. मंगलाचरण एवं ब्रह्मांडीय प्रस्तावना (Divine Invocation & Cosmic Preface)**: Poetic greeting, invocation of divine vibrations, and overview of the subject's birth star alignments.
 - **2. मूलांक एवं भाग्यांक - आपके जीवन का दोहरा कम्पास (Psychic & Destiny - The Dual Compasses)**: Deep advisory analysis of Mulank (${mulank}) and Bhagyank (${bhagyank}) traits, career recommendations, spiritual lessons, and mutual alignment.
+
+  महत्वपूर्ण निर्देश (CRITICAL INSTRUCTION - NO SHALLOW OUTPUT):
+  इस अध्याय में शामिल दोनों प्रमुख अंकों - मूलांक (Psychic Number: ${mulank}) और भाग्यांक (Destiny Number: ${bhagyank}) के लिए बिना किसी अपवाद के आपको निम्नलिखित पाँचों अनुभागों (five sections) को पूरी तरह से विस्तृत और व्यापक रूप में प्रस्तुत करना होगा:
+  
+  A) **गणना एवं स्रोत (Derivation & Calculation)**:
+     स्पष्ट रूप से दर्शाएं कि ये अंक आपके जन्म विवरण से किस तरह प्राप्त किए गए हैं।
+     - मूलांक (Psychic Number): जन्म तिथि के दिन का जोड़ (जैसे: "23 -> 2 + 3 = 5")।
+     - भाग्यांक (Destiny Number): जन्म तिथि, माह और वर्ष का कुल योग (जैसे: "1984-11-23 -> 1+9+8+4+1+1+2+3 = 29 -> 2+9 = 11 -> 1+1 = 2")।
+  
+  B) **गहन फलादेश (In-depth Interpretation)**:
+     प्रत्येक अंक के लिए न्यूनतम 100-150 शब्दों का आत्मीय, गहरा और व्यक्तिगत फलादेश द्वितीय-पुरुष स्वर ("आप", "आपकी आंतरिक ऊर्जा...") में लिखें, जो इस अंक की शास्त्रीय वैदिक ज्योतिष परंपरा को स्पष्ट करता हो। कोई सामान्य भराव वाक्य (filler text) स्वीकार्य नहीं है।
+  
+  C) **सकारात्मक विशिष्टताएँ (Strengths)**:
+     3 से 5 विशिष्ट बुलेट बिंदु जो आपकी सकारात्मक शक्तियों, मानसिक झुकाव और जन्मजात प्रतिभाओं को उजागर करते हों।
+  
+  D) **चुनौतियाँ और छाया रूप (Challenges / Shadow Side)**:
+     3 से 5 बुलेट बिंदु जो आपके जीवन के संघर्षों, नकारात्मक प्रवृत्तियों और उन कमजोरियों को दर्शाते हों जिन पर आपको ध्यान देना है।
+  
+  E) **जीवन के महत्वपूर्ण क्षेत्रों में अभिव्यक्ति (Expressions)**:
+     - **पेशेवर करियर (Career)**: इस अंक का आपके व्यवसाय, नौकरी, निर्णय लेने की शैली और व्यावसायिक सफलता पर प्रभाव (1 लघु पैराग्राफ)।
+     - **पारस्परिक संबंध (Relationships)**: इस अंक का आपके पारिवारिक जीवन, वैवाहिक संबंधों और समाज में संचार पर प्रभाव (1 लघु पैराग्राफ)।
+     - **व्यक्तिगत विकास (Personal Growth)**: इस अंक का आपके जीवन के आध्यात्मिक उद्देश्यों, आंतरिक संतोष और व्यक्तिगत परिपक्वता पर प्रभाव (1 लघु पैराग्राफ)।
+
 - **3. लोशू ग्रिड चार्ट एवं तत्त्व मीमांसा (Loshu Grid Chart & Elemental Metaphysics)**: A complete diagnostic writeup on their 3x3 magic square. Discuss Wood, Water, Fire, Earth, Metal distribution inside their chart.
 - **4. राजयोग विमान एवं सक्रिय ऊर्जा प्रवाह (Sovereign Planes & Active Energies)**: Extensive assessment of active planes: ${strengthArrows.map((s: any) => s.name).join(', ') || 'सक्रिय राजयोग'}. Explain how these shape their material wealth, mental focus, and actions.
 - **5. शून्य विमान, अनुपस्थित अंक एवं सुधारत्मक वेध (Empty Planes, Missing Figures & Karmic Remedies)**: Full list of missing numbers. Detail the Lal Kitab remedies, direction activation (like North career zone, Northwest support), and gemstone rituals required.
 - **6. वर्तमान महादशा और अंतर्दशा चक्र विश्लेषण (Planetary Period Dasha Audit)**: Point out their running Mahadasha of ${currentMahadasha?.planet} and Antardasha of ${currentAntardasha?.planet}. Give a year-by-year checklist on how to conduct negotiations, financial investments, and maintain health during this period, plus what days/hours to avoid.
 - **7. वर्ष 2026-2030 आगामी मार्गदर्शन (5-Year Detailed Planetary Forecast)**: Provide structured annual predictions for the next 5 years based on shifting Personal Years.
+
+  महत्वपूर्ण निर्देश (CRITICAL INSTRUCTION - NO SHALLOW OUTPUT):
+  सक्रिय व्यक्तिगत वर्ष 2026 (Personal Year: ${personalYear.number}) के लिए आपको बिना किसी अपवाद के निम्नलिखित पाँचों अनुभागों (five sections) को पूरी तरह से विस्तृत रूप में प्रस्तुत करना होगा:
+  A) **गणना एवं स्रोत (Derivation)**: जन्म तिथि और माह के साथ वर्ष 2026 को जोड़कर स्पष्ट गणना दर्शाएं।
+  B) **गहन फलादेश (In-depth Interpretation)**: न्यूनतम 100-150 शब्दों में हिन्दी में लिखी व्याख्या जो इस वर्ष की विशिष्ट ऊर्जा कम्पन को दर्शाए।
+  C) **सकारात्मक प्रभाव (Strengths/Opportunities)**: इस वर्ष के लिए 3 से 5 विशिष्ट बुलेट बिंदु।
+  D) **सावधानी एवं संभावित चुनौतियाँ (Challenges/Shadow Side)**: इस वर्ष आपके समक्ष आने वाले संभावित जोखिमों और सावधानियों के 3 से 5 बुलेट बिंदु।
+  E) **जीवन के महत्वपूर्ण क्षेत्रों में अभिव्यक्ति (Expressions)**: करियर, संबंधों, और आत्मिक विकास पर प्रभाव (प्रत्येक का 1 संक्षिप्त पैराग्राफ)।
+
 - **8. सर्वकल्याणकारी लाल किताब कवच (Comprehensive Altar Remedies Shield)**: Personalized signature guidelines (angle, underline), lucky dates, corporate metal structures placement, and customized home altar guidelines.
 
 Write with premium consulting mastery strictly following traditional Vedic Hindi, keeping the quality worthy of elite consultations.
