@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber, generateRemedies } from './services/numerologyEngine';
 import { PersonalDetails, DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdvice } from './types';
+import { generateCompleteNumerologyProfile, NumerologyProfile } from './core';
 import { 
   Phone, User, Calendar, Compass, Star, FileText, Sparkles, Shield, 
   TrendingUp, Heart, BookOpen, Layers, HelpCircle, RefreshCw, 
@@ -39,6 +40,7 @@ const App: React.FC = () => {
   const [nameData, setNameData] = useState<NameAnalysis | null>(null);
   const [mobileData, setMobileData] = useState<MobileAnalysis | null>(null);
   const [remedies, setRemedies] = useState<remediesAdvice | null>(null);
+  const [numerologyProfile, setNumerologyProfile] = useState<NumerologyProfile | null>(null);
 
 
   // Virtual URL & Hash Router for Professional SEO Pages & Dynamic Metadata/JSON-LD Injector
@@ -167,7 +169,16 @@ const App: React.FC = () => {
     const details: PersonalDetails = { name: finalName, dob: finalDob, gender: finalGender, mobile, email: finalEmail };
     setPersonalDetails(details);
 
-    // Run rule engine
+    // Run the centralized core engine as the ONLY source of truth
+    const profile = generateCompleteNumerologyProfile({
+      dob: finalDob,
+      name: finalName,
+      mobile: mobile,
+      gender: finalGender
+    });
+    setNumerologyProfile(profile);
+
+    // Populate backward compatible states
     const dobAnalysis = analyzeDateOfBirth(finalDob, finalName);
     const nameAnalysis = analyzeNameSystems(finalName);
     const mobileAnalysis = analyzeMobileNumber(mobile);
@@ -198,6 +209,7 @@ const App: React.FC = () => {
     setNameData(null);
     setMobileData(null);
     setRemedies(null);
+    setNumerologyProfile(null);
   };
 
   return (

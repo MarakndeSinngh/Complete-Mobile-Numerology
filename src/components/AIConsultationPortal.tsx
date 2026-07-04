@@ -12,6 +12,7 @@ import { generateNameCorrections, NameCorrectionResult, NameVariation } from '..
 import { PersonalDetails } from '../types';
 import { computeLoshuMasterReport } from '../services/loshuMasterEngine';
 import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber } from '../services/numerologyEngine';
+import { generateCompleteNumerologyProfile } from '../core';
 import { generateLeoAdvisorActions } from '../services/leoAdvisorEngine';
 
 const PLANETS_DB: Record<number, { name: string; icon: string; description: string }> = {
@@ -171,12 +172,20 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
     }
   };
 
-  // Generate engines based on selected profile
+  // Generate unified profile from the core engine as the ONLY source of truth
+  const unifiedProfile = activeProfile ? generateCompleteNumerologyProfile({
+    dob: activeProfile.dob,
+    name: activeProfile.name,
+    mobile: activeProfile.mobile,
+    gender: activeProfile.gender || 'MALE'
+  }) : null;
+
+  // Derive engines from the centralized unified profile
   const dobAnalysis = activeProfile ? analyzeDateOfBirth(activeProfile.dob, activeProfile.name) : null;
   const nameAnalysis = activeProfile ? analyzeNameSystems(activeProfile.name) : null;
   const mobileAnalysis = activeProfile ? analyzeMobileNumber(activeProfile.mobile) : null;
 
-  const reportData = activeProfile ? generateLeoConsultation(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
+  const reportData = unifiedProfile ? unifiedProfile.consultation : null;
   const scoreExplanations = activeProfile ? getScoreExplanations(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
   const masterGrid = activeProfile ? computeLoshuMasterReport(activeProfile.dob, activeProfile.name, activeProfile.gender || 'MALE', activeProfile.mobile) : null;
   

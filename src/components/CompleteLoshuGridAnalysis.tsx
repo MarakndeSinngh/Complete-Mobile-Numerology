@@ -14,6 +14,7 @@ import {
   CombinationResult,
   ArrowMasterResult
 } from '../services/loshuMasterEngine';
+import { generateCompleteNumerologyProfile } from '../core';
 import { 
   Calendar, User, Compass, HelpCircle, Sparkles, RefreshCw, Star, 
   Trash2, Heart, Shield, BookOpen, Layers, Award, FileText, Download, 
@@ -136,6 +137,13 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
       const analysis = computeLoshuAnalysis(initialProfile.dob, initialProfile.name, initialProfile.gender);
       setAnalysisResult(analysis);
 
+      // Consume from the unified Core Engine
+      const profile = generateCompleteNumerologyProfile({
+        dob: initialProfile.dob,
+        name: initialProfile.name,
+        mobile: mobileNumber,
+        gender: initialProfile.gender || 'MALE'
+      });
       const master = computeLoshuMasterReport(initialProfile.dob, initialProfile.name, initialProfile.gender || 'MALE', mobileNumber);
       setMasterReport(master);
     }
@@ -149,6 +157,13 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
     const analysis = computeLoshuAnalysis(dob, finalName, gender);
     setAnalysisResult(analysis);
 
+    // Consume from the unified Core Engine
+    const profile = generateCompleteNumerologyProfile({
+      dob,
+      name: finalName,
+      mobile: mobileNumber,
+      gender
+    });
     const master = computeLoshuMasterReport(dob, finalName, gender, mobileNumber);
     setMasterReport(master);
     
@@ -178,6 +193,13 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
     const analysis = computeLoshuAnalysis(item.dob, item.name, gender);
     setAnalysisResult(analysis);
     
+    // Consume from the unified Core Engine
+    const profile = generateCompleteNumerologyProfile({
+      dob: item.dob,
+      name: item.name,
+      mobile: mobileNumber,
+      gender
+    });
     const master = computeLoshuMasterReport(item.dob, item.name, gender, mobileNumber);
     setMasterReport(master);
 
