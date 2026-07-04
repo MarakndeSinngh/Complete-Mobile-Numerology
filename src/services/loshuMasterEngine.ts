@@ -1,5 +1,6 @@
 import { reduceToSingleDigit } from './numerologyEngine';
 import { calculateKuaNumber } from './numeroVaastuEngine';
+import { computeLoshuAnalysis } from './loshuEngine';
 
 export interface CombinationResult {
   code: string; // "11" to "99"
@@ -563,16 +564,24 @@ export function computeLoshuMasterReport(
   const gridMap: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
   keyDigits.forEach(d => { gridMap[d]++; });
 
+  // Single source of truth 'Present Numbers' set that includes both raw birth digits
+  // and the conditionally added Driver/Conductor numbers.
+  const loshuAnalysis = computeLoshuAnalysis(dobStr, name, gender);
+  const enhancedGridMap: Record<number, number> = {};
+  for (let d = 1; d <= 9; d++) {
+    enhancedGridMap[d] = loshuAnalysis.loshuGrid[d]?.count || 0;
+  }
+
   const present: number[] = [];
   const missing: number[] = [];
   const repeated: { digit: number; count: number }[] = [];
   
   for (let d = 1; d <= 9; d++) {
-    const count = gridMap[d];
+    const count = enhancedGridMap[d];
     if (count > 0) {
       present.push(d);
-      if (count > 1) {
-        repeated.push({ digit: d, count });
+      if (gridMap[d] > 1) {
+        repeated.push({ digit: d, count: gridMap[d] });
       }
     } else {
       missing.push(d);
@@ -624,27 +633,27 @@ export function computeLoshuMasterReport(
   }
 
   // Section 1: Dashboard Score Generation matching criteria
-  const mentalCount = (gridMap[4] ? 1 : 0) + (gridMap[9] ? 1 : 0) + (gridMap[2] ? 1 : 0);
-  const emotionalCount = (gridMap[3] ? 1 : 0) + (gridMap[5] ? 1 : 0) + (gridMap[7] ? 1 : 0);
-  const practicalCount = (gridMap[8] ? 1 : 0) + (gridMap[1] ? 1 : 0) + (gridMap[6] ? 1 : 0);
+  const mentalCount = (enhancedGridMap[4] ? 1 : 0) + (enhancedGridMap[9] ? 1 : 0) + (enhancedGridMap[2] ? 1 : 0);
+  const emotionalCount = (enhancedGridMap[3] ? 1 : 0) + (enhancedGridMap[5] ? 1 : 0) + (enhancedGridMap[7] ? 1 : 0);
+  const practicalCount = (enhancedGridMap[8] ? 1 : 0) + (enhancedGridMap[1] ? 1 : 0) + (enhancedGridMap[6] ? 1 : 0);
 
   const mentalStrength = Math.max(35, Math.round((mentalCount / 3) * 100));
   const emotionalStrength = Math.max(35, Math.round((emotionalCount / 3) * 100));
   const practicalStrength = Math.max(35, Math.round((practicalCount / 3) * 100));
 
-  let lScore = 30 + (gridMap[1] * 20) + (gridMap[9] * 15);
+  let lScore = 30 + (enhancedGridMap[1] * 20) + (enhancedGridMap[9] * 15);
   if (driver === 1 || driver === 9) lScore += 15;
   const leadershipScore = Math.min(95, Math.max(40, lScore));
 
-  let cScore = 30 + (gridMap[1] * 15) + (gridMap[5] * 25);
+  let cScore = 30 + (enhancedGridMap[1] * 15) + (enhancedGridMap[5] * 25);
   if (driver === 5 || conductor === 5) cScore += 15;
   const communicationScore = Math.min(95, Math.max(40, cScore));
 
-  let sScore = 30 + (gridMap[7] * 20) + (gridMap[3] * 15) + (gridMap[8] * 10);
+  let sScore = 30 + (enhancedGridMap[7] * 20) + (enhancedGridMap[3] * 15) + (enhancedGridMap[8] * 10);
   if (driver === 7 || conductor === 7 || driver === 3 || conductor === 3) sScore += 15;
   const spiritualScore = Math.min(95, Math.max(40, sScore));
 
-  let rScore = 30 + (gridMap[2] * 25) + (gridMap[6] * 20);
+  let rScore = 30 + (enhancedGridMap[2] * 25) + (enhancedGridMap[6] * 20);
   if (driver === 2 || conductor === 2 || driver === 6 || conductor === 6) rScore += 15;
   const relationshipScore = Math.min(95, Math.max(40, rScore));
 
@@ -652,9 +661,9 @@ export function computeLoshuMasterReport(
   const overallLoshuScore = Math.round((mentalStrength + emotionalStrength + practicalStrength + leadershipScore + communicationScore + spiritualScore + relationshipScore) / 7);
 
   const reasons = {
-    mentalStrength: `Based on your present digits: ${[4,9,2].filter(d => gridMap[d]>0).join(', ')}. Mentally agile, sharp visualization capabilities.`,
-    emotionalStrength: `Calculated from your middle plane: ${[3,5,7].filter(d => gridMap[d]>0).join(', ')}. Reflects intuitive empathy ratios.`,
-    practicalStrength: `Calculated from your solid foundation line: ${[8,1,6].filter(d => gridMap[d]>0).join(', ')}. Governs action readiness.`,
+    mentalStrength: `Based on your present digits: ${[4,9,2].filter(d => enhancedGridMap[d]>0).join(', ')}. Mentally agile, sharp visualization capabilities.`,
+    emotionalStrength: `Calculated from your middle plane: ${[3,5,7].filter(d => enhancedGridMap[d]>0).join(', ')}. Reflects intuitive empathy ratios.`,
+    practicalStrength: `Calculated from your solid foundation line: ${[8,1,6].filter(d => enhancedGridMap[d]>0).join(', ')}. Governs action readiness.`,
     leadershipScore: `Propelled by driver planet #${driver} and the raw strength of digits 1 & 9.`,
     communicationScore: `Derived from water element 1 and center stabiliser 5 presence in the flat map.`,
     spiritualScore: `Governed by Occult Ketu (7) and Wisdom Jupiter (3) levels.`,
@@ -697,9 +706,9 @@ export function computeLoshuMasterReport(
   const arrowsAnalysis: ArrowMasterResult[] = arrowsList.map(arr => {
     let isActive = false;
     if (arr.type === 'STRENGTH') {
-      isActive = arr.digits.every(d => gridMap[d] > 0);
+      isActive = arr.digits.every(d => enhancedGridMap[d] > 0);
     } else {
-      isActive = arr.digits.every(d => gridMap[d] === 0);
+      isActive = arr.digits.every(d => enhancedGridMap[d] === 0);
     }
 
     const fallback = inactiveArrowsData[arr.name];
@@ -827,7 +836,7 @@ export function computeLoshuMasterReport(
 
     // Identify values present in mobile but missing in Lo Shu
     const mobPresents = Array.from(new Set(mobDigits)).filter(d => d >= 1 && d <= 9);
-    const compensating = mobPresents.filter(d => gridMap[d] === 0);
+    const compensating = mobPresents.filter(d => enhancedGridMap[d] === 0);
 
     mStrengths = `Overall mobile compound vibration relates to Planet #${mobSingle}. It contains active numbers: ${mobPresents.join(', ')}.`;
     mWeaknesses = `Lacks frequencies of digits: ${[1,2,3,4,5,6,7,8,9].filter(d => !mobPresents.includes(d)).join(', ')}.`;
@@ -865,9 +874,9 @@ export function computeLoshuMasterReport(
   let primaryDosha: 'VATA' | 'PITTA' | 'KAPHA' = 'PITTA';
   let secondaryDosha: 'VATA' | 'PITTA' | 'KAPHA' | 'NONE' = 'VATA';
 
-  const fireCount = (gridMap[9] || 0) + (driver === 9 ? 1:0);
-  const airCount = (gridMap[4] || 0) + (gridMap[8] || 0);
-  const waterCount = (gridMap[1] || 0) + (gridMap[2] || 0);
+  const fireCount = (enhancedGridMap[9] || 0);
+  const airCount = (enhancedGridMap[4] || 0) + (enhancedGridMap[8] || 0);
+  const waterCount = (enhancedGridMap[1] || 0) + (enhancedGridMap[2] || 0);
 
   if (fireCount >= airCount && fireCount >= waterCount) {
     primaryDosha = 'PITTA';
@@ -880,9 +889,9 @@ export function computeLoshuMasterReport(
     secondaryDosha = 'PITTA';
   }
 
-  const healthScore = Math.min(96, 60 + (gridMap[3]*12) + (gridMap[5]*10) - (missing.length * 4));
-  const stressScore = Math.min(95, 30 + (missing.includes(5) ? 25 : 0) + (gridMap[8]*15));
-  const energyScore = Math.min(98, 50 + (gridMap[9]*15) + (gridMap[1]*10));
+  const healthScore = Math.min(96, 60 + (enhancedGridMap[3]*12) + (enhancedGridMap[5]*10) - (missing.length * 4));
+  const stressScore = Math.min(95, 30 + (missing.includes(5) ? 25 : 0) + (enhancedGridMap[8]*15));
+  const energyScore = Math.min(98, 50 + (enhancedGridMap[9]*15) + (enhancedGridMap[1]*10));
 
   // Section 17: Forecast calculation
   const personalYear = reduceToSingleDigit(driver + conductor + 2026); // targeting 2026
@@ -971,16 +980,16 @@ export function computeLoshuMasterReport(
     },
     profiling: {
       thinkingStyle: driver % 2 === 0 ? 'Empathetic, intuitive and multi-sensory thinking pattern.' : 'Highly structured, analytical and logical strategic flow.',
-      decisionMakingStyle: gridMap[5] > 0 ? 'Balanced decision framework using both commercial logical analysis and gut feel.' : 'Prone to sudden hesitation; highly reliant on external consultations.',
-      communicationStyle: gridMap[1] > 1 ? 'Vocal, hyper-expressive and bold with commands.' : 'Diplomatic, calculated and soft-spoken.',
-      learningStyle: gridMap[3] > 0 ? 'Classic academic reader; retains massive structural knowledge.' : 'Practical, hands-on apprentice format.',
-      leadershipStyle: gridMap[9] > 0 ? 'Pioneering leader, sets visual benchmarks for execution.' : 'Quiet coordinator, works via team agreements.',
-      workStyle: gridMap[8] > 0 ? 'Workaholic, operates until the final block is clean.' : 'Smart coordinator, delegates heavy physical trade.',
-      problemSolvingStyle: gridMap[7] > 0 ? 'Breaks systems down into microscopic parts; excellent debugger.' : 'Solves cases through collective team consensus.',
+      decisionMakingStyle: enhancedGridMap[5] > 0 ? 'Balanced decision framework using both commercial logical analysis and gut feel.' : 'Prone to sudden hesitation; highly reliant on external consultations.',
+      communicationStyle: enhancedGridMap[1] > 1 ? 'Vocal, hyper-expressive and bold with commands.' : 'Diplomatic, calculated and soft-spoken.',
+      learningStyle: enhancedGridMap[3] > 0 ? 'Classic academic reader; retains massive structural knowledge.' : 'Practical, hands-on apprentice format.',
+      leadershipStyle: enhancedGridMap[9] > 0 ? 'Pioneering leader, sets visual benchmarks for execution.' : 'Quiet coordinator, works via team agreements.',
+      workStyle: enhancedGridMap[8] > 0 ? 'Workaholic, operates until the final block is clean.' : 'Smart coordinator, delegates heavy physical trade.',
+      problemSolvingStyle: enhancedGridMap[7] > 0 ? 'Breaks systems down into microscopic parts; excellent debugger.' : 'Solves cases through collective team consensus.',
       stressResponsePattern: primaryDosha === 'PITTA' ? 'Hot outbursts, quick irritation under workload.' : 'Internal anxiety and nervous hyper-movement.',
       motivationPattern: `Driven by the realization of Driver #${driver} frequencies which desire personal recognition.`,
-      selfDisciplineLevel: gridMap[4] > 0 ? 'Meticulous, neat, lives by strict routine guidelines.' : 'Highly creative but chaotic daily timeline structures.',
-      confidenceLevel: gridMap[5] > 0 ? 'Superb internal self-reliance; untroubled by social criticism.' : 'Variables based on immediate feedback from friends.',
+      selfDisciplineLevel: enhancedGridMap[4] > 0 ? 'Meticulous, neat, lives by strict routine guidelines.' : 'Highly creative but chaotic daily timeline structures.',
+      confidenceLevel: enhancedGridMap[5] > 0 ? 'Superb internal self-reliance; untroubled by social criticism.' : 'Variables based on immediate feedback from friends.',
       publicImage: `Seen as a reliable, dignified candidate ruled by planetary destiny.`,
       personalGrowthAreas: `Enhance communication flow by bridging missing nodes: ${missing.join(', ')}.`
     },
@@ -1013,10 +1022,10 @@ export function computeLoshuMasterReport(
       spendingBehaviour,
       savingBehaviour: `Systematic compounding once missing remedies are active.`,
       investmentBehaviour: `Property land purchases and government bonds.`,
-      businessMindset: gridMap[5] > 0 ? 'Natural merchant, identifies retail trade loops.' : 'Advisor structure, works best inside partnerships.',
+      businessMindset: enhancedGridMap[5] > 0 ? 'Natural merchant, identifies retail trade loops.' : 'Advisor structure, works best inside partnerships.',
       wealthCreationStyle: `Slow secure accumulations with major multipliers in running Mahadashas.`,
       financialDisciplineScore,
-      wealthPotentialScore: Math.min(99, 40 + (gridMap[4]*15) + (gridMap[8]*15) + (gridMap[6]*15)),
+      wealthPotentialScore: Math.min(99, 40 + (enhancedGridMap[4]*15) + (enhancedGridMap[8]*15) + (enhancedGridMap[6]*15)),
       moneyBlockages: `Blocked funds in South-West zones due to missing Earth elements.`,
       financialRemedies: `Keep wooden windchimes in South-East and yellow salt lamps in Center zones.`
     },
@@ -1024,15 +1033,15 @@ export function computeLoshuMasterReport(
       bestCareers: ['Engineering', 'Systemic Planning', 'Financial Audits', 'Technology Architectures'],
       governmentJobs: driver === 1 || driver === 9 ? 'Highly suitable; Sun-Mars forces assist administrative success in civil lines.' : 'Moderate; advisor positions only.',
       privateJobs: `Highly suited for corporate consultancy and high-tech planning sectors.`,
-      businessSuitability: gridMap[5] > 0 ? 'High suitability for independent commercial enterprises.' : 'Partner-driven alliances suit you best.',
+      businessSuitability: enhancedGridMap[5] > 0 ? 'High suitability for independent commercial enterprises.' : 'Partner-driven alliances suit you best.',
       suitabilityScores: {
-        teaching: gridMap[3] ? 95 : 55,
-        technology: gridMap[4] || gridMap[7] ? 90 : 60,
-        management: gridMap[9] || gridMap[1] ? 92 : 58,
-        sales: gridMap[5] ? 94 : 50,
-        creative: gridMap[6] ? 96 : 55,
-        spiritual: gridMap[7] || gridMap[2] ? 95 : 60,
-        leadership: gridMap[1] ? 94 : 60
+        teaching: enhancedGridMap[3] ? 95 : 55,
+        technology: enhancedGridMap[4] || enhancedGridMap[7] ? 90 : 60,
+        management: enhancedGridMap[9] || enhancedGridMap[1] ? 92 : 58,
+        sales: enhancedGridMap[5] ? 94 : 50,
+        creative: enhancedGridMap[6] ? 96 : 55,
+        spiritual: enhancedGridMap[7] || enhancedGridMap[2] ? 95 : 60,
+        leadership: enhancedGridMap[1] ? 94 : 60
       },
       recommendedCareers: [
         { title: "Systems Designer", explanation: "Calculated structural vision assists logical blueprint creations." },
