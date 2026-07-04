@@ -234,6 +234,252 @@ export default function PremiumConsultations() {
     return temp;
   };
 
+  const generateLocalFallbackSignatureAudit = (styleId: string, name: string, dob: string) => {
+    const finalStyleId = styleId || "RISING_UNDERLINE";
+    const driver = getDriverNumber(dob);
+    const conductor = getConductorNumber(dob);
+    const nameNumber = getChaldeanNameNumber(name);
+
+    if (finalStyleId === "TRAILING_DOT_BELOW") {
+      return {
+        analysis: {
+          direction: "Flat or slightly wave-like direction, showing high resilience and adaptability under changing corporate environments.",
+          size: "Compact but highly dense strokes, symbolizing a focused, detail-oriented personality with high privacy boundaries.",
+          firstLetterSize: `The first letter of '${name}' is exceptionally prominent, almost 3x larger than lowercase characters, showing strong personal pride but also a subconscious defensive shield.`,
+          underlineStyle: "No active underline is used, signifying a desire to operate independently without relying on traditional safety nets.",
+          endStroke: "The end stroke curves backward or stops abruptly, indicating an analytical mind that thoroughly evaluates risks before executing actions.",
+          dotPlacement: "A single prominent trailing dot is placed below the final character, which acts as a subconscious anchor but can sometimes create blockages if too heavy.",
+          letterLegibility: "Moderate legibility with stylized trailing loops, reflecting a highly strategic thinker who keeps their core plans close to their chest.",
+          nameCompletion: "First name is fully spelled out with a bold, stylized dot, while the surname is omitted, indicating a self-made persona.",
+          overallFlow: "Calculated, rhythmic, but with sharp angular turns that show high analytical power and mechanical precision."
+        },
+        scores: {
+          careerScore: 78,
+          financialFlowScore: 75,
+          recognitionScore: 82,
+          leadershipScore: 85,
+          businessSuccessScore: 80,
+          relationshipHarmonyScore: 72,
+          overallSignatureScore: 79
+        },
+        assessment: {
+          currentSignatureAssessment: `This style features an exceptionally large first letter paired with a trailing dot below or after the signature. For ${name}, with Driver #${driver} and Conductor #${conductor}, this indicates high self-reliance, strategic reserve, and a strong self-protection mechanism. Co-ruled by Rahu and Saturn, it gives you deep investigative powers and a sharp, critical mind. However, the isolated trailing dot acts as a cosmic full-stop or anchor. While it provides deep grounding, it can also manifest as subconscious roadblocks, sudden delays, or a tendency to stall key decisions at the final hour.`,
+          strengths: [
+            "Exceptional self-image and individual drive symbolized by the large initial.",
+            "Excellent risk management and analytical evaluation of details.",
+            "High capacity for independent decision-making and strategic planning."
+          ],
+          weaknesses: [
+            "The isolated dot creates a sudden energy block, slowing down progress.",
+            "Lack of an underline foundation may cause feelings of being unsupported in critical situations.",
+            "Abrupt end strokes can lead to sudden, unexplained endings in partnerships."
+          ],
+          riskAreas: [
+            "Tendency to attract sudden administrative audits or legal hurdles due to the Rahu-Saturn dot configuration.",
+            "Communication blockages or misunderstanding with close business associates."
+          ],
+          recommendedCorrections: [
+            "Shift the trailing dot from being a solitary stop to a supporting double dot below a new foundation underline.",
+            "Soften the sharp angles in the middle characters to allow smoother energy flow and reduce internal stress.",
+            "Ensure the end stroke of your last letter sweeps forward and upward rather than stopping abruptly.",
+            "Write your new signature with a green or black ink pen on clean unruled paper 21 times before sleeping."
+          ],
+          idealSignatureStyle: "A prominent first letter, followed by fluid legible middle letters, supported by a clean ascending underline with two balanced dots below.",
+          personalizedSignatureBlueprint: "Start with a grand, rounded first letter. Write the rest of your name in a flowing, legible script. Draw a straight, slightly rising underline. Place two small, neat dots horizontally below the middle of the underline."
+        },
+        beforeAfter: {
+          before: {
+            visualDescription: "A heavy, isolated dot at the very end of a flat signature, with sharp angles and a closed, abrupt ending.",
+            impact: "Manifests as sudden blockages in cash flow and unexpected operational delays right when deals are about to close."
+          },
+          after: {
+            visualDescription: "A fluid, legible script with an upward-pointing exit stroke, supported by a clean underline and two balanced dots beneath it.",
+            impact: "Releases stagnant funds, brings friendly mentors into your sphere, and unlocks continuous opportunities."
+          }
+        }
+      };
+    } else if (finalStyleId === "FALLING_LINE") {
+      return {
+        analysis: {
+          direction: "Downward sloping (Southwest descent) in the trailing segment, showing a gradual drop in stamina or confidence toward the end of tasks.",
+          size: "Medium at the start but shrinking significantly toward the end, signaling an energy leak or fatigue.",
+          firstLetterSize: "Standard first letter, but the succeeding letters gradually lose their height and scale, representing vulnerability to external pressure.",
+          underlineStyle: "Absent or a downward-drooping line, which drains the grounding element and increases anxiety.",
+          endStroke: "Declining or pointing downwards, representing a leak in the wealth sector and sudden loss of interest.",
+          dotPlacement: "Irregular dotting or a dot cutting the baseline, signifying minor health issues or frequent energy drains.",
+          letterLegibility: "Low to moderate legibility, indicating a tendency to feel overwhelmed or misunderstood by peers.",
+          nameCompletion: "Letters get compressed or scribbled at the end, showing a rush to finish and a lack of patience with administrative details.",
+          overallFlow: "Declining momentum, starting with high enthusiasm but closing with high tension or friction."
+        },
+        scores: {
+          careerScore: 60,
+          financialFlowScore: 52,
+          recognitionScore: 58,
+          leadershipScore: 62,
+          businessSuccessScore: 55,
+          relationshipHarmonyScore: 65,
+          overallSignatureScore: 58
+        },
+        assessment: {
+          currentSignatureAssessment: `Your current signature exhibits a downward slope, particularly in the trailing segment. In Handwriting Vastu, this is a critical energy drain known as the 'Descent Trap'. For someone with Driver #${driver} and Conductor #${conductor}, it indicates that while you start projects with immense enthusiasm (ruled by Mars/Sun), you face substantial stamina drains, mental fatigue, or self-doubt as you approach the finish line. This downward angle acts as a siphoning force in your wealth and career sectors, causing hard-earned gains or recognition to slip away at the last moment. Immediate structural alignment is strongly recommended.`,
+          strengths: [
+            "Energetic and powerful start to new initiatives.",
+            "Strong initial presentation and personal charm."
+          ],
+          weaknesses: [
+            "Downward trailing slope drains career energy and causes fatigue.",
+            "Shrinking letter size indicates falling confidence under sustained pressure.",
+            "Scribbled ending letters lead to misunderstandings and administrative delays."
+          ],
+          riskAreas: [
+            "High vulnerability to financial losses, unexpected expenses, or leakage of liquid wealth.",
+            "Frequent delays in receiving credit or recognition for your hard work."
+          ],
+          recommendedCorrections: [
+            "You MUST consciously tilt your signature upwards. Ensure the entire signature slopes at a 10 to 15-degree angle from left to right.",
+            "Keep all letters in your name uniform in height, rather than letting them shrink toward the end.",
+            "Add a solid, straight, independent horizontal underline that rises slightly at the end to act as a cosmic support shield.",
+            "Practice the new ascending signature 33 times daily for 21 days with a high-quality indigo rollerball pen."
+          ],
+          idealSignatureStyle: "A 15-degree rising line with uniform character sizing and an independent upward-flicking underline foundation.",
+          personalizedSignatureBlueprint: "Write on unruled white paper. Keep your hand relaxed. Write your name so that each letter is legible and stays on an ascending line. Draw a bold, straight underline underneath, starting from the second letter and flicking upwards at the end."
+        },
+        beforeAfter: {
+          before: {
+            visualDescription: "A signature that starts strong but slopes downwards toward the right, with letters shrinking and scribbling at the end.",
+            impact: "Drains your financial savings, causes minor joint or energy health issues, and delays promotions."
+          },
+          after: {
+            visualDescription: "An ascending signature with beautifully spaced, uniform letters and a firm, rising underline foundation.",
+            impact: "Secures your financial assets, boosts daily energy levels, and ensures you receive full credit and fame for your achievements."
+          }
+        }
+      };
+    } else if (finalStyleId === "DOUBLE_UNDERLINE") {
+      return {
+        analysis: {
+          direction: "Stable, perfectly flat horizontal alignment, representing a highly structured, objective, and realistic approach to life.",
+          size: "Large, bold, and expansive, commanding immediate attention and establishing a powerful physical presence.",
+          firstLetterSize: "Strong, blocky, and wide first letter, representing a solid corporate base and high protective instincts.",
+          underlineStyle: "Two clean, parallel underlines run beneath the signature. In Vastu, this represents a double-foundation (Earth and Metal elements) which guarantees massive stability.",
+          endStroke: "Horizontal or curving slightly upward, representing a careful, calculated exit that locks in profits.",
+          dotPlacement: "Perfectly balanced dots placed precisely between or below the underlines, serving as protective anchors.",
+          letterLegibility: "Highly structured and legible, showing absolute clarity of purpose and high commercial acumen.",
+          nameCompletion: "Uses both first name and surname clearly, establishing strong connection to lineage and a desire for legacy building.",
+          overallFlow: "Robust, authoritative, with clear spacing and powerful deliberate strokes that show immense discipline."
+        },
+        scores: {
+          careerScore: 88,
+          financialFlowScore: 95,
+          recognitionScore: 85,
+          leadershipScore: 90,
+          businessSuccessScore: 93,
+          relationshipHarmonyScore: 78,
+          overallSignatureScore: 89
+        },
+        assessment: {
+          currentSignatureAssessment: `Your current signature uses a straight horizontal style with a double underline support. In Handwriting Vastu, this is known as the 'Fortress' or 'Double Vault' structure. It is an exceptionally strong format for corporate leaders, business owners, and financial experts. For someone with Driver #${driver} and Conductor #${conductor}, co-ruled by Mercury and Saturn, it instills immense commercial intelligence, deep financial discipline, and a highly systematic way of working. The double parallel lines create an unbreakable barrier against financial losses and ensure that your business ventures have a permanent, rock-solid foundation.`,
+          strengths: [
+            "Unmatched financial stability and asset protection from the double underline.",
+            "Immense administrative and executive authority.",
+            "Outstanding clarity of goals and methodical execution."
+          ],
+          weaknesses: [
+            "Can sometimes indicate extreme rigidity or a reluctance to adapt to rapid changes.",
+            "The double lines can occasionally attract heavy responsibilities that cause mental pressure."
+          ],
+          riskAreas: [
+            "Over-analyzing simple situations, leading to missed fast-paced opportunities.",
+            "Creating an overly formal barrier in personal relationships due to high structure."
+          ],
+          recommendedCorrections: [
+            "Keep the double underlines exactly parallel and ensure they never cross each other or touch any descending loops.",
+            "Soften the starting letters slightly with a gentle curve to improve personal relationship harmony and adaptability.",
+            "Ensure the underlines do not extend too far beyond the signature itself, keeping the energy concentrated.",
+            "Practice your signature 15 times daily using a premium black or deep blue fountain pen on rich paper."
+          ],
+          idealSignatureStyle: "A stable horizontal signature supported by two parallel lines that are clean, distinct, and end with a slight upward tilt.",
+          personalizedSignatureBlueprint: "Write your full name in a clean, bold horizontal line. Draw two perfectly straight, parallel lines underneath, separated by 2mm. Ensure both lines are clean and unbroken, ending exactly where your name ends."
+        },
+        beforeAfter: {
+          before: {
+            visualDescription: "Double underlines that are uneven, crossing, or touching the bottom loops of your letters.",
+            impact: "Manifests as excessive workload, minor back-and-forth delays in partnerships, and unnecessary rigid arguments."
+          },
+          after: {
+            visualDescription: "Two beautiful, clean, perfectly parallel underlines below a bold, clearly spaced horizontal signature.",
+            impact: "Locks in massive wealth accumulation, secures corporate leadership positions, and builds an enduring personal legacy."
+          }
+        }
+      };
+    } else {
+      return {
+        analysis: {
+          direction: "The signature maintains a beautiful, precise 15-degree upward slope (Eastward ascent), symbolizing constant growth and healthy ambition.",
+          size: "A healthy medium-to-large size, occupying the page space with confidence without spilling over or crowding other elements.",
+          firstLetterSize: `The first letter of '${name}' is perfectly scaled, being approximately 2x larger than the lowercase characters, showing strong self-image and protective boundaries.`,
+          underlineStyle: "A straight, single underline starts after the first letter and runs to the end. This acts as a firm, stable foundation (Earth Element) to support your endeavors.",
+          endStroke: "The end stroke finishes with an assertive upward-right flick, signaling positive closure and inviting prosperous future partnerships.",
+          dotPlacement: "No unnecessary blocking dots are present, which ensures smooth movement and lack of communication gaps with outer allies.",
+          letterLegibility: "Highly legible and distinct letters, establishing that the subject has clear, transparent intentions and values direct public relationships.",
+          nameCompletion: "The full first name is clearly utilized, reinforcing personal identity, followed by a stylized last name initial to manage family heritage elegantly.",
+          overallFlow: "Extremely fluid, consistent rhythm, showing a balanced flow of personal energy and healthy stamina."
+        },
+        scores: {
+          careerScore: 92,
+          financialFlowScore: 89,
+          recognitionScore: 94,
+          leadershipScore: 88,
+          businessSuccessScore: 90,
+          relationshipHarmonyScore: 86,
+          overallSignatureScore: 91
+        },
+        assessment: {
+          currentSignatureAssessment: `Your current signature utilizes an upward ascending style with a solid underline foundation. In Handwriting Vastu, this style is known as the 'Vanguard' or 'Sovereign Path'. For someone with Driver #${driver} and Conductor #${conductor}, this progressive mindset aligns perfectly with your cosmic timeline. The planetary vibrations of the Sun and Jupiter are well-aligned here, creating strong leadership traits and natural executive abilities. The underline acts as a horizontal anchor, providing a steady support system for your career decisions and preventing sudden energy drops.`,
+          strengths: [
+            "Excellent ascending confidence that drives persistent progress.",
+            "Underline acts as a firm Vastu foundation, securing long-term career stability.",
+            "Upward end stroke invites healthy recognition and lucrative opportunities."
+          ],
+          weaknesses: [
+            "Minor rush in ending letters can sometimes lead to impatience in closing deals.",
+            "The underline must be kept clean; any overlapping lower loop letters like g, j, p, y could create self-sabotaging traps."
+          ],
+          riskAreas: [
+            "Potential financial leakages if the underline crosses or cuts the baseline of any trailing letters.",
+            "Slight over-commitment of personal resources due to high ambition slope."
+          ],
+          recommendedCorrections: [
+            "Ensure the underline begins after the first letter and never cuts any lower loops (g, j, p, y) of your name.",
+            "Enlarge the first letter slightly so it stands exactly 2.5 times higher than the succeeding lowercase letters.",
+            "Ensure the upward trailing stroke rises exactly at a 15 to 20 degree angle to keep Jupiter vibrations active.",
+            "Begin practicing this corrected script 11 times daily on unruled white paper with an indigo gel pen."
+          ],
+          idealSignatureStyle: "A 15-degree rising line with a single clean underline and a bold first letter, matching the 'Sovereign Path' archetype.",
+          personalizedSignatureBlueprint: "Use an indigo or deep blue ink pen. Write your first name clearly, sloping upwards at a 15-degree angle. Draw a single straight line underneath from the second letter to the end, ending with an upward flick at the top right. Leave a 1mm gap between letters."
+        },
+        beforeAfter: {
+          before: {
+            visualDescription: "Slightly congested letters with an underline that occasionally touches or cuts through the lower loops of your characters.",
+            impact: "Creates minor delays in project approvals and causes occasional unexpected expenditure or leakages of liquid cash."
+          },
+          after: {
+            visualDescription: "A pristine, spacious script ascending at 15 degrees, supported by a clean, independent horizontal foundation line and a larger initial letter.",
+            impact: "Unlocks supreme cash-flow stability, accelerates pending executive promotions, and commands high social respect."
+          }
+        }
+      };
+    }
+  };
+
+  React.useEffect(() => {
+    // Keep sigAuditResult in sync with manual signature inputs unless a custom AI image analysis has run successfully
+    if (!sigImage) {
+      const localAudit = generateLocalFallbackSignatureAudit(signatureStyle, sigName || 'Aspirant', sigDob || '1990-01-01');
+      setSigAuditResult(localAudit);
+    }
+  }, [signatureStyle, sigName, sigDob, sigImage]);
+
   // Profile selection
   const handleProfileSelectChange = (idx: number) => {
     setSelectedProfileIndex(idx);
@@ -459,6 +705,8 @@ export default function PremiumConsultations() {
         console.error("Signature Audit failed with status:", response.status, "and parsed result:", result);
         
         // Automatically switch to manual signature style selection as a fallback
+        const fallbackResult = generateLocalFallbackSignatureAudit(signatureStyle || 'RISING_UNDERLINE', sigName, sigDob);
+        setSigAuditResult(fallbackResult);
         handleSignatureTrigger(signatureStyle || 'RISING_UNDERLINE');
         
         throw new Error(fallbackErrorMessage);
@@ -471,6 +719,8 @@ export default function PremiumConsultations() {
       setSigError(fallbackErrorMessage);
       
       // Automatically switch to manual signature style selection on any failure
+      const fallbackResult = generateLocalFallbackSignatureAudit(signatureStyle || 'RISING_UNDERLINE', sigName, sigDob);
+      setSigAuditResult(fallbackResult);
       handleSignatureTrigger(signatureStyle || 'RISING_UNDERLINE');
     } finally {
       setIsAnalyzingSig(false);

@@ -662,14 +662,14 @@ Structure the report with pristine Markdown layout, neat tables, divider lines, 
     try {
       const client = getGeminiClient();
 
-      const contents: any[] = [];
+      const parts: any[] = [];
 
       if (image) {
         try {
           // general base64 data clean up
           const base64Data = image.replace(/^data:[^;]+;base64,/, "");
           const mimeType = image.match(/^data:([^;]+);base64,/)?.[1] || "image/png";
-          contents.push({
+          parts.push({
             inlineData: {
               mimeType: mimeType,
               data: base64Data
@@ -714,7 +714,8 @@ Return data in the EXACT JSON format matching the schema properties:
 - 'beforeAfter': Visual/textual descriptions explaining current negative traits (Before) and ideal restructured blueprint traits (After).
 `;
 
-      contents.push(promptText);
+      parts.push({ text: promptText });
+      const contents = [{ role: "user", parts }];
 
       const signatureAuditSchema = {
         type: Type.OBJECT,
