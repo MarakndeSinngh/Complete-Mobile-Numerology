@@ -5,7 +5,8 @@ import {
   performLoshuCompatibility, 
   LoshuAnalysisResult, 
   LoshuGridBox, 
-  CompatibilityAnalysisResult 
+  CompatibilityAnalysisResult,
+  calculateLoShuGrid
 } from '../services/loshuEngine';
 import {
   computeLoshuMasterReport,
@@ -94,6 +95,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
   const [analysisResult, setAnalysisResult] = useState<LoshuAnalysisResult | null>(null);
   const [masterReport, setMasterReport] = useState<LoshuMasterReport | null>(null);
   const [mobileNumber, setMobileNumber] = useState('');
+  const [calcDob, setCalcDob] = useState('05-08-1983');
   
   // Tab control inside Loshu Analysis
   const [activeSubTab, setActiveSubTab] = useState<'MASTER_CONSULTATION' | 'GRID' | 'PLANES' | 'REMEDIES' | 'PERIODS' | 'COMPATIBILITY' | 'AI_REPORT' | 'HISTORY'>('MASTER_CONSULTATION');
@@ -699,6 +701,145 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                       ) : (
                         <p className="text-xs text-slate-400 text-center py-4">No repetitive digits present. Your elements align harmoniously without congestion.</p>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Dedicated calculateLoShuGrid Section */}
+                  <div className="col-span-1 md:col-span-2 pt-8 border-t border-[#E5E7EB] mt-4 space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="text-left space-y-1">
+                        <h5 className="font-cinzel text-base font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 fill-[#D97706]/20 text-[#D97706]" />
+                          Standard Lo Shu Grid Calculator Engine (`calculateLoShuGrid`)
+                        </h5>
+                        <p className="text-[11px] text-slate-500 max-w-2xl leading-relaxed">
+                          A pristine mathematical implementation that extracts digits from birth dates, filters out zeros and derived numbers, but ensures the <strong>Conductor (Bhagyank)</strong> number is fully included inside the birth grid.
+                        </p>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setCalcDob('05-08-1983')}
+                          className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 text-[#D97706] font-mono text-[10px] font-bold rounded-xl transition cursor-pointer"
+                        >
+                          Reset to 05-08-1983
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!dob}
+                          onClick={() => {
+                            if (dob) {
+                              setCalcDob(dob);
+                            }
+                          }}
+                          className={`px-3 py-1.5 border font-mono text-[10px] font-bold rounded-xl transition ${
+                            dob 
+                              ? 'bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700 cursor-pointer' 
+                              : 'bg-slate-50 border-slate-100 text-slate-400 cursor-not-allowed'
+                          }`}
+                        >
+                          Use Main DOB
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-50/50 border border-slate-100 p-6 rounded-3xl items-stretch">
+                      
+                      {/* Left calculation parameters */}
+                      <div className="lg:col-span-4 space-y-4 text-left flex flex-col justify-center">
+                        <div>
+                          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Query DOB String</span>
+                          <div className="flex gap-2 mt-1">
+                            <input
+                              type="text"
+                              value={calcDob}
+                              onChange={(e) => setCalcDob(e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 font-mono text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D97706] focus:border-[#D97706]"
+                              placeholder="DD-MM-YYYY or YYYY-MM-DD"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 text-xs text-slate-600 font-mono">
+                          <div className="flex justify-between">
+                            <span>Extracted ISO Format:</span>
+                            <span className="font-bold text-slate-800">{calculateLoShuGrid(calcDob).yyyymmdd}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Conductor (Bhagyank):</span>
+                            <span className="font-bold text-[#D97706] bg-[#D97706]/10 px-1.5 py-0.5 rounded">
+                              #{calculateLoShuGrid(calcDob).conductor}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right calculation display */}
+                      <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        {/* Present Numbers */}
+                        <div className="p-4 bg-white border border-slate-200/60 rounded-2xl flex flex-col justify-between text-left">
+                          <div>
+                            <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-wider block font-bold flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                              Present Digits Array (Present)
+                            </span>
+                            <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">
+                              Unique DOB digits and Conductor (excluding zeros and intermediate derived numbers).
+                            </p>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-1.5 mt-4">
+                            {calculateLoShuGrid(calcDob).present.map((num) => (
+                              <div
+                                key={num}
+                                className="px-2.5 py-1 bg-emerald-50 border border-emerald-100 rounded-lg text-emerald-800 font-mono font-black text-xs flex items-center gap-1"
+                              >
+                                {num}
+                                <span className="text-[9px] font-normal text-emerald-500">
+                                  ({num === 1 ? 'Sun' : num === 2 ? 'Moon' : num === 3 ? 'Jup' : num === 4 ? 'Rah' : num === 5 ? 'Mer' : num === 6 ? 'Ven' : num === 7 ? 'Ket' : num === 8 ? 'Sat' : 'Mar'})
+                                </span>
+                              </div>
+                            ))}
+                            {calculateLoShuGrid(calcDob).present.length === 0 && (
+                              <span className="text-xs text-slate-400 italic">None</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Missing Numbers */}
+                        <div className="p-4 bg-white border border-slate-200/60 rounded-2xl flex flex-col justify-between text-left">
+                          <div>
+                            <span className="text-[10px] font-mono text-red-500 uppercase tracking-wider block font-bold flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                              Missing Digits Array (Missing)
+                            </span>
+                            <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">
+                              Excluded cosmic nodes. Needs active remedial elements in respective vaastu zones.
+                            </p>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-1.5 mt-4">
+                            {calculateLoShuGrid(calcDob).missing.map((num) => (
+                              <div
+                                key={num}
+                                className="px-2.5 py-1 bg-red-50/50 border border-red-100/50 rounded-lg text-red-700 font-mono font-black text-xs flex items-center gap-1"
+                              >
+                                {num}
+                                <span className="text-[9px] font-normal text-red-400">
+                                  ({num === 1 ? 'Sun' : num === 2 ? 'Moon' : num === 3 ? 'Jup' : num === 4 ? 'Rah' : num === 5 ? 'Mer' : num === 6 ? 'Ven' : num === 7 ? 'Ket' : num === 8 ? 'Sat' : 'Mar'})
+                                </span>
+                              </div>
+                            ))}
+                            {calculateLoShuGrid(calcDob).missing.length === 0 && (
+                              <span className="text-xs text-slate-400 italic">None</span>
+                            )}
+                          </div>
+                        </div>
+
+                      </div>
+
                     </div>
                   </div>
 
@@ -1561,7 +1702,10 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                   >
                     {loshuGridOrder.map((digit) => {
                       const box = analysisResult.loshuGrid[digit];
-                      const style = getBoxElementStyle(box.element, box.count);
+                      const hasDriver = analysisResult.mulank === digit;
+                      const hasBhagyank = analysisResult.bhagyank === digit;
+                      const isBhagyankOnly = hasBhagyank && box.count === 0;
+                      const style = getBoxElementStyle(box.element, box.count || (hasDriver || hasBhagyank ? 1 : 0));
                       const isSelected = selectedBoxDigit === digit;
 
                       return (
@@ -1580,17 +1724,39 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                             {digit}
                           </span>
 
-                          {/* Digit Counts */}
-                          <div className="flex gap-0.5 justify-start">
-                            {box.count > 0 ? (
-                              Array.from({ length: Math.min(box.count, 4) }).map((_, i) => (
-                                <span key={i} className="w-5 h-5 rounded-full bg-white/70 border border-slate-300 flex items-center justify-center text-[10px] font-mono font-black text-slate-800">
-                                  {digit}
+                          {/* Digit Counts / Badges */}
+                          <div className="flex flex-col gap-1.5 justify-start text-left">
+                            {/* Base DOB counts */}
+                            <div className="flex flex-wrap gap-1">
+                              {box.count > 0 ? (
+                                Array.from({ length: Math.min(box.count, 4) }).map((_, i) => (
+                                  <span key={i} title="Birth Grid (DOB) Digit" className="w-5 h-5 rounded-full bg-white border border-slate-300 flex items-center justify-center text-[10px] font-mono font-black text-slate-800 shadow-sm">
+                                    {digit}
+                                  </span>
+                                ))
+                              ) : null}
+                            </div>
+
+                            {/* Reinforcement Badges */}
+                            <div className="flex flex-wrap gap-1">
+                              {hasDriver && (
+                                <span title="Driver Number (Mulank) Reinforcement" className="px-1.5 h-4.5 rounded-md bg-amber-500 text-white border border-amber-600 flex items-center justify-center text-[8px] font-mono font-bold uppercase shadow-sm">
+                                  Dr: +1
                                 </span>
-                              ))
-                            ) : (
-                              <span className="text-[10px] font-mono text-slate-400 font-bold">MISSING</span>
-                            )}
+                              )}
+                              {hasBhagyank && (
+                                <span title={isBhagyankOnly ? "Bhagyank (Conductor) Destiny Energy" : "Bhagyank (Conductor) Reinforcement"} className={`px-1.5 h-4.5 rounded-md flex items-center justify-center text-[8px] font-mono font-bold uppercase shadow-sm ${
+                                  isBhagyankOnly 
+                                    ? 'bg-blue-600 text-white border border-blue-700 animate-pulse' 
+                                    : 'bg-indigo-500 text-white border border-indigo-600'
+                                }`}>
+                                  {isBhagyankOnly ? 'Destiny' : 'Bh: +1'}
+                                </span>
+                              )}
+                              {box.count === 0 && !hasDriver && !hasBhagyank && (
+                                <span className="text-[9px] font-mono text-slate-400 font-bold uppercase">MISSING</span>
+                              )}
+                            </div>
                           </div>
 
                           {/* Info overlay inside Box for details */}
@@ -1620,6 +1786,9 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                   (() => {
                     const box = analysisResult.loshuGrid[selectedBoxDigit];
                     const isMissing = box.count === 0;
+                    const hasDriver = analysisResult.mulank === selectedBoxDigit;
+                    const hasBhagyank = analysisResult.bhagyank === selectedBoxDigit;
+                    const isBhagyankOnly = hasBhagyank && box.count === 0;
 
                     return (
                       <div className="bg-white p-8 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 flex flex-col justify-between min-h-full">
@@ -1647,29 +1816,116 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                             </div>
                           </div>
 
-                          <div className="space-y-3 pt-2">
-                            <span className="text-[10px] font-mono uppercase text-[#D97706] tracking-widest block font-bold">Vibrational State Analytics</span>
-                            {isMissing ? (
-                              <div className="p-5 rounded-2xl border border-red-200 bg-red-50/50 space-y-2">
-                                <div className="flex items-center gap-2 text-red-700">
-                                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                                  <span className="text-xs font-bold uppercase tracking-wider">VIBRATION CONSTRAINED (Missing Digit)</span>
+                          <div className="space-y-4 pt-2">
+                            <span className="text-[10px] font-mono uppercase text-[#D97706] tracking-widest block font-bold border-b border-slate-100 pb-1">Layered Grid Audit</span>
+                            
+                            {/* Layer 1: Birth Grid Analysis */}
+                            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 text-left space-y-1.5">
+                              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 block flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                1. Birth Grid Analysis
+                              </span>
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-slate-700">Base DOB Frequency:</span>
+                                <span className={`font-mono text-xs font-black px-2 py-0.5 rounded ${
+                                  box.count > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {box.count}x
+                                </span>
+                              </div>
+                              <p className="text-slate-600 text-xs leading-relaxed font-sans">
+                                {box.count > 0 
+                                  ? `Number #${selectedBoxDigit} is naturally present ${box.count} time(s) in your Date of Birth, representing a stable baseline of ${box.lifeArea.toLowerCase()} traits.`
+                                  : `Number #${selectedBoxDigit} is completely missing from your Birth Date. This represents a natural baseline void or weakness regarding ${box.lifeArea.toLowerCase()}.`
+                                }
+                              </p>
+                            </div>
+
+                            {/* Layer 2: Driver Influence */}
+                            {hasDriver ? (
+                              <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 text-left space-y-1.5">
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#D97706] block flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                  2. Driver (Mulank) Influence
+                                </span>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-slate-700">Driver Number:</span>
+                                  <span className="font-mono text-xs font-black bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
+                                    #{analysisResult.mulank} (+1 Reinforcement)
+                                  </span>
                                 </div>
-                                <p className="text-slate-600 text-xs leading-relaxed">
-                                  There is no instance of #{selectedBoxDigit} in your Date of Birth or key indexes. This denotes minor weaknesses or voids in your traits regarding <strong>{box.lifeArea}</strong>.
+                                <p className="text-slate-600 text-xs leading-relaxed font-sans">
+                                  Because your Driver Number is also #{analysisResult.mulank}, your core personality, identity, and personal drive significantly reinforce the qualities of communication, adaptability, and learning in this coordinate.
                                 </p>
                               </div>
                             ) : (
-                              <div className="p-5 rounded-2xl border border-emerald-200 bg-emerald-50/50 space-y-2">
-                                <div className="flex items-center gap-2 text-emerald-700">
-                                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                                  <span className="text-xs font-bold uppercase tracking-wider">RESONANCE FULL (Present: {box.count}x)</span>
-                                </div>
-                                <p className="text-slate-600 text-xs leading-relaxed">
-                                  Number #{selectedBoxDigit} is present {box.count} time(s). Sources: {box.sources.join(', ')}. Details: {box.meaning}
-                                </p>
+                              <div className="p-3 rounded-2xl border border-slate-100 bg-slate-50/30 text-left text-[11px] text-slate-400 italic font-mono">
+                                Driver Number #{analysisResult.mulank} operates on a different node. No direct personality reinforcement here.
                               </div>
                             )}
+
+                            {/* Layer 3: Bhagyank Influence */}
+                            {hasBhagyank ? (
+                              <div className="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 text-left space-y-1.5">
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#1E3A8A] block flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                                  3. Bhagyank (Conductor) Influence
+                                </span>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-slate-700">Bhagyank Role:</span>
+                                  <span className="font-mono text-xs font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                    #{analysisResult.bhagyank} ({isBhagyankOnly ? 'Destiny Energy' : '+1 Reinforcement'})
+                                  </span>
+                                </div>
+                                <p className="text-slate-600 text-xs leading-relaxed font-sans">
+                                  {isBhagyankOnly 
+                                    ? `Although missing from your DOB grid, your Conductor Number is #${analysisResult.bhagyank}. This provides powerful "Destiny Energy" that acts as an ambient correction, prompting you toward active learning and development in this area.`
+                                    : `Your Conductor Number matches this node! This provides destiny-level reinforcement, steadily amplifying your innate traits as you progress through life.`
+                                  }
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="p-3 rounded-2xl border border-slate-100 bg-slate-50/30 text-left text-[11px] text-slate-400 italic font-mono">
+                                Conductor Number #{analysisResult.bhagyank} operates on a different node. No direct destiny reinforcement here.
+                              </div>
+                            )}
+
+                            {/* Layer 4: Combined Energy Analysis */}
+                            <div className="p-4 rounded-2xl border border-[#D97706]/20 bg-[#FDFCF7] text-left space-y-1.5">
+                              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#B45309] block flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]"></span>
+                                4. Combined Energy Analysis
+                              </span>
+                              <p className="text-slate-700 text-xs leading-relaxed font-sans font-medium">
+                                {(() => {
+                                  let explanation = `The combined cosmic profile of Node #${selectedBoxDigit} indicates `;
+                                  if (box.count > 0) {
+                                    explanation += `strong baseline active resources in your birth template. `;
+                                    if (hasDriver && hasBhagyank) {
+                                      explanation += `With additional dual reinforcement from both Driver and Conductor forces, this node represents an absolute powerhouse of potential, guaranteeing supreme mastery and achievements.`;
+                                    } else if (hasDriver) {
+                                      explanation += `Because your Driver Number matches, these base talents are highly amplified by your conscious decisions, creating a natural, self-aware practitioner of these skills.`;
+                                    } else if (hasBhagyank) {
+                                      explanation += `Because your Conductor Number matches, this area will expand dramatically as you grow, serving as a primary pillar of your career and material achievements.`;
+                                    } else {
+                                      explanation += `Operating purely as your baseline birth gift, it provides steady support in your life without needing excess conscious effort.`;
+                                    }
+                                  } else {
+                                    explanation += `a baseline void in your birth date. `;
+                                    if (hasDriver && hasBhagyank) {
+                                      explanation += `However, because both your Driver and Conductor focus on this exact node, you naturally generate this trait through deliberate focus and lifetime progression, fully bridging the initial void.`;
+                                    } else if (hasDriver) {
+                                      explanation += `However, because your Driver is #${analysisResult.mulank}, your day-to-day actions and conscious choices will actively compensate for this missing link, converting this weakness into a developed strength.`;
+                                    } else if (hasBhagyank) {
+                                      explanation += `However, your Conductor Number of #${analysisResult.bhagyank} acts as Destiny Energy, ensuring that life circumstances will constantly present opportunities for you to cultivate and master these traits.`;
+                                    } else {
+                                      explanation += `Without direct Driver or Bhagyank reinforcement, this node represents a true karmic lesson. Active remediation via the Lal Kitab altar below is highly recommended to balance your energies.`;
+                                    }
+                                  }
+                                  return explanation;
+                                })()}
+                              </p>
+                            </div>
                           </div>
 
                           {/* Specialized remediation display */}

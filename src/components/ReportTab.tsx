@@ -108,9 +108,12 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       const box = analysis.loshuGrid[digit];
       const count = box ? box.count : 0;
       const element = box ? box.element : '';
+      const hasDriver = analysis.mulank === digit;
+      const hasBhagyank = analysis.bhagyank === digit;
+      const isBhagyankOnly = hasBhagyank && count === 0;
       
       let style = 'background-color: #F9FAFB; color: #9CA3AF; border: 1.5px dashed #E5E7EB;';
-      if (count > 0) {
+      if (count > 0 || hasDriver || hasBhagyank) {
         switch (element.toLowerCase()) {
           case 'water':
             style = 'background-color: #EFF6FF; color: #1E40AF; border: 1.5px solid #BFDBFE;';
@@ -133,19 +136,38 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       let circles = '';
       if (count > 0) {
         for (let i = 0; i < Math.min(count, 4); i++) {
-          circles += `<span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background-color: #FFFFFF; border: 1px solid #CBD5E1; font-family: monospace; font-weight: 900; font-size: 11px; color: #1F2937; margin: 1px;">${digit}</span>`;
+          circles += `<span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background-color: #FFFFFF; border: 1px solid #CBD5E1; font-family: monospace; font-weight: 900; font-size: 10px; color: #1F2937; margin: 1px;">${digit}</span>`;
         }
-      } else {
+      }
+      
+      let badges = '';
+      if (hasDriver) {
+        badges += `<span style="display: inline-block; padding: 2px 4px; border-radius: 4px; background-color: #D97706; color: #FFFFFF; font-size: 7px; font-weight: bold; font-family: monospace; margin: 1px;">DR:+1</span>`;
+      }
+      if (hasBhagyank) {
+        if (isBhagyankOnly) {
+          badges += `<span style="display: inline-block; padding: 2px 4px; border-radius: 4px; background-color: #2563EB; color: #FFFFFF; font-size: 7px; font-weight: bold; font-family: monospace; margin: 1px;">DEST</span>`;
+        } else {
+          badges += `<span style="display: inline-block; padding: 2px 4px; border-radius: 4px; background-color: #6366F1; color: #FFFFFF; font-size: 7px; font-weight: bold; font-family: monospace; margin: 1px;">BH:+1</span>`;
+        }
+      }
+      
+      if (count === 0 && !hasDriver && !hasBhagyank) {
         circles = '<span style="font-size: 8px; font-weight: bold; color: #9CA3AF; letter-spacing: 0.5px;">MISSING</span>';
       }
       
       const label = element ? `${element}` : `Digit ${digit}`;
       
       gridHTML += `
-        <div style="border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; height: 82px; text-align: center; box-sizing: border-box; ${style}">
+        <div style="border-radius: 12px; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; height: 86px; text-align: center; box-sizing: border-box; ${style}">
           <span style="font-size: 9px; opacity: 0.35; font-weight: 800; align-self: flex-start; line-height: 1;">${digit}</span>
-          <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px;">
-            ${circles}
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px;">
+              ${circles}
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px;">
+              ${badges}
+            </div>
           </div>
           <span style="font-size: 8px; font-weight: bold; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.5px;">${label}</span>
         </div>

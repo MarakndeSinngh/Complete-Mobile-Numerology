@@ -1,5 +1,88 @@
 import { reduceToSingleDigit } from './numerologyEngine';
 
+export function calculateLoShuGrid(dob: string) {
+  // Extract digits from the date. We parse DD-MM-YYYY or YYYY-MM-DD
+  const parts = dob.split(/[-/.\s]+/);
+  let year = 1990;
+  let month = 1;
+  let day = 1;
+
+  if (parts.length >= 3) {
+    if (parts[0].length === 4) {
+      // YYYY-MM-DD
+      year = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10);
+      day = parseInt(parts[2], 10);
+    } else if (parts[2].length === 4) {
+      // DD-MM-YYYY
+      day = parseInt(parts[0], 10);
+      month = parseInt(parts[1], 10);
+      year = parseInt(parts[2], 10);
+    } else {
+      year = parseInt(parts[0], 10) || 1990;
+      month = parseInt(parts[1], 10) || 1;
+      day = parseInt(parts[2], 10) || 1;
+    }
+  } else {
+    const digitsOnly = dob.replace(/[^0-9]/g, '');
+    if (digitsOnly.length === 8) {
+      const first4 = parseInt(digitsOnly.slice(0, 4), 10);
+      const last4 = parseInt(digitsOnly.slice(4), 10);
+      if (first4 >= 1800 && first4 <= 2100) {
+        year = first4;
+        month = parseInt(digitsOnly.slice(4, 6), 10);
+        day = parseInt(digitsOnly.slice(6, 8), 10);
+      } else if (last4 >= 1800 && last4 <= 2100) {
+        day = parseInt(digitsOnly.slice(0, 2), 10);
+        month = parseInt(digitsOnly.slice(2, 4), 10);
+        year = last4;
+      }
+    }
+  }
+
+  // Format exactly as YYYYMMDD to extract digits
+  const yStr = year.toString().padStart(4, '0');
+  const mStr = month.toString().padStart(2, '0');
+  const dStr = day.toString().padStart(2, '0');
+  const yyyymmdd = `${yStr}${mStr}${dStr}`;
+
+  // Extract digits from YYYYMMDD
+  const digits = yyyymmdd.split('').map(d => parseInt(d, 10));
+
+  // Filter out zeros
+  const nonZeroDigits = digits.filter(d => d !== 0);
+
+  // Unique set of DOB digits
+  const uniqueDigits = Array.from(new Set(nonZeroDigits));
+
+  // Calculate Conductor (Bhagyank) from YYYYMMDD digits sum
+  let sum = digits.reduce((acc, val) => acc + val, 0);
+  while (sum > 9) {
+    sum = sum.toString().split('').map(d => parseInt(d, 10)).reduce((acc, val) => acc + val, 0);
+  }
+  const conductor = sum;
+
+  // Include Conductor (Bhagyank) in the unique set of digits, but ensure other derived numbers are excluded
+  if (conductor >= 1 && conductor <= 9) {
+    if (!uniqueDigits.includes(conductor)) {
+      uniqueDigits.push(conductor);
+    }
+  }
+
+  // Sort present digits
+  uniqueDigits.sort((a, b) => a - b);
+
+  // Missing digits from 1 to 9
+  const missingDigits = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(d => !uniqueDigits.includes(d));
+
+  return {
+    present: uniqueDigits,
+    missing: missingDigits,
+    conductor,
+    yyyymmdd
+  };
+}
+
 export interface LoshuGridBox {
   digit: number;
   representedDigit: number; // e.g. 4, 9, 2, etc.
@@ -250,21 +333,34 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
     }
   }
 
-  // Mulank & Bhagyank are NOT inserted into the grid as per the audit rules.
-  // They are only used in the interpretation layer to enhance analysis.
-
   // Compile Loshu Grid
   const loshuGrid: Record<number, LoshuGridBox> = {};
   for (let d = 1; d <= 9; d++) {
+    const hasDriver = mulank === d;
+    const hasBhagyank = bhagyank === d;
+    const sources: ('DOB' | 'MULANK' | 'BHAGYANK')[] = [];
+    if (counts[d] > 0) {
+      sources.push('DOB');
+    }
+    if (hasDriver) {
+      sources.push('MULANK');
+    }
+    if (hasBhagyank) {
+      sources.push('BHAGYANK');
+    }
+
     loshuGrid[d] = {
       digit: d,
       representedDigit: d,
-      count: counts[d] || 0,
-      sources: sourcesMap[d],
+      count: counts[d] || 0, // DOB frequency ONLY (Do not alter DOB count!)
+      sources: sources,
       meaning: ELEMENT_MAP[d].gridMeaning,
       element: ELEMENT_MAP[d].element,
       direction: ELEMENT_MAP[d].direction,
-      lifeArea: ELEMENT_MAP[d].lifeArea
+      lifeArea: ELEMENT_MAP[d].lifeArea,
+      isDriverReinforced: hasDriver,
+      isBhagyankReinforced: hasBhagyank,
+      isBhagyankOnly: hasBhagyank && (counts[d] || 0) === 0
     };
   }
 
