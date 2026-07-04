@@ -92,6 +92,11 @@ export interface LoshuGridBox {
   element: string;
   direction: string;
   lifeArea: string;
+  isDriverReinforced?: boolean;
+  isDriverLayer?: boolean;
+  isDestinyReinforced?: boolean;
+  isDestinyLayer?: boolean;
+  dobCount?: number;
 }
 
 export interface LoshuPlane {
@@ -336,31 +341,66 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
   // Compile Loshu Grid
   const loshuGrid: Record<number, LoshuGridBox> = {};
   for (let d = 1; d <= 9; d++) {
-    const hasDriver = mulank === d;
-    const hasBhagyank = bhagyank === d;
+    const dobCount = counts[d] || 0;
+    const isBirthLayer = dobCount > 0;
+    const isDriver = mulank === d;
+    const isDestiny = bhagyank === d;
+
+    let isDriverLayer = false;
+    let isDriverReinforced = false;
+    if (isDriver) {
+      if (isBirthLayer) {
+        isDriverReinforced = true;
+      } else {
+        isDriverLayer = true;
+      }
+    }
+
+    const existsAfterDriver = isBirthLayer || isDriverLayer;
+
+    let isDestinyLayer = false;
+    let isDestinyReinforced = false;
+    if (isDestiny) {
+      if (existsAfterDriver) {
+        isDestinyReinforced = true;
+      } else {
+        isDestinyLayer = true;
+      }
+    }
+
+    // Determine final enhanced count
+    let enhancedCount = 0;
+    if (isBirthLayer) {
+      enhancedCount = dobCount;
+    } else if (isDriverLayer || isDestinyLayer) {
+      enhancedCount = 1;
+    }
+
     const sources: ('DOB' | 'MULANK' | 'BHAGYANK')[] = [];
-    if (counts[d] > 0) {
+    if (isBirthLayer) {
       sources.push('DOB');
     }
-    if (hasDriver) {
+    if (isDriver) {
       sources.push('MULANK');
     }
-    if (hasBhagyank) {
+    if (isDestiny) {
       sources.push('BHAGYANK');
     }
 
     loshuGrid[d] = {
       digit: d,
       representedDigit: d,
-      count: counts[d] || 0, // DOB frequency ONLY (Do not alter DOB count!)
+      count: enhancedCount,
+      dobCount: dobCount,
       sources: sources,
       meaning: ELEMENT_MAP[d].gridMeaning,
       element: ELEMENT_MAP[d].element,
       direction: ELEMENT_MAP[d].direction,
       lifeArea: ELEMENT_MAP[d].lifeArea,
-      isDriverReinforced: hasDriver,
-      isBhagyankReinforced: hasBhagyank,
-      isBhagyankOnly: hasBhagyank && (counts[d] || 0) === 0
+      isDriverReinforced,
+      isDriverLayer,
+      isDestinyReinforced,
+      isDestinyLayer
     };
   }
 

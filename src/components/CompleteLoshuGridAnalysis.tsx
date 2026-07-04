@@ -1702,10 +1702,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                   >
                     {loshuGridOrder.map((digit) => {
                       const box = analysisResult.loshuGrid[digit];
-                      const hasDriver = analysisResult.mulank === digit;
-                      const hasBhagyank = analysisResult.bhagyank === digit;
-                      const isBhagyankOnly = hasBhagyank && box.count === 0;
-                      const style = getBoxElementStyle(box.element, box.count || (hasDriver || hasBhagyank ? 1 : 0));
+                      const style = getBoxElementStyle(box.element, box.count || 0);
                       const isSelected = selectedBoxDigit === digit;
 
                       return (
@@ -1726,34 +1723,40 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
 
                           {/* Digit Counts / Badges */}
                           <div className="flex flex-col gap-1.5 justify-start text-left">
-                            {/* Base DOB counts */}
+                            {/* Base DOB counts (Birth Layer) */}
                             <div className="flex flex-wrap gap-1">
-                              {box.count > 0 ? (
-                                Array.from({ length: Math.min(box.count, 4) }).map((_, i) => (
-                                  <span key={i} title="Birth Grid (DOB) Digit" className="w-5 h-5 rounded-full bg-white border border-slate-300 flex items-center justify-center text-[10px] font-mono font-black text-slate-800 shadow-sm">
+                              {box.dobCount && box.dobCount > 0 ? (
+                                Array.from({ length: Math.min(box.dobCount, 4) }).map((_, i) => (
+                                  <span key={i} title="Birth Layer (DOB) Digit" className="w-5 h-5 rounded-full bg-white border border-slate-300 flex items-center justify-center text-[10px] font-mono font-black text-slate-800 shadow-sm">
                                     {digit}
                                   </span>
                                 ))
                               ) : null}
                             </div>
 
-                            {/* Reinforcement Badges */}
-                            <div className="flex flex-wrap gap-1">
-                              {hasDriver && (
-                                <span title="Driver Number (Mulank) Reinforcement" className="px-1.5 h-4.5 rounded-md bg-amber-500 text-white border border-amber-600 flex items-center justify-center text-[8px] font-mono font-bold uppercase shadow-sm">
-                                  Dr: +1
+                            {/* Reinforcement / Layer Badges */}
+                            <div className="flex flex-wrap gap-1.5">
+                              {box.isDriverLayer && (
+                                <span title="Driver Layer Marker" className="px-1.5 h-4 rounded-md bg-amber-500 text-white border border-amber-600 flex items-center justify-center text-[8px] font-mono font-bold uppercase shadow-sm">
+                                  Dr Lyr
                                 </span>
                               )}
-                              {hasBhagyank && (
-                                <span title={isBhagyankOnly ? "Bhagyank (Conductor) Destiny Energy" : "Bhagyank (Conductor) Reinforcement"} className={`px-1.5 h-4.5 rounded-md flex items-center justify-center text-[8px] font-mono font-bold uppercase shadow-sm ${
-                                  isBhagyankOnly 
-                                    ? 'bg-blue-600 text-white border border-blue-700 animate-pulse' 
-                                    : 'bg-indigo-500 text-white border border-indigo-600'
-                                }`}>
-                                  {isBhagyankOnly ? 'Destiny' : 'Bh: +1'}
+                              {box.isDriverReinforced && (
+                                <span title="Driver Reinforced" className="px-1.5 h-4 rounded-md bg-amber-600 text-white border border-amber-700 flex items-center justify-center text-[8px] font-mono font-bold uppercase shadow-sm">
+                                  Dr Reinf
                                 </span>
                               )}
-                              {box.count === 0 && !hasDriver && !hasBhagyank && (
+                              {box.isDestinyLayer && (
+                                <span title="Destiny Layer Marker" className="px-1.5 h-4 rounded-md bg-blue-600 text-white border border-blue-700 flex items-center justify-center text-[8px] font-mono font-bold uppercase shadow-sm">
+                                  Dest Lyr
+                                </span>
+                              )}
+                              {box.isDestinyReinforced && (
+                                <span title="Destiny Reinforced" className="px-1.5 h-4 rounded-md bg-indigo-500 text-white border border-indigo-600 flex items-center justify-center text-[8px] font-mono font-bold uppercase shadow-sm">
+                                  Dest Reinf
+                                </span>
+                              )}
+                              {box.count === 0 && (
                                 <span className="text-[9px] font-mono text-slate-400 font-bold uppercase">MISSING</span>
                               )}
                             </div>
@@ -1788,7 +1791,6 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                     const isMissing = box.count === 0;
                     const hasDriver = analysisResult.mulank === selectedBoxDigit;
                     const hasBhagyank = analysisResult.bhagyank === selectedBoxDigit;
-                    const isBhagyankOnly = hasBhagyank && box.count === 0;
 
                     return (
                       <div className="bg-white p-8 rounded-[40px] border border-[#E5E7EB] shadow-sm space-y-6 flex flex-col justify-between min-h-full">
@@ -1819,74 +1821,77 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                           <div className="space-y-4 pt-2">
                             <span className="text-[10px] font-mono uppercase text-[#D97706] tracking-widest block font-bold border-b border-slate-100 pb-1">Layered Grid Audit</span>
                             
-                            {/* Layer 1: Birth Grid Analysis */}
+                            {/* Layer 1: Birth Grid Analysis (Birth Layer) */}
                             <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 text-left space-y-1.5">
                               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 block flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                1. Birth Grid Analysis
+                                1. Birth Layer (DOB Grid)
                               </span>
                               <div className="flex justify-between items-center">
-                                <span className="text-xs text-slate-700">Base DOB Frequency:</span>
+                                <span className="text-xs text-slate-700">Birth Grid Status:</span>
                                 <span className={`font-mono text-xs font-black px-2 py-0.5 rounded ${
-                                  box.count > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                                  box.dobCount && box.dobCount > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
                                 }`}>
-                                  {box.count}x
+                                  {box.dobCount && box.dobCount > 0 ? `Present (${box.dobCount}x)` : 'Missing (0x)'}
                                 </span>
                               </div>
                               <p className="text-slate-600 text-xs leading-relaxed font-sans">
-                                {box.count > 0 
-                                  ? `Number #${selectedBoxDigit} is naturally present ${box.count} time(s) in your Date of Birth, representing a stable baseline of ${box.lifeArea.toLowerCase()} traits.`
-                                  : `Number #${selectedBoxDigit} is completely missing from your Birth Date. This represents a natural baseline void or weakness regarding ${box.lifeArea.toLowerCase()}.`
+                                {box.dobCount && box.dobCount > 0 
+                                  ? `Number #${selectedBoxDigit} is naturally present in your Date of Birth, forming the solid Birth Layer of your grid with a count of ${box.dobCount}. This represents stable, innate traits in this zone.`
+                                  : `Number #${selectedBoxDigit} does not appear in your Date of Birth. It is completely missing in the Birth Layer, representing a natural baseline void in ${box.lifeArea.toLowerCase()}.`
                                 }
                               </p>
                             </div>
 
-                            {/* Layer 2: Driver Influence */}
+                            {/* Layer 2: Driver Influence (Driver Layer) */}
                             {hasDriver ? (
                               <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 text-left space-y-1.5">
                                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#D97706] block flex items-center gap-1">
                                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                  2. Driver (Mulank) Influence
+                                  2. Driver Layer (Mulank Influence)
                                 </span>
                                 <div className="flex justify-between items-center">
-                                  <span className="text-xs text-slate-700">Driver Number:</span>
+                                  <span className="text-xs text-slate-700">Driver Status:</span>
                                   <span className="font-mono text-xs font-black bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
-                                    #{analysisResult.mulank} (+1 Reinforcement)
+                                    {box.isDriverReinforced ? `Reinforced (#${analysisResult.mulank})` : `Added as Layer (#${analysisResult.mulank})`}
                                   </span>
                                 </div>
                                 <p className="text-slate-600 text-xs leading-relaxed font-sans">
-                                  Because your Driver Number is also #{analysisResult.mulank}, your core personality, identity, and personal drive significantly reinforce the qualities of communication, adaptability, and learning in this coordinate.
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="p-3 rounded-2xl border border-slate-100 bg-slate-50/30 text-left text-[11px] text-slate-400 italic font-mono">
-                                Driver Number #{analysisResult.mulank} operates on a different node. No direct personality reinforcement here.
-                              </div>
-                            )}
-
-                            {/* Layer 3: Bhagyank Influence */}
-                            {hasBhagyank ? (
-                              <div className="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 text-left space-y-1.5">
-                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#1E3A8A] block flex items-center gap-1">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
-                                  3. Bhagyank (Conductor) Influence
-                                </span>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-xs text-slate-700">Bhagyank Role:</span>
-                                  <span className="font-mono text-xs font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                                    #{analysisResult.bhagyank} ({isBhagyankOnly ? 'Destiny Energy' : '+1 Reinforcement'})
-                                  </span>
-                                </div>
-                                <p className="text-slate-600 text-xs leading-relaxed font-sans">
-                                  {isBhagyankOnly 
-                                    ? `Although missing from your DOB grid, your Conductor Number is #${analysisResult.bhagyank}. This provides powerful "Destiny Energy" that acts as an ambient correction, prompting you toward active learning and development in this area.`
-                                    : `Your Conductor Number matches this node! This provides destiny-level reinforcement, steadily amplifying your innate traits as you progress through life.`
+                                  {box.isDriverReinforced 
+                                    ? `Because your Driver Number is #${analysisResult.mulank} and it already exists in your DOB, it is marked as "Driver Reinforced". This doubles down on your core personality traits without cluttering your grid with a duplicate digit.`
+                                    : `Since digit #${analysisResult.mulank} was missing from your DOB, it is inserted into the grid as a clean "Driver Layer" marker to activate this sector and provide necessary support.`
                                   }
                                 </p>
                               </div>
                             ) : (
                               <div className="p-3 rounded-2xl border border-slate-100 bg-slate-50/30 text-left text-[11px] text-slate-400 italic font-mono">
-                                Conductor Number #{analysisResult.bhagyank} operates on a different node. No direct destiny reinforcement here.
+                                Driver Number #{analysisResult.mulank} operates on a different node. No direct personality reinforcement or layer addition here.
+                              </div>
+                            )}
+
+                            {/* Layer 3: Bhagyank Influence (Destiny Layer) */}
+                            {hasBhagyank ? (
+                              <div className="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 text-left space-y-1.5">
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#1E3A8A] block flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                                  3. Destiny Layer (Bhagyank/Conductor Influence)
+                                </span>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-slate-700">Conductor Status:</span>
+                                  <span className="font-mono text-xs font-black bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                    {box.isDestinyReinforced ? `Reinforced (#${analysisResult.bhagyank})` : `Added as Layer (#${analysisResult.bhagyank})`}
+                                  </span>
+                                </div>
+                                <p className="text-slate-600 text-xs leading-relaxed font-sans">
+                                  {box.isDestinyReinforced 
+                                    ? `Because your Bhagyank is #${analysisResult.bhagyank} and it already exists in your DOB or was added by your Driver, it is marked as "Destiny Reinforced". This channels destiny-level focus to reinforce this node without duplicate digits.`
+                                    : `Since digit #${analysisResult.bhagyank} was not present in your grid, it is inserted as a dedicated "Destiny Layer" marker to introduce cosmic alignment and unlock this area's potentials.`
+                                  }
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="p-3 rounded-2xl border border-slate-100 bg-slate-50/30 text-left text-[11px] text-slate-400 italic font-mono">
+                                Conductor Number #{analysisResult.bhagyank} operates on a different node. No direct destiny reinforcement or layer addition here.
                               </div>
                             )}
 
@@ -1894,15 +1899,15 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                             <div className="p-4 rounded-2xl border border-[#D97706]/20 bg-[#FDFCF7] text-left space-y-1.5">
                               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#B45309] block flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]"></span>
-                                4. Combined Energy Analysis
+                                4. Combined Interpretation
                               </span>
                               <p className="text-slate-700 text-xs leading-relaxed font-sans font-medium">
                                 {(() => {
                                   let explanation = `The combined cosmic profile of Node #${selectedBoxDigit} indicates `;
-                                  if (box.count > 0) {
+                                  if (box.dobCount && box.dobCount > 0) {
                                     explanation += `strong baseline active resources in your birth template. `;
                                     if (hasDriver && hasBhagyank) {
-                                      explanation += `With additional dual reinforcement from both Driver and Conductor forces, this node represents an absolute powerhouse of potential, guaranteeing supreme mastery and achievements.`;
+                                      explanation += `With additional dual reinforcement from both Driver (Mulank) and Conductor (Bhagyank) forces, this node represents an absolute powerhouse of potential, guaranteeing supreme mastery and achievements in ${box.lifeArea.toLowerCase()}.`;
                                     } else if (hasDriver) {
                                       explanation += `Because your Driver Number matches, these base talents are highly amplified by your conscious decisions, creating a natural, self-aware practitioner of these skills.`;
                                     } else if (hasBhagyank) {
