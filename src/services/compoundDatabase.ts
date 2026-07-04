@@ -271,61 +271,61 @@ export function getCompoundDetails(num: number): CompoundInterpretation {
     meaning = 'Highly protective, mystical compound bringing powerful political backing, sudden financial windfalls, and high analytical insight.';
     positiveTraits = ['Brilliant spiritual insight', 'Indestructible hidden protection', 'Astute corporate defense planning'];
     negativeTraits = ['Occasional sudden isolation urge', 'Overly cautious with partners', 'Slower trust build'];
-    careerImpact: 'Perfect for data forensic heads, state advisors, astrological counselors, and senior metaphysical writers.',
-    relationshipImpact: 'Provides a deeply intellectual, slightly silent domestic space. Needs private research rooms inside the house.',
-    businessImpact: 'Unlocks rapid breakthroughs. Succeeds in highly specialized corporate sectors, spiritual platforms, or elite security.',
-    financialImpact: 'Fosters sudden windfalls, unexpected lottery gains, or heavy profits from long-held investments.',
-    healthImpact: 'Strong energetic system. Practice healthy sleep schedules to normalize deep cellular recovery.',
-    spiritualImpact: 'Combines Jupiter (3) with Ketu analyst (7). Unlocks deep past life memory access and metaphysical self-realization.',
-    prediction: 'A majestic halo of protection guards your path. You will rise from relative obscurity to a crown of public honor.'
+    careerImpact = 'Perfect for data forensic heads, state advisors, astrological counselors, and senior metaphysical writers.';
+    relationshipImpact = 'Provides a deeply intellectual, slightly silent domestic space. Needs private research rooms inside the house.';
+    businessImpact = 'Unlocks rapid breakthroughs. Succeeds in highly specialized corporate sectors, spiritual platforms, or elite security.';
+    financialImpact = 'Fosters sudden windfalls, unexpected lottery gains, or heavy profits from long-held investments.';
+    healthImpact = 'Strong energetic system. Practice healthy sleep schedules to normalize deep cellular recovery.';
+    spiritualImpact = 'Combines Jupiter (3) with Ketu analyst (7). Unlocks deep past life memory access and metaphysical self-realization.';
+    prediction = 'A majestic halo of protection guards your path. You will rise from relative obscurity to a crown of public honor.';
   } else if (num === 41) {
     title = 'The Builder of Empires (पुरुषार्थ योग)';
-    meaning: 'Demands intense strategic planning. Multiplies structural and administrative success through tireless professional networks.',
-    positiveTraits: ['Pristine administrative capacity', 'Untiring work dynamic', 'Exceptional systemic coding'],
-    negativeTraits: ['Workaholic neglect of family', 'Excessive rigidity', 'High critical demands'],
-    careerImpact: 'Outstanding with construction, material logistics management, system network engineering, and corporate planning.',
-    relationshipImpact: 'Provides solid structural support but needs to actively express soft emotions to maintain spousal warmth.',
-    businessImpact: 'Very solid. Generates stable industrial models, multiplies offline franchises, and standardizes operations.',
-    financialImpact: 'Gradual, highly disciplined accumulation of substantial real estate, land plots, and robust business reserves.',
-    healthImpact: 'Needs bone flexibility care. Regular exercise/yoga is highly recommended to dissolve joint stiffness.',
-    spiritualImpact: 'Combines Rahu (4) with Sun (1). Dissolves systemic material illusion states to reveal inner golden truth.',
-    prediction: 'Your empire is built brick by brick. Have patience, as your later years will command massive physical estate holdings.'
+    meaning = 'Demands intense strategic planning. Multiplies structural and administrative success through tireless professional networks.';
+    positiveTraits = ['Pristine administrative capacity', 'Untiring work dynamic', 'Exceptional systemic coding'];
+    negativeTraits = ['Workaholic neglect of family', 'Excessive rigidity', 'High critical demands'];
+    careerImpact = 'Outstanding with construction, material logistics management, system network engineering, and corporate planning.';
+    relationshipImpact = 'Provides solid structural support but needs to actively express soft emotions to maintain spousal warmth.';
+    businessImpact = 'Very solid. Generates stable industrial models, multiplies offline franchises, and standardizes operations.';
+    financialImpact = 'Gradual, highly disciplined accumulation of substantial real estate, land plots, and robust business reserves.';
+    healthImpact = 'Needs bone flexibility care. Regular exercise/yoga is highly recommended to dissolve joint stiffness.';
+    spiritualImpact = 'Combines Rahu (4) with Sun (1). Dissolves systemic material illusion states to reveal inner golden truth.';
+    prediction = 'Your empire is built brick by brick. Have patience, as your later years will command massive physical estate holdings.';
   } else if (num === 42) {
     title = 'The Creative Catalyst (स्वर्ण स्पर्श)';
-    meaning: 'Confers amazing aesthetic designs, luxurious domestic comforts, and consistent savings flow. Known as the Golden Touch.',
-    positiveTraits: ['Excellent design curation', 'Gentle cooperative charm', 'Strong passive savings'],
-    negativeTraits: ['Avoiding physical friction', 'Prone to high luxury expenses', 'Minor emotional hesitations'],
-    careerImpact: 'Highly suited to premium hospitality, interior designing, global fashion styling, and luxury asset trading.',
-    relationshipImpact: 'Highly affectionate. Ensures beautiful vehicles, strong jewelry accumulation, and happy family progress.',
-    businessImpact: 'Unlocks exceptional branding curves. Perfect for premium retail outlets, high-end dessert salons, and PR agencies.',
-    financialImpact: 'Continuous growth in luxury savings. Attracts luxury properties and premium long-term diamond investments.',
-    healthImpact: 'Very stable. Guard against mild seasonal allergies and maintain sound water intake schedules.',
-    spiritualImpact: 'Aids in blending material luxury Venus (6) with Rahu execution (4) to realize functional beauty on earth.',
-    prediction: 'Your touch brings aesthetic and commercial life to dull concepts. Wealth of beauty and peace is naturally yours.'
+    meaning = 'Confers amazing aesthetic designs, luxurious domestic comforts, and consistent savings flow. Known as the Golden Touch.';
+    positiveTraits = ['Excellent design curation', 'Gentle cooperative charm', 'Strong passive savings'];
+    negativeTraits = ['Avoiding physical friction', 'Prone to high luxury expenses', 'Minor emotional hesitations'];
+    careerImpact = 'Highly suited to premium hospitality, interior designing, global fashion styling, and luxury asset trading.';
+    relationshipImpact = 'Highly affectionate. Ensures beautiful vehicles, strong jewelry accumulation, and happy family progress.';
+    businessImpact = 'Unlocks exceptional branding curves. Perfect for premium retail outlets, high-end dessert salons, and PR agencies.';
+    financialImpact = 'Continuous growth in luxury savings. Attracts luxury properties and premium long-term diamond investments.';
+    healthImpact = 'Very stable. Guard against mild seasonal allergies and maintain sound water intake schedules.';
+    spiritualImpact = 'Aids in blending material luxury Venus (6) with Rahu execution (4) to realize functional beauty on earth.';
+    prediction = 'Your touch brings aesthetic and commercial life to dull concepts. Wealth of beauty and peace is naturally yours.';
   } else if (num === 46) {
     title = 'The Sovereign Catalyst (महा संबल)';
-    meaning: 'Delivers dynamic, pristine administrative authority and sudden material accumulation through overseas or foreign connections.',
-    positiveTraits: ['Unmatched organizational charisma', 'Rapid promotional cycles', 'Brilliant operational command'],
-    negativeTraits: ['Occasional severe arrogance', 'Inability to take simple feedback', 'Workplace domination urge'],
-    careerImpact: 'Exceptional for executive directors of multinational corporations, state diplomats, and premier brand founders.',
-    relationshipImpact: 'Intensely committed. Commands enormous societal respect for family setups and ensures top schooling for children.',
-    businessImpact: 'Magnificent. Speeds up corporate collaborations, secures major foreign equity bids, and maximizes brand trust.',
-    financialImpact: 'Excellent. Prompts rapid wealth compounding. Secures massive institutional investments and luxury estates.',
-    healthImpact: 'Highly vital energy. Protect against heat fatigue or high-intensity summer activities.',
-    spiritualImpact: 'Combines Rahu (4) with Venus (6) to construct pristine Sun (1) sovereign consciousness, leading with truth.',
-    prediction: 'Your professional growth is destined to scale global charts. You will command respect from top elite circles.'
+    meaning = 'Delivers dynamic, pristine administrative authority and sudden material accumulation through overseas or foreign connections.';
+    positiveTraits = ['Unmatched organizational charisma', 'Rapid promotional cycles', 'Brilliant operational command'];
+    negativeTraits = ['Occasional severe arrogance', 'Inability to take simple feedback', 'Workplace domination urge'];
+    careerImpact = 'Exceptional for executive directors of multinational corporations, state diplomats, and premier brand founders.';
+    relationshipImpact = 'Intensely committed. Commands enormous societal respect for family setups and ensures top schooling for children.';
+    businessImpact = 'Magnificent. Speeds up corporate collaborations, secures major foreign equity bids, and maximizes brand trust.';
+    financialImpact = 'Excellent. Prompts rapid wealth compounding. Secures massive institutional investments and luxury estates.';
+    healthImpact = 'Highly vital energy. Protect against heat fatigue or high-intensity summer activities.';
+    spiritualImpact = 'Combines Rahu (4) with Venus (6) to construct pristine Sun (1) sovereign consciousness, leading with truth.';
+    prediction = 'Your professional growth is destined to scale global charts. You will command respect from top elite circles.';
   } else if (num === 51) {
     title = 'The Merchant Emperor (कुबेर योग)';
-    meaning: 'Highly auspicious compound representing absolute control over commercial markets, rapid trading, and pristine customer trust.',
-    positiveTraits: ['Exceptional sales instinct', 'Magnetic network building', 'Rapid calculated decision speed'],
-    negativeTraits: ['Restlessness under delay', 'Over-expansion of tasks', 'Slightly speculative investments focus'],
-    careerImpact: 'Brilliant as chief financial operations head, strategic retail builder, global trade expert, and media architect.',
-    relationshipImpact: 'Highly joyful. Loves organizing grand dinners, family travels, and high-frequency celebratory environments.',
-    businessImpact: 'Phenomenal corporate frequency. Propels massive business turnovers, easy joint ventures, and total customer loyalty.',
-    financialImpact: 'Magnificent wealth attraction, resembling Kuber Gates. High cash reserves, dynamic asset growth, minimal blockages.',
-    healthImpact: 'Active, high stamina. Monitor sleep quality and avoid excessive screen time during late nights.',
-    spiritualImpact: 'Combines Mercury (5) with Sun (1) to feed Venus (6) luxury manifestation, serving humanity through creative commerce.',
-    prediction: 'Commercial success is your absolute birthright. Your strategies will build a legacy of massive wealth generation.'
+    meaning = 'Highly auspicious compound representing absolute control over commercial markets, rapid trading, and pristine customer trust.';
+    positiveTraits = ['Exceptional sales instinct', 'Magnetic network building', 'Rapid calculated decision speed'];
+    negativeTraits = ['Restlessness under delay', 'Over-expansion of tasks', 'Slightly speculative investments focus'];
+    careerImpact = 'Brilliant as chief financial operations head, strategic retail builder, global trade expert, and media architect.';
+    relationshipImpact = 'Highly joyful. Loves organizing grand dinners, family travels, and high-frequency celebratory environments.';
+    businessImpact = 'Phenomenal corporate frequency. Propels massive business turnovers, easy joint ventures, and total customer loyalty.';
+    financialImpact = 'Magnificent wealth attraction, resembling Kuber Gates. High cash reserves, dynamic asset growth, minimal blockages.';
+    healthImpact = 'Active, high stamina. Monitor sleep quality and avoid excessive screen time during late nights.';
+    spiritualImpact = 'Combines Mercury (5) with Sun (1) to feed Venus (6) luxury manifestation, serving humanity through creative commerce.';
+    prediction = 'Commercial success is your absolute birthright. Your strategies will build a legacy of massive wealth generation.';
   } else {
     // Structural fallback algorithm for remaining numbers
     const planetName = rulers[root].split(' ')[0];

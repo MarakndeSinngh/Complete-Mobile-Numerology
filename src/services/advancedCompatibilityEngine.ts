@@ -140,8 +140,8 @@ export function calculateAdvancedCompatibility(
 
   // Layer 4: Lo Shu Grid Compatibility (20% weight)
   // Compare present/missing/repeated/arrows
-  const p1Digits = loshuAna1.gridBoxes.filter(b => b.count > 0).map(b => b.digit);
-  const p2Digits = loshuAna2.gridBoxes.filter(b => b.count > 0).map(b => b.digit);
+  const p1Digits = Object.values(loshuAna1.loshuGrid).filter(b => b.count > 0).map(b => b.digit);
+  const p2Digits = Object.values(loshuAna2.loshuGrid).filter(b => b.count > 0).map(b => b.digit);
   
   // Find intersection of present numbers
   const sharedPresent = p1Digits.filter(d => p2Digits.includes(d));

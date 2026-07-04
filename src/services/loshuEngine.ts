@@ -250,16 +250,8 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
     }
   }
 
-  // Add Mulank & Bhagyank to grid (optional but extremely traditional for standard synthesis)
-  if (mulank >= 1 && mulank <= 9) {
-    counts[mulank] = (counts[mulank] || 0) + 1;
-    sourcesMap[mulank].push('MULANK');
-  }
-  const destinySingle = reduceToSingleDigit(bhagyank);
-  if (destinySingle >= 1 && destinySingle <= 9) {
-    counts[destinySingle] = (counts[destinySingle] || 0) + 1;
-    sourcesMap[destinySingle].push('BHAGYANK');
-  }
+  // Mulank & Bhagyank are NOT inserted into the grid as per the audit rules.
+  // They are only used in the interpretation layer to enhance analysis.
 
   // Compile Loshu Grid
   const loshuGrid: Record<number, LoshuGridBox> = {};

@@ -102,8 +102,7 @@ export const PAIR_MEANINGS: Record<string, PairMeaning> = {
   '18': {
     meaning: 'Father-Son Discord & Career Delays',
     positive: 'Highly persistent, deep sense of duty.',
-    meaning: 'Possibility of father\'s loss, government issues, needs to change job frequently.',
-    negative: 'Arguments with authority, delays in rewards.',
+    negative: 'Possibility of father\'s loss, government issues, frequent job changes, arguments with authority, delays in rewards.',
     area: 'Career',
     severity: 25
   },

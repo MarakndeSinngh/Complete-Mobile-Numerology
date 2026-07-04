@@ -154,7 +154,10 @@ export function calculateAdvancedCompatibility(
   };
 
   // LAYER 6: Lo Shu Grid Synergies
-  const sharedNumbers = [...grid1.grid].filter(x => grid2.grid.includes(x));
+  const grid1Digits = Object.values(grid1.loshuGrid).filter(box => box.count > 0).map(box => box.digit);
+  const grid2Digits = Object.values(grid2.loshuGrid).filter(box => box.count > 0).map(box => box.digit);
+
+  const sharedNumbers = grid1Digits.filter(x => grid2Digits.includes(x));
   const loshuScore = Math.min(100, Math.max(35, 40 + sharedNumbers.length * 15));
   const loshuMetric: CompatibilityMetric = {
     score: loshuScore,
@@ -164,8 +167,8 @@ export function calculateAdvancedCompatibility(
   };
 
   // LAYER 7: Arrow Compatibility
-  const arrow1 = grid1.presentArrows.length;
-  const arrow2 = grid2.presentArrows.length;
+  const arrow1 = grid1.strengthArrows.length;
+  const arrow2 = grid2.strengthArrows.length;
   const arrowScore = Math.min(100, Math.max(40, 50 + (arrow1 + arrow2) * 8));
   const arrowMetric: CompatibilityMetric = {
     score: arrowScore,
@@ -175,11 +178,11 @@ export function calculateAdvancedCompatibility(
   };
 
   // LAYER 8: Missing Number Compatibility
-  const missing1 = grid1.missingNumbers;
-  const missing2 = grid2.missingNumbers;
+  const missing1 = grid1.missingNumbers.map(item => item.digit);
+  const missing2 = grid2.missingNumbers.map(item => item.digit);
   // Mutual support: if partner 1 has a number that partner 2 is missing, that's beautiful
-  const p1SavesP2 = missing2.filter(num => grid1.grid.includes(num)).length;
-  const p2SavesP1 = missing1.filter(num => grid2.grid.includes(num)).length;
+  const p1SavesP2 = missing2.filter(num => grid1Digits.includes(num)).length;
+  const p2SavesP1 = missing1.filter(num => grid2Digits.includes(num)).length;
   const missingScore = Math.min(100, Math.max(30, 45 + (p1SavesP2 + p2SavesP1) * 12));
   const missingMetric: CompatibilityMetric = {
     score: missingScore,

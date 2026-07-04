@@ -1,6 +1,6 @@
 import { DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdvice } from '../types';
 import { getCompoundDetails, CompoundInterpretation } from './compoundDatabase';
-import { computeLoshuAnalysis, LoshuReport } from './loshuEngine';
+import { computeLoshuAnalysis } from './loshuEngine';
 import { calculateAdvancedCompatibility, AdvancedCompatibilityReport } from './compatibilityKnowledgeBase';
 
 export interface FullConsultationReport {
@@ -101,20 +101,23 @@ export function generateFullConsultationReport(
   - Risks to Avoid: ${compDetails.negativeTraits.join(', ')}`;
 
   // 5. LOS HU GRID AUDIT
-  const presentNums = lGrid.grid.join(', ');
+  const gridDigits = Object.values(lGrid.loshuGrid).filter(box => box.count > 0).map(box => box.digit);
+  const presentNums = gridDigits.join(', ');
   const loshuGridAudit = `Your Lo Shu Grid map displays active numbers: [${presentNums}]. Key placements indicate:
-  ${lGrid.grid.includes(4) && lGrid.grid.includes(9) && lGrid.grid.includes(2) ? '✓ Present Mental Plane (4,9,2): Pristine memory, strong logical calculations, strategic organization.' : '✗ Missing fully active Mental Plane: Relies heavily on practical notebooks to maintain detail accuracy.'}
-  ${lGrid.grid.includes(3) && lGrid.grid.includes(5) && lGrid.grid.includes(7) ? '✓ Present Emotional Plane (3,5,7): Exceptional intuitive depth, heart-driven sales magnetic charm, deep empathy.' : '✗ Missing fully active Emotional Plane: Prompts emotional detachment; prefers structured logic over raw sentiment.'}
-  ${lGrid.grid.includes(8) && lGrid.grid.includes(1) && lGrid.grid.includes(6) ? '✓ Present Practical Plane (8,1,6): High mechanical skills, robust commercial habits, physical execution power.' : '✗ Missing fully active Practical Plane: Needs disciplined schedule alarms to translate ideas to physical targets.'}`;
+  ${gridDigits.includes(4) && gridDigits.includes(9) && gridDigits.includes(2) ? '✓ Present Mental Plane (4,9,2): Pristine memory, strong logical calculations, strategic organization.' : '✗ Missing fully active Mental Plane: Relies heavily on practical notebooks to maintain detail accuracy.'}
+  ${gridDigits.includes(3) && gridDigits.includes(5) && gridDigits.includes(7) ? '✓ Present Emotional Plane (3,5,7): Exceptional intuitive depth, heart-driven sales magnetic charm, deep empathy.' : '✗ Missing fully active Emotional Plane: Prompts emotional detachment; prefers structured logic over raw sentiment.'}
+  ${gridDigits.includes(8) && gridDigits.includes(1) && gridDigits.includes(6) ? '✓ Present Practical Plane (8,1,6): High mechanical skills, robust commercial habits, physical execution power.' : '✗ Missing fully active Practical Plane: Needs disciplined schedule alarms to translate ideas to physical targets.'}`;
 
   // 6. ARROWS INSIGHT
-  const arrowInsightText = lGrid.presentArrows.length > 0
-    ? `Your Lo Shu Grid has successfully formed ${lGrid.presentArrows.length} majestic arrows of cosmic alignment: ${lGrid.presentArrows.map(a => a.name).join(', ')}. In Indian Numerology, these represent dynamic strength pipelines that guarantee consistent public recognition. For example, ${lGrid.presentArrows[0]?.meaning || 'balanced energy'}.`
+  const arrowInsightText = lGrid.strengthArrows.length > 0
+    ? `Your Lo Shu Grid has successfully formed ${lGrid.strengthArrows.length} majestic arrows of cosmic alignment: ${lGrid.strengthArrows.map(a => a.name).join(', ')}. In Indian Numerology, these represent dynamic strength pipelines that guarantee consistent public recognition. For example, ${lGrid.strengthArrows[0]?.description || 'balanced energy'}.`
     : `Your Lo Shu Grid does not form standard primary arrows. Instead, you are guided by dynamic single-axis grids, indicating that you learn major life lessons through direct personal grit and versatile experimental transitions rather than predictable family models.`;
 
   // 7. MISSING NUMBERS REMEDIES
-  const missingString = lGrid.missingNumbers.join(', ');
-  const missingDetails = lGrid.missingNumbers.map(n => {
+  const missingDigits = lGrid.missingNumbers.map(item => item.digit);
+  const missingString = missingDigits.join(', ');
+  const missingDetails = lGrid.missingNumbers.map(item => {
+    const n = item.digit;
     const missReds: Record<number, string> = {
       2: 'Missing 2 (Moon): Triggers sudden emotional loneliness. Remedy: Drink water in silver vessels and perform full-moon meditative walks.',
       3: 'Missing 3 (Jupiter): Limits administrative guidance. Remedy: Keep saffron tilak on forehead on yellow Thursdays.',
@@ -173,10 +176,10 @@ export function generateFullConsultationReport(
   return {
     summary,
     birthDetailNotes,
-    driverConductorSync,
+    driverConductorSync: syncText,
     compoundFrequencies,
     loshuGridAudit,
-    arrowsInsight,
+    arrowsInsight: arrowInsightText,
     missingNumbersRemedies,
     destinedCareerPath,
     financialVastuVibe,

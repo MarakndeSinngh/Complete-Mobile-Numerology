@@ -451,11 +451,10 @@ export function computeLoshuMasterReport(
   const conductor = reduceToSingleDigit(sumAllDigits);
 
   const keyDigits = dobDigitsStr.split('').map(Number).filter(d => d >= 1 && d <= 9);
-  // Add driver and conductor to complete the grid
+  // The gridMap must contain ONLY the original Date of Birth digits as per the audit rules.
+  // We do NOT add driver or conductor to the grid itself.
   const gridMap: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
   keyDigits.forEach(d => { gridMap[d]++; });
-  gridMap[driver]++;
-  gridMap[conductor]++;
 
   const present: number[] = [];
   const missing: number[] = [];
@@ -988,11 +987,11 @@ export function computeLoshuMasterReport(
 
       const emptyLesson = {
         lesson: "General balance check.",
-        lifeChallenge: "Integrate default elements.",
-        growthOpportunity: "Unlock cosmic coordinates.",
-        practicalAdvice: "Maintain balance with daily meditation.",
-        developmentStrategy: "Perform regular actions.",
-        personalizedRemedy: "Carry standard crystals."
+        challenge: "Integrate default elements.",
+        growth: "Unlock cosmic coordinates.",
+        advice: "Maintain balance with daily meditation.",
+        strategy: "Perform regular actions.",
+        remedy: "Carry standard crystals."
       };
 
       const data = lessonsMap[digit] || emptyLesson;

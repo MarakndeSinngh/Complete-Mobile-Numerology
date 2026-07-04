@@ -326,6 +326,7 @@ export function generateNumeroVaastuReport(dobStr: string, gender: 'MALE' | 'FEM
   const targetMissingNodes = lGrid.missingNumbers.map(n => n.toString());
 
   const possibleRemedies: Record<number, {
+    number: number;
     zoneName: string;
     flawDetails: string;
     directionRemedy: string;
@@ -427,7 +428,8 @@ export function generateNumeroVaastuReport(dobStr: string, gender: 'MALE' | 'FEM
   };
 
   const remedyCards: any[] = [];
-  lGrid.missingNumbers.forEach(n => {
+  lGrid.missingNumbers.forEach(item => {
+    const n = item.digit;
     if (possibleRemedies[n]) {
       remedyCards.push(possibleRemedies[n]);
     }
