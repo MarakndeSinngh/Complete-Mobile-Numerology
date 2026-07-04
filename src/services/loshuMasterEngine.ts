@@ -589,7 +589,7 @@ export function computeLoshuMasterReport(
   }
 
   // Dominant and weak calculation
-  const countsArray = Object.entries(gridMap).map(([digit, count]) => ({ digit: parseInt(digit, 10), count }));
+  const countsArray = Object.entries(enhancedGridMap).map(([digit, count]) => ({ digit: parseInt(digit, 10), count }));
   const sortedByCount = [...countsArray].sort((a,b) => b.count - a.count);
   const maxCount = sortedByCount[0].count;
   
@@ -633,7 +633,7 @@ export function computeLoshuMasterReport(
   }
 
   // Section 1: Dashboard Score Generation matching criteria
-  const mentalCount = (enhancedGridMap[4] ? 1 : 0) + (enhancedGridMap[9] ? 1 : 0) + (enhancedGridMap[2] ? 1 : 0);
+  const mentalCount = (enhancedGridMap[9] ? 1 : 0) + (enhancedGridMap[5] ? 1 : 0) + (enhancedGridMap[1] ? 1 : 0);
   const emotionalCount = (enhancedGridMap[3] ? 1 : 0) + (enhancedGridMap[5] ? 1 : 0) + (enhancedGridMap[7] ? 1 : 0);
   const practicalCount = (enhancedGridMap[8] ? 1 : 0) + (enhancedGridMap[1] ? 1 : 0) + (enhancedGridMap[6] ? 1 : 0);
 
@@ -641,19 +641,25 @@ export function computeLoshuMasterReport(
   const emotionalStrength = Math.max(35, Math.round((emotionalCount / 3) * 100));
   const practicalStrength = Math.max(35, Math.round((practicalCount / 3) * 100));
 
-  let lScore = 30 + (enhancedGridMap[1] * 20) + (enhancedGridMap[9] * 15);
+  const score951 = ((enhancedGridMap[9] > 0 ? 1 : 0) + (enhancedGridMap[5] > 0 ? 1 : 0) + (enhancedGridMap[1] > 0 ? 1 : 0)) / 3;
+  const score357 = ((enhancedGridMap[3] > 0 ? 1 : 0) + (enhancedGridMap[5] > 0 ? 1 : 0) + (enhancedGridMap[7] > 0 ? 1 : 0)) / 3;
+  const score816 = ((enhancedGridMap[8] > 0 ? 1 : 0) + (enhancedGridMap[1] > 0 ? 1 : 0) + (enhancedGridMap[6] > 0 ? 1 : 0)) / 3;
+  const score276 = ((enhancedGridMap[2] > 0 ? 1 : 0) + (enhancedGridMap[7] > 0 ? 1 : 0) + (enhancedGridMap[6] > 0 ? 1 : 0)) / 3;
+  const score258 = ((enhancedGridMap[2] > 0 ? 1 : 0) + (enhancedGridMap[5] > 0 ? 1 : 0) + (enhancedGridMap[8] > 0 ? 1 : 0)) / 3;
+
+  let lScore = 30 + Math.round(score951 * 35) + Math.round(score276 * 15);
   if (driver === 1 || driver === 9) lScore += 15;
   const leadershipScore = Math.min(95, Math.max(40, lScore));
 
-  let cScore = 30 + (enhancedGridMap[1] * 15) + (enhancedGridMap[5] * 25);
+  let cScore = 30 + Math.round(score951 * 30) + Math.round(score357 * 20);
   if (driver === 5 || conductor === 5) cScore += 15;
   const communicationScore = Math.min(95, Math.max(40, cScore));
 
-  let sScore = 30 + (enhancedGridMap[7] * 20) + (enhancedGridMap[3] * 15) + (enhancedGridMap[8] * 10);
+  let sScore = 30 + Math.round(score357 * 30) + Math.round(score258 * 20);
   if (driver === 7 || conductor === 7 || driver === 3 || conductor === 3) sScore += 15;
   const spiritualScore = Math.min(95, Math.max(40, sScore));
 
-  let rScore = 30 + (enhancedGridMap[2] * 25) + (enhancedGridMap[6] * 20);
+  let rScore = 30 + Math.round(score357 * 25) + Math.round(score276 * 25);
   if (driver === 2 || conductor === 2 || driver === 6 || conductor === 6) rScore += 15;
   const relationshipScore = Math.min(95, Math.max(40, rScore));
 
@@ -661,13 +667,13 @@ export function computeLoshuMasterReport(
   const overallLoshuScore = Math.round((mentalStrength + emotionalStrength + practicalStrength + leadershipScore + communicationScore + spiritualScore + relationshipScore) / 7);
 
   const reasons = {
-    mentalStrength: `Based on your present digits: ${[4,9,2].filter(d => enhancedGridMap[d]>0).join(', ')}. Mentally agile, sharp visualization capabilities.`,
-    emotionalStrength: `Calculated from your middle plane: ${[3,5,7].filter(d => enhancedGridMap[d]>0).join(', ')}. Reflects intuitive empathy ratios.`,
-    practicalStrength: `Calculated from your solid foundation line: ${[8,1,6].filter(d => enhancedGridMap[d]>0).join(', ')}. Governs action readiness.`,
-    leadershipScore: `Propelled by driver planet #${driver} and the raw strength of digits 1 & 9.`,
-    communicationScore: `Derived from water element 1 and center stabiliser 5 presence in the flat map.`,
-    spiritualScore: `Governed by Occult Ketu (7) and Wisdom Jupiter (3) levels.`,
-    relationshipScore: `Measures affinity numbers 2 & 6 which manage home harmony.`,
+    mentalStrength: `Based on your present digits in Mental Plane 951: ${[9,5,1].filter(d => enhancedGridMap[d]>0).join(', ')}. Mentally agile, sharp visualization capabilities.`,
+    emotionalStrength: `Calculated from your middle Emotional Plane 357: ${[3,5,7].filter(d => enhancedGridMap[d]>0).join(', ')}. Reflects intuitive empathy ratios.`,
+    practicalStrength: `Calculated from your Practical Plane 816: ${[8,1,6].filter(d => enhancedGridMap[d]>0).join(', ')}. Governs action readiness.`,
+    leadershipScore: `Propelled by Plane 951 (Will/Mental) and Plane 276 (Action) alignments with driver planet #${driver}.`,
+    communicationScore: `Derived from Plane 951 and Plane 357 alignments in the flat map, managed by Mercury/Sun.`,
+    spiritualScore: `Governed by Plane 357 (Intuition) and Plane 258 (Spirituality) levels.`,
+    relationshipScore: `Measures affinity from Plane 357 and Plane 276 which manage partnership harmony.`,
     careerPotentialScore: `Synthesis of administrative drive and material plane alignment.`,
     overallLoshuScore: `Cumulative matrix value representing total vibrational balance.`
   };
@@ -690,7 +696,7 @@ export function computeLoshuMasterReport(
   // Section 13: 12 Master Arrows
   const arrowsList = [
     { name: 'Arrow of Determination', digits: [9, 5, 1], type: 'STRENGTH' },
-    { name: 'Arrow of Intellect', digits: [4, 9, 2], type: 'STRENGTH' },
+    { name: 'Arrow of Intellect', digits: [9, 5, 1], type: 'STRENGTH' },
     { name: 'Arrow of Planning', digits: [4, 3, 8], type: 'STRENGTH' },
     { name: 'Arrow of Practicality', digits: [8, 1, 6], type: 'STRENGTH' },
     { name: 'Arrow of Emotional Balance', digits: [3, 5, 7], type: 'STRENGTH' },
@@ -700,7 +706,7 @@ export function computeLoshuMasterReport(
     { name: 'Arrow of Weak Will', digits: [9, 5, 1], type: 'WEAKNESS' },
     { name: 'Arrow of Isolation', digits: [2, 5, 8], type: 'WEAKNESS' },
     { name: 'Arrow of Impatience', digits: [8, 1, 6], type: 'WEAKNESS' },
-    { name: 'Arrow of Confusion', digits: [4, 9, 2], type: 'WEAKNESS' }
+    { name: 'Arrow of Confusion', digits: [9, 5, 1], type: 'WEAKNESS' }
   ];
 
   const arrowsAnalysis: ArrowMasterResult[] = arrowsList.map(arr => {
@@ -889,9 +895,9 @@ export function computeLoshuMasterReport(
     secondaryDosha = 'PITTA';
   }
 
-  const healthScore = Math.min(96, 60 + (enhancedGridMap[3]*12) + (enhancedGridMap[5]*10) - (missing.length * 4));
-  const stressScore = Math.min(95, 30 + (missing.includes(5) ? 25 : 0) + (enhancedGridMap[8]*15));
-  const energyScore = Math.min(98, 50 + (enhancedGridMap[9]*15) + (enhancedGridMap[1]*10));
+  const healthScore = Math.min(96, Math.round(55 + (score357 * 35) + (score258 * 10) - (missing.length * 2)));
+  const stressScore = Math.min(95, Math.round(30 + (enhancedGridMap[5] === 0 ? 25 : 0) + (enhancedGridMap[8] > 0 ? 15 : 0) + ((1 - score357) * 20)));
+  const energyScore = Math.min(98, Math.round(50 + (score951 * 35) + (enhancedGridMap[1] > 0 ? 15 : 0)));
 
   // Section 17: Forecast calculation
   const personalYear = reduceToSingleDigit(driver + conductor + 2026); // targeting 2026
@@ -1025,7 +1031,7 @@ export function computeLoshuMasterReport(
       businessMindset: enhancedGridMap[5] > 0 ? 'Natural merchant, identifies retail trade loops.' : 'Advisor structure, works best inside partnerships.',
       wealthCreationStyle: `Slow secure accumulations with major multipliers in running Mahadashas.`,
       financialDisciplineScore,
-      wealthPotentialScore: Math.min(99, 40 + (enhancedGridMap[4]*15) + (enhancedGridMap[8]*15) + (enhancedGridMap[6]*15)),
+      wealthPotentialScore: Math.min(99, Math.round(40 + (score951 * 15) + (score357 * 15) + (score816 * 15) + (score276 * 10))),
       moneyBlockages: `Blocked funds in South-West zones due to missing Earth elements.`,
       financialRemedies: `Keep wooden windchimes in South-East and yellow salt lamps in Center zones.`
     },
