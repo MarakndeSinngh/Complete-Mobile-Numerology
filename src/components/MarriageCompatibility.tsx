@@ -848,7 +848,7 @@ export default function MarriageCompatibility() {
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed pt-2">
-                  The coupled alignment combines a rich selection of behavioral plans. Physical planes (4-9-2) and Action planes (8-1-6) are robustly active in this partnership, triggering outstanding business stability and continuous target execute focus!
+                  The coupled alignment combines a rich selection of behavioral plans. Mind planes (4-9-2) and Practical planes (8-1-6) are robustly active in this partnership, triggering outstanding business stability and continuous target execute focus!
                 </p>
 
               </div>

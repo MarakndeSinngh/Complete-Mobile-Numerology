@@ -1,4 +1,5 @@
 export * from './types';
+export * from './planeDefinitions';
 export * from './numerologyEngine';
 export * from './loshuEngine';
 export * from './planeEngine';

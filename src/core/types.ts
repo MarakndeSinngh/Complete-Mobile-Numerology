@@ -14,7 +14,19 @@ export interface PlaneAnalysis {
   title: string;
   description: string;
   strengthScore: number;
-  status: 'FULL' | 'EMPTY' | 'PARTIAL';
+  status: 'FULL' | 'EMPTY' | 'PARTIAL' | 'Complete' | 'Partial' | 'Weak' | 'Missing';
+  completionPercentage: number;
+  presentDigits: number[];
+  missingDigits: number[];
+  meaning: string;
+  strengths: string[];
+  weaknesses: string[];
+  careerImpact: string;
+  relationshipImpact: string;
+  financialImpact: string;
+  healthImpact: string;
+  recommendedRemedies: string[];
+  sources?: string[];
 }
 
 export interface ArrowAnalysis {

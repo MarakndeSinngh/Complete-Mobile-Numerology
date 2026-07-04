@@ -1,4 +1,5 @@
 import { reduceToSingleDigit } from './numerologyEngine';
+import { LEOFAMILY_PLANES } from '../core/planeDefinitions';
 
 export function calculateLoShuGrid(dob: string) {
   // Extract digits from the date. We parse DD-MM-YYYY or YYYY-MM-DD
@@ -213,16 +214,13 @@ const ELEMENT_MAP: Record<number, { element: string; direction: string; lifeArea
 };
 
 // Plane definitions
-const PLANE_TEMPLATES = [
-  { name: 'Mental Plane', type: 'HORIZONTAL' as const, digits: [9, 5, 1], title: 'मानसिक विचार विमान', description: 'Governs thought, strategy, memory, and cognitive sharpness through Plane 951.' },
-  { name: 'Emotional Plane', type: 'HORIZONTAL' as const, digits: [3, 5, 7], title: 'भावनात्मक संवेदनशीलता विमान', description: 'Governs intuition, empathy, feelings, and emotional resilience through Plane 357.' },
-  { name: 'Practical Plane', type: 'HORIZONTAL' as const, digits: [8, 1, 6], title: 'व्यावहारिक भौतिक विमान', description: 'Governs physical execution, hard work, trade, and luxury through Plane 816.' },
-  { name: 'Thought Plane', type: 'VERTICAL' as const, digits: [4, 3, 8], title: 'नियोजन एवं विचार विमान', description: 'Indicates deep research, systematic planning, and structural ideas.' },
-  { name: 'Will Plane', type: 'VERTICAL' as const, digits: [9, 5, 1], title: 'इच्छाशक्ति संकल्प विमान', description: 'Determines inner drive, persistent willpower, and execution focus.' },
-  { name: 'Action Plane', type: 'VERTICAL' as const, digits: [2, 7, 6], title: 'क्रियान्वयन भौतिक विमान', description: 'Measures swift translation of business plans into mechanical output.' },
-  { name: 'Golden Prosperity Plane', type: 'DIAGONAL' as const, digits: [4, 5, 6], title: 'स्वर्ण समृद्धि राजयोग विमान', description: 'A highly auspicious alignment denoting immense fame, monetary growth, and executive success.' },
-  { name: 'Silver Spiritual Plane', type: 'DIAGONAL' as const, digits: [2, 5, 8], title: 'रजत संपत्ति भूमि विमान', description: 'Highlights stability, multi-asset real estate luck, and high spiritual peace.' }
-];
+const PLANE_TEMPLATES = LEOFAMILY_PLANES.map(p => ({
+  name: p.name,
+  type: p.type as 'HORIZONTAL' | 'VERTICAL' | 'DIAGONAL',
+  digits: p.coordinates,
+  title: p.title,
+  description: p.meaning
+}));
 
 interface ChaldeanCompound {
   title: string;
@@ -868,9 +866,9 @@ export function performLoshuCompatibility(dob1: string, name1: string, dob2: str
   const overlapPlanes: string[] = [];
   const mutualStrengths: string[] = [];
 
-  // If both have Mental plane full
-  const mentalObj1 = ana1.strengthArrows.find(s => s.name === 'Mental Plane');
-  const mentalObj2 = ana2.strengthArrows.find(s => s.name === 'Mental Plane');
+  // If both have Mental/Mind plane full
+  const mentalObj1 = ana1.strengthArrows.find(s => s.name === 'Mental Plane' || s.name === 'Mind Plane');
+  const mentalObj2 = ana2.strengthArrows.find(s => s.name === 'Mental Plane' || s.name === 'Mind Plane');
   if (mentalObj1 && mentalObj2) {
     overlapPlanes.push('Dual Cognitive Power (Mutual Mental Plane)');
     baseScore += 8;

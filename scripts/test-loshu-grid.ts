@@ -70,7 +70,7 @@ function runTests() {
     const analysis = computeLoshuAnalysis(tc.dob, tc.name);
     console.log("  Checking loshuEngine.ts (computeLoshuAnalysis):");
     for (let d = 1; d <= 9; d++) {
-      const actualCount = analysis.loshuGrid[d].count;
+      const actualCount = analysis.loshuGrid[d].dobCount;
       const expectedCount = tc.expectedCounts[d];
       if (actualCount !== expectedCount) {
         console.error(`  ❌ Digit ${d}: Expected count ${expectedCount}, but got ${actualCount}`);

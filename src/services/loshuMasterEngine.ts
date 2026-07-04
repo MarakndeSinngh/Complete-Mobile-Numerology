@@ -1,6 +1,7 @@
 import { reduceToSingleDigit } from './numerologyEngine';
 import { calculateKuaNumber } from './numeroVaastuEngine';
 import { computeLoshuAnalysis } from './loshuEngine';
+import { LEOFAMILY_PLANES } from '../core/planeDefinitions';
 
 export interface CombinationResult {
   code: string; // "11" to "99"
@@ -577,11 +578,11 @@ export function computeLoshuMasterReport(
   const repeated: { digit: number; count: number }[] = [];
   
   for (let d = 1; d <= 9; d++) {
-    const count = enhancedGridMap[d];
-    if (count > 0) {
+    const dobCount = gridMap[d];
+    if (dobCount > 0) {
       present.push(d);
-      if (gridMap[d] > 1) {
-        repeated.push({ digit: d, count: gridMap[d] });
+      if (dobCount > 1) {
+        repeated.push({ digit: d, count: dobCount });
       }
     } else {
       missing.push(d);
@@ -632,26 +633,36 @@ export function computeLoshuMasterReport(
     archetypeMantra = "OM SHAM SHANAYISHCHARAYAE NAMAH";
   }
 
-  // Section 1: Dashboard Score Generation matching criteria
-  const mentalCount = (enhancedGridMap[9] ? 1 : 0) + (enhancedGridMap[5] ? 1 : 0) + (enhancedGridMap[1] ? 1 : 0);
-  const emotionalCount = (enhancedGridMap[3] ? 1 : 0) + (enhancedGridMap[5] ? 1 : 0) + (enhancedGridMap[7] ? 1 : 0);
-  const practicalCount = (enhancedGridMap[8] ? 1 : 0) + (enhancedGridMap[1] ? 1 : 0) + (enhancedGridMap[6] ? 1 : 0);
+  // Section 1: Dashboard Score Generation matching criteria from LEOFAMILY_PLANES
+  const mindPlaneDef = LEOFAMILY_PLANES.find(p => p.name === 'Mind Plane')!;
+  const emotionalPlaneDef = LEOFAMILY_PLANES.find(p => p.name === 'Emotional Plane')!;
+  const practicalPlaneDef = LEOFAMILY_PLANES.find(p => p.name === 'Practical Plane')!;
+  const thoughtPlaneDef = LEOFAMILY_PLANES.find(p => p.name === 'Thought Plane')!;
+  const willPlaneDef = LEOFAMILY_PLANES.find(p => p.name === 'Will Plane')!;
+  const actionPlaneDef = LEOFAMILY_PLANES.find(p => p.name === 'Action Plane')!;
+  const goldenSuccessDef = LEOFAMILY_PLANES.find(p => p.name === 'Golden Success Plane')!;
+  const silverYogDef = LEOFAMILY_PLANES.find(p => p.name === 'Silver Yog')!;
+
+  const mentalCount = mindPlaneDef.coordinates.filter(d => enhancedGridMap[d] > 0).length;
+  const emotionalCount = emotionalPlaneDef.coordinates.filter(d => enhancedGridMap[d] > 0).length;
+  const practicalCount = practicalPlaneDef.coordinates.filter(d => enhancedGridMap[d] > 0).length;
 
   const mentalStrength = Math.max(35, Math.round((mentalCount / 3) * 100));
   const emotionalStrength = Math.max(35, Math.round((emotionalCount / 3) * 100));
   const practicalStrength = Math.max(35, Math.round((practicalCount / 3) * 100));
 
-  const score951 = ((enhancedGridMap[9] > 0 ? 1 : 0) + (enhancedGridMap[5] > 0 ? 1 : 0) + (enhancedGridMap[1] > 0 ? 1 : 0)) / 3;
-  const score357 = ((enhancedGridMap[3] > 0 ? 1 : 0) + (enhancedGridMap[5] > 0 ? 1 : 0) + (enhancedGridMap[7] > 0 ? 1 : 0)) / 3;
-  const score816 = ((enhancedGridMap[8] > 0 ? 1 : 0) + (enhancedGridMap[1] > 0 ? 1 : 0) + (enhancedGridMap[6] > 0 ? 1 : 0)) / 3;
-  const score276 = ((enhancedGridMap[2] > 0 ? 1 : 0) + (enhancedGridMap[7] > 0 ? 1 : 0) + (enhancedGridMap[6] > 0 ? 1 : 0)) / 3;
-  const score258 = ((enhancedGridMap[2] > 0 ? 1 : 0) + (enhancedGridMap[5] > 0 ? 1 : 0) + (enhancedGridMap[8] > 0 ? 1 : 0)) / 3;
+  const score492 = mentalCount / 3;
+  const score357 = emotionalCount / 3;
+  const score816 = practicalCount / 3;
+  const score276 = actionPlaneDef.coordinates.filter(d => enhancedGridMap[d] > 0).length / 3;
+  const score258 = silverYogDef.coordinates.filter(d => enhancedGridMap[d] > 0).length / 3;
+  const score951 = willPlaneDef.coordinates.filter(d => enhancedGridMap[d] > 0).length / 3;
 
   let lScore = 30 + Math.round(score951 * 35) + Math.round(score276 * 15);
   if (driver === 1 || driver === 9) lScore += 15;
   const leadershipScore = Math.min(95, Math.max(40, lScore));
 
-  let cScore = 30 + Math.round(score951 * 30) + Math.round(score357 * 20);
+  let cScore = 30 + Math.round(score492 * 30) + Math.round(score357 * 20);
   if (driver === 5 || conductor === 5) cScore += 15;
   const communicationScore = Math.min(95, Math.max(40, cScore));
 
@@ -667,13 +678,13 @@ export function computeLoshuMasterReport(
   const overallLoshuScore = Math.round((mentalStrength + emotionalStrength + practicalStrength + leadershipScore + communicationScore + spiritualScore + relationshipScore) / 7);
 
   const reasons = {
-    mentalStrength: `Based on your present digits in Mental Plane 951: ${[9,5,1].filter(d => enhancedGridMap[d]>0).join(', ')}. Mentally agile, sharp visualization capabilities.`,
-    emotionalStrength: `Calculated from your middle Emotional Plane 357: ${[3,5,7].filter(d => enhancedGridMap[d]>0).join(', ')}. Reflects intuitive empathy ratios.`,
-    practicalStrength: `Calculated from your Practical Plane 816: ${[8,1,6].filter(d => enhancedGridMap[d]>0).join(', ')}. Governs action readiness.`,
-    leadershipScore: `Propelled by Plane 951 (Will/Mental) and Plane 276 (Action) alignments with driver planet #${driver}.`,
-    communicationScore: `Derived from Plane 951 and Plane 357 alignments in the flat map, managed by Mercury/Sun.`,
-    spiritualScore: `Governed by Plane 357 (Intuition) and Plane 258 (Spirituality) levels.`,
-    relationshipScore: `Measures affinity from Plane 357 and Plane 276 which manage partnership harmony.`,
+    mentalStrength: `Based on your present digits in Mind Plane ${mindPlaneDef.coordinates.join('')}: ${mindPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')}. Mentally agile, sharp visualization capabilities.`,
+    emotionalStrength: `Calculated from your middle Emotional Plane ${emotionalPlaneDef.coordinates.join('')}: ${emotionalPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')}. Reflects intuitive empathy ratios.`,
+    practicalStrength: `Calculated from your Practical Plane ${practicalPlaneDef.coordinates.join('')}: ${practicalPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')}. Governs action readiness and money management.`,
+    leadershipScore: `Propelled by Will Plane ${willPlaneDef.coordinates.join('')} and Action Plane ${actionPlaneDef.coordinates.join('')} alignments with driver planet #${driver}.`,
+    communicationScore: `Derived from Mind Plane ${mindPlaneDef.coordinates.join('')} and Emotional Plane ${emotionalPlaneDef.coordinates.join('')} alignments in the flat map, managed by Mercury/Sun.`,
+    spiritualScore: `Governed by Emotional Plane ${emotionalPlaneDef.coordinates.join('')} and Silver Yog ${silverYogDef.coordinates.join('')} levels.`,
+    relationshipScore: `Measures affinity from Emotional Plane ${emotionalPlaneDef.coordinates.join('')} and Action Plane ${actionPlaneDef.coordinates.join('')} which manage partnership harmony.`,
     careerPotentialScore: `Synthesis of administrative drive and material plane alignment.`,
     overallLoshuScore: `Cumulative matrix value representing total vibrational balance.`
   };

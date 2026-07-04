@@ -62,7 +62,7 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
   const consultation = generateLeoConsultation(dob, name, gender, mobile);
 
   // 3. Compute Planes and Arrows
-  const planes = calculatePlanes(enhancedGrid);
+  const planes = calculatePlanes(enhancedGrid, birthGrid, driver, bhagyank);
   const arrows = calculateArrows(enhancedGrid);
 
   // 4. Calculate present, missing, and repeated digits
