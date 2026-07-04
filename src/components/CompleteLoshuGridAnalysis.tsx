@@ -29,6 +29,54 @@ const containerVariants = {
   }
 };
 
+const PLANETARY_REPETITION_MEANINGS: Record<number, Record<number, string>> = {
+  1: {
+    2: "Double 1s (Sun) signify a highly balanced communicator, diplomatic, possessing outstanding self-expression and a confident speaking style.",
+    3: "Triple 1s (Sun) indicate a highly talkative, vocal nature but prone to emotional outbursts, speaking secrets or struggling to express depth.",
+    4: "Quadruple 1s (Sun) indicate extreme ego congestion, high stubbornness, and major difficulties aligning in public compromise."
+  },
+  2: {
+    2: "Double 2s (Moon) indicate heightened intuition, but can trigger sudden emotional sensitivity, mood escalations, and deep anxiety.",
+    3: "Triple 2s (Moon) indicate hyper-sensitivity and fragile boundaries, taking feedback too personally and experiencing emotional volatility.",
+    4: "Quadruple 2s (Moon) indicate major mood slides, anxiety loops, unstable relationships, and high psychic overload."
+  },
+  3: {
+    2: "Double 3s (Jupiter) indicate superlative intelligence, excellent creative planning skills, and a sharp researching mind.",
+    3: "Triple 3s (Jupiter) indicate an overly academic or theoretical focus, disconnected from practical reality, and a tendency to over-talk.",
+    4: "Quadruple 3s (Jupiter) indicate high intellectual vanity, rejecting established advice, and facing frequent project restarts."
+  },
+  4: {
+    2: "Double 4s (Rahu) indicate an obsessively meticulous planner who gets lost in micro-details, making them difficult to satisfy.",
+    3: "Triple 4s (Rahu) indicate an extreme workaholic nature with high physical stamina, but a severe lack of personal leisure or social joy.",
+    4: "Quadruple 4s (Rahu) indicate OCD-like traits, intense stubbornness, and frequent friction with legal or administrative authorities."
+  },
+  5: {
+    2: "Double 5s (Mercury) indicate massive commercial confidence, swift mathematical decision-making, and high success in trade structures.",
+    3: "Triple 5s (Mercury) indicate extravagant risk-taking behavior, erratic spending, and an unstable, restless domestic routine.",
+    4: "Quadruple 5s (Mercury) indicate extreme nervous fatigue, losing money in rapid speculative bubbles, and high verbal volatility."
+  },
+  6: {
+    2: "Double 6s (Venus) indicate superlative design skills, highly protective family values, and a strong pursuit of luxury comforts.",
+    3: "Triple 6s (Venus) indicate getting entangled in domestic responsibilities or heavy luxury debts, causing emotional stress.",
+    4: "Quadruple 6s (Venus) indicate excess indulgence, severe delays in marital/partnership alignments, and family separations."
+  },
+  7: {
+    2: "Double 7s (Ketu) indicate a highly analytical mind, but one prone to frequent betrayals from close associates or partners.",
+    3: "Triple 7s (Ketu) indicate undergoing major emotional setbacks or losses in career or relationships, often prompting deep spiritual transformations.",
+    4: "Quadruple 7s (Ketu) indicate severe self-isolation, absolute solitary thinking, and a complete distrust of the external world."
+  },
+  8: {
+    2: "Double 8s (Saturn) indicate strong planning abilities but slow material realization, bringing heavy burdens and responsibilities.",
+    3: "Triple 8s (Saturn) indicate massive volatility in fortunes, alternating between high wealth and sudden material blockages.",
+    4: "Quadruple 8s (Saturn) indicate a severely laborious path, legal delays, and immense struggles before final, profound wisdom is earned."
+  },
+  9: {
+    2: "Double 9s (Mars) indicate an aggressive competitor, highly energetic, with extremely quick verbal and physical reflexes.",
+    3: "Triple 9s (Mars) indicate intense temper outbreaks, high impatience, and risks of physical injuries or sudden burnout.",
+    4: "Quadruple 9s (Mars) indicate extreme inner volatility, impulsive actions, and direct clashes with authority figures."
+  }
+};
+
 const itemVariants = {
   hidden: { opacity: 0, y: 15 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } }
@@ -642,9 +690,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                               <div className="space-y-0.5 text-xs">
                                 <span className="font-bold text-slate-800">Digit {rep.digit} active x{rep.count} times</span>
                                 <p className="text-slate-500 leading-relaxed text-[11px]">
-                                  {rep.count === 2 && "Generates highly balanced expression, dynamic coordination and strong communicative intellect."}
-                                  {rep.count === 3 && "Extravagant expression boundaries, subject to mild talkative outbursts or severe emotional waves."}
-                                  {rep.count >= 4 && "Congested focus values; blocks immediate external guidance. Highly stubborn and requires strict peaceful meditation remediation."}
+                                  {PLANETARY_REPETITION_MEANINGS[rep.digit]?.[Math.min(rep.count, 4)] || "Generates intense element accumulation inside the specific grid sector."}
                                 </p>
                               </div>
                             </div>

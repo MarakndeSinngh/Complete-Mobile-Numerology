@@ -1,4 +1,5 @@
 import { reduceToSingleDigit } from './numerologyEngine';
+import { calculateKuaNumber } from './numeroVaastuEngine';
 
 export interface CombinationResult {
   code: string; // "11" to "99"
@@ -432,6 +433,112 @@ const generateCombinationDetails = (x: number, y: number): CombinationResult => 
   };
 };
 
+const inactiveArrowsData: Record<string, {
+  meaning: string;
+  strength: string;
+  risk: string;
+  careerImpact: string;
+  relationshipImpact: string;
+  remedy: string;
+}> = {
+  'Arrow of Determination': {
+    meaning: 'Latent resolve. You may find yourself starting tasks with high enthusiasm but struggling to maintain single-minded commitment when obstacles arise.',
+    strength: 'Flexible approach; willing to adapt your goals rather than blindly fighting brick walls.',
+    risk: 'Prone to self-doubt, easily discouraged by sudden delays, looks for external motivation.',
+    careerImpact: 'Thrives in collaborative teams where others provide the structural drive and push.',
+    relationshipImpact: 'Requires constant reassurance and partner encouragement to stay aligned on long-term goals.',
+    remedy: 'Light a red candle or ghee lamp in the South direction every evening to activate raw solar willpower.'
+  },
+  'Arrow of Intellect': {
+    meaning: 'Latent mental plane. Rather than relying on pure memory or academic theories, you learn best through visual experience and repetitive practical lessons.',
+    strength: 'Intuitive thinking; avoids analysis paralysis by relying on real-world feedback loops.',
+    risk: 'May struggle with heavy data analysis, abstract mathematical modeling, or long theoretical study.',
+    careerImpact: 'Succeeds in hands-on operations, physical trading, or direct sales over academic research.',
+    relationshipImpact: 'Prefers simple, honest, and action-oriented communication over intellectual debate.',
+    remedy: 'Keep a copper pen or a green aventurine crystal on your study table to boost concentration.'
+  },
+  'Arrow of Planning': {
+    meaning: 'Latent planning plane. You are a spontaneous action-taker who prefers executing first and fixing errors on the fly rather than over-analyzing beforehand.',
+    strength: 'Rapid response rate; highly agile and ready to pivot instantly in fluid scenarios.',
+    risk: 'Prone to disorganized schedules, poor time estimation, and lack of preventative backup systems.',
+    careerImpact: 'Succeeds in fast-paced startup roles, customer service, or crisis mitigation where rigid plans fail.',
+    relationshipImpact: 'Spontaneous partner who loves surprise plans, but may occasionally miss important family dates.',
+    remedy: 'Maintain a physical daily journal; wear a wooden-bead bracelet to cultivate structured grounding.'
+  },
+  'Arrow of Practicality': {
+    meaning: 'Latent practicality plane. You are guided by abstract ideas and creative visions rather than mundane materialistic or physical tasks.',
+    strength: 'High creative sensitivity, unique artistic visions, and ability to think beyond pure utility.',
+    risk: 'Struggles with physical organization, routine paperwork, tax compliance, or manual labor.',
+    careerImpact: 'Excels in strategic consulting, digital designs, and creative conceptualization.',
+    relationshipImpact: 'Provides rich emotional and romantic gestures, but may struggle with practical domestic chores.',
+    remedy: 'Walk barefoot on clean soil or grass for 5 minutes daily to absorb stabilizing earth energies.'
+  },
+  'Arrow of Emotional Balance': {
+    meaning: 'Latent emotional plane. Your emotional state may experience high fluctuations, shifting rapidly between absolute enthusiasm and quiet detachment.',
+    strength: 'Deep emotional empathy when fully engaged; highly expressive when they feel safe.',
+    risk: 'Mood swings, holding onto past emotional hurts, and tendency to suppress personal desires.',
+    careerImpact: 'Works best in low-stress environments where performance pressure is consistent rather than sporadic.',
+    relationshipImpact: 'Needs a stable, emotionally mature partner who can anchor their fluctuating feelings.',
+    remedy: 'Drink water from a silver cup and wear a flawless white pearl pendant set in silver.'
+  },
+  'Arrow of Spirituality': {
+    meaning: 'Latent spiritual plane. You rely heavily on physical evidence, logical analysis, and tangible assets rather than abstract philosophical beliefs.',
+    strength: 'Grounded realism; not easily deceived by fake gurus or speculative mystical promises.',
+    risk: 'Skeptical of unseen energies, struggles to find inner peace during severe professional failures.',
+    careerImpact: 'Excellent in commercial trade, hard sciences, and corporate finance where facts rule.',
+    relationshipImpact: 'Very realistic expectations; seeks practical and stable family commitments.',
+    remedy: 'Meditate with a small amethyst geode or dedicate 10 minutes of silent gratitude every sunrise.'
+  },
+  'Arrow of Activity': {
+    meaning: 'Latent activity plane. You prefer a calm, quiet, and reflective lifestyle rather than continuous physical movement or high-speed events.',
+    strength: 'Excellent capacity for deep, quiet research, deliberate contemplation, and stress-free rest.',
+    risk: 'Prone to physical lethargy, delay in starting exercises, and resistance to sudden travel changes.',
+    careerImpact: 'Thrives in remote administrative, writing, or analytical roles requiring low travel.',
+    relationshipImpact: 'Enjoys peaceful, slow-paced dates and cozy evenings at home over loud crowded parties.',
+    remedy: 'Wear a small red carnelian bead or keep a copper pyramid in your active workspace.'
+  },
+  'Arrow of Frustration': {
+    meaning: 'The Arrow of Frustration is inactive. Your diagonal plane of dynamic energy is well-supported, shielding you from chronic friction.',
+    strength: 'Natural mental patience; accepts delays without feeling personally targeted by destiny.',
+    risk: 'No major risk; baseline resilience remains highly stable under standard stress.',
+    careerImpact: 'Builds stable, long-term tenure in organisations without feeling the urge to run away.',
+    relationshipImpact: 'Keeps arguments healthy and avoids projecting personal career failures onto the spouse.',
+    remedy: 'No major remedy needed. Maintain standard gratitude practices.'
+  },
+  'Arrow of Weak Will': {
+    meaning: 'The Arrow of Weak Will is inactive. Your willpower plane is active or balanced, giving you strong self-belief.',
+    strength: 'High self-determination; capable of making independent life-changing decisions.',
+    risk: 'Can border on obstinacy if your opinions are not validated by trusted associates.',
+    careerImpact: 'Thrives in entrepreneurship, leadership, or high-autonomy professional roles.',
+    relationshipImpact: 'Clear boundary-setter; ensures mutual respect in partnership.',
+    remedy: 'No corrective remedy needed. Share your strength by mentoring younger colleagues.'
+  },
+  'Arrow of Isolation': {
+    meaning: 'The Arrow of Isolation is inactive. Your emotional/spiritual coordinates are well-linked, keeping you socially integrated.',
+    strength: 'Strong social intelligence, natural networking skill, and ability to form meaningful bonds.',
+    risk: 'Can occasionally overcommit to social events at the expense of personal quiet hours.',
+    careerImpact: 'Thrives in public relations, client management, team leadership, and marketing.',
+    relationshipImpact: 'Warm, expressive, and easily connected; shares inner secrets with complete trust.',
+    remedy: 'Donate milk to the needy on Mondays to keep your social channels aligned and clean.'
+  },
+  'Arrow of Impatience': {
+    meaning: 'The Arrow of Impatience is inactive. You possess a patient, steady approach to physical and professional compounding.',
+    strength: 'Outstanding capacity for long-term investments, detail-oriented work, and waiting for natural results.',
+    risk: 'Might stay too long in low-growth scenarios due to high tolerance for routine.',
+    careerImpact: 'Highly reliable in banking, structural engineering, and deep research roles.',
+    relationshipImpact: 'Nurturing, slow-to-anger partner who resolves disputes through quiet dialogue.',
+    remedy: 'No corrective remedy needed. Keep your workspace illuminated with warm yellow light.'
+  },
+  'Arrow of Confusion': {
+    meaning: 'The Arrow of Confusion is inactive. Your mental clarity coordinates are sound, ensuring clear thinking and rapid decisions.',
+    strength: 'Excellent cognitive logic; quickly filters out noisy speculations or false rumors.',
+    risk: 'Can become overly cynical or demanding of perfect proof before acting.',
+    careerImpact: 'Highly effective in stock trading, forensic auditing, and legal representation.',
+    relationshipImpact: 'Clear, direct, and unambiguous in communicating relationship boundaries.',
+    remedy: 'Maintain a silver coin in your wallet to preserve this high-frequency mental purity.'
+  }
+};
+
 export function computeLoshuMasterReport(
   dobStr: string,
   name: string,
@@ -521,14 +628,26 @@ export function computeLoshuMasterReport(
   const emotionalCount = (gridMap[3] ? 1 : 0) + (gridMap[5] ? 1 : 0) + (gridMap[7] ? 1 : 0);
   const practicalCount = (gridMap[8] ? 1 : 0) + (gridMap[1] ? 1 : 0) + (gridMap[6] ? 1 : 0);
 
-  const mentalStrength = Math.round((mentalCount / 3) * 100);
-  const emotionalStrength = Math.round((emotionalCount / 3) * 100);
-  const practicalStrength = Math.round((practicalCount / 3) * 100);
+  const mentalStrength = Math.max(35, Math.round((mentalCount / 3) * 100));
+  const emotionalStrength = Math.max(35, Math.round((emotionalCount / 3) * 100));
+  const practicalStrength = Math.max(35, Math.round((practicalCount / 3) * 100));
 
-  const leadershipScore = gridMap[1] || gridMap[9] ? Math.min(98, 50 + (gridMap[1] * 15) + (gridMap[9] * 10)) : 45;
-  const communicationScore = gridMap[1] || gridMap[5] ? Math.min(95, 45 + (gridMap[1] * 12) + (gridMap[5] * 20)) : 40;
-  const spiritualScore = gridMap[7] || gridMap[8] ? Math.min(96, 40 + (gridMap[7] * 25) + (gridMap[8] * 15)) : 50;
-  const relationshipScore = gridMap[2] || gridMap[6] ? Math.min(97, 45 + (gridMap[2] * 20) + (gridMap[6] * 15)) : 50;
+  let lScore = 30 + (gridMap[1] * 20) + (gridMap[9] * 15);
+  if (driver === 1 || driver === 9) lScore += 15;
+  const leadershipScore = Math.min(95, Math.max(40, lScore));
+
+  let cScore = 30 + (gridMap[1] * 15) + (gridMap[5] * 25);
+  if (driver === 5 || conductor === 5) cScore += 15;
+  const communicationScore = Math.min(95, Math.max(40, cScore));
+
+  let sScore = 30 + (gridMap[7] * 20) + (gridMap[3] * 15) + (gridMap[8] * 10);
+  if (driver === 7 || conductor === 7 || driver === 3 || conductor === 3) sScore += 15;
+  const spiritualScore = Math.min(95, Math.max(40, sScore));
+
+  let rScore = 30 + (gridMap[2] * 25) + (gridMap[6] * 20);
+  if (driver === 2 || conductor === 2 || driver === 6 || conductor === 6) rScore += 15;
+  const relationshipScore = Math.min(95, Math.max(40, rScore));
+
   const careerPotentialScore = Math.round((leadershipScore + communicationScore + practicalStrength) / 3);
   const overallLoshuScore = Math.round((mentalStrength + emotionalStrength + practicalStrength + leadershipScore + communicationScore + spiritualScore + relationshipScore) / 7);
 
@@ -583,12 +702,13 @@ export function computeLoshuMasterReport(
       isActive = arr.digits.every(d => gridMap[d] === 0);
     }
 
-    let meaning = `No major active link for this plane.`;
-    let strength = `Latent capabilities; waiting to be unlocked by specific remedial actions.`;
-    let risk = `Low focus in this category; easily distracted during lengthy transactions.`;
-    let careerImpact = `Normal operations; must create manual checklists to stay disciplined.`;
-    let relationshipImpact = `Requires effort and practical compromises.`;
-    let remedy = `Carry standard protection crystals with you.`;
+    const fallback = inactiveArrowsData[arr.name];
+    let meaning = fallback ? fallback.meaning : `No major active link for this plane.`;
+    let strength = fallback ? fallback.strength : `Latent capabilities; waiting to be unlocked by specific remedial actions.`;
+    let risk = fallback ? fallback.risk : `Low focus in this category; easily distracted during lengthy transactions.`;
+    let careerImpact = fallback ? fallback.careerImpact : `Normal operations; must create manual checklists to stay disciplined.`;
+    let relationshipImpact = fallback ? fallback.relationshipImpact : `Requires effort and practical compromises.`;
+    let remedy = fallback ? fallback.remedy : `Carry standard protection crystals with you.`;
 
     if (isActive) {
       if (arr.name === 'Arrow of Determination') {
@@ -724,15 +844,8 @@ export function computeLoshuMasterReport(
   }
 
   // Section 15: Vaastu Fusion calculation (Kua is calculated)
-  const kuaYearReduced = reduceToSingleDigit(bYear % 100);
-  let kuaNumber = 5;
+  const kuaNumber = calculateKuaNumber(bYear, gender as any);
   let groupType: 'EAST_GROUP' | 'WEST_GROUP' = 'EAST_GROUP';
-  
-  if (gender === 'MALE') {
-    kuaNumber = reduceToSingleDigit(11 - kuaYearReduced);
-  } else {
-    kuaNumber = reduceToSingleDigit(kuaYearReduced + 4);
-  }
 
   if ([1,3,4,9].includes(kuaNumber)) {
     groupType = 'EAST_GROUP';
@@ -775,6 +888,45 @@ export function computeLoshuMasterReport(
   const personalYear = reduceToSingleDigit(driver + conductor + 2026); // targeting 2026
   const personalMonth = reduceToSingleDigit(personalYear + 6); // matching current month June
   const personalDay = reduceToSingleDigit(personalMonth + 22); // matching current scale 22
+
+  // Archetype selection based on Driver and Conductor to avoid wealth psychology contradictions
+  let wealthArchetype = 'STABLE_PLANNER';
+  if ([2, 6].includes(driver) || [2, 6].includes(conductor)) {
+    wealthArchetype = 'COMFORT_SPENDER';
+  } else if ([1, 9].includes(driver) || [1, 9].includes(conductor)) {
+    wealthArchetype = 'BOLD_PROVIDER';
+  } else if ([3, 7].includes(driver) || [3, 7].includes(conductor)) {
+    wealthArchetype = 'SELECTIVE_SCHOLAR';
+  } else {
+    wealthArchetype = 'STABLE_PLANNER';
+  }
+
+  let moneyMindset = '';
+  let spendingBehaviour = '';
+  let riskTakingBehaviour = '';
+  let financialDisciplineScore = 50;
+
+  if (wealthArchetype === 'COMFORT_SPENDER') {
+    moneyMindset = 'Luxury and comfort-oriented. Views wealth as a beautiful medium to experience fine comforts and build an aesthetic, nourishing lifestyle.';
+    spendingBehaviour = 'Loves spending on premium luxury, comfortable travel, and stylish apparel. Values experiences and high-frequency environments over strict penny-pinching savings.';
+    riskTakingBehaviour = 'Moderate; prefers investments in beautiful physical assets, luxury properties, creative brands, and artistic ventures rather than dry speculative bonds.';
+    financialDisciplineScore = 65;
+  } else if (wealthArchetype === 'BOLD_PROVIDER') {
+    moneyMindset = 'Ambitious, growth-oriented, and highly expansionist. Believes in making larger financial plays and scaling income channels aggressively.';
+    spendingBehaviour = 'Generous spender, loves acting as a royal provider for family and associates. Prone to proud impulsive purchases but backed by solid income drives.';
+    riskTakingBehaviour = 'Bold and high-stakes. Confidently invests in equity, direct businesses, and high-growth sectors, managing high levels of systemic stress.';
+    financialDisciplineScore = 75;
+  } else if (wealthArchetype === 'SELECTIVE_SCHOLAR') {
+    moneyMindset = 'Knowledge-driven and spiritually selective. Believes wealth should fund peace, books, health, and deep inner freedom rather than simple public showing off.';
+    spendingBehaviour = 'Highly selective spender. Happy to pay heavily for education, wellness retreats, or premium quality tools, but completely frugal with superficial fast-fashion or sensory clutter.';
+    riskTakingBehaviour = 'Cautious and analytical. Prefers low-volatility long-term deposits, medical shares, or educational assets that compound peacefully over time.';
+    financialDisciplineScore = 85;
+  } else { // STABLE_PLANNER
+    moneyMindset = 'Strict, security-first calculator. Believes in meticulous cash flow planning and building a bulletproof emergency shield before taking any action.';
+    spendingBehaviour = 'Highly disciplined and budget-conscious. Tracks expenditures carefully, avoids unnecessary subscriptions, and values structural safety above all else.';
+    riskTakingBehaviour = 'Calculated and systematic. Prefers government bonds, secure bank savings, land, or blue-chip investments with clear mathematical histories.';
+    financialDisciplineScore = 95;
+  }
 
   // Build pristine structural Report
   return {
@@ -856,14 +1008,14 @@ export function computeLoshuMasterReport(
       generationalGrowthAreas: `Initiate independent family assets instead of completely relying on ancestors.`
     },
     wealthPsychology: {
-      moneyMindset: gridMap[4]? 'Strict risk-calculator, plans investments meticulously.' : 'Extravagant, loves luxury visual objects, enjoys high risk-taking.',
-      riskTakingBehaviour: gridMap[9] > 0 ? 'Bold speculative investor, handles massive stress.' : 'Extremely safe placements in gold or banking deposits.',
-      spendingBehaviour: gridMap[6] > 0 ? 'High lifestyle spendings, loves signature clothing.' : 'Extremely frugal, matches budget lines strictly.',
+      moneyMindset,
+      riskTakingBehaviour,
+      spendingBehaviour,
       savingBehaviour: `Systematic compounding once missing remedies are active.`,
       investmentBehaviour: `Property land purchases and government bonds.`,
       businessMindset: gridMap[5] > 0 ? 'Natural merchant, identifies retail trade loops.' : 'Advisor structure, works best inside partnerships.',
       wealthCreationStyle: `Slow secure accumulations with major multipliers in running Mahadashas.`,
-      financialDisciplineScore: gridMap[4] ? 90 : 45,
+      financialDisciplineScore,
       wealthPotentialScore: Math.min(99, 40 + (gridMap[4]*15) + (gridMap[8]*15) + (gridMap[6]*15)),
       moneyBlockages: `Blocked funds in South-West zones due to missing Earth elements.`,
       financialRemedies: `Keep wooden windchimes in South-East and yellow salt lamps in Center zones.`

@@ -56,23 +56,31 @@ export interface NumeroVaastuReport {
 }
 
 export function calculateKuaNumber(year: number, gender: 'MALE' | 'FEMALE' | 'OTHER' = 'MALE'): number {
-  let yr = year;
-  let sum = yr.toString().split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
+  const lastTwo = year % 100;
+  let sum = lastTwo.toString().split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
   while (sum > 9) {
     sum = sum.toString().split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
   }
   let kua = 0;
   if (gender === 'FEMALE') {
-    kua = sum + 4;
-    if (year >= 2000) kua = sum + 5;
+    if (year >= 2000) {
+      kua = sum + 6;
+    } else {
+      kua = sum + 4;
+    }
   } else {
-    kua = 11 - sum;
-    if (year >= 2000) kua = 10 - sum;
+    if (year >= 2000) {
+      kua = 9 - sum;
+    } else {
+      kua = 11 - sum;
+    }
   }
   while (kua > 9) {
     kua = kua.toString().split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
   }
-  if (kua <= 0) kua = 9;
+  if (kua <= 0) {
+    kua = 9;
+  }
 
   if (kua === 5) {
     kua = gender === 'FEMALE' ? 8 : 2;
