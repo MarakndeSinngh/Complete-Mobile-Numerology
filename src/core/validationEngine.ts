@@ -50,21 +50,25 @@ export function validateNumerologyCalculation(data: {
 
 /**
  * Phase 28: Regression Verification Test
- * Tests against the canonical regression profile:
- * DOB: 05/08/1983
+ * Tests against canonical regression profiles:
+ * 1. 05/08/1983 (Mulank: 5, Bhagyank: 7)
+ * 2. 14/08/1983 (Mulank: 5, Bhagyank: 7)
+ * 3. 02/07/1983 (Mulank: 2, Bhagyank: 3)
+ * 4. 19/02/1980 (Mulank: 1, Bhagyank: 3)
  */
 export function runPhase28RegressionTest(): { success: boolean; errors: string[]; report: Record<string, any> } {
-  const testDob = '05/08/1983';
   const errors: string[] = [];
 
+  // Test 1: 05/08/1983
+  const testDob = '05/08/1983';
   const mulank = calculateMulank(testDob);
   if (mulank !== 5) {
-    errors.push(`Mulank mismatch: expected 5, got ${mulank}`);
+    errors.push(`05/08/1983 Mulank mismatch: expected 5, got ${mulank}`);
   }
 
   const bhagyank = calculateBhagyank(testDob);
   if (bhagyank !== 7) {
-    errors.push(`Bhagyank mismatch: expected 7, got ${bhagyank}`);
+    errors.push(`05/08/1983 Bhagyank mismatch: expected 7, got ${bhagyank}`);
   }
 
   const birthGrid = buildBirthGrid(testDob);
@@ -101,6 +105,21 @@ export function runPhase28RegressionTest(): { success: boolean; errors: string[]
       errors.push(`Plane ${p.name} status mismatch: expected ${expected}, got ${p.status}`);
     }
   });
+
+  // Test 2: 14/08/1983 -> Mulank 5, Bhagyank 7
+  const dob2 = '14/08/1983';
+  if (calculateMulank(dob2) !== 5) errors.push(`14/08/1983 Mulank mismatch: expected 5, got ${calculateMulank(dob2)}`);
+  if (calculateBhagyank(dob2) !== 7) errors.push(`14/08/1983 Bhagyank mismatch: expected 7, got ${calculateBhagyank(dob2)}`);
+
+  // Test 3: 02/07/1983 -> Mulank 2, Bhagyank 3
+  const dob3 = '02/07/1983';
+  if (calculateMulank(dob3) !== 2) errors.push(`02/07/1983 Mulank mismatch: expected 2, got ${calculateMulank(dob3)}`);
+  if (calculateBhagyank(dob3) !== 3) errors.push(`02/07/1983 Bhagyank mismatch: expected 3, got ${calculateBhagyank(dob3)}`);
+
+  // Test 4: 19/02/1980 -> Mulank 1, Bhagyank 3
+  const dob4 = '19/02/1980';
+  if (calculateMulank(dob4) !== 1) errors.push(`19/02/1980 Mulank mismatch: expected 1, got ${calculateMulank(dob4)}`);
+  if (calculateBhagyank(dob4) !== 3) errors.push(`19/02/1980 Bhagyank mismatch: expected 3, got ${calculateBhagyank(dob4)}`);
 
   return {
     success: errors.length === 0,
