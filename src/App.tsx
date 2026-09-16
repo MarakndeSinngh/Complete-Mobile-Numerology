@@ -19,6 +19,8 @@ import CompleteLoshuGridAnalysis from './components/CompleteLoshuGridAnalysis';
 import MarriageCompatibility from './components/MarriageCompatibility';
 import PremiumConsultations from './components/PremiumConsultations';
 import AIConsultationPortal from './components/AIConsultationPortal';
+import DateInput from './components/DateInput';
+import { formatDateIndian } from './utils/dateUtils';
 
 type ViewTab = 'DASHBOARD' | 'MOBILE' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
 
@@ -288,7 +290,7 @@ const App: React.FC = () => {
                 : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50 border border-dashed border-[#D97706]/20'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" /> AI Grand Consultation Hub 🔮
+            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" /> LeoFamily Consultation Hub 🔮
           </button>
 
           <button
@@ -299,7 +301,7 @@ const App: React.FC = () => {
                 : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50'
             }`}
           >
-            <Phone className="w-4 h-4" /> Mobile Numerology Scanner
+            <Phone className="w-4 h-4" /> LeoFamily Mobile Scanner
           </button>
           
           <button
@@ -310,7 +312,7 @@ const App: React.FC = () => {
                 : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50'
             }`}
           >
-            <Compass className="w-4 h-4 animate-spin-slow text-[#D97706]" /> Complete Loshu Grid Analysis 🌟
+            <Compass className="w-4 h-4 animate-spin-slow text-[#D97706]" /> LeoFamily Loshu Grid Analysis 🌟
           </button>
 
           <button
@@ -321,7 +323,7 @@ const App: React.FC = () => {
                 : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50'
             }`}
           >
-            <Heart className="w-4 h-4 text-rose-500 fill-rose-500 animate-pulse" /> Marriage Compatibility 💕
+            <Heart className="w-4 h-4 text-rose-500 fill-rose-500 animate-pulse" /> LeoFamily Marriage Compatibility 💕
           </button>
 
           <button
@@ -332,7 +334,7 @@ const App: React.FC = () => {
                 : 'bg-transparent text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F8F4EF]/50'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" /> Premium Tools 👑
+            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" /> LeoFamily Premium Tools 👑
           </button>
         </div>
 
@@ -456,17 +458,12 @@ const App: React.FC = () => {
                           </label>
                           <span className="text-[9px] font-sans text-[#D97706]">Check alignment with your mobile number</span>
                         </div>
-                        <div className="relative">
-                          <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
-                            <Calendar className="h-4 w-4" />
-                          </span>
-                          <input
-                            type="date"
-                            className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] transition-all font-mono"
-                            value={dob}
-                            onChange={(e) => setDob(e.target.value)}
-                          />
-                        </div>
+                        <DateInput
+                          id="app-quick-dob"
+                          value={dob}
+                          onChange={setDob}
+                          className="py-3.5"
+                        />
                       </div>
                     )}
 
@@ -493,18 +490,13 @@ const App: React.FC = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-1">
                             <label className="text-[10px] font-sans text-[#6B7280] uppercase block font-bold">Date of Birth</label>
-                            <div className="relative">
-                              <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#D97706]">
-                                <Calendar className="h-4 w-4" />
-                              </span>
-                              <input
-                                type="date"
-                                required
-                                className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3.5 focus:border-[#D97706] outline-none text-sm text-[#1F2937] transition-all font-mono"
-                                value={dob}
-                                onChange={(e) => setDob(e.target.value)}
-                              />
-                            </div>
+                            <DateInput
+                              id="app-adv-dob"
+                              value={dob}
+                              onChange={setDob}
+                              required
+                              className="py-3.5"
+                            />
                           </div>
 
                           <div className="space-y-1">
@@ -832,7 +824,7 @@ const App: React.FC = () => {
                   {personalDetails.name}
                 </h2>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#6B7280] font-lora italic pt-1">
-                  <span>Born: {personalDetails.dob}</span>
+                  <span>Born: {formatDateIndian(personalDetails.dob)}</span>
                   <span>•</span>
                   <span>Main Device: {personalDetails.mobile}</span>
                 </div>
@@ -874,6 +866,7 @@ const App: React.FC = () => {
                   mobileData={mobileData}
                   remedies={remedies}
                   name={personalDetails.name}
+                  profile={numerologyProfile}
                 />
               )}
 

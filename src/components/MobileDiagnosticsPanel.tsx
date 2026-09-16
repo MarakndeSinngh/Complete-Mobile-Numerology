@@ -15,6 +15,7 @@ import { PersonalDetails, DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdv
 import { PAIR_MEANINGS } from '../services/pairMeanings';
 import { HINDI_PAIR_MEANINGS } from '../services/hindiPairs';
 import { checkMobileDOBCompatibility } from '../services/numerologyEngine';
+import { formatDateIndian } from '../utils/dateUtils';
 
 interface MobileDiagnosticsPanelProps {
   personalDetails: PersonalDetails;
@@ -386,7 +387,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                   <div>
                     <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">DOB Anchor</span>
                     <span className="text-xs text-[#1F2937] font-mono font-bold">
-                      {isQuickMode ? "Not Provided 🔒" : personalDetails.dob}
+                      {isQuickMode ? "Not Provided 🔒" : formatDateIndian(personalDetails.dob)}
                     </span>
                   </div>
                 </div>
@@ -1905,7 +1906,7 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 {personalDetails.name}
               </h3>
               <p className="font-lora italic text-xs text-[#BFC7D5] max-w-sm mx-auto pt-2">
-                "Prepared dynamically in deep cosmic conjunction under Leo Family guidelines on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}."
+                "Prepared dynamically in deep cosmic conjunction under Leo Family guidelines on {formatDateIndian(new Date())}."
               </p>
             </div>
 
@@ -1958,6 +1959,14 @@ const MobileDiagnosticsPanel: React.FC<MobileDiagnosticsPanelProps> = ({
                 )}
                 Save Report
               </button>
+            </div>
+
+            {/* MANDATORY ASTROLOGICAL DISCLAIMER */}
+            <div className="mt-8 p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-xs text-amber-950 flex items-start gap-2.5 text-left">
+              <Info className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                <strong>Mandatory Astrological Notice:</strong> Traditional numerology/wellness interpretation only. This is not medical diagnosis or medical advice.
+              </p>
             </div>
 
           </div>

@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber } from '../services/numerologyEngine';
 import { computeLoshuAnalysis } from '../services/loshuEngine';
 import { calculateAdvancedCompatibility } from '../services/advancedCompatibilityEngine';
+import DateInput from './DateInput';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -274,16 +275,13 @@ export default function MarriageCompatibility() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Date of Birth</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
-                  <input
-                    type="date"
-                    required
-                    value={p1Dob}
-                    onChange={(e) => setP1Dob(e.target.value)}
-                    className="w-full bg-[#FDFCF7]/60 border border-[#E5E7EB] py-3 pl-11 pr-4 rounded-xl text-sm text-[#1F2937] focus:outline-none focus:ring-2 focus:ring-[#D97706]/40 text-left font-sans"
-                  />
-                </div>
+                <DateInput
+                  id="p1-dob-input"
+                  required
+                  value={p1Dob}
+                  onChange={setP1Dob}
+                  className="py-3 text-sm font-sans"
+                />
               </div>
 
               <div className="space-y-1">
@@ -328,16 +326,13 @@ export default function MarriageCompatibility() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Date of Birth</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
-                  <input
-                    type="date"
-                    required
-                    value={p2Dob}
-                    onChange={(e) => setP2Dob(e.target.value)}
-                    className="w-full bg-[#FDFCF7]/60 border border-[#E5E7EB] py-3 pl-11 pr-4 rounded-xl text-sm text-[#1F2937] focus:outline-none focus:ring-2 focus:ring-[#D97706]/40 text-left font-sans"
-                  />
-                </div>
+                <DateInput
+                  id="p2-dob-input"
+                  required
+                  value={p2Dob}
+                  onChange={setP2Dob}
+                  className="py-3 text-sm font-sans"
+                />
               </div>
 
               <div className="space-y-1">

@@ -14,6 +14,8 @@ import { computeLoshuMasterReport } from '../services/loshuMasterEngine';
 import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber } from '../services/numerologyEngine';
 import { generateCompleteNumerologyProfile } from '../core';
 import { generateLeoAdvisorActions } from '../services/leoAdvisorEngine';
+import DateInput from './DateInput';
+import { formatDateIndian } from '../utils/dateUtils';
 
 const PLANETS_DB: Record<number, { name: string; icon: string; description: string }> = {
   1: { name: "Sun (Surya) ☀️", icon: "☀️", description: "Leadership, Ambition, Conscious Will" },
@@ -121,7 +123,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
       setChatMessages([
         { 
           sender: 'LEO', 
-          text: `Auspicious blessings, ${activeProfile.name}. I am Leo Grand Master, Rajiv Ji's specialized AI consciousness. I have fully indexed your DOB (${activeProfile.dob}) and Mobile Frequency (${activeProfile.mobile}). You can ask me any specific follow-up questions regarding your wealth blocks, relationship compatibility, name variations, or Lal Kitab remedies. Let's begin.`, 
+          text: `Auspicious blessings, ${activeProfile.name}. I am Leo Grand Master, Rajiv Ji's specialized AI consciousness. I have fully indexed your DOB (${formatDateIndian(activeProfile.dob)}) and Mobile Frequency (${activeProfile.mobile}). You can ask me any specific follow-up questions regarding your wealth blocks, relationship compatibility, name variations, or Lal Kitab remedies. Let's begin.`, 
           timestamp: new Date() 
         }
       ]);
@@ -316,7 +318,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
             {activeProfile ? activeProfile.name : "Consultation Dashboard"}
           </h2>
           <p className="text-xs text-[#6B7280] font-lora italic">
-            {activeProfile ? `Natal Frequency Profile: Born ${activeProfile.dob} • Primary Device: ${activeProfile.mobile}` : "Onboard your profile details to unlock professional Indian Numerology diagnostics."}
+            {activeProfile ? `Natal Frequency Profile: Born ${formatDateIndian(activeProfile.dob)} • Primary Device: ${activeProfile.mobile}` : "Onboard your profile details to unlock professional Indian Numerology diagnostics."}
           </p>
         </div>
 
@@ -389,12 +391,12 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-[10px] font-mono uppercase font-bold text-[#6B7280] tracking-wide block">Date of Birth</label>
-                <input
-                  type="date"
+                <DateInput
+                  id="ai-onboard-dob"
                   required
                   value={formDob}
-                  onChange={e => setFormDob(e.target.value)}
-                  className="w-full bg-[#FDFCF7] border border-[#E5E7EB] rounded-2xl px-4 py-3.5 text-xs text-[#1F2937] focus:outline-none focus:border-[#D97706]"
+                  onChange={setFormDob}
+                  className="py-3.5 text-xs"
                 />
               </div>
 
@@ -1559,12 +1561,12 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                       <form onSubmit={handleBookingSubmit} className="space-y-4">
                         <div className="space-y-1">
                           <label className="text-[10px] font-mono uppercase font-bold text-slate-400 block">Date of consultation</label>
-                          <input
-                            type="date"
+                          <DateInput
+                            id="booking-date-input"
                             required
                             value={bookingDate}
-                            onChange={e => setBookingDate(e.target.value)}
-                            className="w-full bg-[#FDFCF7] border border-[#E5E7EB] rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-[#D97706]"
+                            onChange={setBookingDate}
+                            className="py-3 text-xs"
                           />
                         </div>
 

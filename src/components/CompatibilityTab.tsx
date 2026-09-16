@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { generateCompatibility } from '../services/numerologyEngine';
 import { CompatibilityReport } from '../types';
+import DateInput from './DateInput';
 
 const CompatibilityTab: React.FC = () => {
   const [nameA, setNameA] = useState('');
@@ -38,12 +39,12 @@ const CompatibilityTab: React.FC = () => {
                 onChange={(e) => setNameA(e.target.value)}
                 required
               />
-              <input
-                type="date"
-                className="w-full bg-[#F8F4EF] border border-[#E5E7EB] focus:border-[#D97706] rounded-2xl px-5 py-3.5 outline-none text-sm text-[#1F2937]"
+              <DateInput
+                id="compat-dob-a"
                 value={dobA}
-                onChange={(e) => setDobA(e.target.value)}
+                onChange={setDobA}
                 required
+                className="py-3.5"
               />
             </div>
           </div>
@@ -60,12 +61,12 @@ const CompatibilityTab: React.FC = () => {
                 onChange={(e) => setNameB(e.target.value)}
                 required
               />
-              <input
-                type="date"
-                className="w-full bg-[#F8F4EF] border border-[#E5E7EB] focus:border-[#D97706] rounded-2xl px-5 py-3.5 outline-none text-sm text-[#1F2937]"
+              <DateInput
+                id="compat-dob-b"
                 value={dobB}
-                onChange={(e) => setDobB(e.target.value)}
+                onChange={setDobB}
                 required
+                className="py-3.5"
               />
             </div>
           </div>

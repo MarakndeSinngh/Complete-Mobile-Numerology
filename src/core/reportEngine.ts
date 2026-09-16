@@ -1,10 +1,11 @@
 import { NumerologyProfile } from './types';
+import { formatDateIndian } from '../utils/dateUtils';
 
 export function formatReportForPdf(profile: Omit<NumerologyProfile, 'pdfData'>) {
   return {
     title: `Premium Numerology Consultation - ${profile.personality.title}`,
     recipient: profile.personality.publicImage,
-    generatedDate: new Date().toLocaleDateString(),
+    generatedDate: formatDateIndian(new Date()),
     driver: profile.driver,
     bhagyank: profile.bhagyank,
     scores: profile.scores,

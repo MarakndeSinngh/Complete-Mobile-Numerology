@@ -1,5 +1,6 @@
 import { DOBAnalysis, NameAnalysis, MobileAnalysis, CompatibilityReport, remediesAdvice } from '../types';
 import { PAIR_MEANINGS } from './pairMeanings';
+import { parseIndianDate } from '../utils/dateUtils';
 
 // Reduction helpers
 export function reduceToSingleDigit(num: number): number {
@@ -100,10 +101,11 @@ const COMPOUND_RATINGS: Record<number, { rating: 'EXCELLENT' | 'GOOD' | 'AVOID' 
 };
 
 export function analyzeDateOfBirth(dobStr: string, name: string): DOBAnalysis {
+  const parsed = parseIndianDate(dobStr);
   const parts = dobStr.split('-');
-  const year = parseInt(parts[0], 10) || 1990;
-  const month = parseInt(parts[1], 10) || 1;
-  const day = parseInt(parts[2], 10) || 1;
+  const year = parsed ? parsed.year : (parseInt(parts[0], 10) || 1990);
+  const month = parsed ? parsed.month : (parseInt(parts[1], 10) || 1);
+  const day = parsed ? parsed.day : (parseInt(parts[2], 10) || 1);
 
   // Reduced parts
   const dayReduced = reduceToSingleDigit(day);

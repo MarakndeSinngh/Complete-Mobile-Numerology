@@ -2,6 +2,7 @@ import { reduceToSingleDigit } from './numerologyEngine';
 import { calculateKuaNumber } from './numeroVaastuEngine';
 import { computeLoshuAnalysis } from './loshuEngine';
 import { LEOFAMILY_PLANES } from '../core/planeDefinitions';
+import { parseIndianDate } from '../utils/dateUtils';
 
 export interface CombinationResult {
   code: string; // "11" to "99"
@@ -547,10 +548,11 @@ export function computeLoshuMasterReport(
   gender: string = 'MALE',
   mobileNum?: string
 ): LoshuMasterReport {
+  const parsed = parseIndianDate(dobStr);
   const parts = dobStr.split('-');
-  const bYear = parseInt(parts[0], 10) || 1990;
-  const bMonth = parseInt(parts[1], 10) || 1;
-  const bDay = parseInt(parts[2], 10) || 1;
+  const bYear = parsed ? parsed.year : (parseInt(parts[0], 10) || 1990);
+  const bMonth = parsed ? parsed.month : (parseInt(parts[1], 10) || 1);
+  const bDay = parsed ? parsed.day : (parseInt(parts[2], 10) || 1);
 
   const driver = reduceToSingleDigit(bDay);
   

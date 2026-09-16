@@ -1,3 +1,11 @@
+import { EnhancedLoshuGridResult } from './enhancedLoshuEngine';
+import { RepetitionAnalysisResult, MissingNumberAnalysisResult } from './numberMeaningEngine';
+import { MulankBhagyankSynthesis } from './bhagyankEngine';
+import { UnifiedVastuAnalysis } from './vastuEngine';
+import { MedicalNumerologyAnalysis } from './medicalNumerologyEngine';
+import { UnifiedMobileAnalysis } from './mobileNumerologyEngine';
+import { ComprehensiveInterpretationReport } from './interpretationEngine';
+
 export interface LoshuGridDigit {
   count: number;
   digits: number[];
@@ -14,11 +22,17 @@ export interface PlaneAnalysis {
   title: string;
   description: string;
   strengthScore: number;
-  status: 'FULL' | 'EMPTY' | 'PARTIAL' | 'Complete' | 'Partial' | 'Weak' | 'Missing';
+  status: 'FULL' | 'EMPTY' | 'PARTIAL' | 'Complete' | 'Partial' | 'Weak' | 'Missing' | 'COMPLETE';
   completionPercentage: number;
+  strengthPercentage?: number;
   presentDigits: number[];
+  completeNumbers?: number[];
   missingDigits: number[];
+  missingNumbers?: number[];
+  presentCount?: number;
   meaning: string;
+  interpretation?: string;
+  practicalMeaning?: string;
   strengths: string[];
   weaknesses: string[];
   careerImpact: string;
@@ -130,12 +144,65 @@ export interface ExplanationDetail {
   source: string;
 }
 
-export interface NumerologyProfile {
-  birthGrid: Record<number, number>;
-  enhancedGrid: Record<number, number>;
+/**
+ * Phase 24: Standard CompleteNumerologyProfile
+ */
+export interface CompleteNumerologyProfile {
+  identity: {
+    fullName: string;
+    normalizedName: string;
+    dob: string;
+    standardDOB: string; // "DD/MM/YYYY"
+    gender: 'MALE' | 'FEMALE' | 'OTHER';
+    mobile: string;
+  };
+  coreNumbers: {
+    mulank: number;
+    bhagyank: number;
+    compoundMulank?: number;
+    compoundBhagyank?: number;
+    mulankGraha: string;
+    bhagyankGraha: string;
+    synthesis: MulankBhagyankSynthesis;
+  };
+  loshu: {
+    birthGrid: Record<number, number>;
+    enhancedGrid: EnhancedLoshuGridResult;
+    planes: PlaneAnalysis[];
+    arrows: ArrowAnalysis[];
+    repetition: RepetitionAnalysisResult[];
+    missingNumbers: MissingNumberAnalysisResult[];
+    scores: ScoreCard;
+  };
+  vastu: UnifiedVastuAnalysis;
+  medical: MedicalNumerologyAnalysis;
+  mobileAnalysis?: UnifiedMobileAnalysis;
+  interpretations: ComprehensiveInterpretationReport;
+  remedies: RemedyDetails;
+  consultation: any;
+  explanation: Record<string, ExplanationDetail>;
+  annualForecast?: any;
+  compatibility?: any;
+  pdfData?: any;
+  combination81?: any;
+  karmic?: any;
+  kua?: any;
+  vedicGrid?: any;
+  actionPlan90Day?: any;
+  disclaimer?: string;
+  metadata: {
+    calculatedAt: string;
+    engineVersion: string;
+    checksum: string;
+    id: string;
+  };
+
+  // Backwards compatibility surface for existing dashboard views
   driver: number;
   bhagyank: number;
-  mobile: any; // Mobile analysis object
+  birthGrid: Record<number, number>;
+  enhancedGrid: Record<number, number>;
+  mobile: any;
   planes: PlaneAnalysis[];
   arrows: ArrowAnalysis[];
   missingNumbers: number[];
@@ -145,16 +212,7 @@ export interface NumerologyProfile {
   finance: FinanceProfile;
   health: HealthProfile;
   relationship: RelationshipProfile;
-  remedies: RemedyDetails;
-  consultation: any; // Leo Consultation details
-  explanation: Record<string, ExplanationDetail>;
   scores: ScoreCard;
-  annualForecast: any;
-  compatibility: any;
-  pdfData: any;
-  metadata: {
-    timestamp: string;
-    version: string;
-    id: string;
-  };
 }
+
+export type NumerologyProfile = CompleteNumerologyProfile;

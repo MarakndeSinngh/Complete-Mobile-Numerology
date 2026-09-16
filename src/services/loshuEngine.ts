@@ -1,5 +1,6 @@
 import { reduceToSingleDigit } from './numerologyEngine';
 import { LEOFAMILY_PLANES } from '../core/planeDefinitions';
+import { parseIndianDate } from '../utils/dateUtils';
 
 export function calculateLoShuGrid(dob: string) {
   // Extract digits from the date. We parse DD-MM-YYYY or YYYY-MM-DD
@@ -291,10 +292,11 @@ const CHALDEAN_COMPOUNDS: Record<number, ChaldeanCompound> = {
 };
 
 export function computeLoshuAnalysis(dobStr: string, name: string, gender: string = 'MALE'): LoshuAnalysisResult {
+  const parsed = parseIndianDate(dobStr);
   const parts = dobStr.split('-');
-  const bYear = parseInt(parts[0], 10) || 1990;
-  const bMonth = parseInt(parts[1], 10) || 1;
-  const bDay = parseInt(parts[2], 10) || 1;
+  const bYear = parsed ? parsed.year : (parseInt(parts[0], 10) || 1990);
+  const bMonth = parsed ? parsed.month : (parseInt(parts[1], 10) || 1);
+  const bDay = parsed ? parsed.day : (parseInt(parts[2], 10) || 1);
 
   // Calcul Mulank & Bhagyank
   const mulank = reduceToSingleDigit(bDay);

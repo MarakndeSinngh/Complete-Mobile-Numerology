@@ -1,15 +1,28 @@
-import { NumerologyProfile, PlaneAnalysis, ArrowAnalysis } from './types';
-import { calculateDriver, calculateBhagyank } from './numerologyEngine';
-import { calculateBirthGrid, calculateEnhancedGrid } from './loshuEngine';
+import {
+  CompleteNumerologyProfile,
+  NumerologyProfile,
+  PlaneAnalysis,
+  ArrowAnalysis,
+  ScoreCard
+} from './types';
+import { calculateMulank, calculateBhagyank } from './numerologyEngine';
+import { buildBirthGrid } from './loshuEngine';
+import { buildEnhancedGrid, EnhancedLoshuGridResult } from './enhancedLoshuEngine';
 import { calculatePlanes } from './planeEngine';
 import { calculateArrows } from './arrowEngine';
-import { calculateMobileAnalysis } from './mobileEngine';
+import { analyzeNumberRepetition, analyzeMissingNumbers } from './numberMeaningEngine';
+import { calculateMulankBhagyankRelationship } from './bhagyankEngine';
+import { analyzeMobileNumerology } from './mobileNumerologyEngine';
+import { analyzeNumeroVastu } from './vastuEngine';
+import { analyzeMedicalNumerology } from './medicalNumerologyEngine';
+import { generateDomainInterpretations } from './interpretationEngine';
 import { calculateRemedies } from './recommendationEngine';
 import { generateExplanations } from './explanationEngine';
 import { validateNumerologyCalculation } from './validationEngine';
-import { formatReportForPdf, generateExecutiveSummary } from './reportEngine';
+import { formatReportForPdf } from './reportEngine';
+import { formatDateForDisplay, parseIndianDate } from './dateUtils';
+import { GRAHA_MAPPING, LEOFAMILY_METHODOLOGY_VERSION } from './methodologyConfig';
 
-// Import existing robust engines to reuse rich descriptions without duplication
 import { computeLoshuMasterReport } from '../services/loshuMasterEngine';
 import { generateLeoConsultation } from '../services/LeoConsultationEngine';
 import {
@@ -18,9 +31,15 @@ import {
   analyzeBusinessNumerology
 } from '../services/premiumModules';
 import { calculateAdvancedCompatibility } from '../services/advancedCompatibilityEngine';
+import { getCombination81 } from './methodology/combinationDefinitions';
+import { MANDATORY_WELLNESS_DISCLAIMER } from './methodology/wellnessDefinitions';
+import { analyzeKarmicPatterns } from './karmicEngine';
+import { calculateKuaNumber } from './kuaEngine';
+import { buildVedicGrid } from './vedicGridEngine';
+import { generate90DayActionPlan } from './actionPlanEngine';
 
 // Global cache for calculated profiles
-const profileCache = new Map<string, NumerologyProfile>();
+const profileCache = new Map<string, CompleteNumerologyProfile>();
 
 export interface CompleteProfileInput {
   dob: string;
@@ -31,9 +50,11 @@ export interface CompleteProfileInput {
   vehicleNumber?: string;
   houseNumber?: string;
   businessName?: string;
+  facingDirection?: string;
+  entranceNumber?: string;
 }
 
-export function generateCompleteNumerologyProfile(input: CompleteProfileInput): NumerologyProfile {
+export function generateCompleteNumerologyProfile(input: CompleteProfileInput): CompleteNumerologyProfile {
   const {
     dob,
     name,
@@ -42,42 +63,66 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     marriageDob = '',
     vehicleNumber = '',
     houseNumber = '',
-    businessName = ''
+    businessName = '',
+    facingDirection = 'North',
+    entranceNumber = ''
   } = input;
 
   // Compute a deterministic cache key
-  const cacheKey = `${dob || ''}|${name || ''}|${mobile}|${gender}|${marriageDob}|${vehicleNumber}|${houseNumber}|${businessName}`;
+  const cacheKey = `${dob || ''}|${name || ''}|${mobile}|${gender}|${marriageDob}|${vehicleNumber}|${houseNumber}|${businessName}|${facingDirection}`;
   if (profileCache.has(cacheKey)) {
     return profileCache.get(cacheKey)!;
   }
 
-  // 1. Calculate Core Numerology values
-  const driver = calculateDriver(dob);
+  // 1. Core Numerology values (strictly Indian/LeoFamily 1-9 reduction)
+  const mulank = calculateMulank(dob);
   const bhagyank = calculateBhagyank(dob);
-  const birthGrid = calculateBirthGrid(dob);
-  const enhancedGrid = calculateEnhancedGrid(dob, name, gender);
+  const driver = mulank;
 
-  // 2. Reuse rich master report for cohesive profiles
+  // Standardize DOB for display
+  const standardDOB = formatDateForDisplay(dob);
+  const parsedDate = parseIndianDate(dob);
+  const parsedDay = parsedDate.isValid ? parsedDate.day : 1;
+  const parsedYear = parsedDate.isValid ? parsedDate.year : 1990;
+  const dobDigits = parsedDate.isValid ? parsedDate.digits : [1, 9, 9, 0];
+  const compoundDOBSum = dobDigits.reduce((acc, d) => acc + d, 0);
+
+  // 2. Grids
+  const birthGrid = buildBirthGrid(dob);
+  const enhancedGridResult: EnhancedLoshuGridResult = buildEnhancedGrid(birthGrid, mulank, bhagyank);
+  const flatEnhancedGrid = enhancedGridResult.flatGrid;
+
+  // 3. Planes and Arrows (calculated using Enhanced LeoFamily Grid)
+  const planes = calculatePlanes(flatEnhancedGrid, birthGrid, mulank, bhagyank);
+  const arrows = calculateArrows(flatEnhancedGrid);
+
+  // 4. Repetitions and Missing Numbers
+  const repetition = analyzeNumberRepetition(birthGrid, mulank, bhagyank);
+  const missingNumbers = analyzeMissingNumbers(enhancedGridResult.effectiveMissingDigits);
+  const repeatedNumbers = repetition.map(r => ({ digit: r.digit, count: r.count }));
+  const rawMissingNumbers = enhancedGridResult.effectiveMissingDigits;
+
+  // 5. Synthesis & Master profiling
+  const synthesis = calculateMulankBhagyankRelationship(mulank, bhagyank);
   const masterReport = computeLoshuMasterReport(dob, name, gender, mobile);
   const consultation = generateLeoConsultation(dob, name, gender, mobile);
 
-  // 3. Compute Planes and Arrows
-  const planes = calculatePlanes(enhancedGrid, birthGrid, driver, bhagyank);
-  const arrows = calculateArrows(enhancedGrid);
+  // 6. Dedicated specialized engines
+  const vastu = analyzeNumeroVastu({
+    dob,
+    gender,
+    houseNumber,
+    entranceNumber,
+    facingDirection,
+    mobileNumber: mobile,
+    vehicleNumber
+  });
 
-  // 4. Calculate present, missing, and repeated digits
-  const missingNumbers = Object.keys(birthGrid)
-    .map(Number)
-    .filter(d => (enhancedGrid[d] || 0) === 0);
+  const medical = analyzeMedicalNumerology(dob, name);
+  const mobileAnalysis = mobile ? analyzeMobileNumerology(mobile, mulank, bhagyank) : undefined;
+  const interpretations = generateDomainInterpretations(mulank, bhagyank, synthesis, enhancedGridResult);
 
-  const repeatedNumbers = Object.entries(birthGrid)
-    .map(([digit, count]) => ({ digit: parseInt(digit, 10), count }))
-    .filter(item => item.count > 1);
-
-  // 5. Mobile analysis
-  const mobileData = calculateMobileAnalysis(mobile);
-
-  // 6. Profile structures
+  // 7. Profile structural fields
   const personality = {
     title: masterReport.archetype.title,
     description: masterReport.archetype.description,
@@ -100,10 +145,10 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
 
   const career = {
     potentialScore: masterReport.scores.careerPotentialScore,
-    suitableIndustries: ['Technology', 'E-commerce', 'Civil Services', 'Real Estate', 'Consultancy'],
-    careerPathDetails: masterReport.profiling.thinkingStyle + ' ' + masterReport.profiling.learningStyle,
-    strengths: masterReport.gridAnalysis.present.map(d => `Digit ${d} vibrational strength`),
-    weaknesses: masterReport.gridAnalysis.missing.map(d => `Missing node ${d}`)
+    suitableIndustries: interpretations.career.strengths,
+    careerPathDetails: interpretations.career.detailedAnalysis,
+    strengths: interpretations.career.strengths,
+    weaknesses: interpretations.career.growthAreas
   };
 
   const finance = {
@@ -113,18 +158,18 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     moneyBlockages: masterReport.wealthPsychology.spendingBehaviour,
     financialRemedies: masterReport.wealthPsychology.riskTakingBehaviour,
     businessMindset: masterReport.wealthPsychology.moneyMindset,
-    businessSuitability: 'Excellent for trade and partnerships matching planetary support.'
+    businessSuitability: 'Aligned for commercial investments in supportive sectors.'
   };
 
   const health = {
-    dosha: masterReport.healthAnalysis.primaryDosha,
-    secondaryDosha: masterReport.healthAnalysis.secondaryDosha || 'Pitta',
-    healthScore: masterReport.healthAnalysis.healthScore,
-    stressScore: masterReport.healthAnalysis.stressScore,
-    energyScore: masterReport.healthAnalysis.vitalityScore || 75,
-    dietaryAdvice: masterReport.healthAnalysis.dietPlan,
-    organStrengths: 'High kidney and heart coordination based on current water-metal presence.',
-    chakraVibrations: 'Manipura (Solar Plexus) and Anahata (Heart) vibrate at primary frequencies.'
+    dosha: medical.dominantDosha,
+    secondaryDosha: medical.secondaryDosha || 'Pitta',
+    healthScore: medical.scores.healthScore,
+    stressScore: medical.scores.stressScore,
+    energyScore: medical.scores.energyScore || 75,
+    dietaryAdvice: medical.dietRecommendations.recommendedFoods.slice(0, 3).join(', '),
+    organStrengths: medical.healthStrengths.join('; ') || 'Balanced organ vitality reserves.',
+    chakraVibrations: 'Manipura and Anahata energy centers resonate at primary frequencies.'
   };
 
   const relationship = {
@@ -135,8 +180,7 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     harmonyTips: masterReport.relationshipBehaviour.growthSuggestions
   };
 
-  // 7. Core scores block
-  const scores = {
+  const scores: ScoreCard = {
     mentalStrength: masterReport.scores.mentalStrength,
     emotionalStrength: masterReport.scores.emotionalStrength,
     practicalStrength: masterReport.scores.practicalStrength,
@@ -149,13 +193,13 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
   };
 
   // 8. Remedies
-  const weakPlanes = planes.filter(p => p.status !== 'FULL').map(p => p.name);
-  const remedies = calculateRemedies(missingNumbers, weakPlanes, driver, bhagyank);
+  const weakPlanes = planes.filter(p => p.status !== 'COMPLETE').map(p => p.name);
+  const remedies = calculateRemedies(rawMissingNumbers, weakPlanes, mulank, bhagyank);
 
-  // 9. Explanations block
-  const explanation = generateExplanations(scores, enhancedGrid, driver, bhagyank);
+  // 9. Explanations
+  const explanation = generateExplanations(scores, flatEnhancedGrid, mulank, bhagyank);
 
-  // 10. Optional calculations (Marriage, Vehicle, House, Business)
+  // 10. Optional Modules
   let compatibility = null;
   if (marriageDob) {
     compatibility = calculateAdvancedCompatibility(
@@ -164,64 +208,114 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     );
   }
 
+  const karmic = analyzeKarmicPatterns(parsedDay, parsedDay, compoundDOBSum);
+  const kua = calculateKuaNumber(parsedYear, gender);
+  const vedicGrid = buildVedicGrid(dobDigits);
+  const combination81 = getCombination81(mulank, bhagyank);
+  const actionPlan90Day = generate90DayActionPlan({
+    mulank,
+    bhagyank,
+    missingNumbers: rawMissingNumbers,
+    repeatedNumbers: repeatedNumbers.map(r => r.digit),
+    weakPlanes
+  });
+
   const premiumModules = {
-    vehicle: vehicleNumber ? analyzeVehicleNumerology(vehicleNumber, driver) : null,
+    vehicle: vehicleNumber ? analyzeVehicleNumerology(vehicleNumber, mulank) : null,
     house: houseNumber ? analyzeHouseNumerology(houseNumber) : null,
-    business: businessName ? analyzeBusinessNumerology(businessName, driver) : null
+    business: businessName ? analyzeBusinessNumerology(businessName, mulank) : null
   };
 
   // 11. Metadata
-  const metadata = {
-    timestamp: new Date().toISOString(),
-    version: '2.0.0',
-    id: `num_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  };
+  const timestamp = new Date().toISOString();
+  const id = `leo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  const profile: Omit<NumerologyProfile, 'pdfData'> & { pdfData: any } = {
-    birthGrid,
-    enhancedGrid,
-    driver,
+  // Assemble full CompleteNumerologyProfile
+  const profile: CompleteNumerologyProfile = {
+    identity: {
+      fullName: name,
+      normalizedName: name.trim().toUpperCase(),
+      dob,
+      standardDOB,
+      gender,
+      mobile
+    },
+    coreNumbers: {
+      mulank,
+      bhagyank,
+      mulankGraha: GRAHA_MAPPING[mulank]?.nameHi || `Planet ${mulank}`,
+      bhagyankGraha: GRAHA_MAPPING[bhagyank]?.nameHi || `Planet ${bhagyank}`,
+      synthesis
+    },
+    loshu: {
+      birthGrid,
+      enhancedGrid: enhancedGridResult,
+      planes,
+      arrows,
+      repetition,
+      missingNumbers,
+      scores
+    },
+    vastu,
+    medical,
+    mobileAnalysis,
+    interpretations,
+    remedies,
+    consultation,
+    explanation,
+    annualForecast: masterReport.reasons,
+    compatibility,
+    pdfData: null,
+    combination81,
+    karmic,
+    kua,
+    vedicGrid,
+    actionPlan90Day,
+    disclaimer: MANDATORY_WELLNESS_DISCLAIMER,
+    metadata: {
+      calculatedAt: timestamp,
+      engineVersion: LEOFAMILY_METHODOLOGY_VERSION,
+      checksum: `${mulank}-${bhagyank}-${Object.values(birthGrid).join('')}`,
+      id
+    },
+
+    // Flat compatibility surface for existing dashboard views
+    driver: mulank,
     bhagyank,
-    mobile: mobileData,
+    birthGrid,
+    enhancedGrid: flatEnhancedGrid,
+    mobile: mobileAnalysis || masterReport.mobileAnalysis,
     planes,
     arrows,
-    missingNumbers,
+    missingNumbers: rawMissingNumbers,
     repeatedNumbers,
     personality,
     career,
     finance,
     health,
     relationship,
-    remedies,
-    consultation,
-    explanation,
     scores,
-    annualForecast: masterReport.reasons, // Matches forecasted year reasons
-    compatibility,
-    pdfData: null, // Populated below
-    metadata,
-    // Store premium modules inside the profile object to prevent recalculating
     ...premiumModules
   };
 
-  // Validate the calculated data to safeguard outputs
+  // Validate calculation data bounds
   validateNumerologyCalculation({
-    driver,
+    driver: mulank,
     bhagyank,
     birthGrid,
-    enhancedGrid,
+    enhancedGrid: flatEnhancedGrid,
     planesCount: planes.length,
     arrowsCount: arrows.length,
     scores
   });
 
-  // 12. Format PDF and Report templates
+  // PDF report formatting
   profile.pdfData = formatReportForPdf(profile);
 
-  // Save to cache
-  profileCache.set(cacheKey, profile as NumerologyProfile);
+  // Cache deterministic result
+  profileCache.set(cacheKey, profile);
 
-  return profile as NumerologyProfile;
+  return profile;
 }
 
 export function clearProfileCache() {

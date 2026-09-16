@@ -15,6 +15,11 @@ import {
   ArrowMasterResult
 } from '../services/loshuMasterEngine';
 import { generateCompleteNumerologyProfile } from '../core';
+import { CompleteNumerologyProfile } from '../core/types';
+import { MANDATORY_WELLNESS_DISCLAIMER } from '../core/methodology';
+import { KarmicVedicAnalysisView } from './KarmicVedicAnalysisView';
+import { DateInput } from './DateInput';
+import { formatDateIndian } from '../utils/dateUtils';
 import { 
   Calendar, User, Compass, HelpCircle, Sparkles, RefreshCw, Star, 
   Trash2, Heart, Shield, BookOpen, Layers, Award, FileText, Download, 
@@ -99,7 +104,8 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
   const [calcDob, setCalcDob] = useState('05-08-1983');
   
   // Tab control inside Loshu Analysis
-  const [activeSubTab, setActiveSubTab] = useState<'MASTER_CONSULTATION' | 'GRID' | 'PLANES' | 'REMEDIES' | 'PERIODS' | 'COMPATIBILITY' | 'AI_REPORT' | 'HISTORY'>('MASTER_CONSULTATION');
+  const [activeSubTab, setActiveSubTab] = useState<'MASTER_CONSULTATION' | 'KARMIC_VEDIC' | 'GRID' | 'PLANES' | 'REMEDIES' | 'PERIODS' | 'COMPATIBILITY' | 'AI_REPORT' | 'HISTORY'>('MASTER_CONSULTATION');
+  const [completeProfile, setCompleteProfile] = useState<CompleteNumerologyProfile | null>(null);
   
   // History list
   const [history, setHistory] = useState<{ id: string; name: string; dob: string; date: string }[]>([]);
@@ -144,6 +150,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
         mobile: mobileNumber,
         gender: initialProfile.gender || 'MALE'
       });
+      setCompleteProfile(profile);
       const master = computeLoshuMasterReport(initialProfile.dob, initialProfile.name, initialProfile.gender || 'MALE', mobileNumber);
       setMasterReport(master);
     }
@@ -164,6 +171,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
       mobile: mobileNumber,
       gender
     });
+    setCompleteProfile(profile);
     const master = computeLoshuMasterReport(dob, finalName, gender, mobileNumber);
     setMasterReport(master);
     
@@ -172,7 +180,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
       id: Date.now().toString(),
       name: finalName,
       dob,
-      date: new Date().toLocaleDateString('en-US', { hour: '2-digit', minute: '2-digit' })
+      date: new Date().toLocaleDateString('en-IN', { hour: '2-digit', minute: '2-digit' })
     };
     
     const updatedHistory = [newHistoryItem, ...history.filter(h => h.dob !== dob)].slice(0, 8);
@@ -360,16 +368,13 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
 
           <div className="space-y-2">
             <label className="block text-[10px] font-mono uppercase text-[#D97706] tracking-widest font-bold">Select Date of Birth</label>
-            <div className="relative">
-              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D97706]/70" />
-              <input
-                type="date"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                required
-                className="w-full bg-[#F8F4EF] border border-[#E5E7EB] focus:border-[#D97706] focus:bg-white transition-all rounded-2xl pl-12 pr-4 py-4 outline-none text-sm text-[#1F2937] font-semibold"
-              />
-            </div>
+            <DateInput
+              id="loshu-dob-input"
+              value={dob}
+              onChange={setDob}
+              required
+              className="py-4 text-sm font-semibold"
+            />
           </div>
 
           <button
@@ -390,7 +395,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                 onClick={() => handleLoadHistoryItem(h)}
                 className="inline-flex items-center gap-1.5 bg-[#F8F4EF] hover:bg-[#F2E8DC] text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer border border-[#E5E7EB]/60 group text-[#1F2937]"
               >
-                <span>{h.name} ({h.dob})</span>
+                <span>{h.name} ({formatDateIndian(h.dob)})</span>
                 <button
                   onClick={(e) => handleDeleteHistoryItem(h.id, e)}
                   className="p-0.5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition"
@@ -502,6 +507,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
           <div className="border-b border-[#E5E7EB] pt-2 flex flex-wrap gap-2 print:hidden">
             {[
               { id: 'MASTER_CONSULTATION', label: 'Master Consultation 5.0 🏆' },
+              { id: 'KARMIC_VEDIC', label: 'Vedic Grid & 81 Yogas ☸️' },
               { id: 'GRID', label: 'Loshu Magic Grid' },
               { id: 'PLANES', label: 'Planes & Arrows' },
               { id: 'REMEDIES', label: 'Lal Kitab remedies' },
@@ -523,6 +529,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                 }`}
               >
                 {subTab.id === 'MASTER_CONSULTATION' && <Award className="w-4 h-4 text-[#D97706] animate-pulse" />}
+                {subTab.id === 'KARMIC_VEDIC' && <Sparkles className="w-4 h-4 text-[#D97706] animate-spin-slow" />}
                 {subTab.id === 'GRID' && <Compass className="w-4 h-4" />}
                 {subTab.id === 'PLANES' && <Layers className="w-4 h-4" />}
                 {subTab.id === 'REMEDIES' && <Shield className="w-4 h-4" />}
@@ -778,7 +785,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                               value={calcDob}
                               onChange={(e) => setCalcDob(e.target.value)}
                               className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 font-mono text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D97706] focus:border-[#D97706]"
-                              placeholder="DD-MM-YYYY or YYYY-MM-DD"
+                              placeholder="DD/MM/YYYY or YYYY-MM-DD"
                             />
                           </div>
                         </div>
@@ -1703,6 +1710,11 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
             </div>
           )}
 
+          {/* TAB 0.5: VEDIC GRID, 81 YOGAS & KARMIC ACTION PLAN */}
+          {activeSubTab === 'KARMIC_VEDIC' && completeProfile && (
+            <KarmicVedicAnalysisView profile={completeProfile} />
+          )}
+
           {/* TAB 1: GRID & BOX AUDITING */}
           {activeSubTab === 'GRID' && (
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 animate-in duration-500">
@@ -2339,12 +2351,12 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                   </div>
                   <div className="space-y-2">
                     <label className="block text-[10px] font-mono uppercase text-[#6B7280]">Partner's DOB</label>
-                    <input
-                      type="date"
+                    <DateInput
+                      id="partner-dob-input"
                       value={partnerDob}
-                      onChange={(e) => setPartnerDob(e.target.value)}
+                      onChange={setPartnerDob}
                       required
-                      className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl px-5 py-3.5 outline-none text-xs text-[#1F2937]"
+                      className="py-3.5 text-xs"
                     />
                   </div>
                   <button

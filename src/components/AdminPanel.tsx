@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PersonalDetails } from '../types';
+import DateInput from './DateInput';
 import { 
   Compass, User, Calendar, Award, Activity, Heart, Sparkles, 
   AlertTriangle, Check, FileText, Layers, Info, RefreshCw, 
@@ -459,15 +460,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ personalDetails }) => {
 
               <div className="space-y-1.5">
                 <label className="text-[10px] uppercase font-mono text-[#6B7280] font-bold">Date of Birth (DOB)</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3.5 top-3.5 h-4 w-4 text-[#D97706]" />
-                  <input
-                    type="date"
-                    className="w-full bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl pl-10 pr-4 py-3 outline-none text-[#1F2937] focus:border-[#D97706] font-mono font-bold"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                  />
-                </div>
+                <DateInput
+                  id="admin-dob-input"
+                  value={dob}
+                  onChange={setDob}
+                  className="py-3 font-mono font-bold"
+                />
               </div>
 
               <div className="space-y-1.5">

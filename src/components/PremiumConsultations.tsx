@@ -21,6 +21,8 @@ import {
 import { generateMedicalNumerologyReport, MedicalNumerologyResult } from '../services/medicalNumerologyEngine';
 import { generateNumeroVaastuReport, NumeroVaastuResult } from '../services/numeroVaastuEngine';
 import { calculateDashaAndYearForecast, DashaAnalysisReport } from '../services/dashaEngine';
+import DateInput from './DateInput';
+import { formatDateIndian } from '../utils/dateUtils';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 15 },
@@ -1196,7 +1198,7 @@ export default function PremiumConsultations() {
                       className="bg-white border text-xs px-3 py-1.5 rounded-xl text-slate-700 font-medium focus:ring-1 focus:ring-[#1E3A8A] focus:outline-none"
                     >
                       {savedProfiles.map((p, idx) => (
-                        <option key={idx} value={idx}>{p.name} ({p.dob})</option>
+                        <option key={idx} value={idx}>{p.name} ({formatDateIndian(p.dob)})</option>
                       ))}
                       <option value={-1}>+ Use Custom Credentials</option>
                     </select>
@@ -1220,14 +1222,14 @@ export default function PremiumConsultations() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Birth Date</label>
-                  <input
-                    type="date"
+                  <DateInput
+                    id="sig-dob-input"
                     value={sigDob}
-                    onChange={(e) => {
-                      setSigDob(e.target.value);
+                    onChange={(isoVal) => {
+                      setSigDob(isoVal);
                       setSelectedProfileIndex(-1);
                     }}
-                    className="w-full bg-white border border-slate-200 text-xs px-4 py-2.5 rounded-xl text-slate-800 font-sans focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 focus:border-[#1E3A8A]"
+                    className="py-2.5 text-xs"
                   />
                 </div>
               </div>
@@ -1779,12 +1781,12 @@ export default function PremiumConsultations() {
             <form onSubmit={handleChildSubmit} className="flex gap-3">
               <div className="flex-1 space-y-1">
                 <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Select Baby's Date of Birth</label>
-                <input
-                  type="date"
+                <DateInput
+                  id="baby-dob-input"
                   required
                   value={childDob}
-                  onChange={(e) => setChildDob(e.target.value)}
-                  className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
+                  onChange={setChildDob}
+                  className="py-3 text-sm font-sans"
                 />
               </div>
               <button
@@ -1976,12 +1978,12 @@ export default function PremiumConsultations() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Seeker Date of Birth</label>
-                  <input
-                    type="date"
+                  <DateInput
+                    id="medical-dob-input"
                     required
                     value={medicalDob}
-                    onChange={(e) => setMedicalDob(e.target.value)}
-                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
+                    onChange={setMedicalDob}
+                    className="py-3 text-sm font-sans"
                   />
                 </div>
                 <div className="space-y-1">
@@ -2193,12 +2195,12 @@ export default function PremiumConsultations() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1 text-left">
                   <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Date of Birth</label>
-                  <input
-                    type="date"
+                  <DateInput
+                    id="vaastu-dob-input"
                     required
                     value={vaastuDob}
-                    onChange={(e) => setVaastuDob(e.target.value)}
-                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
+                    onChange={setVaastuDob}
+                    className="py-3 text-sm font-sans"
                   />
                 </div>
                 <div className="space-y-1 text-left">
@@ -2404,12 +2406,12 @@ export default function PremiumConsultations() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1 text-left">
                   <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Seeker Date of Birth</label>
-                  <input
-                    type="date"
+                  <DateInput
+                    id="dasha-dob-input"
                     required
                     value={dashaDob}
-                    onChange={(e) => setDashaDob(e.target.value)}
-                    className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
+                    onChange={setDashaDob}
+                    className="py-3 text-sm font-sans"
                   />
                 </div>
                 <div className="space-y-1 text-left">

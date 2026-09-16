@@ -6,6 +6,7 @@ import { Sparkles, Briefcase, Heart, Activity } from 'lucide-react';
 import { generateLeoAdvisorActions } from '../services/leoAdvisorEngine';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { formatDateIndian, parseIndianDate } from '../utils/dateUtils';
 
 interface ReportTabProps {
   personalDetails: PersonalDetails;
@@ -340,9 +341,9 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
     analysis: LoshuAnalysisResult,
     advisorActions: any
   ) => {
-    const parts = details.dob.split('-');
-    const bMonth = parseInt(parts[1], 10) || 1;
-    const bDay = parseInt(parts[2], 10) || 1;
+    const parsed = parseIndianDate(details.dob);
+    const bMonth = parsed ? parsed.month : 1;
+    const bDay = parsed ? parsed.day : 1;
     const currentYear = 2026;
 
     const dosha = getDoshaData(analysis.mulank);
@@ -533,7 +534,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
               </tr>
               <tr>
                 <td style="padding: 6px 0; color: #6B7280; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Date of Birth:</td>
-                <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${details.dob}</td>
+                <td style="padding: 6px 0; font-weight: bold; color: #111827; text-align: right;">${formatDateIndian(details.dob)}</td>
               </tr>
               <tr>
                 <td style="padding: 6px 0; color: #6B7280; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Mobile Frequency:</td>
@@ -632,7 +633,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
                   </tr>
                   <tr style="border-bottom: 1px solid #F3F4F6;">
                     <td style="color: #6B7280;">Birth Date:</td>
-                    <td style="font-weight: bold; text-align: right; color: #111827;">${details.dob}</td>
+                    <td style="font-weight: bold; text-align: right; color: #111827;">${formatDateIndian(details.dob)}</td>
                   </tr>
                   <tr style="border-bottom: 1px solid #F3F4F6;">
                     <td style="color: #6B7280;">Driver Number (Mulank):</td>
@@ -767,8 +768,8 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
             <span class="pdf-header-tag">${reportId} • Page 5</span>
           </div>
           
-          <div style="background-color: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; font-size: 8px; color: #991B1B; font-weight: 500; line-height: 1.4;">
-            <strong>IMPORTANT CLINICAL DISCLAIMER:</strong> This report provides astrological-vibrational wellness insights and Ayurvedic-inspired lifestyle counseling based on ancient Vedic calculations and driver numbers. It DOES NOT constitute, nor is it a substitute for, professional medical advice, diagnosis, or clinical treatment plans. Always consult with a registered physician or healthcare professional for any medical concerns.
+          <div style="background-color: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; font-size: 8.5px; color: #991B1B; font-weight: 600; line-height: 1.4;">
+            <strong>MANDATORY DISCLAIMER:</strong> Traditional numerology/wellness interpretation only. This is not medical diagnosis or medical advice. Consult a registered physician for any medical concerns.
           </div>
           
           <div class="pdf-row">
@@ -1069,11 +1070,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
 
     const computedAdvisorActions = generateLeoAdvisorActions(dobData, nameData, mobileData);
 
-    const currentDateStr = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    const currentDateStr = formatDateIndian(new Date());
 
     const reportId = `LEO-COSMIC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
@@ -1119,11 +1116,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
 
       const computedAdvisorActions = generateLeoAdvisorActions(dobData, nameData, mobileData);
 
-      const currentDateStr = new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+      const currentDateStr = formatDateIndian(new Date());
 
       const reportId = `LEO-COSMIC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
