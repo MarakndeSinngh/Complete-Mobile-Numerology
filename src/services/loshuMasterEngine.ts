@@ -56,6 +56,8 @@ export interface LoshuMasterReport {
   gridAnalysis: {
     present: number[];
     missing: number[];
+    birthPresent?: number[];
+    birthMissing?: number[];
     repeated: { digit: number; count: number }[];
     dominant: number[];
     weak: number[];
@@ -445,100 +447,100 @@ const inactiveArrowsData: Record<string, {
   remedy: string;
 }> = {
   'Arrow of Determination': {
-    meaning: 'Latent resolve. You may find yourself starting tasks with high enthusiasm but struggling to maintain single-minded commitment when obstacles arise.',
-    strength: 'Flexible approach; willing to adapt your goals rather than blindly fighting brick walls.',
-    risk: 'Prone to self-doubt, easily discouraged by sudden delays, looks for external motivation.',
-    careerImpact: 'Thrives in collaborative teams where others provide the structural drive and push.',
-    relationshipImpact: 'Requires constant reassurance and partner encouragement to stay aligned on long-term goals.',
-    remedy: 'Light a red candle or ghee lamp in the South direction every evening to activate raw solar willpower.'
+    meaning: 'दृढ़ संकल्प का तीर अभी पूरी तरह सक्रिय नहीं है। आप कार्यों को पूरे उत्साह से शुरू करते हैं, परंतु मार्ग में बाधा आने पर निरंतरता बनाए रखने में चुनौती महसूस कर सकते हैं।',
+    strength: 'लचीला दृष्टिकोण; परिस्थितियों के अनुसार खुद को ढालने की अच्छी क्षमता।',
+    risk: 'आत्म-संदेह और कार्यों में देरी होने पर जल्दी निराश होना।',
+    careerImpact: 'सहयोगात्मक टीमों में उत्कृष्ट, जहां अन्य सहयोगी निरंतर प्रेरणा प्रदान करते हैं।',
+    relationshipImpact: 'दीर्घकालिक लक्ष्यों पर टिके रहने के लिए साथी के प्रोत्साहन व संबल की आवश्यकता।',
+    remedy: 'शाम को दक्षिण दिशा में शुद्ध घी का दीपक या लाल मोमबत्ती जलाएं और तांबे का छल्ला पहनें।'
   },
   'Arrow of Intellect': {
-    meaning: 'Latent mental plane. Rather than relying on pure memory or academic theories, you learn best through visual experience and repetitive practical lessons.',
-    strength: 'Intuitive thinking; avoids analysis paralysis by relying on real-world feedback loops.',
-    risk: 'May struggle with heavy data analysis, abstract mathematical modeling, or long theoretical study.',
-    careerImpact: 'Succeeds in hands-on operations, physical trading, or direct sales over academic research.',
-    relationshipImpact: 'Prefers simple, honest, and action-oriented communication over intellectual debate.',
-    remedy: 'Keep a copper pen or a green aventurine crystal on your study table to boost concentration.'
+    meaning: 'बौद्धिक तीर सामान्य स्थिति में है। आप केवल किताबी ज्ञान पर निर्भर रहने के बजाय व्यावहारिक अनुभव और वास्तविक जीवन के पाठों से अधिक सीखते हैं।',
+    strength: 'सहज और व्यावहारिक सोच; अत्यधिक तार्किक उलझनों में फंसे बिना आगे बढ़ना।',
+    risk: 'अत्यधिक जटिल डेटा या अमूर्त गणितीय विश्लेषण में जल्दी ऊब जाना।',
+    careerImpact: 'व्यावहारिक संचालन, प्रत्यक्ष व्यापार और सेल्स जैसे क्षेत्रों में शानदार प्रदर्शन।',
+    relationshipImpact: 'तार्किक बहसों के स्थान पर सरल, स्पष्ट और ईमानदार संवाद को प्राथमिकता।',
+    remedy: 'अध्ययन मेज पर ग्रीन एवेंट्यूरिन रखें और गुरुवार को बच्चों को पठन सामग्री दान करें।'
   },
   'Arrow of Planning': {
-    meaning: 'Latent planning plane. You are a spontaneous action-taker who prefers executing first and fixing errors on the fly rather than over-analyzing beforehand.',
-    strength: 'Rapid response rate; highly agile and ready to pivot instantly in fluid scenarios.',
-    risk: 'Prone to disorganized schedules, poor time estimation, and lack of preventative backup systems.',
-    careerImpact: 'Succeeds in fast-paced startup roles, customer service, or crisis mitigation where rigid plans fail.',
-    relationshipImpact: 'Spontaneous partner who loves surprise plans, but may occasionally miss important family dates.',
-    remedy: 'Maintain a physical daily journal; wear a wooden-bead bracelet to cultivate structured grounding.'
+    meaning: 'नियोजन तीर सामान्य है। आप पहले से बहुत अधिक योजनाएं बनाने के बजाय सीधे काम शुरू करके रास्ते में सुधार करने वाले व्यक्ति हैं।',
+    strength: 'त्वरित निर्णय और बदलती परिस्थितियों में तेजी से बदलाव करने की योग्यता।',
+    risk: 'अव्यवस्थित दिनचर्या और बैकअप प्लान न होने से अचानक समस्या का सामना।',
+    careerImpact: 'स्टार्टअप्स, फील्ड वर्क और गतिशील भूमिकाओं में जहां सख्त योजनाएं काम नहीं आतीं।',
+    relationshipImpact: 'रोमांचक और स्वतःस्फूर्त साथी, लेकिन महत्वपूर्ण तिथियों को याद रखने के लिए रिमाइंडर रखें।',
+    remedy: 'दैनिक डायरी लिखें और दाहिने हाथ में तुलसी या रुद्राक्ष का ब्रेसलेट पहनें।'
   },
   'Arrow of Practicality': {
-    meaning: 'Latent practicality plane. You are guided by abstract ideas and creative visions rather than mundane materialistic or physical tasks.',
-    strength: 'High creative sensitivity, unique artistic visions, and ability to think beyond pure utility.',
-    risk: 'Struggles with physical organization, routine paperwork, tax compliance, or manual labor.',
-    careerImpact: 'Excels in strategic consulting, digital designs, and creative conceptualization.',
-    relationshipImpact: 'Provides rich emotional and romantic gestures, but may struggle with practical domestic chores.',
-    remedy: 'Walk barefoot on clean soil or grass for 5 minutes daily to absorb stabilizing earth energies.'
+    meaning: 'व्यावहारिक भौतिक तीर सामान्य है। आपका झुकाव भौतिक चीजों से अधिक रचनात्मक विचारों, मानवीय संवेदनाओं और दृष्टि पर रहता है।',
+    strength: 'उच्च संवेदनशीलता, रचनात्मक दृष्टि और सामान्य उपयोगिता से आगे सोचने का सामर्थ्य।',
+    risk: 'कागजी कार्रवाई, टैक्स या भौतिक रखरखाव में लापरवाही की संभावना।',
+    careerImpact: 'रणनीतिक परामर्श, डिजाइनिंग और वैचारिक भूमिकाओं में अत्यधिक सफल।',
+    relationshipImpact: 'भावनात्मक व गहरे संबंध बनाते हैं, लेकिन व्यावहारिक घरेलू जिम्मेदारियों में सहयोग बढ़ाएं।',
+    remedy: 'प्रतिदिन सुबह हरी घास पर 5 मिनट नंगे पैर टहलें और ईशान कोण को स्वच्छ रखें।'
   },
   'Arrow of Emotional Balance': {
-    meaning: 'Latent emotional plane. Your emotional state may experience high fluctuations, shifting rapidly between absolute enthusiasm and quiet detachment.',
-    strength: 'Deep emotional empathy when fully engaged; highly expressive when they feel safe.',
-    risk: 'Mood swings, holding onto past emotional hurts, and tendency to suppress personal desires.',
-    careerImpact: 'Works best in low-stress environments where performance pressure is consistent rather than sporadic.',
-    relationshipImpact: 'Needs a stable, emotionally mature partner who can anchor their fluctuating feelings.',
-    remedy: 'Drink water from a silver cup and wear a flawless white pearl pendant set in silver.'
+    meaning: 'भावनात्मक संतुलन तीर सामान्य है। आपकी भावनाएं कभी अत्यधिक उत्साहित तो कभी शांत और अलग-थलग हो सकती हैं।',
+    strength: 'गहरी सहानुभूति और सुरक्षित महसूस होने पर आत्मीयता से जुड़ना।',
+    risk: 'मूड स्विंग्स और पुरानी नकारात्मक बातों को दिल में दबाए रखने की आदत।',
+    careerImpact: 'स्थिर और तनावमुक्त माहौल में आपका कार्य-प्रदर्शन सर्वोत्तम रहता है।',
+    relationshipImpact: 'एक परिपक्व और समझदार साथी आपके भावनात्मक उतार-चढ़ाव को संतुलित रखता है।',
+    remedy: 'चांदी के गिलास में पानी पिएं और गले में चांदी में शुद्ध मोती धारण करें।'
   },
   'Arrow of Spirituality': {
-    meaning: 'Latent spiritual plane. You rely heavily on physical evidence, logical analysis, and tangible assets rather than abstract philosophical beliefs.',
-    strength: 'Grounded realism; not easily deceived by fake gurus or speculative mystical promises.',
-    risk: 'Skeptical of unseen energies, struggles to find inner peace during severe professional failures.',
-    careerImpact: 'Excellent in commercial trade, hard sciences, and corporate finance where facts rule.',
-    relationshipImpact: 'Very realistic expectations; seeks practical and stable family commitments.',
-    remedy: 'Meditate with a small amethyst geode or dedicate 10 minutes of silent gratitude every sunrise.'
+    meaning: 'आध्यात्मिक शांति तीर सामान्य है। आप प्रत्यक्ष प्रमाण, तार्किक विश्लेषण और वास्तविक परिणामों पर अधिक विश्वास करते हैं।',
+    strength: 'जमीनी यथार्थवाद; किसी के बहकावे या अंधविश्वास में आसानी से न आना।',
+    risk: 'कठिन समय में आंतरिक शांति पाने में कभी-कभी कठिनाई महसूस होना।',
+    careerImpact: 'वित्तीय प्रबंधन, विज्ञान और कॉर्पोरेट जगत में तथ्यों के आधार पर उत्कृष्ट निर्णय।',
+    relationshipImpact: 'व्यावहारिक अपेक्षाएं और परिवार के प्रति स्पष्ट, स्थायी जिम्मेदारियां।',
+    remedy: 'सूर्योदय के समय 10 मिनट मौन ध्यान करें और गुरुवार को चने की दाल का दान करें।'
   },
   'Arrow of Activity': {
-    meaning: 'Latent activity plane. You prefer a calm, quiet, and reflective lifestyle rather than continuous physical movement or high-speed events.',
-    strength: 'Excellent capacity for deep, quiet research, deliberate contemplation, and stress-free rest.',
-    risk: 'Prone to physical lethargy, delay in starting exercises, and resistance to sudden travel changes.',
-    careerImpact: 'Thrives in remote administrative, writing, or analytical roles requiring low travel.',
-    relationshipImpact: 'Enjoys peaceful, slow-paced dates and cozy evenings at home over loud crowded parties.',
-    remedy: 'Wear a small red carnelian bead or keep a copper pyramid in your active workspace.'
+    meaning: 'शारीरिक सक्रियता तीर सामान्य है। आप भागदौड़ भरे माहौल के बजाय शांत, चिंतनशील और स्थिर जीवनशैली पसंद करते हैं।',
+    strength: 'गहन शोध, एकाग्रता और तनावमुक्त रहकर चिंतन करने की श्रेष्ठ क्षमता।',
+    risk: 'शारीरिक व्यायाम शुरू करने में आलस्य या यात्रा योजनाओं में देरी।',
+    careerImpact: 'रिमोट कार्य, लेखन, विश्लेषण और शोध जैसे क्षेत्रों में सफलता।',
+    relationshipImpact: 'भीड़भाड़ के बजाय घर पर शांतिपूर्ण समय बिताना अधिक पसंद करते हैं।',
+    remedy: 'कार्यस्थल पर तांबे का पिरामिड रखें और मंगलवार को हल्का व्यायाम नियमित करें।'
   },
   'Arrow of Frustration': {
-    meaning: 'The Arrow of Frustration is inactive. Your diagonal plane of dynamic energy is well-supported, shielding you from chronic friction.',
-    strength: 'Natural mental patience; accepts delays without feeling personally targeted by destiny.',
-    risk: 'No major risk; baseline resilience remains highly stable under standard stress.',
-    careerImpact: 'Builds stable, long-term tenure in organisations without feeling the urge to run away.',
-    relationshipImpact: 'Keeps arguments healthy and avoids projecting personal career failures onto the spouse.',
-    remedy: 'No major remedy needed. Maintain standard gratitude practices.'
+    meaning: 'निराशा का तीर (Arrow of Frustration) सक्रिय नहीं है। आपकी ऊर्जा का संतुलन मजबूत है जो आपको निरंतर निराशा से सुरक्षित रखता है।',
+    strength: 'स्वाभाविक मानसिक धैर्य; बाधाओं को व्यक्तिगत असफलता माने बिना आगे बढ़ते हैं।',
+    risk: 'कोई बड़ा जोखिम नहीं; सामान्य तनाव में भी मानसिक स्थिरता बनी रहती है।',
+    careerImpact: 'संस्थानों में लंबे समय तक टिककर स्थायी प्रगति करने की क्षमता।',
+    relationshipImpact: 'स्वस्थ संवाद और कार्यस्थल के तनाव को पारिवारिक जीवन पर हावी न होने देना।',
+    remedy: 'प्रतिदिन कृतज्ञता का भाव रखें और बड़ों का सम्मान करें।'
   },
   'Arrow of Weak Will': {
-    meaning: 'The Arrow of Weak Will is inactive. Your willpower plane is active or balanced, giving you strong self-belief.',
-    strength: 'High self-determination; capable of making independent life-changing decisions.',
-    risk: 'Can border on obstinacy if your opinions are not validated by trusted associates.',
-    careerImpact: 'Thrives in entrepreneurship, leadership, or high-autonomy professional roles.',
-    relationshipImpact: 'Clear boundary-setter; ensures mutual respect in partnership.',
-    remedy: 'No corrective remedy needed. Share your strength by mentoring younger colleagues.'
+    meaning: 'कमजोर इच्छाशक्ति का तीर सक्रिय नहीं है। आपका संकल्प मजबूत है और आप स्वतंत्र निर्णय लेने में सक्षम हैं।',
+    strength: 'उच्च आत्मविश्वास और जीवन के बड़े निर्णय स्वयं लेने की शक्ति।',
+    risk: 'कभी-कभी अत्यधिक जिद्दीपन से दूसरों के अच्छे सुझाव नजरअंदाज हो सकते हैं।',
+    careerImpact: 'नेतृत्व, व्यापार और स्वतंत्र जिम्मेदारी वाले पदों में श्रेष्ठ।',
+    relationshipImpact: 'संबंधों में स्पष्ट सीमाएं और आपसी सम्मान सुनिश्चित करते हैं।',
+    remedy: 'अपने अनुभव और सकारात्मक ऊर्जा से कनिष्ठ साथियों का मार्गदर्शन करें।'
   },
   'Arrow of Isolation': {
-    meaning: 'The Arrow of Isolation is inactive. Your emotional/spiritual coordinates are well-linked, keeping you socially integrated.',
-    strength: 'Strong social intelligence, natural networking skill, and ability to form meaningful bonds.',
-    risk: 'Can occasionally overcommit to social events at the expense of personal quiet hours.',
-    careerImpact: 'Thrives in public relations, client management, team leadership, and marketing.',
-    relationshipImpact: 'Warm, expressive, and easily connected; shares inner secrets with complete trust.',
-    remedy: 'Donate milk to the needy on Mondays to keep your social channels aligned and clean.'
+    meaning: 'अकेलेपन का तीर सक्रिय नहीं है। आपकी सामाजिक और भावनात्मक क्षमताएं संतुलित हैं, जिससे आप समाज से जुड़े रहते हैं।',
+    strength: 'उत्कृष्ट सामाजिक तालमेल और सार्थक संबंध बनाने की स्वाभाविक कला।',
+    risk: 'कभी-कभी सामाजिक व्यस्तताओं के कारण स्वयं के लिए समय न निकाल पाना।',
+    careerImpact: 'जनसंपर्क (PR), क्लाइंट मैनेजमेंट, टीम लीडरशिप और मार्केटिंग में सफलता।',
+    relationshipImpact: 'स्नेही और खुले दिल वाले साथी; विश्वास के साथ मन की बातें साझा करते हैं।',
+    remedy: 'सोमवार को जरूरतमंदों को दूध या चावल का दान करें।'
   },
   'Arrow of Impatience': {
-    meaning: 'The Arrow of Impatience is inactive. You possess a patient, steady approach to physical and professional compounding.',
-    strength: 'Outstanding capacity for long-term investments, detail-oriented work, and waiting for natural results.',
-    risk: 'Might stay too long in low-growth scenarios due to high tolerance for routine.',
-    careerImpact: 'Highly reliable in banking, structural engineering, and deep research roles.',
-    relationshipImpact: 'Nurturing, slow-to-anger partner who resolves disputes through quiet dialogue.',
-    remedy: 'No corrective remedy needed. Keep your workspace illuminated with warm yellow light.'
+    meaning: 'अधीरता का तीर सक्रिय नहीं है। आपके पास दीर्घकालिक परिणामों के लिए धैर्यपूर्वक प्रतीक्षा करने की परिपक्वता है।',
+    strength: 'स्थायी निवेश, बारीक कार्य और समय के साथ प्रगति करने की दृढ़ क्षमता।',
+    risk: 'धीमी प्रगति वाले वातावरण में कभी-कभी आवश्यकता से अधिक समय रुक जाना।',
+    careerImpact: 'बैंकिंग, इंजीनियरिंग, अनुसंधान और स्थायी व्यवसायों में अत्यंत विश्वसनीय।',
+    relationshipImpact: 'शांत और समझदार साथी जो विवादों को प्रेमपूर्वक बातचीत से सुलझाते हैं।',
+    remedy: 'कार्यस्थल को हमेशा स्वच्छ और उचित प्रकाशयुक्त रखें।'
   },
   'Arrow of Confusion': {
-    meaning: 'The Arrow of Confusion is inactive. Your mental clarity coordinates are sound, ensuring clear thinking and rapid decisions.',
-    strength: 'Excellent cognitive logic; quickly filters out noisy speculations or false rumors.',
-    risk: 'Can become overly cynical or demanding of perfect proof before acting.',
-    careerImpact: 'Highly effective in stock trading, forensic auditing, and legal representation.',
-    relationshipImpact: 'Clear, direct, and unambiguous in communicating relationship boundaries.',
-    remedy: 'Maintain a silver coin in your wallet to preserve this high-frequency mental purity.'
+    meaning: 'भ्रम का तीर सक्रिय नहीं है। आपकी मानसिक स्पष्टता उत्तम है, जिससे आप सही और गलत का त्वरित निर्णय ले पाते हैं।',
+    strength: 'तार्किक बुद्धि; अफवाहों और भ्रामक बातों को तुरंत पहचान कर दूर रहना।',
+    risk: 'हर बात में पूर्ण प्रमाण मांगने की आदत से कभी-कभी देरी।',
+    careerImpact: 'ऑडिटिंग, ट्रेडिंग, कानून और प्रशासनिक कार्यों में अत्यंत प्रभावी।',
+    relationshipImpact: 'रिश्तों में स्पष्ट और पारदर्शी संवाद बनाए रखते हैं।',
+    remedy: 'पर्स में एक चांदी का सिक्का रखें जिससे मानसिक शांति और स्पष्टता बनी रहे।'
   }
 };
 
@@ -575,6 +577,8 @@ export function computeLoshuMasterReport(
     enhancedGridMap[d] = loshuAnalysis.loshuGrid[d]?.count || 0;
   }
 
+  const birthPresent: number[] = [];
+  const birthMissing: number[] = [];
   const present: number[] = [];
   const missing: number[] = [];
   const repeated: { digit: number; count: number }[] = [];
@@ -582,10 +586,19 @@ export function computeLoshuMasterReport(
   for (let d = 1; d <= 9; d++) {
     const dobCount = gridMap[d];
     if (dobCount > 0) {
-      present.push(d);
+      birthPresent.push(d);
       if (dobCount > 1) {
         repeated.push({ digit: d, count: dobCount });
       }
+    } else {
+      birthMissing.push(d);
+    }
+
+    // LeoFamily Enhanced Grid presence:
+    // Present if DOB count > 0 OR driverLayer is true OR destinyLayer is true
+    const isEnhancedPresent = dobCount > 0 || loshuAnalysis.loshuGrid[d]?.isDriverLayer || loshuAnalysis.loshuGrid[d]?.isDestinyLayer;
+    if (isEnhancedPresent) {
+      present.push(d);
     } else {
       missing.push(d);
     }
@@ -740,89 +753,89 @@ export function computeLoshuMasterReport(
 
     if (isActive) {
       if (arr.name === 'Arrow of Determination') {
-        meaning = "Unstoppable inner resolve. Challenges are viewed as immediate stepping stones.";
-        strength = "Will power, aggressive target completion, leadership initiative.";
-        risk = "Overbearing attitude, stubbornness, neglects team feedback.";
-        careerImpact = "Successful as startup founders, project heads, and crisis administrators.";
-        relationshipImpact = "Extremely protective; demands transparency and single-pointed focus.";
-        remedy = "Perform 10 minutes of deep meditation daily; wear a copper coin.";
+        meaning = "अदम्य इच्छाशक्ति और संकल्प। बाधाओं को रुकावट नहीं बल्कि आगे बढ़ने की सीढ़ी मानते हैं।";
+        strength = "मजबूत इच्छाशक्ति, आक्रामक लक्ष्य प्राप्ति और स्वाभाविक नेतृत्व क्षमता।";
+        risk = "अत्यधिक हठ, दूसरों के फीडबैक को अनदेखा करना और जल्दी अधीर होना।";
+        careerImpact = "स्टार्टअप फाउंडर्स, प्रोजेक्ट हेड्स और प्रशासनिक अधिकारियों के रूप में भारी सफलता।";
+        relationshipImpact = "अत्यंत सुरक्षात्मक और निष्ठावान साथी; पूर्ण पारदर्शिता की अपेक्षा रखते हैं।";
+        remedy = "प्रतिदिन 10 मिनट मौन ध्यान करें और अनामिका में तांबे का छल्ला धारण करें।";
       } else if (arr.name === 'Arrow of Intellect') {
-        meaning = "Vast memory retention, rapid academic wisdom, logical problem solvers.";
-        strength = "Mental sharpness, structural strategy, abstract ideas processing.";
-        risk = "Arrogance of knowledge, easily bored by daily physical work.";
-        careerImpact = "Successful in tech architecture, complex asset calculations, and authorship.";
-        relationshipImpact = "Needs rich intellectual banter; avoids simple small talk.";
-        remedy = "Teach children for free on Thursdays; keep green study lamps.";
+        meaning = "अद्भुत स्मरण शक्ति, तीव्र शैक्षणिक विवेक और जटिल समस्याओं को सुलझाने की तार्किक कला।";
+        strength = "मानसिक प्रखरता, रणनीतिक योजना और अमूर्त विचारों का त्वरित विश्लेषण।";
+        risk = "ज्ञान का अहंकार और सामान्य शारीरिक या दोहराव वाले कार्यों में जल्दी ऊब जाना।";
+        careerImpact = "तकनीकी आर्किटेक्चर, वित्तीय विश्लेषण, कानून और शोध व लेखन में शीर्ष सफलता।";
+        relationshipImpact = "बौद्धिक संवाद पसंद करते हैं; सतही या निरर्थक बातों से दूर रहते हैं।";
+        remedy = "गुरुवार को विद्यार्थियों को शिक्षा सामग्री दान करें और अध्ययन मेज पर हरा लैंप रखें।";
       } else if (arr.name === 'Arrow of Planning') {
-        meaning = "Excellent systemic planners, masters of structure, blueprints, and future projections.";
-        strength = "Microscopic detailing, foresight, preventative security measures.";
-        risk = "Analysis paralysis; spends too much time writing reports and less executing.";
-        careerImpact = "Project architecture, finance directors, and government auditors.";
-        relationshipImpact = "Highly secure partner; loves organizing family trips.";
-        remedy = "Carry green tourmaline. Establish structured morning alarms.";
+        meaning = "उत्कृष्ट योजनाकार, भविष्य की संभावनाओं और ब्लूप्रिंट्स को सटीक रूप से तैयार करने वाले।";
+        strength = "सूक्ष्म बारीकियों पर ध्यान, दूरदर्शिता और सुरक्षात्मक रणनीतियां बनाना।";
+        risk = "एनालिसिस पैरालिसिस (अति-विश्लेषण); कभी-कभी काम शुरू करने में अत्यधिक समय लगाना।";
+        careerImpact = "प्रोजेक्ट आर्किटेक्चर, फाइनेंस डायरेक्टर्स, डेटा एनालिस्ट और सरकारी योजनाकार।";
+        relationshipImpact = "अत्यंत सुरक्षित व योजनाबद्ध साथी; पारिवारिक यात्राओं व भविष्य की सुंदर योजनाएं बनाते हैं।";
+        remedy = "ग्रीन टूमलाइन पास रखें और सुबह उठने की व्यवस्थित दिनचर्या बनाएं।";
       } else if (arr.name === 'Arrow of Practicality') {
-        meaning = "Grounded physical workers. Learns strictly through hands-on operations.";
-        strength = "Practical trade skills, high physical stamina, realistic assessment.";
-        risk = "Rejects spiritual guidance, overly materialistic outlook.";
-        careerImpact = "Real property execution, mineral industries, logistics operations.";
-        relationshipImpact = "Shows love through physical support, home construction, and cash stability.";
-        remedy = "Walk barefoot on grass on Saturday mornings; keep clean entryways.";
+        meaning = "जमीनी और व्यावहारिक रूप से काम करने वाले। वास्तविक क्रियान्वयन से ही सब कुछ सीखते हैं।";
+        strength = "व्यावहारिक कौशल, उच्च शारीरिक क्षमता और यथार्थवादी आकलन।";
+        risk = "अमूर्त या आध्यात्मिक मार्गदर्शन को कभी-कभी अनदेखा करना; भौतिकता पर अधिक जोर।";
+        careerImpact = "रियल एस्टेट, विनिर्माण, खनिज उद्योग, लॉजिस्टिक्स और बड़े व्यापारिक ऑपरेशंस।";
+        relationshipImpact = "स्थायी भौतिक सुरक्षा, गृह निर्माण और वित्तीय स्थिरता से अपना प्रेम व्यक्त करते हैं।";
+        remedy = "शनिवार की सुबह हरी घास पर नंगे पैर चलें और मुख्य द्वार को स्वच्छ रखें।";
       } else if (arr.name === 'Arrow of Emotional Balance') {
-        meaning = "Empathetic guides, outstanding intuitive healers, sensitive somatic antennas.";
-        strength = "Intuitive counseling, natural pacifier, calms people instantly.";
-        risk = "Fragile boundaries, takes on external negative stress, vulnerable to anxiety.";
-        careerImpact = "High connection to therapy, psychological analysis, and humanitarian systems.";
-        relationshipImpact = "Absolute soul intimacy; requires endless emotional validation.";
-        remedy = "Wear a silver ring with a natural pearl; practice deep breathing controls.";
+        meaning = "सहानुभूतिपूर्ण मार्गदर्शक, उत्कृष्ट सहज हीलर और दूसरों के मनोभावों को तुरंत समझने वाले।";
+        strength = "अंतर्ज्ञान आधारित परामर्श, स्वाभाविक शांतिदूत और लोगों को तुरंत तनावमुक्त करना।";
+        risk = "संवेदनशील स्वभाव; दूसरों की नकारात्मक ऊर्जा से जल्दी प्रभावित होना।";
+        careerImpact = "थेरेपी, मनोवैज्ञानिक परामर्श, कला, संगीत और जनसेवा के क्षेत्रों में विशेष सफलता।";
+        relationshipImpact = "गहरा आत्मीय जुड़ाव; संबंधों में भावनात्मक सुरक्षा और सम्मान की तलाश।";
+        remedy = "चांदी में शुद्ध प्राकृतिक मोती धारण करें और प्राणायाम का अभ्यास करें।";
       } else if (arr.name === 'Arrow of Spirituality') {
-        meaning = "High connection to unseen frequencies, deep philosophy, and calm detached peace.";
-        strength = "Inner stability, understands karmic cycles, guides others effortlessly.";
-        risk = "Sudden commercial detachments, ignoring physical cash creation.";
-        careerImpact = "Yoga masters, spiritual authors, wellness directors.";
-        relationshipImpact = "Extremely loyal and peaceful; handles family disputes gracefully.";
-        remedy = "Donate yellow chickpeas on Thursdays; carry amethyst.";
+        meaning = "गहन दर्शन, शांत अनासक्ति और आंतरिक संतुलन का उच्च स्तर।";
+        strength = "आंतरिक स्थिरता, कर्मों के चक्र की गहरी समझ और दूसरों को शांतिपूर्ण मार्गदर्शन।";
+        risk = "अचानक सांसारिक कार्यों से विरक्ति या भौतिक लाभ की अनदेखी करना।";
+        careerImpact = "योग गुरु, आध्यात्मिक लेखक, हीलर्स और वेलनेस डायरेक्टर्स।";
+        relationshipImpact = "अत्यंत वफादार और शांत साथी; पारिवारिक विवादों को समझदारी से सुलझाते हैं।";
+        remedy = "गुरुवार को चने की दाल का दान करें और नियमित ध्यान करें।";
       } else if (arr.name === 'Arrow of Activity') {
-        meaning = "Highly active physical movers; cannot sit idle. Fast project execution.";
-        strength = "Fast reflexes, mechanical intelligence, swift problem solvers.";
-        risk = "Impulsive actions, physical injuries from speed.";
-        careerImpact = "Media production, luxury export trade, sports coaching.";
-        relationshipImpact = "Enjoys travel dates, dynamic physical activities.";
-        remedy = "Donate red lentils on Tuesdays; perform daily active exercises.";
+        meaning = "अत्यधिक शारीरिक सक्रियता; खाली बैठना पसंद नहीं करते और कार्यों को तुरंत पूरा करते हैं।";
+        strength = "त्वरित प्रतिक्रिया, यांत्रिक समझ और समस्याओं का तेजी से समाधान।";
+        risk = "जल्दबाजी में निर्णय लेना और बिना सोचे काम शुरू कर देना।";
+        careerImpact = "मीडिया प्रोडक्शन, निर्यात व्यापार, स्पोर्ट्स कोचिंग और इवेंट मैनेजमेंट।";
+        relationshipImpact = "सक्रिय और ऊर्जावान साथी; आउटडोर गतिविधियां और यात्रा पसंद करते हैं।";
+        remedy = "मंगलवार को लाल मसूर की दाल दान करें और नियमित शारीरिक व्यायाम करें।";
       } else if (arr.name === 'Arrow of Frustration') {
-        meaning = "Occurs when diagonal plan numbers are missing. Feels constant friction against destiny paths.";
-        strength = "Builds high resilience through trials and repetitive adaptations.";
-        risk = "Prone to immediate irritation, feel like their work is never appreciated.";
-        careerImpact = "Frequent job switches; struggles to find stable career themes.";
-        relationshipImpact = "Prone to projection of personal stress onto marital partners.";
-        remedy = "Wear a brass balance ring. Place an earthen yellow salt lamp in the center of the living room.";
+        meaning = "जब विकर्ण (डायगोनल) रेखा के अंक अनुपस्थित हों। बार-बार अवरोध और निराशा की भावना।";
+        strength = "संघर्षों और चुनौतियों से मजबूत होकर पुनः खड़े होने की अद्भुत सहनशक्ति।";
+        risk = "जल्दी चिढ़चिढ़ापन और यह महसूस होना कि मेहनत का पूरा श्रेय नहीं मिल रहा।";
+        careerImpact = "बार-बार कार्यक्षेत्र बदलना; स्थायी करियर पथ खोजने में समय लगना।";
+        relationshipImpact = "कार्यस्थल के तनाव का प्रभाव कभी-कभी जीवनसाथी के संबंधों पर पड़ना।";
+        remedy = "पीतल का कड़ा पहनें और लिविंग रूम के केंद्र में पीला हिमालयन सॉल्ट लैंप रखें।";
       } else if (arr.name === 'Arrow of Weak Will') {
-        meaning = "Occurs when Will plane is empty. High reliance on other workers' approvals.";
-        strength = "Excellent cooperative helper; listens to administrative commands accurately.";
-        risk = "Fear of independent action, easily manipulated by bad mentors.";
-        careerImpact = "Prefers safe salaried positions over risk-filled business operations.";
-        relationshipImpact = "Compromises personal desires to maintain superficial relationship peace.";
-        remedy = "Keep red threads or red pyramids in the South sector of your room.";
+        meaning = "जब इच्छाशक्ति की रेखा खाली हो। दूसरों के निर्णयों और अनुमोदन पर अधिक निर्भरता।";
+        strength = "सहयोगी और आज्ञाकारी; दिए गए निर्देशों का निष्ठापूर्वक पालन करना।";
+        risk = "स्वतंत्र निर्णय लेने में हिचकिचाहट और गलत लोगों के प्रभाव में आना।";
+        careerImpact = "जोखिम भरे व्यवसायों के बजाय सुरक्षित वेतनभोगी नौकरियों को प्राथमिकता।";
+        relationshipImpact = "ऊपरी शांति बनाए रखने के लिए अपनी इच्छाओं का बार-बार त्याग करना।";
+        remedy = "कमरे के दक्षिण क्षेत्र में लाल पिरामिड या लाल वस्त्र/वस्तुएं रखें।";
       } else if (arr.name === 'Arrow of Isolation') {
-        meaning = "Occurs when spiritual plane is empty. Feels detached or misunderstood by social groups.";
-        strength = "Develops sharp logical reliance instead of blind emotional belief.";
-        risk = "Distrusts close partners, prone to excessive lonely hours.";
-        careerImpact = "Works best in separate cubicles or independent technical projects.";
-        relationshipImpact = "Struggles to express deep secrets; keeps walls high.";
-        remedy = "Plant leafy green Tulsi in your East balconies; water it daily.";
+        meaning = "जब आध्यात्मिक/शांति की रेखा खाली हो। समाज से अलग-थलग या अनसुना महसूस करना।";
+        strength = "भावनाओं के बजाय कठोर तार्किक सोच पर निर्भर रहने की कला।";
+        risk = "करीबियों पर भी जल्दी भरोसा न करना और अत्यधिक अकेले रहना।";
+        careerImpact = "स्वतंत्र तकनीकी परियोजनाओं और व्यक्तिगत कार्यों में श्रेष्ठ प्रदर्शन।";
+        relationshipImpact = "अपने दिल की गहरी बातें साझा करने में संकोच और दूरियां बनाना।";
+        remedy = "पूर्व दिशा की बालकनी में हरा तुलसी का पौधा लगाएं और प्रतिदिन जल दें।";
       } else if (arr.name === 'Arrow of Impatience') {
-        meaning = "Occurs when active practical line is missing; demands rapid immediate results.";
-        strength = "Drives coworkers forward with urgent progress demands.";
-        risk = "Burnout, leaving incomplete projects, high nervous exhaustion.";
-        careerImpact = "Prefers rapid day-trading formats over patient 10-year asset compounding.";
-        relationshipImpact = "Frustrated by slow, deliberate conversations.";
-        remedy = "Wear black tourmaline or onyx beads on your left wrist.";
+        meaning = "जब व्यावहारिक रेखा खाली हो। त्वरित परिणामों की अत्यधिक चाह और अधीरता।";
+        strength = "कार्यों को तेजी से आगे बढ़ाने के लिए सहकर्मियों को प्रेरित करना।";
+        risk = "कार्यों को अधूरा छोड़ देना और अत्यधिक मानसिक थकान (Burnout)।";
+        careerImpact = "दीर्घकालिक योजनाओं के बजाय तुरंत परिणाम देने वाले कार्यों की तलाश।";
+        relationshipImpact = "धीमी और गंभीर बातचीत में जल्दी ऊब जाना।";
+        remedy = "दाहिने हाथ में ब्लैक टूमलाइन या ओनेक्स का ब्रेसलेट धारण करें।";
       } else if (arr.name === 'Arrow of Confusion') {
-        meaning = "Occurs when active mental plane is empty. Brain fog during rapid market shifts.";
-        strength = "Relies on gut instincts which can be surprisingly accurate.";
-        risk = "Indecisiveness, highly prone to fake speculations.";
-        careerImpact = "Struggles with continuous document screening and heavy data analysis.";
-        relationshipImpact = "Unclear communication goals leading to administrative misunderstandings.";
-        remedy = "Apply yellow sandal paste on forehead after morning showers.";
+        meaning = "जब मस्तिष्क रेखा खाली हो। तेजी से बदलते माहौल में निर्णय लेने में भ्रम।";
+        strength = "सहज अंतर्ज्ञान पर भरोसा जो कई बार आश्चर्यजनक रूप से सही सिद्ध होता है।";
+        risk = "अनिर्णय की स्थिति और भ्रामक योजनाओं में फंसने का जोखिम।";
+        careerImpact = "अत्यधिक कागजी कार्रवाई और गहन डेटा विश्लेषण में असहजता।";
+        relationshipImpact = "बातचीत में अस्पष्टता जिससे गलतफहमियां उत्पन्न हो सकती हैं।";
+        remedy = "स्नान के बाद माथे पर चंदन/केसर का तिलक लगाएं और शांत मन से निर्णय लें।";
       }
     }
 
@@ -980,6 +993,8 @@ export function computeLoshuMasterReport(
     gridAnalysis: {
       present,
       missing,
+      birthPresent,
+      birthMissing,
       repeated,
       dominant,
       weak,

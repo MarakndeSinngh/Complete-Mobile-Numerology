@@ -19,25 +19,25 @@ export const LEOFAMILY_PLANES: PlaneDefinition[] = [
     coordinates: [4, 9, 2],
     type: 'HORIZONTAL',
     title: 'मस्तिष्क विचार विमान (Mind Plane)',
-    meaning: 'Governs raw cognitive intelligence, deep logical processing, structured memory, and long-term mental stability. This plane represents how you perceive, analyze, and synthesize structural knowledge.',
+    meaning: 'यह विमान बौद्धिक क्षमता, तार्किक विश्लेषण, स्मरण शक्ति और मानसिक संतुलन का प्रतिनिधित्व करता है। यह दर्शाता है कि आप किसी भी विषय को कैसे समझते, सोचते और निर्णय लेते हैं।',
     strengths: [
-      'Outstanding logical deductions and quick computational memory.',
-      'Highly strategic and capable of complex research work.',
-      'Possesses high analytical precision and mental stability under pressure.'
+      'उत्कृष्ट तार्किक सोच और तीव्र स्मरण शक्ति।',
+      'गहन शोध, योजना निर्माण और रणनीतिक सोच में निपुणता।',
+      'कठिन परिस्थितियों में भी शांत और विश्लेषणात्मक दृष्टिकोण।'
     ],
     weaknesses: [
-      'Can slide into over-analysis, causing rapid mental fatigue.',
-      'Might struggle with spontaneous emotional alignment, preferring intellectual filters.',
-      'Prone to mental stiffness and over-thinking minor delays.'
+      'अत्यधिक सोचने (Over-thinking) से मानसिक तनाव व थकान।',
+      'भावनाओं के बजाय केवल तर्क पर भरोसा करना, जिससे रिश्तों में दूरी आ सकती है।',
+      'छोटी-छोटी बातों में अत्यधिक समय लगाना और अनिर्णय की स्थिति।'
     ],
-    careerImpact: 'Exceptional for executive roles, scientific research, financial audits, and deep technology architectures where logic rules.',
-    relationshipImpact: 'Values intellectual compatibility, transparent boundaries, and logical conflict resolution over emotional outbursts.',
-    financialImpact: 'Excellent at budget planning, wealth audits, and calculating risk ratios before making commercial investments.',
-    healthImpact: 'Strong neurological coordination, but prone to stress-induced sleep irregularities or headaches if over-stimulated.',
+    careerImpact: 'प्रशासनिक सेवाओं, आईटी, रिसर्च, वित्तीय ऑडिट, कानून और उच्च तकनीकी क्षेत्रों के लिए अत्यंत अनुकूल।',
+    relationshipImpact: 'रिश्तों में तार्किक समझ और स्पष्ट बातचीत को प्राथमिकता देते हैं, अनावश्यक भावनात्मक दिखावे से बचते हैं।',
+    financialImpact: 'वित्तीय बजटिंग और सुरक्षित निवेश की बेहतरीन समझ; जोखिम भरे सट्टेबाजी से बचते हैं।',
+    healthImpact: 'मानसिक रूप से सजग, लेकिन अत्यधिक तनाव से सिरदर्द या अनिद्रा की संभावना; ध्यान व प्राणायाम लाभकारी है।',
     recommendedRemedies: [
-      'Chant the planetary mantra "OM BUDHAYA NAMAH" on Wednesdays.',
-      'Keep a clean green aventurine crystal or a solid silver coin on your study desk.',
-      'Write your daily targets on unruled white paper with an indigo ink pen.'
+      'बुधवार को "ॐ बुधाय नमः" मंत्र का 108 बार जाप करें।',
+      'अध्ययन की मेज पर ग्रीन एवेंट्यूरिन या चांदी का सिक्का रखें।',
+      'अपने दैनिक लक्ष्यों को सादे कागज पर नीली स्याही से लिखें।'
     ]
   },
   {
@@ -45,25 +45,25 @@ export const LEOFAMILY_PLANES: PlaneDefinition[] = [
     coordinates: [3, 5, 7],
     type: 'HORIZONTAL',
     title: 'भावनात्मक संवेदनशीलता विमान (Emotional Plane)',
-    meaning: 'Governs gut-intuition, deep empathy, aesthetic creativity, compassion, and spiritual awareness. This plane reflects your inner emotional resilience and how you process somatic or heart-centered energies.',
+    meaning: 'यह विमान अंतर्ज्ञान (Gut Feeling), संवेदनशीलता, रचनात्मकता, दया और आध्यात्मिक चेतना का संचालन करता है। यह आपकी आंतरिक भावनात्मक शक्ति और हृदय से जुड़े निर्णयों को दर्शाता है।',
     strengths: [
-      'Immense empathetic resonance, allowing you to read social settings effortlessly.',
-      'High creative adaptability and artistic expression.',
-      'Natural spiritual intelligence and trustworthy gut instincts.'
+      'तीव्र अंतर्ज्ञान और दूसरों की भावनाओं को बिना कहे समझ लेने की क्षमता।',
+      'उच्च रचनात्मकता, कलात्मक दृष्टिकोण और सहानुभूतिपूर्ण स्वभाव।',
+      'प्राकृतिक आध्यात्मिक समझ और दूसरों के प्रति गहरा परोपकार।'
     ],
     weaknesses: [
-      'Highly sensitive to negative surrounding vibes, leading to rapid energy drains.',
-      'Prone to emotional volatility or mood swings if feelings are suppressed.',
-      'Can make major life decisions based purely on emotional impulses rather than logic.'
+      'नकारात्मक माहौल से जल्दी प्रभावित होना और ऊर्जा का ह्रास।',
+      'मूड स्विंग्स और दिल पर बातें लेने की प्रवृत्ति।',
+      'कभी-कभी केवल भावनाओं में बहकर महत्वपूर्ण जीवन निर्णय ले लेना।'
     ],
-    careerImpact: 'Thrives in human-centric domains: counseling, design, public relations, creative arts, and spiritual mentorship.',
-    relationshipImpact: 'Seeks profound soul-level connections, values deep empathy, and requires high emotional security and warmth.',
-    financialImpact: 'Wealth is often linked to creative pursuits, but requires external discipline to avoid impulsive spending during low emotional phases.',
-    healthImpact: 'Directly linked to the heart and solar plexus chakras; thrives with balanced breathing exercises and emotional release.',
+    careerImpact: 'परामर्श (Counseling), डिज़ाइनिंग, पब्लिक रिलेशंस, कला, हीलिंग और आध्यात्मिक मार्गदर्शन के लिए सर्वश्रेष्ठ।',
+    relationshipImpact: 'गहरे और आत्मीय संबंधों की तलाश रहती है; रिश्तों में भावनात्मक सुरक्षा और सम्मान सर्वाधिक महत्वपूर्ण है।',
+    financialImpact: 'रचनात्मक कार्यों से धन लाभ, लेकिन भावनात्मक उतार-चढ़ाव में फिजूलखर्ची से बचने की सलाह दी जाती है।',
+    healthImpact: 'हृदय और पाचन तंत्र भावनाओं से सीधे जुड़े हैं; प्रतिदिन संतुलित श्वास क्रिया (प्राणायाम) आवश्यक है।',
     recommendedRemedies: [
-      'Drink clean water from a pure silver cup daily to stabilize lunar/emotional frequencies.',
-      'Wear a high-quality white pearl or moonstone pendant set in solid silver.',
-      'Meditate in silence for 10 minutes facing the East direction during sunrise.'
+      'चांदी के गिलास में पानी पीने से चंद्र ऊर्जा और मन स्थिर रहता है।',
+      'चांदी में शुद्ध मोती या मूनस्टोन लॉकेट धारण करें।',
+      'सूर्योदय के समय पूर्व दिशा की ओर मुख करके 10 मिनट मौन ध्यान करें।'
     ]
   },
   {
@@ -71,25 +71,25 @@ export const LEOFAMILY_PLANES: PlaneDefinition[] = [
     coordinates: [8, 1, 6],
     type: 'HORIZONTAL',
     title: 'व्यावहारिक भौतिक विमान (Practical Plane)',
-    meaning: 'Governs physical execution, hard work, trade, luxury, material success, and money management. This plane represents your ability to manifest abstract plans into brick-and-mortar reality.',
+    meaning: 'यह विमान जमीनी क्रियान्वयन, कड़ी मेहनत, व्यापारिक कुशलता, भौतिक सुख-सुविधाओं और धन प्रबंधन को नियंत्रित करता है। यह विचारों को वास्तविक धरातल पर उतारने की क्षमता है।',
     strengths: [
-      'Unmatched operational discipline and physical productivity.',
-      'Strong commercial acumen and practical financial management skills.',
-      'Thrives in managing physical assets, real estate, and luxury goods.'
+      'बेहतरीन कार्य अनुशासन और व्यावहारिक उत्पादकता।',
+      'व्यापारिक कौशल और धन संचय व निवेश की सटीक समझ।',
+      'भौतिक संपत्तियों, रियल एस्टेट और लग्जरी प्रबंधन में निपुण।'
     ],
     weaknesses: [
-      'Can become overly materialistic, evaluating relationships based on utility.',
-      'May struggle to adapt to rapid, highly abstract theoretical shifts.',
-      'Prone to over-working, neglecting essential spiritual or emotional rest.'
+      'अत्यधिक भौतिकवादी दृष्टिकोण, जिससे रिश्तों को भी फायदे के नजरिए से देखने का जोखिम।',
+      'अमूर्त या अत्यधिक काल्पनिक विचारों को स्वीकार करने में झिझक।',
+      'कार्य में अत्यधिक व्यस्त रहकर आध्यात्मिक व व्यक्तिगत स्वास्थ्य की अनदेखी।'
     ],
-    careerImpact: 'Superb for entrepreneurship, real estate, direct manufacturing, corporate trading, and high-stakes financial operations.',
-    relationshipImpact: 'Expresses care through providing luxury, material comfort, stable assets, and physical acts of service.',
-    financialImpact: 'Highly stable wealth accumulator; possesses natural shields against sudden monetary leakage and excels at long-term compounding.',
-    healthImpact: 'Strong physical constitution and high stamina, but needs to guard against joint stiffness or lower back tension.',
+    careerImpact: 'व्यवसाय (Business), रियल एस्टेट, विनिर्माण, कॉर्पोरेट प्रबंधन और बड़े वित्तीय संचालन में अपार सफलता।',
+    relationshipImpact: 'परिवार को सभी सुख-सुविधाएं, सुरक्षा और भौतिक सहयोग प्रदान करके अपना प्रेम व्यक्त करते हैं।',
+    financialImpact: 'दीर्घकालिक संपत्ति निर्माण में माहिर; धन की बचत और सुरक्षित निवेश में स्वाभाविक निपुणता।',
+    healthImpact: 'शारीरिक रूप से मजबूत, लेकिन जोड़ों में अकड़न या पीठ के निचले हिस्से में तनाव से सावधान रहें।',
     recommendedRemedies: [
-      'Walk barefoot on clean, natural green grass for 5 minutes daily at dawn.',
-      'Keep a high-grade brass or copper pyramid in the North-East zone of your active office.',
-      'Chant the Saturnian mantra "OM SHAM SHANAYISHCHARAYAE NAMAH" 27 times on Saturdays.'
+      'प्रातःकाल हरी घास पर 5 से 10 मिनट नंगे पैर टहलें।',
+      'कार्यालय या कार्यस्थल के उत्तर-पूर्व (ईशान कोण) में पीतल या तांबे का पिरामिड रखें।',
+      'शनिवार को "ॐ शं शनैश्चराय नमः" मंत्र का 27 बार जाप करें।'
     ]
   },
   {
@@ -97,25 +97,25 @@ export const LEOFAMILY_PLANES: PlaneDefinition[] = [
     coordinates: [4, 3, 8],
     type: 'VERTICAL',
     title: 'नियोजन एवं विचार विमान (Thought Plane)',
-    meaning: 'Governs systematic planning, vision, idea generation, deep research, and innovation. This plane represents your mental blueprint phase before physical action is initiated.',
+    meaning: 'यह विमान व्यवस्थित योजना (Planning), दूरदर्शिता, नए विचार उत्पन्न करने, गहन अनुसंधान और नवाचार को नियंत्रित करता है। यह कार्य शुरू होने से पहले की मानसिक रूपरेखा है।',
     strengths: [
-      'Superb foresight and the ability to visualize long-term structural changes.',
-      'Highly innovative, generating unique solutions to complex problems.',
-      'Organizes tasks with microscopic detail and preventive safeguards.'
+      'शानदार दूरदर्शिता और भविष्य के बदलावों को पहले ही भांप लेने की क्षमता।',
+      'जटिल समस्याओं का अनोखा और व्यवस्थित समाधान खोजने में कुशल।',
+      'कार्यों को हर छोटी बारीकी और सुरक्षा उपायों के साथ प्लान करना।'
     ],
     weaknesses: [
-      'Highly prone to analysis paralysis, delaying crucial launches trying to find perfect variables.',
-      'Can become overly rigid with schedules, struggling when spontaneous changes occur.',
-      'May overcommit intellectual energy to plans that lack real-world execution feasibility.'
+      'एनालिसिस पैरालिसिस (अति-विश्लेषण) के कारण निर्णय लेने में देरी करना।',
+      'अचानक बदलाव आने पर असहज महसूस करना और अत्यधिक सख्त योजनाएं बनाना।',
+      'ऐसे विचारों में उलझ जाना जो व्यावहारिक धरातल पर लागू करना कठिन हों।'
     ],
-    careerImpact: 'Perfect for structural architects, database designers, strategic planners, and research and development directors.',
-    relationshipImpact: 'Values organized, timeline-driven family goals; communicates through detailed plans and constructive dialogues.',
-    financialImpact: 'Excellent at long-term financial forecasting and planning multi-year investment portfolios, but may miss fast-moving speculative opportunities.',
-    healthImpact: 'Requires high mental rest; benefits immensely from slow wooden-instrument music or walking in wooded areas.',
+    careerImpact: 'रणनीतिक योजनाकार (Strategic Planner), आर्किटेक्ट, रिसर्च डायरेक्टर, डेटा एनालिस्ट और सलाहकार।',
+    relationshipImpact: 'व्यवस्थित और समयबद्ध पारिवारिक लक्ष्यों को महत्व देते हैं; स्पष्ट योजनाओं से संबंध संभालते हैं।',
+    financialImpact: 'दीर्घकालिक निवेश योजनाओं और बहु-वर्षीय पोर्टफोलियो के निर्माण में उत्कृष्ट।',
+    healthImpact: 'मानसिक विश्राम अति आवश्यक है; प्रकृति के बीच समय बिताना और शांत संगीत सुनना लाभकारी है।',
     recommendedRemedies: [
-      'Chant the Jupiter mantra "OM GURAVE NAMAH" on Thursdays to align growth coordinates.',
-      'Keep your active workspace clean and illuminated with balanced warm yellow lighting.',
-      'Wear a wooden-bead or Tulsi-bead bracelet on your right wrist for grounding.'
+      'गुरुवार को "ॐ गुरवे नमः" मंत्र का जाप करें और पीले वस्त्र/खाद्य पदार्थों का उपयोग करें।',
+      'कार्यक्षेत्र को हमेशा स्वच्छ और उचित प्रकाशयुक्त रखें।',
+      'दाहिने हाथ में तुलसी या लकड़ी की माला का ब्रेसलेट धारण करें।'
     ]
   },
   {
@@ -123,25 +123,25 @@ export const LEOFAMILY_PLANES: PlaneDefinition[] = [
     coordinates: [9, 5, 1],
     type: 'VERTICAL',
     title: 'इच्छाशक्ति संकल्प विमान (Will Plane)',
-    meaning: 'Governs willpower, absolute determination, persistent leadership, goal completion, and raw confidence. This plane is the engine of your internal drive and decision-making authority.',
+    meaning: 'यह विमान दृढ़ इच्छाशक्ति, अटूट संकल्प, स्थायी नेतृत्व, लक्ष्यों की पूर्णता और आत्मविश्वास को नियंत्रित करता है। यह आपके आंतरिक संकल्प का मुख्य केंद्र है।',
     strengths: [
-      'Unstoppable inner resolve and the capacity to rise above severe personal crises.',
-      'Strong leadership presence that commands immediate respect and team loyalty.',
-      'Executes decisions with absolute clarity and single-pointed focus.'
+      'अदम्य आंतरिक इच्छाशक्ति और कठिन से कठिन चुनौतियों से उबरने की क्षमता।',
+      'प्रभावशाली नेतृत्व जिससे लोग स्वाभाविक रूप से आपका सम्मान और अनुसरण करते हैं।',
+      'स्पष्टता और एकाग्रता के साथ त्वरित निर्णय लेने की क्षमता।'
     ],
     weaknesses: [
-      'Can border on stubbornness or obstinacy, dismissing feedback from peers.',
-      'May push self and others past healthy physical or mental limits.',
-      'Prone to impatience when systems or colleagues operate at a slower tempo.'
+      'कभी-कभी हठ या जिद्दीपन, जिससे दूसरों के अच्छे सुझावों को अनदेखा कर देना।',
+      'स्वयं और सहयोगियों से क्षमता से अधिक अपेक्षा रखना।',
+      'धीमी गति से काम करने वाले लोगों के प्रति अधीरता व गुस्सा।'
     ],
-    careerImpact: 'Thrives in high-autonomy environments: entrepreneurship, military command, corporate administration, and crisis management.',
-    relationshipImpact: 'Extremely protective and loyal partner; demands complete transparency, direct communication, and shared core values.',
-    financialImpact: 'Possesses immense wealth-creation drive, and is capable of building extensive business empires through sheer persistent willpower.',
-    healthImpact: 'Directly governs the core vital energy; requires regular aerobic activity or intense physical workouts to release excess inner fire.',
+    careerImpact: 'उद्यमिता (Startups/Business), प्रशासनिक पद, सेना/पुलिस, संकट प्रबंधन और कॉर्पोरेट लीडरशिप।',
+    relationshipImpact: 'अत्यंत वफादार और सुरक्षात्मक साथी; संबंधों में पूर्ण ईमानदारी और स्पष्टता की अपेक्षा रखते हैं।',
+    financialImpact: 'दृढ़ इच्छाशक्ति के बल पर बड़े व्यापारिक साम्राज्य और धन का निर्माण करने में सक्षम।',
+    healthImpact: 'उच्च ऊर्जा स्तर; अतिरिक्त ऊर्जा और आंतरिक अग्नि को संतुलित करने के लिए नियमित व्यायाम आवश्यक है।',
     recommendedRemedies: [
-      'Light a red candle or a pure ghee lamp in the South direction of your room every evening.',
-      'Carry a small copper coin or wear a copper ring on your ring finger to boost solar vitality.',
-      'Chant "OM ADITYAYA NAMAH" on Sunday mornings during sunrise.'
+      'घर या कमरे के दक्षिण कोने में शाम को लाल मोमबत्ती या शुद्ध घी का दीपक जलाएं।',
+      'तांबे का छल्ला अनामिका उंगली में पहनें या तांबे का सिक्का पास रखें।',
+      'रविवार की सुबह उगते सूर्य को तांबे के पात्र से अर्घ्य दें और "ॐ आदित्याय नमः" जपें।'
     ]
   },
   {
@@ -149,25 +149,25 @@ export const LEOFAMILY_PLANES: PlaneDefinition[] = [
     coordinates: [2, 7, 6],
     type: 'VERTICAL',
     title: 'क्रियान्वयन भौतिक विमान (Action Plane)',
-    meaning: 'Governs swift execution, task completion, responsibility, work completion, and mechanical discipline. This plane represents the rapid, tangible translation of ideas into final actions.',
+    meaning: 'यह विमान त्वरित कार्य, क्रियान्वयन, जिम्मेदारी, कार्य पूर्णता और व्यावहारिक अनुशासन का संचालन करता है। यह विचारों को तुरंत वास्तविक एक्शन में बदलने की शक्ति है।',
     strengths: [
-      'Rapid execution speed; quickly translates decisions into immediate physical results.',
-      'Highly responsible and reliable in completing critical tasks under tight timelines.',
-      'Outstanding coordination and physical execution skills.'
+      'तीव्र कार्य गति; सोची गई बात को बिना देर किए जमीन पर उतारना।',
+      'समयसीमा के भीतर महत्वपूर्ण जिम्मेदारियों को कुशलतापूर्वक पूरा करना।',
+      'उत्कृष्ट कार्य समन्वय और शारीरिक सक्रियता।'
     ],
     weaknesses: [
-      'May jump into action prematurely without verifying structural plan details.',
-      'Prone to physical fatigue or sudden burnout from rapid, un-paced movements.',
-      'Can become highly impatient with team members who analyze before executing.'
+      'बिना पूरी योजना समझे जल्दबाजी में काम शुरू कर देना।',
+      'अत्यधिक व्यस्तता और बिना विश्राम के काम करने से शारीरिक थकान व बर्नआउट।',
+      'उन लोगों पर गुस्सा होना जो काम से पहले बहुत अधिक सोचते हैं।'
     ],
-    careerImpact: 'Thrives in fast-paced operational roles, manufacturing setups, rapid sales campaigns, onsite audits, and emergency response services.',
-    relationshipImpact: 'An active, supportive partner who loves outdoor dates, sport activities, and expresses love through direct physical actions.',
-    financialImpact: 'Generates active cash flows rapidly through physical trades, direct sales, and operational efficiency.',
-    healthImpact: 'Needs to maintain high physical joint flexibility; regular stretching, yoga, and adequate hydration are crucial.',
+    careerImpact: 'ऑपरेशंस, मैन्युफैक्चरिंग, फील्ड सेल्स, इवेंट मैनेजमेंट, स्पोर्ट्स और त्वरित प्रतिक्रिया वाली सेवाएं।',
+    relationshipImpact: 'सक्रिय और सहयोगी साथी; सीधे शारीरिक सहयोग और कार्यों के माध्यम से अपना स्नेह प्रकट करते हैं।',
+    financialImpact: 'सक्रिय व्यापार और प्रत्यक्ष मेहनत से त्वरित धन प्रवाह उत्पन्न करते हैं।',
+    healthImpact: 'जोड़ों का लचीलापन बनाए रखना आवश्यक है; नियमित स्ट्रेचिंग, योग और पर्याप्त पानी पीना जरूरी है।',
     recommendedRemedies: [
-      'Wear a small red carnelian gemstone or keep a copper pyramid on your desk.',
-      'Donate white or silver items (like milk or sugar) to the needy on Mondays.',
-      'Ensure the South-West corner of your home or office is kept uncluttered and clean.'
+      'लाल अकीक (Carnelian) या तांबे का पिरामिड कार्यस्थल पर रखें।',
+      'सोमवार को जरूरतमंदों को सफेद वस्तुएं जैसे दूध, चावल या चीनी का दान करें।',
+      'घर या कार्यालय के दक्षिण-पश्चिम (नैऋत्य कोण) को भारी व साफ-सुथरा रखें।'
     ]
   },
   {
@@ -175,25 +175,25 @@ export const LEOFAMILY_PLANES: PlaneDefinition[] = [
     coordinates: [4, 5, 6],
     type: 'DIAGONAL',
     title: 'स्वर्ण समृद्धि राजयोग (Golden Raj Yog)',
-    meaning: 'The highly auspicious Golden Raj Yog represents the cosmic flow of leadership, massive business expansion, public recognition, fame, and authority. It is the ultimate alignment of wood, earth, and metal elements.',
+    meaning: 'यह अति-शुभ स्वर्ण राजयोग नेतृत्व, व्यापारिक विस्तार, प्रसिद्धि, समाज में सम्मान और अधिकार का प्रतिनिधित्व करता है। यह काष्ठ (4), पृथ्वी (5) और धातु (6) तत्वों का सर्वोत्तम संगम है।',
     strengths: [
-      'Attracts natural wealth, fame, and supportive mentors in high administrative ranks.',
-      'Superb commercial expansion skills and organic business diplomacy.',
-      'Commands natural authority and executive charisma that influences public spaces.'
+      'स्वाभाविक धन आकर्षण, प्रसिद्धि और उच्च प्रशासनिक वर्गों से भरपूर सहयोग।',
+      'उत्कृष्ट व्यापारिक कूटनीति और बड़े पैमाने पर विस्तार करने की क्षमता।',
+      'प्रभावशाली व्यक्तित्व और समाज में प्राकृतिक सम्मान व नेतृत्व।'
     ],
     weaknesses: [
-      'Can attract extreme envy or public scrutiny if personal pride is not managed with humility.',
-      'May feel immense pressure to maintain an elite public status at all times.',
-      'Prone to sudden workaholic patterns that can strain family or household peace.'
+      'यदि विनम्रता न रखी जाए तो दूसरों की ईर्ष्या व नजर का शिकार होना।',
+      'हमेशा उच्च सामाजिक प्रतिष्ठा बनाए रखने का मानसिक दबाव।',
+      'अत्यधिक काम में डूब जाने से पारिवारिक सुख में असंतुलन का खतरा।'
     ],
-    careerImpact: 'Ideal for major corporate founders, public politicians, luxury trade executives, and administrative leaders.',
-    relationshipImpact: 'Brings immense societal honor and luxury to the family life; seeks partners who can match or gracefully manage their social status.',
-    financialImpact: 'Unlocks steady, extensive multi-generational cash flows, providing access to massive material prosperity and asset acquisitions.',
-    healthImpact: 'Governs overall structural vitality and energy flow; thrives on routine planetary chants to balance the heavy elemental alignments.',
+    careerImpact: 'बड़े कॉर्पोरेट फाउंडर, राजनेता, लग्जरी ब्रांड्स, उच्च प्रशासनिक अधिकारी और उद्योगपति।',
+    relationshipImpact: 'परिवार को उच्च सामाजिक प्रतिष्ठा और वैभव प्रदान करते हैं; गरिमापूर्ण संबंध बनाए रखते हैं।',
+    financialImpact: 'पीढ़ी-दर-पीढ़ी चलने वाला स्थायी धन प्रवाह और विशाल भौतिक संपत्तियों का अर्जन।',
+    healthImpact: 'समग्र ऊर्जा उत्तम; ग्रह संतुलन के लिए नियमित दान-पुण्य और मंत्र जाप लाभकारी है।',
     recommendedRemedies: [
-      'Keep an active golden Lo Shu Grid pyramid or brass lion in the South-East zone of your living room.',
-      'Donate yellow seeds or grains to birds on Thursday mornings.',
-      'Wear a premium quality yellow sapphire or citrine gemstone set in gold on your index finger.'
+      'लिविंग रूम के दक्षिण-पूर्व में गोल्डन पिरामिड या पीतल का शेर रखें।',
+      'गुरुवार की सुबह पक्षियों को पीले दाने या चने की दाल डालें।',
+      'तर्जनी उंगली में सोने में पुखराज या सुनहला रत्न धारण करें।'
     ]
   },
   {
@@ -201,25 +201,25 @@ export const LEOFAMILY_PLANES: PlaneDefinition[] = [
     coordinates: [2, 5, 8],
     type: 'DIAGONAL',
     title: 'रजत राजयोग (Rajat Yog)',
-    meaning: 'The highly stabilizing Rajat Yog governs the accumulation of real estate assets, steady property luck, multi-source financial stability, and deep emotional peace. It is the perfect synchronization of the earth element.',
+    meaning: 'यह अत्यंत स्थिरता प्रदान करने वाला रजत राजयोग भूमि, अचल संपत्ति, स्थायी वित्तीय सुरक्षा और गहरे मानसिक सुकून का योग है। यह पृथ्वी तत्व (2, 5, 8) का संपूर्ण संतुलन है।',
     strengths: [
-      'Superb luck in acquiring land, real estate property, and high-value residential assets.',
-      'Deep emotional resilience and an anchored, calm mind under crisis.',
-      'Strong support from an affectionate family and high domestic comfort.'
+      'भूमि, मकान, रियल एस्टेट और अचल संपत्ति के निर्माण में जबरदस्त भाग्य।',
+      'संकट के समय भी शांत, स्थिर और धैर्यवान मन की स्थिति।',
+      'परिवार का अटूट सहयोग, सुख-शांति और घरेलू खुशहाली।'
     ],
     weaknesses: [
-      'Can sometimes lead to extreme nesting instincts or a reluctance to step out of comfort zones.',
-      'Prone to heavy mental relaxation, delaying highly competitive corporate moves.',
-      'Can absorb surrounding domestic stresses too deeply due to high family attachment.'
+      'कंफर्ट जोन (आराम क्षेत्र) से बाहर निकलने में कभी-कभी हिचकिचाहट।',
+      'अत्यधिक संतुष्टि के कारण कभी-कभी नए अवसरों में धीमी गति।',
+      'परिवार से गहरे जुड़ाव के कारण घरेलू तनाव को बहुत गहराई से महसूस करना।'
     ],
-    careerImpact: 'Exceptional for real estate developers, interior designers, agricultural business owners, asset managers, and family business administrators.',
-    relationshipImpact: 'Creates an incredibly warm, loving, and supportive household environment; values multi-generational family harmony.',
-    financialImpact: 'Builds permanent wealth through land, buildings, and secure physical assets; immune to transient market fluctuations.',
-    healthImpact: 'Directly linked to gastric health and bone density; benefits from eating mineral-rich natural foods and maintaining regular core posture exercises.',
+    careerImpact: 'रियल एस्टेट डेवलपर्स, इंटीरियर डिज़ाइनर, कृषि व्यवसाय, संपत्ति प्रबंधक और पारिवारिक व्यापार।',
+    relationshipImpact: 'अत्यंत स्नेहपूर्ण, सहायक और पारिवारिक मूल्यों को सर्वोपरि रखने वाला जीवनसाथी।',
+    financialImpact: 'जमीन-जायदाद और सुरक्षित संपत्तियों के माध्यम से स्थायी और अभेद्य धन का निर्माण।',
+    healthImpact: 'पाचन और हड्डियों का स्वास्थ्य उत्तम रखने के लिए प्राकृतिक व पौष्टिक आहार लें।',
     recommendedRemedies: [
-      'Drink fresh coconut water or milk from a pure silver cup on Monday mornings.',
-      'Maintain a small container filled with river sand and a silver coin in your North-East corner.',
-      'Wear a heavy silver bracelet on your active hand to anchor and stabilize physical assets.'
+      'सोमवार की सुबह चांदी के बर्तन से पानी या दूध ग्रहण करें।',
+      'उत्तर-पूर्व (ईशान कोण) में एक छोटे पात्र में गंगाजल व चांदी का सिक्का रखें।',
+      'दाहिने हाथ में शुद्ध चांदी का कड़ा या ब्रेसलेट धारण करें।'
     ]
   }
 ];

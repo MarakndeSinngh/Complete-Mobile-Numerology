@@ -10,7 +10,7 @@ export interface EnhancedGridCell {
   totalVisualOccurrences: number;
   effectivePresent: boolean;
   sources: string[];
-  status: 'absent' | 'dob_only' | 'driver_reinforced' | 'destiny_reinforced' | 'driver_added' | 'destiny_added' | 'both_reinforced' | 'layered';
+  status: 'ABSENT' | 'DOB_ONLY' | 'DRIVER_REINFORCED' | 'DESTINY_REINFORCED' | 'DRIVER_ADDED' | 'DESTINY_ADDED' | 'BOTH_REINFORCED' | 'LAYERED' | 'absent' | 'dob_only' | 'driver_reinforced' | 'destiny_reinforced' | 'driver_added' | 'destiny_added' | 'both_reinforced' | 'layered';
   interpretation: string;
   element: string;
   direction: string;
@@ -75,30 +75,28 @@ export function buildEnhancedGrid(
     }
 
     const sources: string[] = [];
-    if (dobCount > 0) sources.push(`DOB (${dobCount}x)`);
-    if (driverStatus === 'reinforced') sources.push('DOB + MULANK');
-    else if (driverStatus === 'added') sources.push('MULANK');
-    if (destinyStatus === 'reinforced') sources.push('DOB + BHAGYANK');
-    else if (destinyStatus === 'added') sources.push('BHAGYANK');
+    if (dobCount > 0) sources.push('DOB');
+    if (isDriver) sources.push('MULANK');
+    if (isDestiny) sources.push('BHAGYANK');
 
     // Determine status string
-    let status: EnhancedGridCell['status'] = 'absent';
+    let status: EnhancedGridCell['status'] = 'ABSENT';
     if (dobCount === 0 && !driverLayer && !destinyLayer) {
-      status = 'absent';
+      status = 'ABSENT';
     } else if (dobCount > 0 && !driverLayer && !destinyLayer) {
-      status = 'dob_only';
+      status = 'DOB_ONLY';
     } else if (driverStatus === 'reinforced' && destinyStatus === 'reinforced') {
-      status = 'both_reinforced';
+      status = 'BOTH_REINFORCED';
     } else if (driverStatus === 'reinforced') {
-      status = 'driver_reinforced';
+      status = 'DRIVER_REINFORCED';
     } else if (destinyStatus === 'reinforced') {
-      status = 'destiny_reinforced';
+      status = 'DESTINY_REINFORCED';
     } else if (driverStatus === 'added') {
-      status = 'driver_added';
+      status = 'DRIVER_ADDED';
     } else if (destinyStatus === 'added') {
-      status = 'destiny_added';
+      status = 'DESTINY_ADDED';
     } else {
-      status = 'layered';
+      status = 'LAYERED';
     }
 
     // In the LeoFamily 3-layer Enhanced Grid:
@@ -119,17 +117,18 @@ export function buildEnhancedGrid(
 
     // Interpretation description
     let interpretation = '';
-    if (status === 'absent') {
+    const statusNormalized = status.toLowerCase();
+    if (statusNormalized === 'absent') {
       interpretation = `Digit ${num} (${graha.nameHi}) is absent in the birth chart; represents an area for conscious development and remedy support.`;
-    } else if (status === 'driver_reinforced') {
+    } else if (statusNormalized === 'driver_reinforced') {
       interpretation = `Digit ${num} (${graha.nameHi}) is naturally present in DOB and strongly reinforced by your Mulank/Driver vibration. Natural core asset.`;
-    } else if (status === 'destiny_reinforced') {
+    } else if (statusNormalized === 'destiny_reinforced') {
       interpretation = `Digit ${num} (${graha.nameHi}) is present in DOB and activated as your Bhagyank/Destiny channel. Highly auspicious karmic alignment.`;
-    } else if (status === 'driver_added') {
+    } else if (statusNormalized === 'driver_added') {
       interpretation = `Digit ${num} (${graha.nameHi}) is absent from physical DOB but activated through your Mulank (${mulank}). Supplements the grid through your conscious driving nature.`;
-    } else if (status === 'destiny_added') {
+    } else if (statusNormalized === 'destiny_added') {
       interpretation = `Digit ${num} (${graha.nameHi}) is absent from physical DOB but bestowed through your Bhagyank (${bhagyank}). Supplements the grid through destiny evolution.`;
-    } else if (status === 'both_reinforced') {
+    } else if (statusNormalized === 'both_reinforced') {
       interpretation = `Digit ${num} (${graha.nameHi}) is physical in DOB and reinforced by both Mulank and Bhagyank. A dominant, defining pillar of your chart.`;
     } else {
       interpretation = `Digit ${num} (${graha.nameHi}) is active with ${dobCount} occurrence(s) in your birth kundali.`;

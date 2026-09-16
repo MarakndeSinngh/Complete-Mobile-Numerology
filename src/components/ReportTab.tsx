@@ -137,6 +137,8 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
         for (let i = 0; i < Math.min(dobCount, 4); i++) {
           circles += `<span style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background-color: #FFFFFF; border: 1px solid #CBD5E1; font-family: monospace; font-weight: 900; font-size: 9px; color: #1F2937; margin: 1px;">${digit}</span>`;
         }
+      } else if (box?.isDriverLayer || box?.isDestinyLayer) {
+        circles += `<span style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background-color: ${box.isDestinyLayer ? '#EFF6FF' : '#FFFBEB'}; border: 1px solid ${box.isDestinyLayer ? '#93C5FD' : '#FCD34D'}; font-family: monospace; font-weight: 900; font-size: 9px; color: ${box.isDestinyLayer ? '#1D4ED8' : '#B45309'}; margin: 1px;">${digit}</span>`;
       }
       
       let badges = '';
@@ -155,7 +157,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
         }
       }
       
-      if (count === 0) {
+      if (count === 0 && !box?.isDriverLayer && !box?.isDestinyLayer) {
         circles = '<span style="font-size: 8px; font-weight: bold; color: #9CA3AF; letter-spacing: 0.5px;">MISSING</span>';
       }
       

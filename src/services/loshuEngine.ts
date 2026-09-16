@@ -64,7 +64,19 @@ export function calculateLoShuGrid(dob: string) {
   }
   const conductor = sum;
 
-  // Include Conductor (Bhagyank) in the unique set of digits, but ensure other derived numbers are excluded
+  // Calculate Driver (Mulank) from day sum
+  let daySum = day;
+  while (daySum > 9) {
+    daySum = daySum.toString().split('').map(d => parseInt(d, 10)).reduce((acc, val) => acc + val, 0);
+  }
+  const driver = daySum;
+
+  // Include Driver (Mulank) and Conductor (Bhagyank) in the unique set of digits for Enhanced Grid
+  if (driver >= 1 && driver <= 9) {
+    if (!uniqueDigits.includes(driver)) {
+      uniqueDigits.push(driver);
+    }
+  }
   if (conductor >= 1 && conductor <= 9) {
     if (!uniqueDigits.includes(conductor)) {
       uniqueDigits.push(conductor);
@@ -145,6 +157,8 @@ export interface LoshuAnalysisResult {
   mulank: number; // Psychic
   bhagyank: number; // Conductor (Bhagyank)
   loshuGrid: Record<number, LoshuGridBox>;
+  birthMissingNumbers: number[];
+  enhancedMissingNumbers: number[];
   missingNumbers: {
     digit: number;
     element: string;
@@ -203,15 +217,15 @@ export interface LoshuAnalysisResult {
 
 // Elemental properties
 const ELEMENT_MAP: Record<number, { element: string; direction: string; lifeArea: string; gridMeaning: string }> = {
-  1: { element: 'Water', direction: 'North', lifeArea: 'Career & Conductor Path', gridMeaning: 'Communication & Planning' },
-  2: { element: 'Earth', direction: 'Southwest', lifeArea: 'Marriage, Love & Partnerships', gridMeaning: 'Relationships & Sensitivity' },
-  3: { element: 'Wood', direction: 'East', lifeArea: 'Family & Health', gridMeaning: 'Growth & Wisdom' },
-  4: { element: 'Wood', direction: 'Southeast', lifeArea: 'Wealth & Prosperity', gridMeaning: 'Discipline & Organization' },
-  5: { element: 'Earth', direction: 'Center', lifeArea: 'Stability & Balance', gridMeaning: 'Mental Stability & Communication' },
-  6: { element: 'Metal', direction: 'Northwest', lifeArea: 'Helpful Friends & Travel', gridMeaning: 'Luxury & Support' },
-  7: { element: 'Metal', direction: 'West', lifeArea: 'Children & Creativity', gridMeaning: 'Analytical Power & Intellect' },
-  8: { element: 'Earth', direction: 'Northeast', lifeArea: 'Education & Knowledge', gridMeaning: 'Material Wealth & Asset Accumulation' },
-  9: { element: 'Fire', direction: 'South', lifeArea: 'Fame & Reputation', gridMeaning: 'Enthusiasm & Courage' }
+  1: { element: 'Water (जल तत्व)', direction: 'उत्तर (North)', lifeArea: 'करियर एवं जीवन दिशा (Career & Life Path)', gridMeaning: 'संवाद एवं योजना (Communication & Planning)' },
+  2: { element: 'Earth (पृथ्वी तत्व)', direction: 'दक्षिण-पश्चिम (Southwest)', lifeArea: 'विवाह, प्रेम एवं संबंध (Marriage & Relationships)', gridMeaning: 'संवेदनशीलता एवं साझेदारी (Sensitivity & Partnership)' },
+  3: { element: 'Wood (काष्ठ/लकड़ी तत्व)', direction: 'पूर्व (East)', lifeArea: 'परिवार, स्वास्थ्य एवं ज्ञान (Family & Health)', gridMeaning: 'विकास एवं ज्ञान (Growth & Wisdom)' },
+  4: { element: 'Wood (काष्ठ तत्व)', direction: 'दक्षिण-पूर्व (Southeast)', lifeArea: 'धन एवं समृद्धि (Wealth & Prosperity)', gridMeaning: 'अनुशासन एवं व्यवस्था (Discipline & Organization)' },
+  5: { element: 'Earth (पृथ्वी तत्व)', direction: 'ब्रह्मस्थान / केंद्र (Center)', lifeArea: 'स्थिरता एवं संतुलन (Stability & Balance)', gridMeaning: 'मानसिक संतुलन एवं संवाद (Mental Stability & Communication)' },
+  6: { element: 'Metal (धातु तत्व)', direction: 'उत्तर-पश्चिम (Northwest)', lifeArea: 'सहायक मित्र, यात्रा एवं विलासिता (Friends & Luxury)', gridMeaning: 'सुख-सुविधा एवं सहयोग (Luxury & Support)' },
+  7: { element: 'Metal (धातु तत्व)', direction: 'पश्चिम (West)', lifeArea: 'संतान, रचनात्मकता एवं शोध (Creativity & Intellect)', gridMeaning: 'विश्लेषण क्षमता एवं अंतर्ज्ञान (Analytical Power & Intuition)' },
+  8: { element: 'Earth (पृथ्वी तत्व)', direction: 'उत्तर-पूर्व / ईशान (Northeast)', lifeArea: 'ज्ञान, शिक्षा एवं संपत्ति (Knowledge & Wealth)', gridMeaning: 'भौतिक संपत्ति एवं गंभीरता (Material Wealth & Focus)' },
+  9: { element: 'Fire (अग्नि तत्व)', direction: 'दक्षिण (South)', lifeArea: 'प्रसिद्धि, मान-सम्मान एवं ऊर्जा (Fame & Reputation)', gridMeaning: 'साहस, ऊर्जा एवं पहचान (Courage & Recognition)' }
 };
 
 // Plane definitions
@@ -356,12 +370,10 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
       }
     }
 
-    const existsAfterDriver = isBirthLayer || isDriverLayer;
-
     let isDestinyLayer = false;
     let isDestinyReinforced = false;
     if (isDestiny) {
-      if (existsAfterDriver) {
+      if (isBirthLayer) {
         isDestinyReinforced = true;
       } else {
         isDestinyLayer = true;
@@ -405,33 +417,41 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
   }
 
   // Missing Numbers
+  const birthMissingNumbers: number[] = [];
+  const enhancedMissingNumbers: number[] = [];
   const missingNumbers: { digit: number; element: string; meaning: string; remedy: string }[] = [];
   const missingRemedies: Record<number, string> = {
-    1: 'Wear red/orange threads, keep small metal artifacts in the North zone, carry silver coins.',
-    2: 'Wear natural pearl beads, decorate southwest corners with earthen pots or yellow salt lamps.',
-    3: 'Keep a green wooden bracelet, plant leafy tulsi or ficus in the East sector of your room.',
-    4: 'Keep wooden wind-chimes or carry a green aventurine crystal. Introduce structural bamboo lines.',
-    5: 'Wear a pure copper coin around the chest, keep brass pyramids/discs at workplace.',
-    6: 'Wear shiny steel or automatic wristwatches. Place metal ornaments in the Northwest corner.',
-    7: 'Introduce steel accessories, light small oil lamps on Saturdays, keep a brass/silver Ganesha statuette.',
-    8: 'Wear an amethyst or black tourmaline crystal bracelet. Maintain earthy/clay pottery in Northeast.',
-    9: 'Light a red wax candle in the South zone daily for 15 mins. Wear scarlet threads or small rubies.'
+    1: 'उत्तर दिशा में पानी का फव्वारा या जल पात्र रखें, चांदी का सिक्का पास रखें और लाल/नारंगी धागा पहनें।',
+    2: 'प्राकृतिक मोती की माला पहनें, दक्षिण-पश्चिम कोने को भारी रखें या मिट्टी के बर्तन/सेंधा नमक लैंप रखें।',
+    3: 'हरे रंग का धागा या रुद्राक्ष धारण करें, पूर्व दिशा में तुलसी या हरे पौधे लगाएं और बड़े-बुजुर्गों का आशीर्वाद लें।',
+    4: 'लकड़ी की विंड चाइम लगाएं, ग्रीन एवेंट्यूरिन ब्रेसलेट पहनें या पूर्व-दक्षिण में बांस का पौधा रखें।',
+    5: 'तांबे का सिक्का या कड़ा पहनें, कार्यस्थल पर पीतल का पिरामिड रखें और घर के केंद्र को साफ व खुला रखें।',
+    6: 'चांदी या स्टील की घड़ी पहनें, उत्तर-पश्चिम दिशा में धातु की घंटी या विंड चाइम लगाएं और इत्र का प्रयोग करें।',
+    7: 'चांदी की अंगूठी पहनें, शनिवार को दीपक जलाएं, कुत्तों को भोजन दें और गणेश जी की आराधना करें।',
+    8: 'एमेथिस्ट या ब्लैक टूमलाइन ब्रेसलेट पहनें, उत्तर-पूर्व दिशा को स्वच्छ रखें और जरूरतमंदों की सहायता करें।',
+    9: 'दक्षिण दिशा में लाल दीपक या लाल बल्ब जलाएं, तांबे का छल्ला पहनें और नियमित रूप से सूर्य नमस्कार करें।'
   };
 
   const missingMeanings: Record<number, string> = {
-    1: 'Difficulties with career path and clarity. Lacks solid independent expression.',
-    2: 'High relationship adjustments, lack of sensitivity, impatient mindset.',
-    3: 'Lack of elders blessing. Struggles with consistent wisdom, wisdom or focus.',
-    4: 'Erratic savings. High financial vulnerability and lack of systemic discipline.',
-    5: 'Lacks personal stabilizing center. Struggles with core communication and decision loops.',
-    6: 'Lacks helper agents or corporate friends. Difficulties getting support in crucial hours.',
-    7: 'Lack of patience and deep analytical focus. Prone to immediate disappointments.',
-    8: 'Slower asset accumulation. Struggles planning long term real estate expansions.',
-    9: 'Faint fame. Struggling with recognition and low driving courage.'
+    1: 'करियर में स्पष्टता की कमी, स्वतंत्रता से निर्णय लेने में संकोच और वाणी अभिव्यक्ति में झिझक।',
+    2: 'रिश्तों में तालमेल की कमी, अत्यधिक संवेदनशीलता या दूसरों की भावनाओं को समझने में कठिनाई।',
+    3: 'ज्ञान और एकाग्रता में भटकाव, जीवन में गुरु या वरिष्ठों के मार्गदर्शन का अभाव महसूस होना।',
+    4: 'धन संचय में उतार-चढ़ाव, अनुशासन और व्यवस्थित दिनचर्या बनाए रखने में कठिनाई।',
+    5: 'मानसिक अस्थिरता, निर्णयों में असमंजस और जीवन में संतुलन बनाए रखने में संघर्ष।',
+    6: 'जरूरत के समय मित्रों या सहयोगियों से मदद का अभाव, विलासिता और पारिवारिक सुख में कमी।',
+    7: 'धैर्य की कमी, मानसिक विश्लेषण में जल्दबाजी और कई बार अपनों से ही धोखा मिलने का डर।',
+    8: 'दीर्घकालिक संपत्ति निर्माण में धीमी प्रगति और कार्यों के फल मिलने में देरी।',
+    9: 'प्रसिद्धि और पहचान पाने में संघर्ष, ऊर्जा और उत्साह में समय-समय पर कमी आना।'
   };
 
   for (let d = 1; d <= 9; d++) {
-    if (loshuGrid[d].count === 0) {
+    const dobCount = loshuGrid[d].count;
+    if (dobCount === 0) {
+      birthMissingNumbers.push(d);
+    }
+    const isEnhancedPresent = dobCount > 0 || loshuGrid[d].isDriverLayer || loshuGrid[d].isDestinyLayer;
+    if (!isEnhancedPresent) {
+      enhancedMissingNumbers.push(d);
       missingNumbers.push({
         digit: d,
         element: ELEMENT_MAP[d].element,
@@ -445,58 +465,58 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
   const repeatedNumbers: { digit: number; count: number; meaning: string }[] = [];
   const repeatedMeanings: Record<number, Record<number, string>> = {
     1: {
-      1: 'Indicates good independent voice but difficulty speaking out deep personal concerns.',
-      2: 'Auspicous! Diplomatic, highly balanced, outstanding expression, great communication.',
-      3: 'Vocal, expressive but extremely talkative. Prone to speak out secrets.',
-      4: 'Highly egocentric voice. Extremely stubborn and hard to align in compromise.'
+      1: 'संतुलित एवं स्वतंत्र विचार। अपनी बात स्पष्टता से रखने में सक्षम।',
+      2: 'अति शुभ! बेहतरीन संवाद शैली, कूटनीति, मधुर वाणी और नेतृत्व क्षमता।',
+      3: 'अत्यधिक बातचीत की प्रवृत्ति, बातें साझा करने में जल्दबाजी, कभी-कभी अति-मुखर।',
+      4: 'अहंकार और हठ की प्रवृत्ति। दूसरों के सुझाव सुनने में कठिनाई।'
     },
     2: {
-      1: 'Sensitive, cooperative, intuitive.',
-      2: 'Over-intuitive but highly subject to sudden mood escalations and anxiety.',
-      3: 'Hypersensitive. Prone to taking everything too personally, fragile heart.',
-      4: 'Subject to continuous mood slides, anxiety loops, unstable relationship patterns.'
+      1: 'संवेदनशील, मिलनसार, दूसरों की मदद करने वाला एवं शांत स्वभाव।',
+      2: 'गहरी संवेदनशीलता, अंतर्ज्ञान मजबूत, लेकिन मूड स्विंग्स और चिंता की संभावना।',
+      3: 'अति-संवेदनशील। छोटी बातों को दिल पर लगाना और भावनात्मक रूप से आहत होना।',
+      4: 'अत्यधिक भावनात्मक उतार-चढ़ाव, रिश्तों में असुरक्षा की भावना।'
     },
     3: {
-      1: 'Good academic sense, creative, respectable behavior.',
-      2: 'Superlative intelligence, highly creative planer, deep researching mind.',
-      3: 'Overly academic, disconnected from simple practical reality, over-talker.',
-      4: 'Vain, rejects expert consultation or advice, faces frequent blocks.'
+      1: 'उत्कृष्ट रचनात्मकता, ज्ञानवान, बड़ों का सम्मान करने वाला एवं सभ्य स्वभाव।',
+      2: 'गहरी बुद्धिमत्ता, रणनीतिक सोच, उच्च बौद्धिक क्षमता और सीखने की तीव्र ललक।',
+      3: 'अति-आलोचनात्मक सोच, व्यावहारिक धरातल से कटना, बहुत अधिक उपदेश देने की आदत।',
+      4: 'अति-आत्मविश्वास, दूसरों की सलाह को पूरी तरह नकारना और अनावश्यक विवाद।'
     },
     4: {
-      1: 'Thoroughly practical, neat, highly systematic.',
-      2: 'Obsessively meticulous, gets lost in microscopic details, hard to satisfy.',
-      3: 'Extreme workaholic, lacks social joy or leisure interests.',
-      4: 'High stubbornness, OCD traits, suffers sudden legal/authority friction.'
+      1: 'व्यवस्थित, परिश्रमी, व्यावहारिक और नियमों का पालन करने वाला व्यक्ति।',
+      2: 'अति-सावधानी, हर छोटी बारीकी में उलझना, आसानी से संतुष्ट न होना।',
+      3: 'अत्यधिक कार्य का बोझ लेना, मनोरंजन और आराम से पूरी तरह दूर रहना।',
+      4: 'कठोर स्वभाव, बदलाव का विरोध और अचानक कानूनी या प्रशासनिक अड़चनें।'
     },
     5: {
-      1: 'Self-driven, business minded, excellent communication.',
-      2: 'Immense confidence, quick mathematical decisions, loves trading structures.',
-      3: 'Extravagant spender, severe risk attractor, highly unstable home routine.',
-      4: 'Erratic cash flows, loses money in speculative bubbles, high nervous fatigue.'
+      1: 'आत्मविश्वास से भरपूर, व्यापारिक समझ, चतुर संवाद और नई परिस्थितियों में सहज।',
+      2: 'तीव्र बुद्धिमत्ता, त्वरित निर्णय, बहुमुखी प्रतिभा और जोखिम लेने में आगे।',
+      3: 'अनावश्यक फिजूलखर्ची, जोखिम भरे निवेश और दिनचर्या में अत्यधिक अस्थिरता।',
+      4: 'अनियंत्रित सट्टेबाजी की आदत, अचानक आर्थिक नुकसान और घबराहट।'
     },
     6: {
-      1: 'Caring teacher, loves artistic decors, close family connection.',
-      2: 'Luxurious expectations, creative design skills, protective family values.',
-      3: 'Entangled in domestic debts or luxury expenditures. High relatives stress.',
-      4: 'Prone to luxury excesses, marital alignments delays, family separations.'
+      1: 'परिवार से गहरा लगाव, कला और सौंदर्य में रुचि, जिम्मेदार और मार्गदर्शक स्वभाव।',
+      2: 'विलासिता और उच्च रहन-सहन की चाहत, उत्तम डिज़ाइनर पसंद, पारिवारिक सुरक्षा।',
+      3: 'दिखावे और लग्जरी पर अत्यधिक खर्च, पारिवारिक मामलों में तनाव और देनदारियां।',
+      4: 'वैवाहिक जीवन में अपेक्षाओं का अत्यधिक बोझ, संबंधों में दूरी और असंतोष।'
     },
     7: {
-      1: 'Philosophical, gains massive depth via experience, intuitive.',
-      2: 'Prone to frequent betrayals from close associates, analytical mind.',
-      3: 'Underwent massive emotional setbacks in career/marriage, leading to ascetic turns.',
-      4: 'Deeply self-isolated. Absolute solitary thinker, distrusts world.'
+      1: 'दार्शनिक दृष्टिकोण, अनुभवों से सीखने वाला, आध्यात्मिक रुचि और तीव्र अंतर्दृष्टि।',
+      2: 'गहरा विश्लेषणात्मक दिमाग, लेकिन निकट सहयोगियों से धोखे का डर और एकाकीपन।',
+      3: 'करियर या रिश्तों में भावनात्मक झटके झेलना, जिसके बाद वैराग्य की ओर झुकाव।',
+      4: 'समाज से पूरी तरह अलग-थलग होना, दुनिया पर विश्वास न करना और अकेलापन।'
     },
     8: {
-      1: 'Practical, meticulous, financial intelligence, gradual gains.',
-      2: 'Dual Saturn force: deep planning but slow asset realization. Heavy responsibilities.',
-      3: 'Massive, sudden volatility in fortunes. Alternate wealth blocks.',
-      4: 'Severely laborious path, legal cases, delayed rewards but final profound wisdom.'
+      1: 'व्यावहारिक सोच, वित्तीय अनुशासन, धैर्यवान और धीरे-धीरे स्थायी सफलता।',
+      2: 'शनि का दोहरा प्रभाव: गहरी योजना लेकिन परिणाम धीमी गति से। भारी जिम्मेदारियां।',
+      3: 'आर्थिक स्थिति में अचानक बड़े उतार-चढ़ाव, धन के रुक-रुक कर आने की समस्या।',
+      4: 'कड़ा संघर्ष, कानूनी उलझनें, लेकिन अंततः गहरा अनुभव और स्थायी ज्ञान।'
     },
     9: {
-      1: 'Selfless, courageous, high energetic drive.',
-      2: 'Aggressive competitor, highly energetic, quick verbal reactions.',
-      3: 'Hyper-vocal temper outbreaks, surgery risks, sharp bone injuries.',
-      4: 'Impulsive actions, disputes with authorities, extreme inner volatility.'
+      1: 'साहसी, ऊर्जावान, परोपकारी और नेतृत्व करने में सबसे आगे रहने वाला व्यक्ति।',
+      2: 'प्रतिस्पर्धी स्वभाव, अत्यधिक ऊर्जा, त्वरित प्रतिक्रिया और स्पष्टवादी।',
+      3: 'अचानक क्रोध आना, वाणी में तल्खी, चोट या सर्जरी की संभावना।',
+      4: 'अति-उतावलापन, अधिकारियों से मतभेद और आंतरिक अशांति।'
     }
   };
 
@@ -556,26 +576,26 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
   const currentYear = 2026;
   const pYearNum = reduceToSingleDigit(reduceToSingleDigit(bDay) + reduceToSingleDigit(bMonth) + reduceToSingleDigit(currentYear));
   const personalYearTitles: Record<number, string> = {
-    1: 'New Beginnings & Leadership Initiatives (वर्ष 1: नव निर्माण)',
-    2: 'Patience, Partnerships & Balance (वर्ष 2: धैर्य एवं सहकार्यता)',
-    3: 'Expansion, Expressions & Knowledge (वर्ष 3: ज्ञान एवं विस्तार)',
-    4: 'Foundation, Work & Organization (वर्ष 4: कठिन परिश्रम एवं नियम)',
-    5: 'Dynamic Change, Freedom & Public Relation (वर्ष 5: परिवर्तन एवं संचार)',
-    6: 'Domestic Peace, Luxury & Health (वर्ष 6: परिवार एवं सुख समृद्धि)',
-    7: 'Self Reflection, Spiritual Study & Solitude (वर्ष 7: अध्यात्म एवं चिंतन)',
-    8: 'Material Abundance, Business Growth & Assets (वर्ष 8: कर्म फल एवं विजय)',
-    9: 'Completion, Detoxification & Philanthropy (वर्ष 9: विसर्जन एवं नया मार्ग)'
+    1: 'वर्ष 1: नव निर्माण एवं नेतृत्व (New Beginnings & Leadership)',
+    2: 'वर्ष 2: धैर्य, सहकार्यता एवं संतुलन (Patience & Partnerships)',
+    3: 'वर्ष 3: ज्ञान, विस्तार एवं रचनात्मकता (Expansion & Wisdom)',
+    4: 'वर्ष 4: कठिन परिश्रम, संगठन एवं नींव (Foundation & Hard Work)',
+    5: 'वर्ष 5: परिवर्तन, यात्रा एवं नए अवसर (Change & Opportunities)',
+    6: 'वर्ष 6: परिवार, सुख-सुविधा एवं समृद्धि (Family & Luxury)',
+    7: 'वर्ष 7: आत्म-मंथन, अध्यात्म एवं शोध (Spiritual Growth & Solitude)',
+    8: 'वर्ष 8: कर्म फल, व्यवसाय वृद्धि एवं विजय (Material Success & Harvest)',
+    9: 'वर्ष 9: पूर्णता, विसर्जन एवं नवीनीकरण (Completion & Transformation)'
   };
   const personalYearForecasts: Record<number, string> = {
-    1: 'The perfect time to plant seeds. Launch new business endeavors, switch roles, or declare independent tracks. High support from Sun solar cycles.',
-    2: 'A year of slow water-like flow. Deepen partnerships, avoid sudden friction. Excellent for team bonding, marriage considerations, and mediation.',
-    3: 'Jupiter-backed mental blooming. Enroll in certification programs, write materials, or advisor programs. Social expressions expand swiftly.',
-    4: 'Solid ground creation. Work hours increase, delayed outcomes test patience. Focus on brick and mortar security, systemic audits, or gold savings.',
-    5: 'A fast progressive breeze. Expect multi-city travels, public speeches, and quick financial agreements. Keep your grounding active.',
-    6: 'Sovereign luxury, domestic happiness, purchase of elegant cars, or home renovation. Relationships get heavy investment and mature gracefully.',
-    7: 'Ketu reigns. Lessen commercial noise, engage in yoga, meditation, occult science research. Avoid launching mega speculative ventures.',
-    8: 'Saturn harvest year. Long pending files clear up, outstanding balances materialize, real estate is acquired. Deliver justice in relationships.',
-    9: 'Wash away old unnecessary structures. Finish lagging cases, declutter your home. Do not start giant 10-year lock plans, let cycle clear.'
+    1: 'नया कार्य, व्यापार या योजना शुरू करने के लिए अत्यंत शुभ वर्ष। सूर्य की ऊर्जा से आत्मविश्वास और स्वतंत्र पहचान में भारी वृद्धि होगी।',
+    2: 'जल की तरह शांत और धैर्यवान बने रहने का वर्ष। साझेदारी मजबूत करें, टीम वर्क अपनाएं और विवादों से दूर रहकर आगे बढ़ें।',
+    3: 'गुरु बृहस्पति की कृपा से बौद्धिक विकास, नए कौशल सीखने और सामाजिक प्रतिष्ठा बढ़ाने का उत्तम समय है। ज्ञान का विस्तार होगा।',
+    4: 'धैर्यपूर्वक मजबूत नींव तैयार करने का समय। मेहनत अधिक होगी परंतु भविष्य के लिए स्थायी सुरक्षा और बचत का निर्माण होगा।',
+    5: 'तेज गति और सकारात्मक बदलावों का वर्ष। यात्राएं, नए संपर्क, जनसंपर्क और व्यापार में प्रगति के भरपूर योग हैं।',
+    6: 'शुक्र का प्रभाव सुख-समृद्धि, वाहन/गृह निर्माण और पारिवारिक सौहार्द को बढ़ावा देगा। संबंधों में मधुरता और विलासिता बढ़ेगी।',
+    7: 'केतु का प्रभाव। बाहरी शोर कम करके आंतरिक ज्ञान, योग, ध्यान और आत्म-विश्लेषण पर ध्यान केंद्रित करने का समय है।',
+    8: 'शनि देव का वर्ष। पूर्व के कर्मों और परिश्रम का श्रेष्ठ फल मिलेगा। रुका हुआ धन व संपत्ति के सौदे पूर्ण होंगे।',
+    9: 'पुराने अनावश्यक बंधनों और रुकी हुई योजनाओं को समाप्त कर नए चक्र की तैयारी करने का समय। दान-पुण्य और सेवा करें।'
   };
 
   // Pinnacle Cycles
@@ -584,17 +604,17 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
   const pin3 = reduceToSingleDigit(pin1 + pin2);
   const pin4 = reduceToSingleDigit(reduceToSingleDigit(bMonth) + reduceToSingleDigit(bYear));
   const pinnacleMeanings = [
-    'Youth development, seeking individual path and learning structures.',
-    'Expansion of career, building families, stabilizing social profile.',
-    'Harvest of mature actions, advisor roles, financial authority peak.',
-    'Eldership, mentoring family circles, spiritual deep dive, legacy works.'
+    'प्रारंभिक जीवन का विकास, अपनी पहचान खोजना और मूल संरचनाओं को सीखना।',
+    'करियर का तीव्र विस्तार, पारिवारिक उत्तरदायित्व और सामाजिक प्रतिष्ठा का निर्माण।',
+    'परिपक्व कर्मों का फल, मार्गदर्शक की भूमिका, आर्थिक व प्रशासनिक शक्ति का शिखर।',
+    'वरिष्ठता, परिवार व समाज को मार्गदर्शन, आध्यात्मिक गहराई और स्थायी विरासत।'
   ];
 
   const pinnaclesList = [
-    { pinnacle: pin1, cycle: 1, ageRange: `0 to ${36 - bhagyank} Years`, meaning: pinnacleMeanings[0] },
-    { pinnacle: pin2, cycle: 2, ageRange: `${36 - bhagyank + 1} to ${36 - bhagyank + 9} Years`, meaning: pinnacleMeanings[1] },
-    { pinnacle: pin3, cycle: 3, ageRange: `${36 - bhagyank + 10} to ${36 - bhagyank + 18} Years`, meaning: pinnacleMeanings[2] },
-    { pinnacle: pin4, cycle: 4, ageRange: `After ${36 - bhagyank + 19} Years`, meaning: pinnacleMeanings[3] }
+    { pinnacle: pin1, cycle: 1, ageRange: `0 से ${36 - bhagyank} वर्ष`, meaning: pinnacleMeanings[0] },
+    { pinnacle: pin2, cycle: 2, ageRange: `${36 - bhagyank + 1} से ${36 - bhagyank + 9} वर्ष`, meaning: pinnacleMeanings[1] },
+    { pinnacle: pin3, cycle: 3, ageRange: `${36 - bhagyank + 10} से ${36 - bhagyank + 18} वर्ष`, meaning: pinnacleMeanings[2] },
+    { pinnacle: pin4, cycle: 4, ageRange: `${36 - bhagyank + 19} वर्ष के बाद`, meaning: pinnacleMeanings[3] }
   ];
 
   // Challenge Numbers
@@ -603,10 +623,10 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
   const ch3 = Math.abs(ch1 - ch2);
   const ch4 = Math.abs(reduceToSingleDigit(bMonth) - reduceToSingleDigit(bYear));
   const challengeMeanings = [
-    'Avoiding excessive emotional fluctuation, learning stable planning.',
-    'Establishing independent authority, avoiding subservience traps.',
-    'Balancing extreme patience against frustration during delayed intervals.',
-    'Managing wealth allocations with utmost caution against speculation.'
+    'अत्यधिक भावनात्मक उतार-चढ़ाव से बचना और स्थिर योजना बनाना सीखना।',
+    'स्वतंत्र निर्णय क्षमता विकसित करना और दूसरों पर अत्यधिक निर्भरता से बचना।',
+    'कार्यों में देरी के दौरान धैर्य बनाए रखना और निराशा से खुद को बचाना।',
+    'वित्तीय संतुलन बनाए रखना और जोखिम भरे सट्टेबाजी से बचना।'
   ];
 
   const challengesList = [
@@ -730,39 +750,39 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
 
   // Lucky Details
   const colorsMap: Record<number, string[]> = {
-    1: ['Ruby Red', 'Orange', 'Saffron Yellow'],
-    2: ['Milky White', 'Silver Accent', 'Cream'],
-    3: ['Golden Yellow', 'Deep Mustard', 'Saffron'],
-    4: ['Electric Wood-Green', 'Khaki', 'Turquoise'],
-    5: ['Emerald Green', 'Light Parrot Green', 'Jade'],
-    6: ['Opal/Diamond White', 'Champagne Pink', 'Glittery Cream'],
-    7: ['Chalky White', 'Muted Grey', 'Light Saffron'],
-    8: ['Indigo Blue', 'Teal', 'Muted Sage Green'],
-    9: ['Scarlet Red', 'Light Saffron', 'Coral Coral']
+    1: ['लाल (Ruby Red)', 'नारंगी (Orange)', 'केसरिया (Saffron)'],
+    2: ['दूधिया सफेद (Milky White)', 'सिल्वर (Silver)', 'क्रीम (Cream)'],
+    3: ['सुनहरा पीला (Golden Yellow)', 'हल्दी पीला (Mustard)', 'केसरिया (Saffron)'],
+    4: ['गहरा हरा (Deep Green)', 'खाकी (Khaki)', 'फिरोजी (Turquoise)'],
+    5: ['पन्ना हरा (Emerald Green)', 'हल्का हरा (Light Green)', 'पिस्ता (Jade)'],
+    6: ['चमकीला सफेद (Opal White)', 'हल्का गुलाबी (Pink)', 'क्रीम (Glittery Cream)'],
+    7: ['सफेद (Muted White)', 'धूसर/ग्रे (Grey)', 'हल्का पीला (Light Saffron)'],
+    8: ['गहरा नीला (Indigo Blue)', 'नेवी ब्लू (Navy Blue)', 'काला/ग्रे (Muted Sage)'],
+    9: ['लाल (Scarlet Red)', 'केसरिया (Saffron)', 'मूंगा लाल (Coral)']
   };
 
   const gemstoneMap: Record<number, string[]> = {
-    1: ['Ruby (Manik)', 'Red Garnet'],
-    2: ['Pure Natural Pearl (Moti)', 'Moonstone'],
-    3: ['Yellow Sapphire (Pukhraj)', 'Golden Heliodor'],
-    4: ['Gomedh (Hessonite)', 'Rutile Quartz'],
-    5: ['Emerald (Panna)', 'Peridot'],
-    6: ['Diamond (Heera)', 'Natural White Opal'],
-    7: ['Cats Eye (Lehsuniya)', 'Tiger Eye Quartz'],
-    8: ['Blue Sapphire (Neelam)', 'Midnight Amethyst'],
-    9: ['Red Coral (Moonga)', 'Jasper Red carnelian']
+    1: ['माणिक्य (Ruby / Manik)', 'लाल गार्नेट (Garnet)'],
+    2: ['सच्चा मोती (Natural Pearl / Moti)', 'मूनस्टोन (Moonstone)'],
+    3: ['पुखराज (Yellow Sapphire / Pukhraj)', 'सुनहला (Golden Topaz)'],
+    4: ['गोमेद (Hessonite / Gomedh)', 'रूटाइल क्वार्ट्ज'],
+    5: ['पन्ना (Emerald / Panna)', 'पेरिडॉट (Peridot)'],
+    6: ['हीरा (Diamond / Heera)', 'सफेद ओपल (White Opal)'],
+    7: ['लहसुनिया (Cats Eye / Lehsuniya)', 'टाइगर आई (Tiger Eye)'],
+    8: ['नीलम (Blue Sapphire / Neelam)', 'जमुनिया (Amethyst)'],
+    9: ['मूंगा (Red Coral / Moonga)', 'लाल अकीक (Red Carnelian)']
   };
 
   const remediesMap: Record<number, string[]> = {
-    1: ['Chant Aditya Hrudaya Stotra on Sundays.', 'Offer copper water to Sun facing East.'],
-    2: ['Avoid high milk intake late at Mondays night.', 'Respect mother figures, donate white items.'],
-    3: ['Apply yellow saffron tilak on center forehead.', 'Offer bananas or chickpea sweets to educators.'],
-    4: ['Observe bird-feeding early Wednesdays.', 'Keep clear water bowls in Southeast balconies.'],
-    5: ['Donate whole green gram lentils on Wednesdays.', 'Perform plant watering routines.'],
-    6: ['Wear highly clean, naturally scented attire.', 'Avoid taking heavy credit loans for fashion.'],
-    7: ['Meditate daily, Ganesha mantra cycles.', 'Offer food bowls to street dogs on Saturdays.'],
-    8: ['Donate sesame oils to poor layout laborers.', 'Respect construction workers, perform hard physical cleaning.'],
-    9: ['Carry small copper items.', 'Donate red blood or offer support to police/defense centers.']
+    1: ['रविवार को सूर्य देव को तांबे के लोटे से जल अर्पित करें और आदित्य हृदय स्तोत्र का पाठ करें।', 'पूर्व दिशा में तांबे का सूर्य लगाएं और पिता का सम्मान करें।'],
+    2: ['माता का आशीर्वाद लें, सोमवार को सफेद वस्तुओं या दूध का दान करें।', 'चांदी के गिलास में पानी पिएं और रात्रि में अधिक देर तक जागने से बचें।'],
+    3: ['माथे पर नियमित केसर या हल्दी का तिलक लगाएं।', 'गुरुजनों, शिक्षकों का सम्मान करें और गुरुवार को चने की दाल या केले का दान करें।'],
+    4: ['पक्षियों को प्रतिदिन दाना-पानी डालें।', 'दक्षिण-पूर्व दिशा में लकड़ी का विंड चाइम लगाएं और घर में अव्यवस्था न रखें।'],
+    5: ['बुधवार को साबुत हरी मूंग का दान करें या गाय को हरा चारा खिलाएं।', 'कार्यस्थल पर तुलसी का पौधा रखें और हरे रंग का रुमाल पास रखें।'],
+    6: ['साफ-सुथरे व सुगंधित वस्त्र पहनें, इत्र/परफ्यूम का नियमित प्रयोग करें।', 'शुक्रवार को कन्याओं को सफेद मिष्ठान खिलाएं और जीवनसाथी का सम्मान करें।'],
+    7: ['प्रतिदिन भगवान गणेश जी की आराधना करें और संकटनाशन स्तोत्र का पाठ करें।', 'शनिवार को काले/सफेद आवारा कुत्तों को रोटी या बिस्कुट खिलाएं।'],
+    8: ['शनिवार को पीपल के वृक्ष के नीचे सरसों के तेल का दीपक जलाएं।', 'गरीबों, मजदूरों व सफाई कर्मचारियों का सम्मान करें और उन्हें काले चने या तेल का दान करें।'],
+    9: ['मंगलवार को हनुमान चालीसा का पाठ करें और सिंदूर का तिलक लगाएं।', 'छोटे भाइयों व मित्रों की सहायता करें, तांबे का छल्ला धारण करें।']
   };
 
   const luckyDetails = {
@@ -807,6 +827,8 @@ export function computeLoshuAnalysis(dobStr: string, name: string, gender: strin
     mulank,
     bhagyank,
     loshuGrid,
+    birthMissingNumbers,
+    enhancedMissingNumbers,
     missingNumbers,
     repeatedNumbers,
     strengthArrows,

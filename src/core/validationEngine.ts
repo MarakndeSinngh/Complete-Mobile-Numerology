@@ -87,6 +87,30 @@ export function runPhase28RegressionTest(): { success: boolean; errors: string[]
     }
   }
 
+  // Verify Node 7 (Destiny Added layer for 05/08/1983)
+  const cell7 = enhanced.cells[7];
+  if (!cell7) {
+    errors.push('Enhanced grid missing cell 7');
+  } else {
+    if (cell7.dobCount !== 0) errors.push(`Cell 7 dobCount expected 0, got ${cell7.dobCount}`);
+    if (cell7.destinyLayer !== true) errors.push(`Cell 7 destinyLayer expected true, got ${cell7.destinyLayer}`);
+    if (cell7.driverLayer !== false) errors.push(`Cell 7 driverLayer expected false, got ${cell7.driverLayer}`);
+    if (cell7.status.toUpperCase() !== 'DESTINY_ADDED') errors.push(`Cell 7 status expected DESTINY_ADDED, got ${cell7.status}`);
+    if (JSON.stringify(cell7.sources) !== JSON.stringify(['BHAGYANK'])) errors.push(`Cell 7 sources expected ["BHAGYANK"], got ${JSON.stringify(cell7.sources)}`);
+  }
+
+  // Verify Node 5 (Driver Reinforced layer for 05/08/1983)
+  const cell5 = enhanced.cells[5];
+  if (!cell5) {
+    errors.push('Enhanced grid missing cell 5');
+  } else {
+    if (cell5.dobCount !== 1) errors.push(`Cell 5 dobCount expected 1, got ${cell5.dobCount}`);
+    if (cell5.driverLayer !== true) errors.push(`Cell 5 driverLayer expected true, got ${cell5.driverLayer}`);
+    if (cell5.destinyLayer !== false) errors.push(`Cell 5 destinyLayer expected false, got ${cell5.destinyLayer}`);
+    if (cell5.status.toUpperCase() !== 'DRIVER_REINFORCED') errors.push(`Cell 5 status expected DRIVER_REINFORCED, got ${cell5.status}`);
+    if (JSON.stringify(cell5.sources) !== JSON.stringify(['DOB', 'MULANK'])) errors.push(`Cell 5 sources expected ["DOB", "MULANK"], got ${JSON.stringify(cell5.sources)}`);
+  }
+
   const planes = calculatePlanes(enhanced.flatGrid, birthGrid, mulank, bhagyank);
   const expectedPlanes: Record<string, string> = {
     'Mind Plane': 'PARTIAL',
