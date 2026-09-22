@@ -27,6 +27,13 @@ export const SOURCES: Record<string, SourceCitation> = {
     rule: 'Deterministic Mulank, Bhagyank, and 3-Layer Enhanced Lo Shu Grid',
     level: 'LEVEL_A'
   },
+  LEOFAMILY_LOSHU_PDF: {
+    sourceDocument: 'Loshu Grdi(1).pdf',
+    author: 'LeoFamily / Raajeev Singh Chauhann',
+    topic: 'Master Lo Shu Grid Blueprint, 81 Combinations, 12 Arrows, Psychological Profiling, Karmic Lessons & 90-Day Remedial Altar',
+    rule: 'Complete Lo Shu Master Report Analysis, 81 Combinations, Karmic Lessons, 12 Arrows, Generational Karma, Numero Vastu, and 90-Day Remedial Action Plan',
+    level: 'LEVEL_B'
+  },
   LEOFAMILY_MOBILE_PDF_D1: {
     sourceDocument: 'LeoFamily Mobile Numerology Course — Day 1',
     author: 'Raajeev Singh Chauhann',
@@ -60,11 +67,27 @@ export const SOURCES: Record<string, SourceCitation> = {
     level: 'LEVEL_B'
   },
   LEOFAMILY_MEDICAL_NUMEROLOGY_PDF: {
-    sourceDocument: 'LeoFamily Medical Numerology & Wellness Reference',
+    sourceDocument: 'Medical Numerology Day 1 (Eng & Hindi).pdf',
     author: 'Raajeev Singh Chauhann',
     page: 1,
-    topic: 'Ayurvedic Tridosha & Planetary Energy Resonances',
-    rule: 'Traditional wellness & lifestyle reflection only; never diagnose or prescribe; mandatory disclaimer',
+    topic: 'Ayurvedic Tridosha, Planetary Resonances & Vedic Mahadasha Calculation',
+    rule: 'Ayurvedic Doshas (Pitta, Kapha, Vata), Body Parts, Planetary Diseases, and Mulank-based Vedic Mahadasha progression',
+    level: 'LEVEL_B'
+  },
+  LEOFAMILY_MEDICAL_NUMEROLOGY_D1_PDF: {
+    sourceDocument: 'Medical Numerology Day 1 (Eng & Hindi).pdf',
+    author: 'Raajeev Singh Chauhann',
+    page: 1,
+    topic: 'Ayurveda Tridosha, Single/Bi/Tri-Doshic Analysis, Body Parts, Diseases & Vedic Mahadasha Grid Calculation',
+    rule: 'Number 1-9 Dosha mapping (1 Pitta, 2 Kapha, 3 Kapha, 4 Vata, 5 Vata, 6 Kapha, 7 Kapha, 8 Vata, 9 Pitta); Vedic 3x3 Grid [3,1,9][6,7,5][2,8,4]; Mahadasha sequence from Mulank',
+    level: 'LEVEL_B'
+  },
+  LEOFAMILY_MEDICAL_NUMEROLOGY_D2_PDF: {
+    sourceDocument: 'Medical Numerology Day 2 (Eng & Hindi).pdf',
+    author: 'Raajeev Singh Chauhann',
+    page: 1,
+    topic: 'Day Lord Mapping, Dasha of Day Formula, Dasha Start-Date Rule, Remedies Diet Plan & Vedic Remedies',
+    rule: 'Day Lord (Sun 1, Mon 2, Tue 9, Wed 5, Thu 3, Fri 6, Sat 8); Dasha formula: Day + Month + Year + Day Lord; Birthday Anniversary rule; Diet plans & Good karma remedies for 1-9',
     level: 'LEVEL_B'
   },
   LEOFAMILY_NUMERO_VASTU_PDF: {

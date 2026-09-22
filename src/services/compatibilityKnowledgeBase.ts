@@ -105,9 +105,9 @@ export function calculateAdvancedCompatibility(
   if (m1 === m2) driverScore = 85; 
   const driverMetric: CompatibilityMetric = {
     score: driverScore,
-    rating: driverScore >= 90 ? 'EXCELLENT' : driverScore >= 70 ? 'GOOD' : 'CHALLENGING',
-    explanation: `Driver Numbers ${m1} (Ruled by ${getPlanetName(m1)}) and ${m2} (Ruled by ${getPlanetName(m2)}) form a ${relDriver === 2 ? 'highly harmonious planetary relationship' : relDriver === 1 ? 'cooperative, neutral bond' : 'complex friction alliance'} in daily action templates.`,
-    whyThisResult: `Because Driver ${m1} & ${m2} have a traditional ${relDriver === 2 ? 'Friendly' : relDriver === 1 ? 'Neutral' : 'Enemy'} relationship factor in Vedic frameworks.`
+    rating: driverScore >= 90 ? 'अति उत्तम (EXCELLENT)' : driverScore >= 70 ? 'उत्तम (GOOD)' : 'चुनौतीपूर्ण (CHALLENGING)',
+    explanation: `मूलांक ${m1} (${getPlanetName(m1)}) और मूलांक ${m2} (${getPlanetName(m2)}) का आपसी संबंध दैनिक जीवन में ${relDriver === 2 ? 'अत्यंत सामंजस्यपूर्ण और सुखद' : relDriver === 1 ? 'सहयोगात्मक व सामान्य' : 'वैचारिक मतभेद वाला'} योग बनाता है।`,
+    whyThisResult: `वैदिक अंकशास्त्र के अनुसार मूलांक ${m1} और ${m2} के स्वामी ग्रहों में ${relDriver === 2 ? 'परस्पर मित्रता' : relDriver === 1 ? 'सम भाव (तटस्थ)' : 'शत्रुता/मतभेद'} का संबंध है।`
   };
 
   // LAYER 2: Conductor (Bhagyank) Compatibility
@@ -115,9 +115,9 @@ export function calculateAdvancedCompatibility(
   let condScore = relCond === 2 ? 95 : relCond === 1 ? 70 : 40;
   const condMetric: CompatibilityMetric = {
     score: condScore,
-    rating: condScore >= 90 ? 'EXCELLENT' : condScore >= 70 ? 'GOOD' : 'CHALLENGING',
-    explanation: `Conductor (Bhagyank) ${b1} met with Partner's Conductor ${b2} governs core material and spiritual expansion. This forms an axis of ${relCond === 2 ? 'seamless long-term planning' : relCond === 1 ? 'average supportive coordination' : 'critical delays in family building'}.`,
-    whyThisResult: `Because Conductor ${b1} & ${b2} are planetary ${relCond === 2 ? 'Friends' : relCond === 1 ? 'Neutral' : 'Opposition'} which influences career and conductor synastry.`
+    rating: condScore >= 90 ? 'अति उत्तम (EXCELLENT)' : condScore >= 70 ? 'उत्तम (GOOD)' : 'चुनौतीपूर्ण (CHALLENGING)',
+    explanation: `भाग्यांक ${b1} और साथी के भाग्यांक ${b2} का मिलान दीर्घकालिक भौतिक व आध्यात्मिक उन्नति को नियंत्रित करता है। यह संबंध ${relCond === 2 ? 'सहज व दीर्घकालिक उन्नति' : relCond === 1 ? 'संतुलित व सामान्य सहयोग' : 'पारिवारिक निर्णयों में सावधानी'} दर्शाता है।`,
+    whyThisResult: `भाग्यांक ${b1} और ${b2} के बीच ${relCond === 2 ? 'मित्रता' : relCond === 1 ? 'सामान्य' : 'विरोधी'} ग्रह संबंध है जो करियर और भविष्य के निर्णयों को प्रभावित करता है।`
   };
 
   // LAYER 3: Compound Number Compatibility
@@ -128,9 +128,9 @@ export function calculateAdvancedCompatibility(
   const compScore = Math.max(30, 100 - cDiff * 2.5);
   const compMetric: CompatibilityMetric = {
     score: compScore,
-    rating: compScore >= 80 ? 'EXCELLENT' : compScore >= 60 ? 'GOOD' : 'CHALLENGING',
-    explanation: `Compound Birth Numbers ${comp1} and ${comp2} are audited for core mathematical distance. A distance of ${cDiff} degrees represents ${compScore >= 80 ? 'pristine soul compatibility' : 'balanced adaptive rhythm'}.`,
-    whyThisResult: `Calculated from distance vector between birth compound days ${comp1} & ${comp2}, regulating sudden subconscious stress loops.`
+    rating: compScore >= 80 ? 'अति उत्तम (EXCELLENT)' : compScore >= 60 ? 'उत्तम (GOOD)' : 'चुनौतीपूर्ण (CHALLENGING)',
+    explanation: `जन्म तिथि के संयुक्त अंक ${comp1} और ${comp2} का सूक्ष्म विश्लेषण किया गया है। दोनों अंकों का अंतर ${cDiff} है जो ${compScore >= 80 ? 'उत्कृष्ट आत्मिक अनुकूलता' : 'संतुलित व व्यावहारिक तालमेल'} दर्शाता है।`,
+    whyThisResult: `जन्म दिवस के संयुक्त अंकों ${comp1} व ${comp2} के गणितीय अंतर पर आधारित, जो भावनात्मक तरंगों को नियंत्रित करता है।`
   };
 
   // LAYER 4: Name Compatibility
@@ -138,9 +138,9 @@ export function calculateAdvancedCompatibility(
   let nameScore = relName === 2 ? 92 : relName === 1 ? 75 : 50;
   const nameMetric: CompatibilityMetric = {
     score: nameScore,
-    rating: nameScore >= 85 ? 'EXCELLENT' : nameScore >= 70 ? 'GOOD' : 'CHALLENGING',
-    explanation: `Your name Chaldean sum is ${nameSum1} (resolving to root ${n1}) and partner name resolves to ${n2} (${nameSum2}). This represents how public identities and social circles blend happily.`,
-    whyThisResult: `Based on Chaldean Name roots ${n1} & ${n2} which directly direct communication harmony during social gatherings.`
+    rating: nameScore >= 85 ? 'अति उत्तम (EXCELLENT)' : nameScore >= 70 ? 'उत्तम (GOOD)' : 'चुनौतीपूर्ण (CHALLENGING)',
+    explanation: `आपके नाम का चालडियन जोड़ ${nameSum1} (मूलांक ${n1}) और साथी के नाम का जोड़ ${nameSum2} (मूलांक ${n2}) है। यह सामाजिक मेलजोल और सार्वजनिक जीवन में आपसी तालमेल को दर्शाता है।`,
+    whyThisResult: `चालडियन नामांक ${n1} और ${n2} के आधार पर, जो बातचीत और सामाजिक संबंधों को निर्धारित करते हैं।`
   };
 
   // LAYER 5: Mobile Compatibility
@@ -148,9 +148,9 @@ export function calculateAdvancedCompatibility(
   const mobScore = relMob === 2 ? 90 : relMob === 1 ? 72 : 48;
   const mobMetric: CompatibilityMetric = {
     score: mobScore,
-    rating: mobScore >= 80 ? 'EXCELLENT' : mobScore >= 65 ? 'GOOD' : 'CHALLENGING',
-    explanation: `Mobile vibrations resolve to ${mobVal1} matched with partner's ${mobVal2}. This dictates the cellular telecommunication ease between you two.`,
-    whyThisResult: `Formed by comparing the reduced sum of mobile values under Vedic planetary aspects.`
+    rating: mobScore >= 80 ? 'अति उत्तम (EXCELLENT)' : mobScore >= 65 ? 'उत्तम (GOOD)' : 'चुनौतीपूर्ण (CHALLENGING)',
+    explanation: `मोबाइल नंबर का एकल अंक ${mobVal1} और साथी के मोबाइल का अंक ${mobVal2} है। यह दैनिक दूरभाषी बातचीत और डिजिटल संवाद की सहजता को दर्शाता है।`,
+    whyThisResult: `दोनों मोबाइल नंबरों के योग और वैदिक ग्रह मित्रता के आधार पर गणना।`
   };
 
   // LAYER 6: Lo Shu Grid Synergies
@@ -161,9 +161,9 @@ export function calculateAdvancedCompatibility(
   const loshuScore = Math.min(100, Math.max(35, 40 + sharedNumbers.length * 15));
   const loshuMetric: CompatibilityMetric = {
     score: loshuScore,
-    rating: loshuScore >= 80 ? 'EXCELLENT' : loshuScore >= 60 ? 'GOOD' : 'CHALLENGING',
-    explanation: `The overlay of your Lo Shu Grids reveals ${sharedNumbers.length} shared energy blocks (${sharedNumbers.join(', ') || 'none'}), displaying outstanding coordination in balancing life quadrants.`,
-    whyThisResult: `Computed from the intersection elements in both Lo Shu grids which represents shared energetic elements.`
+    rating: loshuScore >= 80 ? 'अति उत्तम (EXCELLENT)' : loshuScore >= 60 ? 'उत्तम (GOOD)' : 'चुनौतीपूर्ण (CHALLENGING)',
+    explanation: `दोनों के लो शू ग्रिड में ${sharedNumbers.length} उभयनिष्ठ अंक (${sharedNumbers.join(', ') || 'कोई नहीं'}) उपस्थित हैं, जो जीवन के विभिन्न पहलुओं में उत्तम तालमेल दर्शाते हैं।`,
+    whyThisResult: `दोनों लो शू ग्रिड के उभयनिष्ठ ऊर्जा केंद्रों की उपस्थिति के आधार पर गणना।`
   };
 
   // LAYER 7: Arrow Compatibility
@@ -172,9 +172,9 @@ export function calculateAdvancedCompatibility(
   const arrowScore = Math.min(100, Math.max(40, 50 + (arrow1 + arrow2) * 8));
   const arrowMetric: CompatibilityMetric = {
     score: arrowScore,
-    rating: arrowScore >= 75 ? 'EXCELLENT' : arrowScore >= 60 ? 'GOOD' : 'CHALLENGING',
-    explanation: `Combined, the couple shares ${arrow1 + arrow2} complete arrows of willpower, determination, or intellect, producing deep active avenues of prosperity.`,
-    whyThisResult: `Based on total constructive strength vectors generated by present Lo Shu structural arrows.`
+    rating: arrowScore >= 75 ? 'अति उत्तम (EXCELLENT)' : arrowScore >= 60 ? 'उत्तम (GOOD)' : 'चुनौतीपूर्ण (CHALLENGING)',
+    explanation: `दोनों के चार्ट में मिलकर कुल ${arrow1 + arrow2} पूर्ण योग (इच्छाशक्ति, संकल्प या बुद्धि के तीर) बनते हैं, जो जीवन में प्रगति के मार्ग खोलते हैं।`,
+    whyThisResult: `लो शू ग्रिड के सकारात्मक तीरों (Strengths Arrows) के संयुक्त प्रभाव पर आधारित।`
   };
 
   // LAYER 8: Missing Number Compatibility
@@ -186,29 +186,29 @@ export function calculateAdvancedCompatibility(
   const missingScore = Math.min(100, Math.max(30, 45 + (p1SavesP2 + p2SavesP1) * 12));
   const missingMetric: CompatibilityMetric = {
     score: missingScore,
-    rating: missingScore >= 80 ? 'EXCELLENT' : 'GOOD',
-    explanation: `Mutual support matrix is outstanding. Partner 1 fills ${p2SavesP1} energetic voids for Partner 2, while Partner 2 compensates for ${p1SavesP2} of Partner 1's missing cosmic frequencies.`,
-    whyThisResult: `Derived from cross-filling capacity of empty nodes in each other’s personal birth grids.`
+    rating: missingScore >= 80 ? 'अति उत्तम (EXCELLENT)' : 'उत्तम (GOOD)',
+    explanation: `परस्पर ऊर्जा पूर्ति बहुत अच्छी है। पार्टनर 1 पार्टनर 2 के ${p2SavesP1} खाली अंकों की पूर्ति करते हैं, जबकि पार्टनर 2 पार्टनर 1 के ${p1SavesP2} अनुपस्थित अंकों को संतुलित करते हैं।`,
+    whyThisResult: `एक-दूसरे के जन्म ग्रिड के खाली ऊर्जा केंद्रों को परस्पर संतुलित करने की क्षमता पर आधारित।`
   };
 
   // LAYER 9: Karmic Compatibility
   const karmicScore = isSoulmate ? 98 : karmicWarning ? 50 : 75;
   const karmicMetric: CompatibilityMetric = {
     score: karmicScore,
-    rating: karmicScore >= 90 ? 'KARMIC SOULMATE' : karmicScore >= 70 ? 'STABLE' : 'KARMIC TEST',
-    explanation: isSoulmate ? 'Amazing. Strong soulmate past-life configuration found. Absolute spiritual loyalty.' : 
-                 karmicWarning ? 'Alert: Presence of structural lessons. Requires planetary mantras to prevent sudden disruptions.' : 
-                 'Standard peaceful karmic pattern. Balanced growth avenues without aggressive backlogs.',
-    whyThisResult: `Determined by check of driver-conductor crossovers (${m1} & ${b2}, ${m2} & ${b1}) and planetary standard warning coordinates.`
+    rating: karmicScore >= 90 ? 'आत्मिक संबंध (KARMIC SOULMATE)' : karmicScore >= 70 ? 'स्थिर (STABLE)' : 'कर्मिक परीक्षा (KARMIC TEST)',
+    explanation: isSoulmate ? 'अत्यंत दुर्लभ और शुभ संयोग। पूर्व जन्म का गहरा आत्मिक संबंध और अटूट निष्ठा।' : 
+                 karmicWarning ? 'सावधानी: कुछ कर्मिक सबक सीखने की आवश्यकता है। शांति बनाए रखने हेतु दैनिक ग्रह मंत्र व उपाय आवश्यक हैं।' : 
+                 'सामान्य व शांतिपूर्ण कर्मिक संबंध। बिना बड़े तनाव के संतुलित जीवन यात्रा।',
+    whyThisResult: `मूलांक-भाग्यांक क्रॉसओवर (${m1} व ${b2}, ${m2} व ${b1}) और चेतावनी निर्देशांकों की जांच पर आधारित।`
   };
 
   // LAYER 10: Planetary Compatibility
   const pScore = Math.round((PLANETARY_RELS[m1]?.[m2] + PLANETARY_RELS[b1]?.[b2] + PLANETARY_RELS[n1]?.[n2]) * 16.6);
   const planetaryMetric: CompatibilityMetric = {
     score: pScore,
-    rating: pScore >= 80 ? 'HIGHLY HARMONIOUS' : pScore >= 60 ? 'NEUTRAL' : 'CONFLICT PRONE',
-    explanation: `The overall planetary alignment between rulers Sun, Moon, Jupiter, Mercury, Venus, or Saturn shows ${pScore >= 80 ? 'outstanding sync' : pScore >= 60 ? 'acceptable baseline coordination' : 'intense friction requiring remedial correction'}.`,
-    whyThisResult: `Calculated from aggregate weights of planetary friendships across Driver, Conductor, and Name root vibrations.`
+    rating: pScore >= 80 ? 'अत्यंत अनुकूल (HARMONIOUS)' : pScore >= 60 ? 'सामान्य (NEUTRAL)' : 'मतभेद की संभावना',
+    explanation: `ग्रह स्वामियों (सूर्य, चंद्रमा, गुरु, बुध, शुक्र, शनि आदि) का कुल तालमेल ${pScore >= 80 ? 'उत्कृष्ट' : pScore >= 60 ? 'संतोषजनक व सामान्य' : 'सावधानी व उपाय योग्य'} है।`,
+    whyThisResult: `मूलांक, भाग्यांक और नामांक के ग्रह स्वामियों की परस्पर मित्रता के कुल भार पर आधारित।`
   };
 
   // CATEGORY CORES
@@ -233,102 +233,102 @@ export function calculateAdvancedCompatibility(
   const emotionalMetric: CompatibilityMetric = {
     score: emotionalScore,
     rating: getCategoryRating(emotionalScore),
-    explanation: `Emotional attachment is ${getCategoryDesc(emotionalScore)}. Your root emotions sync ${emotionalScore >= 80 ? 'beautifully' : 'with moderate adjustment cycles'}.`,
-    whyThisResult: `Driven by Driver ${m1} & ${m2} harmony modified by compound day distance of ${cDiff}.`
+    explanation: `भावनात्मक जुड़ाव ${getCategoryDesc(emotionalScore)} है। दोनों के मूल स्वभाव में ${emotionalScore >= 80 ? 'सुंदर तालमेल' : 'थोड़े सामंजस्य के साथ अच्छा समन्वय'} है।`,
+    whyThisResult: `मूलांक ${m1} व ${m2} की मित्रता और जन्म दिन के अंतर (${cDiff}) पर आधारित।`
   };
 
   const communicationMetric: CompatibilityMetric = {
     score: communicationScore,
     rating: getCategoryRating(communicationScore),
-    explanation: `Sharing of thoughts is ${getCategoryDesc(communicationScore)}. The couple communicates with ${communicationScore >= 80 ? 'tremendous transparency' : 'minor hesitations during stressful projects'}.`,
-    whyThisResult: `Derived from Chaldean name Roots and Mobile root totals ${mobVal1} & ${mobVal2}.`
+    explanation: `विचारों का आदान-प्रदान ${getCategoryDesc(communicationScore)} है। बातचीत में ${communicationScore >= 80 ? 'अत्यंत स्पष्टता और खुलापन' : 'तनाव के समय थोड़ा संकोच'} रह सकता है।`,
+    whyThisResult: `चालडियन नामांक और मोबाइल अंकों (${mobVal1} व ${mobVal2}) के आधार पर।`
   };
 
   const financialMetric: CompatibilityMetric = {
     score: financialScore,
     rating: getCategoryRating(financialScore),
-    explanation: `Wealth and asset coordination score is ${financialScore}/100. Relies on destiny numbers.`,
-    whyThisResult: `Conductor ${b1} & ${b2} dictate career luck, while Lo Shu Arrows support mutual real estate joint actions.`
+    explanation: `धन और संपत्ति का संयुक्त सूचकांक ${financialScore}/100 है। भाग्यांक की अनुकूलता पर निर्भर करता है।`,
+    whyThisResult: `भाग्यांक ${b1} व ${b2} करियर की दिशा तय करते हैं, जबकि लो शू तीर संयुक्त निवेश को समर्थन देते हैं।`
   };
 
   const familyMetric: CompatibilityMetric = {
     score: familyScore,
     rating: getCategoryRating(familyScore),
-    explanation: `Domestic tranquility, children prosperity, and relationship with in-laws is rated ${getCategoryRating(familyScore)}.`,
-    whyThisResult: `Calculated from Lo Shu structural sync and Chaldean Name compatibility to balance household vibes.`
+    explanation: `पारिवारिक सुख-शांति, संतान समृद्धि और परिजनों के साथ तालमेल की रेटिंग ${getCategoryRating(familyScore)} है।`,
+    whyThisResult: `लो शू संरचनात्मक समन्वय और चालडियन नामांक के पारिवारिक प्रभाव पर आधारित।`
   };
 
   const intimacyMetric: CompatibilityMetric = {
     score: intimacyScore,
     rating: getCategoryRating(intimacyScore),
-    explanation: `Physical and chemistry resonance maps to a highly stable ${intimacyScore}%.`,
-    whyThisResult: `Reflects driver mutual attraction indices modified by Lo Shu emotional plane coordination.`
+    explanation: `परस्पर आकर्षण और सामंजस्य का स्तर ${intimacyScore}% पर स्थिर है।`,
+    whyThisResult: `मूलांक आकर्षण और लो शू भावनात्मक तल के समन्वय से निर्धारित।`
   };
 
   const spiritualMetric: CompatibilityMetric = {
     score: spiritualScore,
     rating: getCategoryRating(spiritualScore),
-    explanation: `Soul evolution and support during dark transits registers at ${spiritualScore}%.`,
-    whyThisResult: `Based on karmic indicators and Conductor compatibility which direct long-term spiritual growth.`
+    explanation: `कठिन समय में एक-दूसरे का संबल बनना और आध्यात्मिक उन्नति का स्तर ${spiritualScore}% है।`,
+    whyThisResult: `कर्मिक संकेतों और भाग्यांक की अनुकूलता पर आधारित।`
   };
 
   // Generate dynamic actionable conflict areas
   const conflicts: { area: string; riskLevel: 'HIGH' | 'MEDIUM' | 'LOW'; description: string; advice: string }[] = [];
   if (relDriver === 0) {
     conflicts.push({
-      area: 'Ego Clashes in Daily Decisions',
+      area: 'दैनिक निर्णयों में अहं का टकराव',
       riskLevel: 'HIGH',
-      description: `Because Driver ${m1} (${getPlanetName(m1)}) and Driver ${m2} (${getPlanetName(m2)}) have contradictory approaches to authority.`,
-      advice: 'Implement a clear rule: Partner 1 retains veto rights in domestic setups, and Partner 2 retains veto in financial investments.'
+      description: `मूलांक ${m1} (${getPlanetName(m1)}) और मूलांक ${m2} (${getPlanetName(m2)}) के नेतृत्व दृष्टिकोण में अंतर के कारण।`,
+      advice: 'एक स्पष्ट नियम बनाएं: घरेलू निर्णयों में पार्टनर 1 और वित्तीय निवेश में पार्टनर 2 की राय को प्राथमिकता दें।'
     });
   }
   if (karmicWarning) {
     conflicts.push({
-      area: 'Sudden Unexpressed Distrust Intervals',
+      area: 'कभी-कभार मनमुटाव या चुप्पी',
       riskLevel: 'MEDIUM',
-      description: 'Triggered by karmic warning parameters, generating periods of silence or sudden withdrawal.',
-      advice: 'Vow to discuss small relationship irritations every Friday evening over light meals to prevent residue storage.'
+      description: 'कर्मिक चेतावनी के कारण समय-समय पर बातचीत में दूरी आ सकती है।',
+      advice: 'प्रत्येक शुक्रवार शाम को साथ बैठकर मन की बात खुलकर साझा करें ताकि गिले-शिकवे न बढ़ें।'
     });
   }
   if (PLANETARY_RELS[n1]?.[n2] === 0) {
     conflicts.push({
-      area: 'Public Social Disagreements',
+      area: 'सामाजिक मुलाकातों में वैचारिक मतभेद',
       riskLevel: 'MEDIUM',
-      description: 'Your names have conflicting Chaldean roots, which can cause misunderstandings during large circle gatherings.',
-      advice: 'Avoid entering arguments in public arenas. Standardize your signatures with upwards starting blocks to maintain composure.'
+      description: 'नामांक में थोड़ा अंतर होने के कारण सार्वजनिक कार्यक्रमों में राय अलग हो सकती है।',
+      advice: 'सार्वजनिक स्थानों पर बहस से बचें और अपने हस्ताक्षर को ऊपर की ओर 15 डिग्री पर करने का अभ्यास करें।'
     });
   }
   if (conflicts.length === 0) {
     conflicts.push({
-      area: 'Minor Domestic Schedule Friction',
+      area: 'दैनिक दिनचर्या में सामान्य समायोजन',
       riskLevel: 'LOW',
-      description: 'Standard household adjustment loops occurring under planetary transit changes.',
-      advice: 'Maintain a clean copper water vessel in the north-east zone of the master bedroom.'
+      description: 'ग्रह गोचर के बदलाव के समय होने वाले सामान्य घरेलू समायोजन।',
+      advice: 'शयनकक्ष के ईशान कोण (North-East) में तांबे के पात्र में स्वच्छ जल रखें।'
     });
   }
 
   // Generate dynamic, realistic growth plans
   const growth: { area: string; benefit: string; plan: string }[] = [
     {
-      area: 'Mutual Wealth Compounding',
-      benefit: 'Launches multiple commercial income channels and clears real estate blockages.',
-      plan: `Since Partner 1 fills ${p2SavesP1} voids for Partner 2, sign all joint investment papers on a Thursday morning holding yellow-gold metals.`
+      area: 'संयुक्त धन वृद्धि एवं निवेश',
+      benefit: 'अतिरिक्त आय के स्रोत खुलते हैं और संपत्ति में रुकावटें दूर होती हैं।',
+      plan: `चूंकि पार्टनर 1 पार्टनर 2 के ${p2SavesP1} खाली अंकों को सहारा देते हैं, संयुक्त निवेश के कागजातों पर गुरुवार सुबह हस्ताक्षर करें।`
     },
     {
-      area: 'Empathetic Transparent Space',
-      benefit: 'Dissolves hidden emotional stress waves completely.',
-      plan: `Install a joint photograph in a premium silver frame in the South-West sector of the living room.`
+      area: 'पारस्परिक विश्वास एवं शांति',
+      benefit: 'अदृश्य मानसिक तनाव और चिंताएं पूरी तरह समाप्त होती हैं।',
+      plan: `लिविंग रूम के दक्षिण-पश्चिम (South-West) कोने में चांदी के फ्रेम में दोनों का संयुक्त चित्र लगाएं।`
     }
   ];
 
   return {
     overallScore: overallStability,
-    overallRating: overallStability >= 85 ? 'EXCELLENT STABILITY' : overallStability >= 70 ? 'GOOD ALIGNMENT' : 'REQUIRES REMEDIAL SHIELD',
+    overallRating: overallStability >= 85 ? 'अति उत्तम स्थिरता (EXCELLENT STABILITY)' : overallStability >= 70 ? 'उत्तम तालमेल (GOOD ALIGNMENT)' : 'उपायों की आवश्यकता (REQUIRES REMEDIES)',
     overallExplanation: overallStability >= 85 
-      ? 'An outstandingly supportive relationship. Harmonious drivers and complementary Lo Shu grids guarantee deep long-term companionship.'
+      ? 'एक अत्यंत अनुकूल और सुखद संबंध। मित्र मूलांक और पूरक लो शू ग्रिड दीर्घकालिक साथी के रूप में उत्तम सुख का संकेत देते हैं।'
       : overallStability >= 70 
-      ? 'A robust, protective relationship. Generates stable home zones but requires proactive discussion to bypass minor ego hurdles.'
-      : 'A challenging alignment. High planetary opposition found. Strongly recommended to perform daily Sun water rituals and name spelling upgrades.',
+      ? 'एक मजबूत और सुरक्षात्मक संबंध। घरेलू स्तर पर स्थिरता देता है, बस कभी-कभार बातचीत से छोटी-मोटी गलतफहमियां दूर करते रहें।'
+      : 'थोड़ा चुनौतीपूर्ण संबंध। ग्रहों में मतभेद होने के कारण नियमित सूर्य को अर्घ्य देना और नाम की स्पेलिंग का सही समायोजन लाभकारी रहेगा।',
     layers: {
       driver: driverMetric,
       conductor: condMetric,
@@ -360,21 +360,21 @@ export function calculateAdvancedCompatibility(
 
 function getPlanetName(num: number): string {
   const ps: Record<number, string> = {
-    1: 'Sun', 2: 'Moon', 3: 'Jupiter', 4: 'Rahu', 5: 'Mercury', 6: 'Venus', 7: 'Ketu', 8: 'Saturn', 9: 'Mars'
+    1: 'सूर्य (Sun)', 2: 'चंद्रमा (Moon)', 3: 'बृहस्पति (Jupiter)', 4: 'राहु (Rahu)', 5: 'बुध (Mercury)', 6: 'शुक्र (Venus)', 7: 'केतु (Ketu)', 8: 'शनि (Saturn)', 9: 'मंगल (Mars)'
   };
-  return ps[num] || 'Sovereign';
+  return ps[num] || 'स्वामी';
 }
 
 function getCategoryRating(score: number): string {
-  if (score >= 85) return 'EXCELLENT';
-  if (score >= 70) return 'GOOD';
-  return 'OK (REMEDIES SUGGESTED)';
+  if (score >= 85) return 'अति उत्तम (EXCELLENT)';
+  if (score >= 70) return 'उत्तम (GOOD)';
+  return 'सामान्य (उपाय सुझाये गए)';
 }
 
 function getCategoryDesc(score: number): string {
-  if (score >= 85) return 'highly harmonious, resilient, and deeply satisfying';
-  if (score >= 70) return 'stable, dependable, and generally highly smooth';
-  return 'dependent on emotional patience and planetary remedies';
+  if (score >= 85) return 'अत्यंत सामंजस्यपूर्ण, सुखद और गहरा';
+  if (score >= 70) return 'स्थिर, विश्वसनीय और सहज';
+  return 'धैर्य और सरल उपायों पर आधारित';
 }
 
 function calculateChaldeanNameSum(name: string): number {

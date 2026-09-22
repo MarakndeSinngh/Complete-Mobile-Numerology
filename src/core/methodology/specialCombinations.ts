@@ -14,8 +14,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Good Married Life & Domestic Bliss',
     hindiTitle: 'सुखी दांपत्य जीवन',
     patterns: ['2567', '5666', '5667'],
-    description: 'Brings lunar emotional understanding (2), mercurial communication (5), venusian love (6), and ketu spiritual bond (7).',
-    traditionalInterpretation: 'Configurations with 2567 or triple 6 flanked by 5 foster enduring marital warmth, mutual loyalty, and domestic elegance.',
+    description: 'चंद्रमा (2) की भावनात्मक समझ, बुध (5) का संवाद, शुक्र (6) का प्रेम और केतु (7) का आत्मिक जुड़ाव लाता है।',
+    traditionalInterpretation: '2567 या 5 के साथ 666 का संयोग दांपत्य जीवन में मधुरता, आपसी निष्ठा और पारिवारिक सुख-शांति प्रदान करता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   education: {
@@ -23,8 +23,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Higher Education & Academic Excellence',
     hindiTitle: 'उच्च शिक्षा और शैक्षणिक सफलता',
     patterns: ['6555', '3569'],
-    description: 'Combines Venusian focus (6), triple Mercury (555) for mental calculation, Jupiter (3) for wisdom, and Mars (9) for competitive focus.',
-    traditionalInterpretation: 'Auspicious for students pursuing demanding board exams, university admissions, and scholarly research.',
+    description: 'शुक्र (6) की एकाग्रता, बुध (555) की गणना व याददाश्त, गुरु (3) का ज्ञान और मंगल (9) की प्रतिस्पर्धात्मक ऊर्जा को जोड़ता है।',
+    traditionalInterpretation: 'कठिन बोर्ड परीक्षाओं, उच्च शिक्षा, विश्वविद्यालय प्रवेश और शोध कार्यों में संलग्न विद्यार्थियों के लिए अत्यंत शुभ।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   foreign_travel: {
@@ -32,8 +32,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Foreign Travel & Overseas Opportunities',
     hindiTitle: 'विदेश यात्रा और अंतरराष्ट्रीय अवसर',
     patterns: ['3567', '1113', '3579', '2756'],
-    description: 'Unlocks planetary mobility through combinations bridging Jupiter (3), Mercury (5), Venus (6), Ketu (7), and Mars (9).',
-    traditionalInterpretation: 'Attracts international work permits, cross-border business expansion, and global relocation.',
+    description: 'गुरु (3), बुध (5), शुक्र (6), केतु (7) और मंगल (9) के समन्वय से विदेश गमन और यात्रा के मजबूत योग बनते हैं।',
+    traditionalInterpretation: 'अंतरराष्ट्रीय स्तर पर नौकरी, वर्क परमिट, विदेश व्यापार विस्तार और वैश्विक पुनर्वास के अवसरों को आकर्षित करता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   health: {
@@ -41,8 +41,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Vitality & Traditional Wellness Harmony',
     hindiTitle: 'आरोग्य और जीवन शक्ति',
     patterns: ['3569'],
-    description: 'Synthesizes Guru (3) cellular wisdom, Budha (5) nervous agility, Shukra (6) rejuvenation, and Mangal (9) physical stamina.',
-    traditionalInterpretation: 'Supports physical stamina and holistic wellness routines. (Traditional supportive symbolism, not a medical cure).',
+    description: 'गुरु (3) का आंतरिक ज्ञान, बुध (5) की मानसिक सजगता, शुक्र (6) की ताजगी और मंगल (9) की शारीरिक ऊर्जा का संतुलन।',
+    traditionalInterpretation: 'शारीरिक स्फूर्ति, ऊर्जा और समग्र स्वास्थ्य संतुलन में सहायक सिद्ध होता है। (यह पारम्परिक सलाह है, चिकित्सकीय उपचार नहीं)।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   relationships: {
@@ -50,8 +50,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Harmonious Relationships & Social Support',
     hindiTitle: 'मधुर संबंध और सामाजिक सहयोग',
     patterns: ['3567'],
-    description: 'Jupiter (3), Mercury (5), Venus (6), and Ketu (7) create a magnetic field of empathy, fair communication, and goodwill.',
-    traditionalInterpretation: 'Dissolves social friction, attracting reliable mentors and supportive friends.',
+    description: 'गुरु (3), बुध (5), शुक्र (6) और केतु (7) मिलकर आपसी सम्मान, स्पष्ट बातचीत और सौहार्द का वातावरण बनाते हैं।',
+    traditionalInterpretation: 'सामाजिक और पारिवारिक तनाव दूर करने, अच्छे मित्रों और सच्चे मार्गदर्शकों का सहयोग पाने में लाभकारी।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   promotion: {
@@ -59,8 +59,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Career Promotion & Corporate Elevation',
     hindiTitle: 'पदोन्नति और करियर में प्रगति',
     patterns: ['4368'],
-    description: 'Connects Rahu (4) breakthroughs, Jupiter (3) managerial advice, Venus (6) corporate goodwill, and Saturn (8) executive tenure.',
-    traditionalInterpretation: 'Aids candidates aspiring to senior managerial promotions and corporate appraisals.',
+    description: 'राहु (4) की रणनीतिक सूझबूझ, गुरु (3) की सलाह, शुक्र (6) का सहयोग और शनि (8) का प्रशासनिक प्रभाव जोड़ता है।',
+    traditionalInterpretation: 'वरिष्ठ प्रबंधकीय पदों, पदोन्नति (Promotion) और कॉरपोरेट क्षेत्र में मान-सम्मान पाने में सहायक।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   luck_factor: {
@@ -68,8 +68,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Luck Factor & Auspicious Synchronicity',
     hindiTitle: 'भाग्य वृद्धि और शुभ संयोग',
     patterns: ['4566'],
-    description: 'Integrates Rahu (4) sudden windfalls, Mercury (5) commercial timing, and Double Venus (66) luxury fortune.',
-    traditionalInterpretation: 'Enhances timely opportunities, sudden favors from decision-makers, and smooth project approvals.',
+    description: 'राहु (4) का अचानक लाभ, बुध (5) की सही व्यापारिक समझ और दोहरे शुक्र (66) का वैभव व भाग्य योग।',
+    traditionalInterpretation: 'सही समय पर उचित अवसर, उच्चाधिकारियों का सहयोग और अटके हुए कार्यों में अचानक सफलता दिलाता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   will_power: {
@@ -77,8 +77,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Will Power, Resolve & Unyielding Focus',
     hindiTitle: 'दृढ़ इच्छाशक्ति और आत्मबल',
     patterns: ['1159'],
-    description: 'Combines Double Sun (11) executive determination, Mercury (5) tactical planning, and Mars (9) fearless follow-through.',
-    traditionalInterpretation: 'Eliminates procrastination and establishes formidable self-discipline.',
+    description: 'दोहरे सूर्य (11) का दृढ़ संकल्प, बुध (5) की व्यावहारिक योजना और मंगल (9) की निर्भीक क्रियाशीलता का संगम।',
+    traditionalInterpretation: 'आलस्य और टालमटोल की आदत दूर कर जीवन में अटूट अनुशासन और इच्छाशक्ति का निर्माण करता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   court_case: {
@@ -86,8 +86,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Legal Defense & Court Case Settlement',
     hindiTitle: 'विधिक रक्षा और न्यायालयीन विवाद निपटारा',
     patterns: ['4488'],
-    description: 'Double Rahu (44) strategic acumen coupled with Double Saturn (88) endurance for courtroom litigation.',
-    traditionalInterpretation: 'Strengthens stamina during prolonged legal proceedings and complex institutional disputes.',
+    description: 'दोहरे राहु (44) की कुशाग्र रणनीति और दोहरे शनि (88) का धैर्य, जो जटिल कानूनी व अदालती विवादों में शक्ति देता है।',
+    traditionalInterpretation: 'दीर्घकालिक कानूनी प्रक्रियाओं और संस्थागत विवादों में संबल और सही निर्णय लेने की क्षमता बढ़ाता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   money_attraction: {
@@ -95,8 +95,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Money Attraction & Financial Abundance',
     hindiTitle: 'धन आकर्षण और वित्तीय समृद्धि',
     patterns: ['3467'],
-    description: 'Connects Jupiter (3) wealth wisdom, Rahu (4) large-scale transactions, Venus (6) liquid cash, and Ketu (7) retention.',
-    traditionalInterpretation: 'Stimulates revenue streams, lucrative client conversions, and financial liquidity.',
+    description: 'गुरु (3) का धन-ज्ञान, राहु (4) का बड़ा लेन-देन, शुक्र (6) का नगद प्रवाह (Cash Flow) और केतु (7) की बचत।',
+    traditionalInterpretation: 'आमदनी के नए स्रोत खोलने, लाभकारी सौदों और आर्थिक मजबूती व तरलता को गति देता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   property: {
@@ -104,8 +104,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Property Acquisition & Real Estate Wealth',
     hindiTitle: 'भूमि-भवन और अचल संपत्ति लाभ',
     patterns: ['2588'],
-    description: 'Moon (2) residential home comfort, Mercury (5) clean title deeds, and Double Saturn (88) massive earth/land holdings.',
-    traditionalInterpretation: 'Classic signature for buying residential land, commercial properties, and immovable estates.',
+    description: 'चंद्रमा (2) का गृह सुख, बुध (5) के स्पष्ट दस्तावेज और दोहरे शनि (88) का विशाल भूमि व अचल संपत्ति योग।',
+    traditionalInterpretation: 'आवासीय मकान, प्लॉट, कमर्शियल प्रॉपर्टी और अचल संपत्ति खरीदने के लिए अत्यंत प्रभावशाली योग।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   govt_job: {
@@ -113,8 +113,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Government Job & Public Sector Authority',
     hindiTitle: 'सरकारी सेवा और प्रशासनिक अधिकार',
     patterns: ['1458'],
-    description: 'Sun (1) sovereign state authority, Rahu (4) competitive exams, Mercury (5) paperwork/interviews, Saturn (8) permanent tenure.',
-    traditionalInterpretation: 'Supports aspirants targeting civil services, state commissions, and public sector undertakings.',
+    description: 'सूर्य (1) का राजसत्ता अधिकार, राहु (4) की प्रतियोगी परीक्षा सूझबूझ, बुध (5) का साक्षात्कार और शनि (8) का स्थायी पद।',
+    traditionalInterpretation: 'सिविल सेवा, राज्य प्रशासनिक सेवाओं और सरकारी उपक्रमों की तैयारी करने वालों के लिए अनुकूल।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   construction_house: {
@@ -122,8 +122,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Construction of House & Infrastructure Building',
     hindiTitle: 'गृह निर्माण और भवन विस्तार',
     patterns: ['4568'],
-    description: 'Rahu (4) architectural blueprints, Mercury (5) approvals, Venus (6) interior beauty, and Saturn (8) bricks/steel execution.',
-    traditionalInterpretation: 'Helps overcome delays in starting, erecting, and completing residential or commercial buildings.',
+    description: 'राहु (4) का वास्तु ब्लूप्रिंट, बुध (5) की स्वीकृतियां, शुक्र (6) का आंतरिक सौंदर्य और शनि (8) का भवन निर्माण।',
+    traditionalInterpretation: 'मकान निर्माण की शुरुआत, प्रगति और आवासीय या व्यावसायिक भवन पूर्ण करने में आ रही रुकावटें दूर करता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   business_growth: {
@@ -131,8 +131,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Business Growth & Commercial Expansion',
     hindiTitle: 'व्यापार वृद्धि और व्यावसायिक विस्तार',
     patterns: ['1159', '1559'],
-    description: 'Sun-Mercury-Mars engines engineered to scale customer acquisition, product turnover, and market dominance.',
-    traditionalInterpretation: 'Accelerates trading volumes, dealership networks, and business revenue growth.',
+    description: 'सूर्य-बुध-मंगल का शक्तिशाली योग, जो ग्राहक आधार, उत्पादों की बिक्री और बाजार में दबदबा बढ़ाने में सक्षम है।',
+    traditionalInterpretation: 'व्यापारिक टर्नओवर, डीलरशिप नेटवर्क और व्यावसायिक मुनाफे में तेज वृद्धि सुनिश्चित करता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   politics: {
@@ -140,8 +140,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Political Influence & Mass Leadership',
     hindiTitle: 'राजनीतिक प्रभाव और जनसमर्थन',
     patterns: ['1348'],
-    description: 'Sun (1) command, Jupiter (3) party manifesto, Rahu (4) mass crowd mobilization, Saturn (8) electoral perseverance.',
-    traditionalInterpretation: 'Aids public candidates, civic activists, and political strategists.',
+    description: 'सूर्य (1) का नेतृत्व, गुरु (3) का मार्गदर्शन, राहु (4) का जनसमर्थन और शनि (8) का निरंतर जनसेवा समर्पण।',
+    traditionalInterpretation: 'जनप्रतिनिधियों, सामाजिक कार्यकर्ताओं और राजनीतिक रणनीतिकारों के लिए प्रतिष्ठा व प्रभाव बढ़ाता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   prosperity: {
@@ -149,8 +149,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Overall Prosperity & Auspicious Lifestyle',
     hindiTitle: 'समग्र समृद्धि और ऐश्वर्य',
     patterns: ['1668'],
-    description: 'Sun (1) status, Double Venus (66) supreme comfort and luxury assets, Saturn (8) permanent stability.',
-    traditionalInterpretation: 'Establishes generational family wealth, luxurious residences, and prestigious status.',
+    description: 'सूर्य (1) की प्रतिष्ठा, दोहरे शुक्र (66) का सर्वोच्च भौतिक व पारिवारिक सुख और शनि (8) का स्थायी स्थायित्व।',
+    traditionalInterpretation: 'पीढ़ी-दर-पीढ़ी चलने वाली पारिवारिक समृद्धि, विलासिता और समाज में सम्मानित दर्जा दिलाता है।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   },
   peace_of_mind: {
@@ -158,8 +158,8 @@ export const SPECIAL_GOAL_COMBINATIONS: Record<string, SpecialGoalCombination> =
     goalName: 'Peace of Mind & Mental Tranquility',
     hindiTitle: 'मानसिक शांति और सौहार्द',
     patterns: ['4556', '5151'],
-    description: 'Stabilizes the nervous system through harmonious Mercury-Venus balances and rhythmic solar-mercurial pulses.',
-    traditionalInterpretation: 'Reduces anxiety, fosters restful sleep, and restores peaceful domestic tranquility.',
+    description: 'बुध और शुक्र के सौम्य संतुलन से तंत्रिका तंत्र को शांत कर मानसिक शांति और सहजता प्रदान करता है।',
+    traditionalInterpretation: 'मानसिक तनाव और बेचैनी कम करता है, गहरी नींद लाने और पारिवारिक सुख-शांति स्थापित करने में सहायक।',
     source: 'Mobile PIN & Combination Reference (PDF 2, Pages 46-47)'
   }
 };

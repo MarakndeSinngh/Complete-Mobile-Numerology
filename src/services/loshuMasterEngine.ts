@@ -3,6 +3,7 @@ import { calculateKuaNumber } from './numeroVaastuEngine';
 import { computeLoshuAnalysis } from './loshuEngine';
 import { LEOFAMILY_PLANES } from '../core/planeDefinitions';
 import { parseIndianDate } from '../utils/dateUtils';
+import { getCombination81 } from '../core/methodology/combinationDefinitions';
 
 export interface CombinationResult {
   code: string; // "11" to "99"
@@ -281,160 +282,19 @@ export interface LoshuMasterReport {
 // 81 Combinations Dictionary Generator Helper
 const generateCombinationDetails = (x: number, y: number): CombinationResult => {
   const code = `${x}${y}`;
-  const sum = reduceToSingleDigit(x + y);
-
-  const planetaryRulers: Record<number, string> = {
-    1: 'Sun', 2: 'Moon', 3: 'Jupiter', 4: 'Rahu', 5: 'Mercury',
-    6: 'Venus', 7: 'Ketu', 8: 'Saturn', 9: 'Mars'
-  };
-
-  const rulerX = planetaryRulers[x];
-  const rulerY = planetaryRulers[y];
-
-  // Specific Names & Details for key combinations
-  let name = `The ${rulerX}-${rulerY} Amalgam`;
-  let meaning = `Vibrational resonance linking the power of the ${rulerX} with the wisdom of the ${rulerY}. Accentuates Conductor path ${sum}.`;
-  let strength = `A balanced alignment facilitating high execution drive, creative expression, and intellectual curiosity.`;
-  let weakness = `Potential internal conflicts where the motivations of ${rulerX} override the strategic requirements of ${rulerY}.`;
-  let careerImpact = `Highly positive for positions demanding intellectual depth, advising, or leadership execution.`;
-  let relationshipImpact = `Requires clear, open verbal agreements. Empathetic alignment ensures deep long-term stability.`;
-  let financialImpact = `Best suited for structured long-term assets and systematic cash placements rather than volatile speculation.`;
-  let spiritualImpact = `Encourages self-reflection and alignment with high-vibration mentorship.`;
-  let remedy = `Perform focused visual meditations or carry matching elemental crystals representing number ${sum}.`;
-
-  if (x === 1 && y === 1) {
-    name = "Independent Thinker (सूर्य-सूर्य एकाग्रता)";
-    meaning = "Double Sun power. Unmatched willpower, pioneer essence, extremely individualized perspective.";
-    strength = "Raw determination, high moral standing, natural initiator, self-reliant.";
-    weakness = "Prone to ego-conflict, resistance to external guidance, occasional loneliness.";
-    careerImpact = "Best suited for executive leadership, independent business operations, or pioneering inventions.";
-    relationshipImpact = "Needs a partner who respects personal boundaries and values deep intellectual independence.";
-    financialImpact = "Strong capacity to earn independently; must avoid impulsive financial acquisitions.";
-    spiritualImpact = "Finding the sacred inner light; learning humility is the highest target.";
-    remedy = "Offer water to the East facing morning Sun. Meditate on the solar-plexus chakra.";
-  } else if (x === 1 && y === 2) {
-    name = "Emotional Learner (सूर्य-चन्द्र सामंजस्य)";
-    meaning = "Union of Sun (force) and Moon (intuition). Represents creative balance and diplomatic intelligence.";
-    strength = "High emotional intelligence, empathetic planning, gentle persuasion abilities.";
-    weakness = "Moody hesitation, torn between logic and emotional values, sensitive to public opinions.";
-    careerImpact = "Outstanding in human resource development, public relations, design, and teaching.";
-    relationshipImpact = "Extremely romantic and protective, but easily hurt by cold communication.";
-    financialImpact = "Vibrant fluctuation; gains money via creative partnerships and real estate.";
-    spiritualImpact = "Unlocking divine equilibrium; balancing masculine (Ida) and feminine (Pingala) energies.";
-    remedy = "Drink water from silver utensils; respect maternal figures unconditionally.";
-  } else if (x === 1 && y === 3) {
-    name = "Transformation Energy (ज्ञान-सूर्य संगम)";
-    meaning = "Sun (power) paired with Jupiter (wisdom). The celestial guru-leader compound yielding vast mental growth.";
-    strength = "Broad advisory vision, massive educational potential, ethical leadership style, high optimism.";
-    weakness = "Overly didactic, struggles to execute simple details, prone to intellectual pride.";
-    careerImpact = "Top-tier career in consultancy, corporate coaching, judicial affairs, and academic administration.";
-    relationshipImpact = "Brings high loyalty, expects family respect, values deep ethical alignments.";
-    financialImpact = "Excellent wealth potential; accumulation happens via mentoring and intellectual properties.";
-    spiritualImpact = "Acts as a bridge of knowledge; easily grasps Vedic or spiritual guidelines.";
-    remedy = "Apply yellow saffron tilak on the forehead/throat daily; support public libraries.";
-  } else if (x === 1 && y === 4) {
-    name = "Change and Adaptability (सूर्य-राहू क्रांतियोग)";
-    meaning = "Sun with Rahu. A combination representing sudden architectural changes, rebellion, and unique execution paths.";
-    strength = "Unconventional analytical skills, out-of-the-box strategy, magnetic charisma, handles massive scale.";
-    weakness = "Sudden reputational hurdles, internal stress, struggles with conventional authorities.";
-    careerImpact = "Best in technology innovation, media disruptors, systemic auditing, research, and design.";
-    relationshipImpact = "Attracts unique, unconventional relationships; requires partners who understand creative chaos.";
-    financialImpact = "High risk, sudden massive windfalls accompanied by unexpected structural updates.";
-    spiritualImpact = "Demands transcending worldly illusions; mastering shadows to find true cosmic light.";
-    remedy = "Feed wild birds on Wednesday mornings. Carry a green aventurine crystal.";
-  } else if (x === 1 && y === 5) {
-    name = "Attraction and Magnetism (सूर्य-बुध बुधादित्य)";
-    meaning = "Sun combined with Mercury. The classic highly auspicious 'Budhaditya Yoga' of pristine commerce intellect.";
-    strength = "Superb mercantile intelligence, rapid calculation, high verbal expression, instant problem solving.";
-    weakness = "Nervous speed, quick burnouts, highly critical of slow-moving teammates.";
-    careerImpact = "Highly suitable for strategic consulting, complex trade, finance brokerage, and public communication.";
-    relationshipImpact = "Humorous, engaging companion. Demands dynamic, talkative partnerships and community activities.";
-    financialImpact = "Outstanding commercial fortunes; multiplies capital quickly via retail or digital businesses.";
-    spiritualImpact = "Awakens intellectual awareness, converting high knowledge into practical daily actions.";
-    remedy = "Keep a clean green plant on your workspace desk; donate green lentils on Wednesdays.";
-  } else if (x === 1 && y === 6) {
-    name = "Luxury Manifestation (शाही वैभव योग)";
-    meaning = "Sun meeting Venus. High standard of living, appreciation of aesthetics, and premium worldly comfort.";
-    strength = "Excellent taste, artistic appreciation, strong visual eye, attractive social presence.";
-    weakness = "Pompous spendings, high cost of living, prone to superficial relationship judgments.";
-    careerImpact = "Superb for high-end hospitality, luxury design, gemstone trade, and entertainment sector management.";
-    relationshipImpact = "Seeks high romance and material comfort; loves visual presentation and social gatherings.";
-    financialImpact = "Gains wealth via premium products, luxury assets, and corporate friendships.";
-    spiritualImpact = "Learning that true luxury is internal peace; converting beauty into devotion (Bhakti).";
-    remedy = "Wear a splash of sandalwood mist or pleasant natural perfume daily; carry a clear quartz.";
-  } else if (x === 1 && y === 7) {
-    name = "Fame and Recognition (सूर्य-केतु संधान)";
-    meaning = "Sun paired with Ketu. Fosters mysterious deep research, introspective analysis, and quiet fame.";
-    strength = "Supernatural focus, analytical persistence, identifies hidden errors, unaffected by social gossip.";
-    weakness = "Self-isolator, sudden spiritual detachments, difficult for others to read or comprehend.";
-    careerImpact = "Top-tier research engineer, forensic accountant, occult investigator, or deep software architect.";
-    relationshipImpact = "Needs a companion comfortable with quiet hours and deep, silent emotional support.";
-    financialImpact = "Prone to financial indifference; gains money through specialized secret advisory assignments.";
-    spiritualImpact = "Ultimate search for the hidden self; highly conductive to advanced dhyana (meditation).";
-    remedy = "Support homeless shelters or donate woolen clothes to those in need on Saturdays.";
-  } else if (x === 1 && y === 8) {
-    name = "Karmic Struggles & Mastery (सूर्य-शनि द्वंद्व)";
-    meaning = "Sun (light) confronting Saturn (darkness). A combination demands high resilience, patience, and absolute justice.";
-    strength = "Immensely hard-working, deep physical and mental endurance, strict justice principles, long-term legacy builders.";
-    weakness = "Delays in recognition, high initial duties, friction with early family or father figures.";
-    careerImpact = "Excellent in legal arbitration, structural engineering, raw asset mining, and governmental administration.";
-    relationshipImpact = "Takes long to trust; demands absolute commitment, loyalty, and practical realism.";
-    financialImpact = "Slow, gradual capital growth; highly secure wealth accumulation in real properties.";
-    spiritualImpact = "Cleanses deep family karma; learns surrender to divine timing and cosmic laws.";
-    remedy = "Respect construction laborers and help them. Light a sesame oil lamp in the West on Saturdays.";
-  } else if (x === 1 && y === 9) {
-    name = "Leadership Success (सूर्य-मंगल शौर्यराज)";
-    meaning = "Sun with Mars. High-energy, explosive drive, commanding field authority, and execution focus.";
-    strength = "Vast courage, quick reflex execution, leads teams with absolute authority, champion spirit.";
-    weakness = "Hot temper, impatient with micro management, prone to physical burns or stress.";
-    careerImpact = "Successful in military command, police enforcement, heavy business start-ups, and active surgery.";
-    relationshipImpact = "Highly protective and passionate parent/partner, but struggles with hot-headed arguments.";
-    financialImpact = "Aggressive earner; multiplies capital via fast-expanding corporate trades.";
-    spiritualImpact = "Transforming physical drive into selfless service (Karma Yoga).";
-    remedy = "Maintain a copper coin in your pocket. Perform regular cardio exercises.";
-  } else if (x === 2 && y === 2) {
-    name = "Highly Intuitive Empath (चन्द्र-चन्द्र गहनता)";
-    meaning = "Double Moon presence. Deep psychic abilities, fluid adaptation, and highly-charged emotional compass.";
-    strength = "Exceptional empathetic resonance, artistically genius, comforting presence to all.";
-    weakness = "Extreme mood swings, psychological fatigue from carrying others' pain, fear of rejection.";
-    careerImpact = "Ideal in psychiatric therapy, creative writing, painting, culinary arts, or maritime commerce.";
-    relationshipImpact = "Requires absolute unconditional security, deep comfort, and emotional validation.";
-    financialImpact = "Fluctuates like sea tides; must rely on rigid wealth managers rather than mood investments.";
-    spiritualImpact = "Accessing deep spiritual realms; highly capable of dream work and somatic meditation.";
-    remedy = "Meditate near water bodies or keep a silver bowl of clean river water in your Northeast zone.";
-  } else if (x === 5 && y === 5) {
-    name = "The Master Mercantilist (बुध-बुध व्यापारिक)";
-    meaning = "Double Mercury. Peerless trading brain, hyper-functional communications, mathematical calculation depth.";
-    strength = "Instant arithmetic calculation, witty logic, superb public speaker, identifies arbitrage opportunities.";
-    weakness = "High nervous tension, erratic focus, tendency to overanalyze simple life elements.";
-    careerImpact = "Finance trading, algorithmic software development, public relations, brokerage, and tech startups.";
-    relationshipImpact = "Needs continuous intellectual stimulation, witty banter, and freedom to travel.";
-    financialImpact = "Outstanding growth engine; multiplies money via smart cash rotation and public stocks.";
-    spiritualImpact = "Transforms logic into divine discrimination (Viveka); masters pranayama.";
-    remedy = "Practice deep daily breathwork (Anulom Vilom); wear organic shades of green on Wednesdays.";
-  } else if (x === 9 && y === 9) {
-    name = "The Fiery Crusader (मंगल-मंगल उग्रता)";
-    meaning = "Double Mars. Blazing courage, unstoppable physical energy, warrior mindset.";
-    strength = "Fearless, high physical speed, defends the weak, overcomes hurdles with sheer willpower.";
-    weakness = "Aggressive tone, impatient with details, vulnerable to physical injury and sudden burns.";
-    careerImpact = "Defense command, active surgery, high-stakes trade, emergency response management.";
-    relationshipImpact = "Protective protector but needs a very calm, grounded partner who diffuses fire.";
-    financialImpact = "High gains through risk-filled ventures; must build structured assets to anchor cash.";
-    spiritualImpact = "Burning away absolute ego-impurities through intensive self-discipline.";
-    remedy = "Donate blood regularly; practice daily cooling meditation (Sheetali Pranayama).";
-  }
+  const comb = getCombination81(x, y);
 
   return {
     code,
-    name,
-    meaning,
-    strength,
-    weakness,
-    careerImpact,
-    relationshipImpact,
-    financialImpact,
-    spiritualImpact,
-    remedy
+    name: comb.title,
+    meaning: comb.positiveMeaning,
+    strength: comb.positiveMeaning,
+    weakness: comb.negativeMeaning,
+    careerImpact: comb.careerMeaning,
+    relationshipImpact: comb.relationshipMeaning,
+    financialImpact: comb.wealthMeaning,
+    spiritualImpact: comb.spiritualMeaning,
+    remedy: comb.remedy
   };
 };
 
@@ -615,36 +475,36 @@ export function computeLoshuMasterReport(
   const mostInfluentialDigit = driver;
   const leastInfluentialDigit = missing.length > 0 ? missing[0] : 8;
 
-  // Archetype logic
-  let archetypeTitle = "The Strategist";
-  let archetypeDesc = "Combining systematic planning with intuitive human understanding.";
-  let archetypeReasoning = "Driven by a balanced mental plane and a firm Conductor path (Bhagyank).";
+  // Archetype logic in natural Indian Hindi
+  let archetypeTitle = "रणनीतिकार (The Strategist)";
+  let archetypeDesc = "व्यवस्थित योजना और व्यावहारिक मानवीय समझ का संतुलित समन्वय।";
+  let archetypeReasoning = `मस्तिष्क विमान का संतुलन और भाग्यांक (Conductor) #${conductor} की दिशा आपको एक स्पष्ट योजनाकार बनाती है।`;
   let archetypeMantra = "OM BRIM BRHASPATAYE NAMAH";
 
   if (driver === 1 || driver === 9) {
-    archetypeTitle = "The Leader (शासक)";
-    archetypeDesc = "An organic initiator of structures, motivating public crowds towards singular vision paths.";
-    archetypeReasoning = `Formulated by Driver Number (Mulank) #${driver} and Conductor Number (Bhagyank) #${conductor}. Indicates fire-water structural force.`;
+    archetypeTitle = "नेतृत्वकर्ता व प्रशासक (The Leader)";
+    archetypeDesc = "स्वाभाविक नेतृत्व क्षमता, नई पहलों को शुरू करने का साहस और लोगों को एक लक्ष्य के साथ आगे ले जाने की कला।";
+    archetypeReasoning = `मूलांक #${driver} और भाग्यांक #${conductor} का संयोग आपको ऊर्जावान और स्वतंत्र नेतृत्व की शक्ति देता है।`;
     archetypeMantra = "OM ADITYAYA NAMAH • OM KEM KETAVE NAMAH";
   } else if (driver === 3 || driver === 5) {
-    archetypeTitle = "The Teacher & Advisor (गुरु)";
-    archetypeDesc = "Brings academic study, advisors skills, and deep systemic balance to growing systems.";
-    archetypeReasoning = `Active growth numbers are present in core quadrants with a Conductor Number (Bhagyank) #${conductor}.`;
+    archetypeTitle = "मार्गदर्शक व शिक्षक (The Advisor)";
+    archetypeDesc = "ज्ञान, व्यावहारिक समझ और व्यापारिक बुद्धिमत्ता का सुंदर संगम। आप दूसरों को सही सलाह देने में अग्रणी हैं।";
+    archetypeReasoning = `विकास के अंक और भाग्यांक #${conductor} मिलकर आपको एक उत्कृष्ट शिक्षक व रणनीतिक सलाहकार बनाते हैं।`;
     archetypeMantra = "OM GURAVE NAMAH";
   } else if (driver === 2 || driver === 7) {
-    archetypeTitle = "The Mystic Healer (योगी)";
-    archetypeDesc = "A conduit for esoteric occurrences, deep somatic intelligence, and emotional counseling.";
-    archetypeReasoning = `Ruler digits suggest moon-ketu balance which opens high psychic pathways.`;
+    archetypeTitle = "सहज हीलर व साधक (The Mystic Healer)";
+    archetypeDesc = "गहरा अंतर्ज्ञान, मानवीय संवेदनाओं की समझ और सूक्ष्म विषयों में शोध करने की स्वाभाविक क्षमता।";
+    archetypeReasoning = `मूलांक व भाग्यांक की ऊर्जा आपको दूसरों की भावनाएं समझने और आध्यात्मिक गहराई की ओर प्रेरित करती है।`;
     archetypeMantra = "OM SOM SOMA_YAE NAMAH";
   } else if (driver === 6) {
-    archetypeTitle = "The Creative Artist (कलाकार)";
-    archetypeDesc = "Injecting design aesthetics, deep consumer warmth, and luxury dynamics into physical creations.";
-    archetypeReasoning = "Venusian frequencies dictate first reaction parameters, aligning beautifully with team designs.";
+    archetypeTitle = "सौंदर्य व कला साधक (The Creative Artist)";
+    archetypeDesc = "उत्कृष्ट कलात्मक पसंद, रिश्तों में सौहार्द और जीवन को सुरुचिपूर्ण बनाने की स्वाभाविक कला।";
+    archetypeReasoning = "शुक्र का प्रभाव आपकी सोच और जीवनशैली में सुरुचिपूर्ण सौंदर्य व संतुलन लाता है।";
     archetypeMantra = "OM SHUM SHUKRAYAE NAMAH";
   } else if (driver === 4 || driver === 8) {
-    archetypeTitle = "The Structural Builder (शिल्पी)";
-    archetypeDesc = "Persistent determination, unmatched brick-and-mortar execution stamina, high organizational discipline.";
-    archetypeReasoning = `Heavy earth and metal channels operate within the grid coordinates.`;
+    archetypeTitle = "कर्मठ निर्माता (The Structural Builder)";
+    archetypeDesc = "अथक परिश्रम, अनुशासन और मजबूत नींव तैयार करने की क्षमता। आप दीर्घकालिक स्थायी सफलता में विश्वास रखते हैं।";
+    archetypeReasoning = "मजबूत व्यावहारिक तत्व आपको धैर्यवान और जिम्मेदार निर्माता बनाते हैं।";
     archetypeMantra = "OM SHAM SHANAYISHCHARAYAE NAMAH";
   }
 
@@ -693,15 +553,15 @@ export function computeLoshuMasterReport(
   const overallLoshuScore = Math.round((mentalStrength + emotionalStrength + practicalStrength + leadershipScore + communicationScore + spiritualScore + relationshipScore) / 7);
 
   const reasons = {
-    mentalStrength: `Based on your present digits in Mind Plane ${mindPlaneDef.coordinates.join('')}: ${mindPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')}. Mentally agile, sharp visualization capabilities.`,
-    emotionalStrength: `Calculated from your middle Emotional Plane ${emotionalPlaneDef.coordinates.join('')}: ${emotionalPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')}. Reflects intuitive empathy ratios.`,
-    practicalStrength: `Calculated from your Practical Plane ${practicalPlaneDef.coordinates.join('')}: ${practicalPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')}. Governs action readiness and money management.`,
-    leadershipScore: `Propelled by Will Plane ${willPlaneDef.coordinates.join('')} and Action Plane ${actionPlaneDef.coordinates.join('')} alignments with driver planet #${driver}.`,
-    communicationScore: `Derived from Mind Plane ${mindPlaneDef.coordinates.join('')} and Emotional Plane ${emotionalPlaneDef.coordinates.join('')} alignments in the flat map, managed by Mercury/Sun.`,
-    spiritualScore: `Governed by Emotional Plane ${emotionalPlaneDef.coordinates.join('')} and Silver Yog ${silverYogDef.coordinates.join('')} levels.`,
-    relationshipScore: `Measures affinity from Emotional Plane ${emotionalPlaneDef.coordinates.join('')} and Action Plane ${actionPlaneDef.coordinates.join('')} which manage partnership harmony.`,
-    careerPotentialScore: `Synthesis of administrative drive and material plane alignment.`,
-    overallLoshuScore: `Cumulative matrix value representing total vibrational balance.`
+    mentalStrength: `मस्तिष्क विमान (${mindPlaneDef.coordinates.join('')}) में मौजूद अंक ${mindPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')} के आधार पर। तार्किक सोच और स्मरण शक्ति तीव्र है।`,
+    emotionalStrength: `भावनात्मक विमान (${emotionalPlaneDef.coordinates.join('')}) में मौजूद अंक ${emotionalPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')} के आधार पर। यह आपकी संवेदनशीलता और अंतर्ज्ञान को दर्शाता है।`,
+    practicalStrength: `व्यावहारिक विमान (${practicalPlaneDef.coordinates.join('')}) में मौजूद अंक ${practicalPlaneDef.coordinates.filter(d => enhancedGridMap[d]>0).join(', ')} के आधार पर। यह कार्य क्षमता और धन प्रबंधन को नियंत्रित करता है।`,
+    leadershipScore: `इच्छाशक्ति विमान (${willPlaneDef.coordinates.join('')}) और कर्म विमान (${actionPlaneDef.coordinates.join('')}) का मूलांक #${driver} के साथ सामंजस्य नेतृत्व क्षमता को बढ़ाता है।`,
+    communicationScore: `मस्तिष्क विमान (${mindPlaneDef.coordinates.join('')}) और भावनात्मक विमान (${emotionalPlaneDef.coordinates.join('')}) के समन्वय से वाणी में स्पष्टता और प्रभावशीलता आती है।`,
+    spiritualScore: `भावनात्मक विमान (${emotionalPlaneDef.coordinates.join('')}) और सिल्वर योग (${silverYogDef.coordinates.join('')}) के संतुलन से आंतरिक शांति और जीवन की गहरी समझ मिलती है।`,
+    relationshipScore: `भावनात्मक विमान (${emotionalPlaneDef.coordinates.join('')}) और कर्म विमान (${actionPlaneDef.coordinates.join('')}) का तालमेल रिश्तों में सौहार्द और स्थायित्व बनाए रखता है।`,
+    careerPotentialScore: `प्रशासनिक क्षमता, कार्य कौशल और व्यावहारिक धरातल का संतुलित समन्वय।`,
+    overallLoshuScore: `समग्र ग्रिड का संयुक्त सूचकांक जो जीवन के सभी क्षेत्रों में ऊर्जा संतुलन को दर्शाता है।`
   };
 
   // Section 3: 81 Combinations - Select active combinations found in the chart
@@ -744,12 +604,12 @@ export function computeLoshuMasterReport(
     }
 
     const fallback = inactiveArrowsData[arr.name];
-    let meaning = fallback ? fallback.meaning : `No major active link for this plane.`;
-    let strength = fallback ? fallback.strength : `Latent capabilities; waiting to be unlocked by specific remedial actions.`;
-    let risk = fallback ? fallback.risk : `Low focus in this category; easily distracted during lengthy transactions.`;
-    let careerImpact = fallback ? fallback.careerImpact : `Normal operations; must create manual checklists to stay disciplined.`;
-    let relationshipImpact = fallback ? fallback.relationshipImpact : `Requires effort and practical compromises.`;
-    let remedy = fallback ? fallback.remedy : `Carry standard protection crystals with you.`;
+    let meaning = fallback ? fallback.meaning : `इस विमान में कोई मुख्य संयोजन सक्रिय नहीं है।`;
+    let strength = fallback ? fallback.strength : `सुप्त क्षमताएं; विशिष्ट उपचारात्मक उपायों द्वारा इन्हें जाग्रत किया जा सकता है।`;
+    let risk = fallback ? fallback.risk : `इस क्षेत्र में कम ध्यान; लंबे कार्यों के दौरान कभी-कभी ध्यान भटकना।`;
+    let careerImpact = fallback ? fallback.careerImpact : `सामान्य कार्यप्रणाली; अनुशासन बनाए रखने के लिए लिखित सूची बनाकर काम करें।`;
+    let relationshipImpact = fallback ? fallback.relationshipImpact : `आपसी समझ और व्यावहारिक समझौते से संबंध संतुलित रहते हैं।`;
+    let remedy = fallback ? fallback.remedy : `अनुकूल रत्न या क्रिस्टल पास रखें और नियमित ध्यान करें।`;
 
     if (isActive) {
       if (arr.name === 'Arrow of Determination') {
@@ -853,12 +713,12 @@ export function computeLoshuMasterReport(
   });
 
   // Section 14: Mobile Fusion calculation
-  let mStrengths = "No mobile number provided to analyze.";
-  let mWeaknesses = "Please submit your primary 10-digit mobile number.";
-  let mComp = "N/A";
-  let mSupport = "N/A";
-  let mConflict = "N/A";
-  let mImprovements = "N/A";
+  let mStrengths = "विश्लेषण के लिए कोई मोबाइल नंबर दर्ज नहीं किया गया है।";
+  let mWeaknesses = "कृपया अपना 10 अंकों का प्राथमिक मोबाइल नंबर दर्ज करें।";
+  let mComp = "लागू नहीं";
+  let mSupport = "लागू नहीं";
+  let mConflict = "लागू नहीं";
+  let mImprovements = "लागू नहीं";
 
   if (mobileNum) {
     const cleanMob = mobileNum.replace(/[^0-9]/g, '');
@@ -870,18 +730,18 @@ export function computeLoshuMasterReport(
     const mobPresents = Array.from(new Set(mobDigits)).filter(d => d >= 1 && d <= 9);
     const compensating = mobPresents.filter(d => enhancedGridMap[d] === 0);
 
-    mStrengths = `Overall mobile compound vibration relates to Planet #${mobSingle}. It contains active numbers: ${mobPresents.join(', ')}.`;
-    mWeaknesses = `Lacks frequencies of digits: ${[1,2,3,4,5,6,7,8,9].filter(d => !mobPresents.includes(d)).join(', ')}.`;
+    mStrengths = `मोबाइल नंबर का कुल कम्पाउंड योग ग्रह #${mobSingle} से संबंधित है। इसमें सक्रिय अंक ${mobPresents.join(', ')} शामिल हैं।`;
+    mWeaknesses = `इस नंबर में अंक ${[1,2,3,4,5,6,7,8,9].filter(d => !mobPresents.includes(d)).join(', ')} की ऊर्जा अनुपस्थित है।`;
     
     if (compensating.length > 0) {
-      mComp = `Excellent compensation! Your mobile introduces missing frequencies of digits: ${compensating.join(', ')}. This partially stabilizes communication loops.`;
+      mComp = `शानदार समन्वय! आपका मोबाइल नंबर ग्रिड में अनुपस्थित अंक ${compensating.join(', ')} की कमी को आंशिक रूप से संतुलित करता है।`;
     } else {
-      mComp = `No direct support for missing digits. Your mobile reinforces already congested digits inside your grid.`;
+      mComp = `अनुपस्थित अंकों को सीधा सहयोग नहीं मिल रहा है। मोबाइल नंबर ग्रिड में पहले से मौजूद अंकों को ही दोहरा रहा है।`;
     }
 
-    mSupport = `The mobile single sum #${mobSingle} is friendly with your driver planet #${driver}. Enhances business conversion rates.`;
-    mConflict = mobSingle === 8 && driver === 1 ? "WARNING: Your mobile sum (8) is hostile with Driver (1), causing delays in cash clearances." : "Dynamic neutral support. No fatal conflicts.";
-    mImprovements = `To unlock peak wealth, shift your mobile number so that the sum totals to 5 (Business) or 6 (Luxury).`;
+    mSupport = `मोबाइल का एकल योग #${mobSingle} आपके मूलांक #${driver} के अनुकूल है, जो व्यावसायिक सफलता में सहायक रहेगा।`;
+    mConflict = mobSingle === 8 && driver === 1 ? "सावधानी: मोबाइल का कुल योग (8) मूलांक (1) के साथ विरोधी ऊर्जा बनाता है, जिससे धन लेन-देन में देरी हो सकती है।" : "संतुलित और सकारात्मक सहयोग। कोई गंभीर दोष नहीं है।";
+    mImprovements = `धन और व्यापारिक प्रगति को और गति देने के लिए मोबाइल का कुल योग 5 (बुध) या 6 (शुक्र) पर रखना अत्यंत शुभ माना जाता है।`;
   }
 
   // Section 15: Vaastu Fusion calculation (Kua is calculated)
@@ -895,12 +755,12 @@ export function computeLoshuMasterReport(
   }
 
   const bestDirections = groupType === 'EAST_GROUP' 
-    ? ['North (Career)', 'East (Health)', 'South (Fame)', 'Southeast (Success)']
-    : ['Northeast (Education)', 'Southwest (Marriage)', 'West (Creativity)', 'Northwest (Helpful Friends)'];
+    ? ['उत्तर (करियर व धन)', 'पूर्व (स्वास्थ्य व परिवार)', 'दक्षिण (यश व सम्मान)', 'दक्षिण-पूर्व (समृद्धि)']
+    : ['उत्तर-पूर्व (ज्ञान व शिक्षा)', 'दक्षिण-पश्चिम (रिश्ते व विवाह)', 'पश्चिम (रचनात्मकता)', 'उत्तर-पश्चिम (सहयोगी मित्र)'];
 
   const avoidDirections = groupType === 'EAST_GROUP'
-    ? ['West', 'Southwest', 'Northeast', 'Northwest']
-    : ['North', 'East', 'South', 'Southeast'];
+    ? ['पश्चिम (West)', 'दक्षिण-पश्चिम (Southwest)', 'उत्तर-पूर्व (Northeast)', 'उत्तर-पश्चिम (Northwest)']
+    : ['उत्तर (North)', 'पूर्व (East)', 'दक्षिण (South)', 'दक्षिण-पूर्व (Southeast)'];
 
   // Section 16: Health Analysis (Calculated based on DOSHA)
   let primaryDosha: 'VATA' | 'PITTA' | 'KAPHA' = 'PITTA';
@@ -948,24 +808,24 @@ export function computeLoshuMasterReport(
   let financialDisciplineScore = 50;
 
   if (wealthArchetype === 'COMFORT_SPENDER') {
-    moneyMindset = 'Luxury and comfort-oriented. Views wealth as a beautiful medium to experience fine comforts and build an aesthetic, nourishing lifestyle.';
-    spendingBehaviour = 'Loves spending on premium luxury, comfortable travel, and stylish apparel. Values experiences and high-frequency environments over strict penny-pinching savings.';
-    riskTakingBehaviour = 'Moderate; prefers investments in beautiful physical assets, luxury properties, creative brands, and artistic ventures rather than dry speculative bonds.';
+    moneyMindset = 'सुख-सुविधा और सौंदर्य को महत्व देना। धन को परिवार के लिए एक आरामदायक और सुरुचिपूर्ण जीवनशैली का साधन मानते हैं।';
+    spendingBehaviour = 'अच्छी जीवनशैली, सुरुचिपूर्ण यात्रा और गुणवत्तापूर्ण वस्तुओं पर खर्च करना पसंद करते हैं। केवल संचय करने के बजाय अच्छे अनुभवों को प्राथमिकता देते हैं।';
+    riskTakingBehaviour = 'मध्यम जोखिम; सुंदर भौतिक संपत्तियों, रियल एस्टेट और भरोसेमंद ब्रांड्स में निवेश अधिक सुरक्षित व पसंदीदा लगता है।';
     financialDisciplineScore = 65;
   } else if (wealthArchetype === 'BOLD_PROVIDER') {
-    moneyMindset = 'Ambitious, growth-oriented, and highly expansionist. Believes in making larger financial plays and scaling income channels aggressively.';
-    spendingBehaviour = 'Generous spender, loves acting as a royal provider for family and associates. Prone to proud impulsive purchases but backed by solid income drives.';
-    riskTakingBehaviour = 'Bold and high-stakes. Confidently invests in equity, direct businesses, and high-growth sectors, managing high levels of systemic stress.';
+    moneyMindset = 'महत्वाकांक्षी और विस्तारवादी सोच। आय के नए स्रोत बनाने और आगे बढ़कर बड़े वित्तीय निर्णय लेने में विश्वास रखते हैं।';
+    spendingBehaviour = 'उदार स्वभाव; परिवार और सहयोगियों के लिए खुले दिल से खर्च करते हैं। कभी-कभी उत्साह में बड़े वित्तीय फैसले ले सकते हैं।';
+    riskTakingBehaviour = 'साहसी और प्रगतिशील; नए बिजनेस, शेयर बाजार और विस्तार की संभावना वाले क्षेत्रों में सोच-समझकर जोखिम उठाते हैं।';
     financialDisciplineScore = 75;
   } else if (wealthArchetype === 'SELECTIVE_SCHOLAR') {
-    moneyMindset = 'Knowledge-driven and spiritually selective. Believes wealth should fund peace, books, health, and deep inner freedom rather than simple public showing off.';
-    spendingBehaviour = 'Highly selective spender. Happy to pay heavily for education, wellness retreats, or premium quality tools, but completely frugal with superficial fast-fashion or sensory clutter.';
-    riskTakingBehaviour = 'Cautious and analytical. Prefers low-volatility long-term deposits, medical shares, or educational assets that compound peacefully over time.';
+    moneyMindset = 'ज्ञान और मानसिक शांति को प्राथमिकता। धन का उपयोग स्वास्थ्य, शिक्षा, अच्छी किताबों और आंतरिक स्वतंत्रता के लिए होना चाहिए।';
+    spendingBehaviour = 'सोच-समझकर खर्च करने वाले; दिखावे या अनावश्यक वस्तुओं पर व्यय करने से बचते हैं, लेकिन सीखने और स्वास्थ्य पर खुशी से खर्च करते हैं।';
+    riskTakingBehaviour = 'सावधानीपूर्वक और विश्लेषणात्मक; सुरक्षित दीर्घकालिक निवेश, सरकारी योजनाएं या स्थिर रिटर्न वाले माध्यम पसंद करते हैं।';
     financialDisciplineScore = 85;
   } else { // STABLE_PLANNER
-    moneyMindset = 'Strict, security-first calculator. Believes in meticulous cash flow planning and building a bulletproof emergency shield before taking any action.';
-    spendingBehaviour = 'Highly disciplined and budget-conscious. Tracks expenditures carefully, avoids unnecessary subscriptions, and values structural safety above all else.';
-    riskTakingBehaviour = 'Calculated and systematic. Prefers government bonds, secure bank savings, land, or blue-chip investments with clear mathematical histories.';
+    moneyMindset = 'सुरक्षा और स्थिरता को सर्वोच्च प्राथमिकता। किसी भी कदम से पहले बचत और आपातकालीन फंड सुनिश्चित करना पसंद करते हैं।';
+    spendingBehaviour = 'अनुशासित और बजट के अनुसार चलने वाले; अनावश्यक खर्चों पर नियंत्रण रखते हैं और बचत को मजबूत बनाते हैं।';
+    riskTakingBehaviour = 'गणनायुक्त और सुरक्षित; बैंक फिक्स्ड डिपॉजिट, जमीन और सुरक्षित परिसंपत्तियों में निवेश को प्राथमिकता देते हैं।';
     financialDisciplineScore = 95;
   }
 
@@ -998,12 +858,12 @@ export function computeLoshuMasterReport(
       repeated,
       dominant,
       weak,
-      mostInfluential: { digit: mostInfluentialDigit, reason: `Matches your birth Driver Number (Mulank) planet #${driver}.` },
-      leastInfluential: { digit: leastInfluentialDigit, reason: `Completely missing node inside the 3x3 birth grid.` },
+      mostInfluential: { digit: mostInfluentialDigit, reason: `यह आपके मूलांक (Driver Number) ग्रह #${driver} का प्रतिनिधित्व करता है।` },
+      leastInfluential: { digit: leastInfluentialDigit, reason: `यह अंक आपके 3x3 जन्म ग्रिड में अनुपस्थित है।` },
       lifeThemeNum: conductor,
-      lifeThemeText: `Governed by Conductor Number (Bhagyank) #${conductor}. Indicates structural movement toward target growth.`,
+      lifeThemeText: `भाग्यांक (Conductor Number) #${conductor} द्वारा संचालित। यह आपके जीवन की समग्र दिशा और मुख्य लक्ष्यों को दर्शाता है।`,
       corePersonalityNum: driver,
-      corePersonalityText: `Governed by Driver Number (Mulank) #${driver}. Denotes default emotional reactions.`
+      corePersonalityText: `मूलांक (Driver Number) #${driver} द्वारा संचालित। यह आपके आंतरिक स्वभाव और स्वाभाविक प्रतिक्रियाओं को दर्शाता है।`
     },
     activeCombinations,
     archetype: {
@@ -1013,61 +873,61 @@ export function computeLoshuMasterReport(
       mantra: archetypeMantra
     },
     profiling: {
-      thinkingStyle: driver % 2 === 0 ? 'Empathetic, intuitive and multi-sensory thinking pattern.' : 'Highly structured, analytical and logical strategic flow.',
-      decisionMakingStyle: enhancedGridMap[5] > 0 ? 'Balanced decision framework using both commercial logical analysis and gut feel.' : 'Prone to sudden hesitation; highly reliant on external consultations.',
-      communicationStyle: enhancedGridMap[1] > 1 ? 'Vocal, hyper-expressive and bold with commands.' : 'Diplomatic, calculated and soft-spoken.',
-      learningStyle: enhancedGridMap[3] > 0 ? 'Classic academic reader; retains massive structural knowledge.' : 'Practical, hands-on apprentice format.',
-      leadershipStyle: enhancedGridMap[9] > 0 ? 'Pioneering leader, sets visual benchmarks for execution.' : 'Quiet coordinator, works via team agreements.',
-      workStyle: enhancedGridMap[8] > 0 ? 'Workaholic, operates until the final block is clean.' : 'Smart coordinator, delegates heavy physical trade.',
-      problemSolvingStyle: enhancedGridMap[7] > 0 ? 'Breaks systems down into microscopic parts; excellent debugger.' : 'Solves cases through collective team consensus.',
-      stressResponsePattern: primaryDosha === 'PITTA' ? 'Hot outbursts, quick irritation under workload.' : 'Internal anxiety and nervous hyper-movement.',
-      motivationPattern: `Driven by the realization of Driver #${driver} frequencies which desire personal recognition.`,
-      selfDisciplineLevel: enhancedGridMap[4] > 0 ? 'Meticulous, neat, lives by strict routine guidelines.' : 'Highly creative but chaotic daily timeline structures.',
-      confidenceLevel: enhancedGridMap[5] > 0 ? 'Superb internal self-reliance; untroubled by social criticism.' : 'Variables based on immediate feedback from friends.',
-      publicImage: `Seen as a reliable, dignified candidate ruled by planetary destiny.`,
-      personalGrowthAreas: `Enhance communication flow by bridging missing nodes: ${missing.join(', ')}.`
+      thinkingStyle: driver % 2 === 0 ? 'सहज, संवेदनशील और गहरी समझ वाला चिंतन।' : 'अत्यधिक व्यवस्थित, तार्किक और व्यावहारिक रणनीतिक सोच।',
+      decisionMakingStyle: enhancedGridMap[5] > 0 ? 'व्यावहारिक विश्लेषण और स्वाभाविक अंतर्ज्ञान का संतुलित निर्णय ढांचा।' : 'महत्वपूर्ण निर्णयों में कभी-कभी असमंजस; बाहरी सलाह पर अधिक निर्भरता।',
+      communicationStyle: enhancedGridMap[1] > 1 ? 'स्पष्ट, मुखर और आत्मविश्वास से अपनी बात रखने की शैली।' : 'मधुरभाषी, नपी-तुली और कूटनीतिक बातचीत।',
+      learningStyle: enhancedGridMap[3] > 0 ? 'अध्ययनशील पाठक; ज्ञान को गहराई से समझकर लंबे समय तक याद रखने की क्षमता।' : 'व्यावहारिक और प्रयोग-आधारित तरीके से सीखने की आदत।',
+      leadershipStyle: enhancedGridMap[9] > 0 ? 'दूरदर्शी नेतृत्व; उदाहरण पेश करके टीम को प्रेरित करने की क्षमता।' : 'सहयोगात्मक मार्गदर्शक; टीम में सामंजस्य बनाकर कार्य पूरा कराना।',
+      workStyle: enhancedGridMap[8] > 0 ? 'अथक परिश्रमी; कार्य पूरा होने तक निरंतर समर्पित रहना।' : 'कुशल समन्वयक; कार्यों को सही लोगों में विभाजित कर परिणाम पाना।',
+      problemSolvingStyle: enhancedGridMap[7] > 0 ? 'समस्या को गहराई से विश्लेषित कर मूल कारण तक पहुंचने में माहिर।' : 'टीम की सामूहिक राय और सहयोग से समाधान निकालना।',
+      stressResponsePattern: primaryDosha === 'PITTA' ? 'दबाव में कभी-कभी शीघ्र उत्तेजना या चिड़चिड़ापन।' : 'भीतर मानसिक चिंता और विचारों की अत्यधिक उथल-पुथल।',
+      motivationPattern: `मूलांक #${driver} के प्रभाव से आत्म-सम्मान और स्वयं की पहचान बनाने की गहरी प्रेरणा।`,
+      selfDisciplineLevel: enhancedGridMap[4] > 0 ? 'नियमित दिनचर्या, व्यवस्थित कार्यशैली और समय की पाबंदी।' : 'रचनात्मक सोच, लेकिन दैनिक दिनचर्या में कभी-कभी अनियमितता।',
+      confidenceLevel: enhancedGridMap[5] > 0 ? 'मजबूत आंतरिक आत्मविश्वास; दूसरों की आलोचना से अप्रभावित रहना।' : 'आस-पास के लोगों के फीडबैक और माहौल के अनुसार बदलता हुआ।',
+      publicImage: `समाज में एक गंभीर, गरिमामय और भरोसेमंद व्यक्ति के रूप में पहचान।`,
+      personalGrowthAreas: `अनुपस्थित अंक (${missing.join(', ')}) के संतुलन से जीवन में स्थिरता और स्पष्टता बढ़ाएं।`
     },
     relationshipBehaviour: {
-      loveLanguage: driver === 6 || driver === 2 ? 'Words of affirmation and elegant gift exchanges.' : 'Acts of service and protective support.',
-      emotionalNeeds: `Needs absolute comfort and family stability without loud dramatic outbursts.`,
-      commitmentStyle: `Highly stable once trust conditions are established.`,
-      trustPattern: `Slow to build; audits candidate history before opening up.`,
-      conflictBehaviour: `Prefers quiet holding hours to avoid direct verbal hurts.`,
-      marriageExpectations: `Wants absolute balance and supportive joint asset expansions.`,
-      partnerExpectations: `Seeks high hygiene, intellectual sharpness, and mutual respect.`,
-      emotionalCompatibilityStyle: `Resonates with numbers that match complementary elemental groups.`,
-      strengths: `Deep empathy and complete family devotion.`,
-      challenges: `Overly critical during times of financial delay.`,
-      growthSuggestions: `Avoid mind-reading; write down clear mutual domestic goals.`
+      loveLanguage: driver === 6 || driver === 2 ? 'सराहना के प्यारे शब्द, उपहार और भावनात्मक अपनापन।' : 'मददगार स्वभाव और जीवनसाथी को व्यावहारिक सुरक्षा देना।',
+      emotionalNeeds: `पारिवारिक शांति, सम्मान और बिना किसी अनावश्यक तनाव के आरामदायक माहौल।`,
+      commitmentStyle: `एक बार भरोसा बन जाने के बाद अत्यंत निष्ठावान और दीर्घकालिक समर्पण।`,
+      trustPattern: `भरोसा धीरे-धीरे बनता है; गहराई से परखने के बाद ही अपना दिल खोलते हैं।`,
+      conflictBehaviour: `कटु विवाद से बचने के लिए कुछ समय शांत रहना और बात टालना पसंद करते हैं।`,
+      marriageExpectations: `जीवन में पूर्ण संतुलन, आपसी सम्मान और साथ मिलकर पारिवारिक समृद्धि बढ़ाना।`,
+      partnerExpectations: `सुलझा हुआ स्वभाव, बौद्धिक समझ और एक-दूसरे के प्रति गहरा आदर।`,
+      emotionalCompatibilityStyle: `अनुकूल तत्व और मित्र ग्रहों वाले अंकों के साथ स्वाभाविक सामंजस्य।`,
+      strengths: `गहरी संवेदनशीलता और परिवार के प्रति अटूट निष्ठा।`,
+      challenges: `वित्तीय या काम के तनाव के समय जरूरत से ज्यादा आलोचनात्मक हो जाना।`,
+      growthSuggestions: `मन की बात दबाने के बजाय जीवनसाथी के साथ खुलकर साझा करें।`
     },
     familyKarma: {
-      fatherInfluence: `Sun-Saturn relationship rules indicate significant responsibility of parent figures onto you.`,
-      motherInfluence: `Moon-Venus guidelines show deep internal emotional support system through mother.`,
-      ancestralInfluence: `High inheritance of physical wisdom and real estate luck.`,
-      familyResponsibilities: `Expected to act as the primary structural advisor during family property updates.`,
-      inheritedStrengths: `Intense patience and structural design vision.`,
-      inheritedChallenges: `Carrying karmic delays of family real estates.`,
-      familyKarmaLessons: `Release old sibling argument patterns to clear financial blocks.`,
-      generationalGrowthAreas: `Initiate independent family assets instead of completely relying on ancestors.`
+      fatherInfluence: `सूर्य-शनि के प्रभाव से पिता अथवा परिवार के वरिष्ठों के प्रति महत्वपूर्ण जिम्मेदारियों का योग।`,
+      motherInfluence: `चंद्र-शुक्र के समन्वय से माता का गहरा भावनात्मक संबल और आशीर्वाद प्राप्त होता है।`,
+      ancestralInfluence: `पारिवारिक ज्ञान, धैर्य और स्थायी संपत्ति के मामलों में पूर्वजों का आशीर्वाद।`,
+      familyResponsibilities: `पारिवारिक संपत्तियों और महत्वपूर्ण निर्णयों में मुख्य सलाहकार की भूमिका निभाना।`,
+      inheritedStrengths: `अथक धैर्य, दूरदर्शिता और परिवार को जोड़े रखने की क्षमता।`,
+      inheritedChallenges: `पुरानी पारिवारिक संपत्तियों या मामलों में कभी-कभी अप्रत्याशित देरी।`,
+      familyKarmaLessons: `पुराने मतभेदों को भुलाकर रिश्तों में सौहार्द बनाए रखना धन-मार्ग को प्रशस्त करता है।`,
+      generationalGrowthAreas: `केवल पैतृक साधनों पर निर्भर रहने के बजाय अपनी स्वतंत्र संपत्ति और पहचान बनाएं।`
     },
     wealthPsychology: {
       moneyMindset,
       riskTakingBehaviour,
       spendingBehaviour,
-      savingBehaviour: `Systematic compounding once missing remedies are active.`,
-      investmentBehaviour: `Property land purchases and government bonds.`,
-      businessMindset: enhancedGridMap[5] > 0 ? 'Natural merchant, identifies retail trade loops.' : 'Advisor structure, works best inside partnerships.',
-      wealthCreationStyle: `Slow secure accumulations with major multipliers in running Mahadashas.`,
+      savingBehaviour: `उपायों के बाद योजनाबद्ध तरीके से नियमित बचत और वेल्थ कम्पाउंडिंग।`,
+      investmentBehaviour: `जमीन, रियल एस्टेट, सुरक्षित फिक्स्ड डिपॉजिट और ठोस संपत्तियों में निवेश।`,
+      businessMindset: enhancedGridMap[5] > 0 ? 'व्यापारिक सोच में दक्ष; बाजार के रुझानों को तेजी से भांपने की क्षमता।' : 'सलाहकार और रणनीतिक भूमिका; साझेदारी में कार्य करना अधिक फलदायी।',
+      wealthCreationStyle: `स्थिर और सुरक्षित संचय; अनुकूल महादशा में धन में तेजी से वृद्धि।`,
       financialDisciplineScore,
       wealthPotentialScore: Math.min(99, Math.round(40 + (score951 * 15) + (score357 * 15) + (score816 * 15) + (score276 * 10))),
-      moneyBlockages: `Blocked funds in South-West zones due to missing Earth elements.`,
-      financialRemedies: `Keep wooden windchimes in South-East and yellow salt lamps in Center zones.`
+      moneyBlockages: `दक्षिण-पश्चिम (South-West) में पृथ्वी तत्व की कमी से कभी-कभी धन अटकने की संभावना।`,
+      financialRemedies: `दक्षिण-पूर्व (SE) में हरे पौधे और मध्य क्षेत्र (Brahmasthan) में पीला लैंप स्थापित करें।`
     },
     careerBlueprint: {
       bestCareers: ['Engineering', 'Systemic Planning', 'Financial Audits', 'Technology Architectures'],
-      governmentJobs: driver === 1 || driver === 9 ? 'Highly suitable; Sun-Mars forces assist administrative success in civil lines.' : 'Moderate; advisor positions only.',
-      privateJobs: `Highly suited for corporate consultancy and high-tech planning sectors.`,
-      businessSuitability: enhancedGridMap[5] > 0 ? 'High suitability for independent commercial enterprises.' : 'Partner-driven alliances suit you best.',
+      governmentJobs: driver === 1 || driver === 9 ? 'अत्यंत अनुकूल; सूर्य-मंगल का प्रभाव प्रशासनिक व सरकारी क्षेत्रों में सफलता दिलाता है।' : 'मध्यम अनुकूल; सलाहकार या तकनीकी पदों के लिए बेहतर।',
+      privateJobs: `कॉर्पोरेट कंसल्टेंसी, मैनेजमेंट और आधुनिक टेक्नोलॉजी सेक्टर के लिए अत्यंत उपयुक्त।`,
+      businessSuitability: enhancedGridMap[5] > 0 ? 'स्वतंत्र व्यावसायिक उद्यमों और ट्रेडिंग के लिए उच्च अनुकूलता।' : 'पार्टनरशिप और रणनीतिक सहयोग के साथ काम करना श्रेष्ठ रहेगा।',
       suitabilityScores: {
         teaching: enhancedGridMap[3] ? 95 : 55,
         technology: enhancedGridMap[4] || enhancedGridMap[7] ? 90 : 60,
@@ -1078,115 +938,115 @@ export function computeLoshuMasterReport(
         leadership: enhancedGridMap[1] ? 94 : 60
       },
       recommendedCareers: [
-        { title: "Systems Designer", explanation: "Calculated structural vision assists logical blueprint creations." },
-        { title: "Corporate Consultant", explanation: "Advisory strengths help businesses identify flow blocks." },
-        { title: "Financial Arbitrator", explanation: "Excellent for legal reviews, tax and balance auditing." },
-        { title: "Occult Researcher", explanation: "Mystic elements unlock secrets of numbers and stars." },
-        { title: "Real Estate Arbitrageur", explanation: "Saturnian aspects support spatial acquisitions." },
-        { title: "Digital Communication Expert", explanation: "Mercurial power translates concepts into swift public copies." },
-        { title: "Hospitality Manager", explanation: "Venusian aspects facilitate elite guest experiences." },
-        { title: "Project Manager", explanation: "Bridges technical builders with high financial owners, maintaining limits." },
-        { title: "Education specialist", explanation: "Jupiter aspect helps pass down legacy practices cleanly." },
-        { title: "Logistics Analyst", explanation: "Optimizes structural cargo flow maps using mathematical indices." }
+        { title: "Systems Designer", explanation: "व्यवस्थित और तार्किक सोच से बड़े प्रोजेक्ट्स की रूपरेखा तैयार करने में माहिर।" },
+        { title: "Corporate Consultant", explanation: "व्यावसायिक समस्याओं को पहचानकर सही मार्गदर्शन देने की उत्कृष्ट क्षमता।" },
+        { title: "Financial Arbitrator", explanation: "वित्तीय ऑडिट, कानूनी समीक्षा और बैलेंस शीट विश्लेषण के लिए श्रेष्ठ।" },
+        { title: "Occult Researcher", explanation: "अंकशास्त्र, ज्योतिष और गूढ़ विद्याओं के रहस्यों को समझने का स्वाभाविक योग।" },
+        { title: "Real Estate Arbitrageur", explanation: "शनि का प्रभाव जमीन और अचल संपत्तियों के सौदों में अनुकूलता देता है।" },
+        { title: "Digital Communication Expert", explanation: "बुध का प्रभाव विचारों को स्पष्ट संदेश में बदलकर प्रभावशाली संवाद स्थापित करता है।" },
+        { title: "Hospitality Manager", explanation: "शुक्र का प्रभाव अतिथियों को उत्कृष्ट अनुभव और सुरुचिपूर्ण सुविधाएं देने में सहायक है।" },
+        { title: "Project Manager", explanation: "टीम और वित्तीय संसाधनों के बीच समन्वय बनाकर समय पर लक्ष्य हासिल करना।" },
+        { title: "Education Specialist", explanation: "गुरु (बृहस्पति) का आशीर्वाद ज्ञान को सरल तरीके से दूसरों तक पहुंचाने में मदद करता है।" },
+        { title: "Logistics Analyst", explanation: "तार्किक गणनाओं के माध्यम से सप्लाई चेन और संचालन को अधिक प्रभावी बनाना।" }
       ]
     },
     hiddenTalents: {
-      naturalGifts: `Gut intuition, systemic tracking, and immediate human empathy.`,
+      naturalGifts: `तीव्र अंतर्ज्ञान, व्यवस्थित योजना और मानवीय संवेदनाओं को तुरंत भांपने की कला।`,
       talents: {
-        creative: `High aesthetic eye and spatial decoration sense.`,
-        communication: `Expressive command tone; drives people towards visual operations.`,
-        business: `Calculates capital rotation and trade loopholes.`,
-        teaching: `Translates abstract complex theories into direct friendly notes.`,
-        leadership: `Crisis management; maintains cool composure under severe timeline stress.`,
-        spiritual: `Aura scanning and esoteric reading matching birthday blueprints.`,
-        artistic: `Appreciation of fine frequencies, premium cosmetics, jewelry, and gems.`,
-        entrepreneurial: `Finds structural startup paths from minimal seed elements.`
+        creative: `सुरुचिपूर्ण सौंदर्य दृष्टि और स्थान सजावट की स्वाभाविक समझ।`,
+        communication: `प्रभावशाली वाणी; लोगों को लक्ष्य के प्रति प्रेरित करने की क्षमता।`,
+        business: `पूंजी के प्रवाह और व्यापारिक अवसरों को समय से पहले पहचानना।`,
+        teaching: `कठिन और गूढ़ विषयों को सरल नोट्स में समझा देने का हुनर।`,
+        leadership: `संकट प्रबंधन; कठिन समय में भी शांत रहकर सही निर्णय लेना।`,
+        spiritual: `ऊर्जा स्कैनिंग और जन्म ग्रिड के अनुरूप सूक्ष्म संकेतों को समझना।`,
+        artistic: `उत्कृष्ट कला, रत्न, सुरुचिपूर्ण वस्त्र और डिजाइन की गहरी परख।`,
+        entrepreneurial: `सीमित संसाधनों से भी नए स्टार्टअप और प्रोजेक्ट्स की सफल शुरुआत करना।`
       },
-      mostPowerfulTalent: `Intuitive structural planning: combining logical blueprints with a natural gut feel for people.`
+      mostPowerfulTalent: `सहज रणनीतिक योजना: तार्किक सोच और मानवीय मनोविज्ञान का अद्भुत संगम।`
     },
     karmicLessons: missing.map(digit => {
       const lessonsMap: Record<number, { lesson: string; challenge: string; growth: string; advice: string; strategy: string; remedy: string }> = {
         1: {
-          lesson: "Struggling to express independent desires without validation.",
-          challenge: "Fear of speaking out your real thoughts; feeling ungrounded in public arenas.",
-          growth: "Awaken the inner pillar of self-reliance; build personal boundary limits.",
-          advice: "Do not wait for others to crown you. Speak first, execute independently.",
-          strategy: "Lead at least one small self-driven project monthly without asking for approvals.",
-          remedy: "Pour clean fresh water to morning Sun; wear orange threads on your right wrist."
+          lesson: "दूसरों की मंजूरी के बिना अपने स्वतंत्र विचारों को व्यक्त करने में संकोच।",
+          challenge: "सार्वजनिक मंचों पर खुलकर बोलने में झिझक या अपनी क्षमता पर संदेह होना।",
+          growth: "आत्मनिर्भरता और आंतरिक साहस को जाग्रत करना; स्वयं की सीमाएं तय करना।",
+          advice: "दूसरों के कहने की प्रतीक्षा न करें; पहल करें और आत्मविश्वास से आगे बढ़ें।",
+          strategy: "हर महीने बिना किसी की अनुमति की प्रतीक्षा किए एक छोटा प्रोजेक्ट स्वयं पूरा करें।",
+          remedy: "प्रातःकाल सूर्य को तांबे के लोटे से जल अर्पित करें; दाहिनी कलाई पर लाल या नारंगी कलावा बांधें।"
         },
         2: {
-          lesson: "Struggles with emotional vulnerability and mood containment.",
-          challenge: "Fragile domestic boundaries; taking comments from acquaintances too personally.",
-          growth: "Mastering somatic stability, learning to differentiate your feelings from others.",
-          advice: "Avoid immediate reactive steps during high/low mood tides.",
-          strategy: "Engage in swimming or water meditations. Maintain strict sleep timings.",
-          remedy: "Wear silver ornaments or carry natural pearls. Keep yellow clay objects in South-West."
+          lesson: "अत्यधिक भावुकता और मूड में आने वाले उतार-चढ़ाव को संतुलित करना।",
+          challenge: "छोटी-छोटी बातों को दिल से लगा लेना; दूसरों की नकारात्मक ऊर्जा से जल्दी प्रभावित होना।",
+          growth: "भावनात्मक स्थिरता विकसित करना और अपनी भावनाओं को दूसरों के विचारों से अलग रखना।",
+          advice: "अत्यधिक भावुकता या गुस्से के समय कोई भी बड़ा निर्णय लेने से बचें।",
+          strategy: "पर्याप्त नींद लें, पानी भरपूर पिएं और पूर्णिमा के समय शांत ध्यान का अभ्यास करें।",
+          remedy: "चांदी का छल्ला या मोती धारण करें; दक्षिण-पश्चिम (SW) में पीली मिट्टी की वस्तुएं रखें।"
         },
         3: {
-          lesson: "Struggles keeping focused on dry academic files; lacks mentor advice.",
-          challenge: "Starting multiple research lines but finishing none; rejecting guru directions.",
-          growth: "Systemizing knowledge; building long-term study concentration.",
-          advice: "Approach established mentors; study classic texts with complete patience.",
-          strategy: "Spend 2 hours weekly learning classical arts or ancestral texts.",
-          remedy: "Offer yellow fruits to educators on Thursdays; maintain clean bookshelves."
+          lesson: "अध्ययन और ज्ञान को एकाग्रता के साथ पूरा करना; गुरु या मेंटर के मार्गदर्शन का अभाव।",
+          challenge: "कई काम एक साथ शुरू करना लेकिन अंत तक पूरा न करना; वरिष्ठों की सलाह को अनदेखा करना।",
+          growth: "ज्ञान को व्यवस्थित करना और दीर्घकालिक अध्ययन में निरंतरता बनाए रखना।",
+          advice: "योग्य मेंटर्स और गुरुओं का सम्मान करें; किसी भी विषय को धैर्यपूर्वक पूरा पढ़ें।",
+          strategy: "प्रति सप्ताह कम से कम 2 घंटे स्वाध्याय या ज्ञानवर्धक ग्रंथों के अध्ययन में लगाएं।",
+          remedy: "गुरुवार को शिक्षकों या बुजुर्गों को पीले फल अर्पित करें; अपनी अध्ययन मेज साफ रखें।"
         },
         4: {
-          lesson: "Struggles with rigid discipline, organization, and cash savings.",
-          challenge: "Erratic daily timelines; ignoring legal structures; chaotic savings accounts.",
-          growth: "Building absolute brick-and-mortar foundation systems.",
-          advice: "Maintain a daily budget log. Keep your closets clean.",
-          strategy: "Adopt a strict morning checklist routine. Use physical alarm clocks.",
-          remedy: "Keep wooden windchimes in South-East. Carry a green aventurine crystal."
+          lesson: "कठोर अनुशासन, नियमित दिनचर्या और धन की व्यवस्थित बचत की आवश्यकता।",
+          challenge: "अनियमित दिनचर्या; कानूनी या दस्तावेजी कार्यों में ढिलाई; बजट न बनाना।",
+          growth: "जीवन में ठोस नींव तैयार करना और हर काम में व्यवस्थित नियम अपनाना।",
+          advice: "दैनिक खर्चों का हिसाब रखें और अपने घर व दफ्तर की अलमारियों को सुव्यवस्थित रखें।",
+          strategy: "सुबह उठने का एक निश्चित समय तय करें और टू-डू लिस्ट बनाकर काम पूरा करें।",
+          remedy: "दक्षिण-पूर्व (SE) में लकड़ी की विंड चाइम लगाएं; हरा एवेंच्यूरिन ब्रेसलेट पहनें।"
         },
         5: {
-          lesson: "Lacks central mental stability and grounding.",
-          challenge: "Feeling scattered mentally; struggles negotiating business terms.",
-          growth: "Mastering central focal points, solid balance, and verbal negotiations.",
-          advice: "Do not rush. Stabilize your center before launching heavy operations.",
-          strategy: "Perform core-stabilising exercises. Keep brass pyramids on desks.",
-          remedy: "Wear emerald or peridot on your little finger. Donate green lentils."
+          lesson: "मानसिक स्थिरता और व्यापारिक संतुलन को मजबूत करना।",
+          challenge: "मन का बार-बार भटकना; व्यापार या बातचीत में सही शर्तें तय न कर पाना।",
+          growth: "आंतरिक संतुलन, स्पष्ट संवाद और व्यावसायिक बातचीत में निपुणता हासिल करना।",
+          advice: "जल्दबाजी में फैसले न लें; किसी भी बड़े कदम से पहले अच्छी तरह सोच-विचार करें।",
+          strategy: "नाभि केंद्रित श्वास प्राणायाम करें; काम की मेज पर पीतल का छोटा पिरामिड रखें।",
+          remedy: "कनिष्ठिका उंगली में पन्ना (Emerald) धारण करें या बुधवार को हरी मूंग दान करें।"
         },
         6: {
-          lesson: "Struggles receiving external support and family warmth.",
-          challenge: "Feeling lonely in times of crisis; neglecting personal luxury and home decor.",
-          growth: "Opening up channels for helpful friendships and cooperative designs.",
-          advice: "Be supportive to others first; learn to receive love gracefully.",
-          strategy: "Host clean warm family dinners. Decorate North-West sectors with metal.",
-          remedy: "Wear diamond/white opal or use rose essential mists in morning baths."
+          lesson: "दूसरों से सहयोग और पारिवारिक स्नेह को सहर्ष स्वीकार करना।",
+          challenge: "कठिन समय में अकेलापन महसूस करना; स्वयं के आराम और घर के सौंदर्य की उपेक्षा करना।",
+          growth: "अच्छे मित्रों का दायरा बढ़ाना और जीवन में सुख-समृद्धि को आकर्षित करना।",
+          advice: "दूसरों की निस्वार्थ मदद करें और बदले में प्रेम व सहयोग का आदर करें।",
+          strategy: "पारिवारिक मिलनसार डिनर आयोजित करें; उत्तर-पश्चिम (NW) दिशा को सुरुचिपूर्ण सजाएं।",
+          remedy: "सफेद ओपल या जरकन पहनें; स्नान के पानी में गुलाब जल का प्रयोग करें।"
         },
         7: {
-          lesson: "Struggles with deep patient analysis; prone to direct betrayals.",
-          challenge: "Prone to instant superficial beliefs; lacks inner protective shield.",
-          growth: "Developing persistent analytical research and occulic understanding.",
-          advice: "Verify facts twice. Do not share core secrets with casual friends.",
-          strategy: "Spend 1 hour in absolute silence daily. Maintain a personal journal.",
-          remedy: "Meditate on Ganesha mantras; donate food bowls to street dogs."
+          lesson: "धैर्यपूर्वक शोध और गहरी समझ विकसित करना; विश्वासघात से बचना।",
+          challenge: "बिना सोचे-समझे जल्दी विश्वास कर लेना; अपनी गुप्त बातें आसानी से साझा करना।",
+          growth: "गहन विश्लेषणात्मक दृष्टि और आध्यात्मिक अंतर्दृष्टि को जाग्रत करना।",
+          advice: "तथ्यों की दो बार पुष्टि करें; महत्वपूर्ण योजनाएं हर किसी से साझा न करें।",
+          strategy: "प्रतिदिन 20 मिनट मौन रहकर ध्यान करें और अपने अनुभवों की डायरी लिखें।",
+          remedy: "भगवान गणेश के मंत्रों का जाप करें; बेजुबान जानवरों या कुत्तों को भोजन कराएं।"
         },
         8: {
-          lesson: "Slower asset accumulation and material wealth blockages.",
-          challenge: "Lacking persistence in heavy physical labor; delayed corporate files.",
-          growth: "Learning deep material planning, corporate arbitration, and long-term security.",
-          advice: "Respect time and Saturn's values. Accept early hard duties with joy.",
-          strategy: "Perform deep cleaning tasks in your home every Saturday.",
-          remedy: "Wear black tourmaline. Keep earthy pottery items in North-East."
+          lesson: "स्थायी संपत्ति निर्माण में धैर्य और भौतिक अनुशासन की आवश्यकता।",
+          challenge: "कड़े परिश्रम में जल्दी ऊब जाना; कानूनी व सरकारी फाइलों में अप्रत्याशित देरी।",
+          growth: "दीर्घकालिक वित्तीय योजना, धैर्य और शनि के अनुशासनात्मक मूल्यों को अपनाना।",
+          advice: "समय की कीमत समझें; जिम्मेदारियों को बोझ मानने के बजाय अवसर समझकर निभाएं।",
+          strategy: "शनिवार को घर और कार्यस्थल की अच्छी तरह सफाई करें और व्यवस्थित रखें।",
+          remedy: "काली तुलसी या ब्लैक टूमलाइन पास रखें; उत्तर-पूर्व (NE) में मिट्टी के बर्तन रखें।"
         },
         9: {
-          lesson: "Low public recognition and driving courage.",
-          challenge: "Feeling invisible in social groups; low dynamic vitality.",
-          growth: "Awakening raw courage, self-worth, and high ethical fame.",
-          advice: "Do not hide. Step into the spotlight when systems require your hand.",
-          strategy: "Engage in public speaking or physical active challenges.",
-          remedy: "Light a red candle in South bedrooms daily. Wear scarlet accessories."
+          lesson: "सामाजिक पहचान, साहस और नेतृत्व भावना को जाग्रत करना।",
+          challenge: "समूहों में अपनी उपस्थिति दर्ज न करा पाना; आत्मविश्वास व ऊर्जा में कमी महसूस होना।",
+          growth: "साहस, आत्म-सम्मान और नैतिक नेतृत्व की शक्ति को जाग्रत करना।",
+          advice: "पीछे न हटें; जब भी नेतृत्व की आवश्यकता हो, आगे आकर जिम्मेदारी संभालें।",
+          strategy: "सार्वजनिक बोलने या शारीरिक फिटनेस की गतिविधियों में सक्रिय भाग लें।",
+          remedy: "दक्षिण दिशा में लाल लैंप या मोमबत्ती जलाएं; अपने पास लाल रुमाल रखें।"
         }
       };
 
       const emptyLesson = {
-        lesson: "General balance check.",
-        challenge: "Integrate default elements.",
-        growth: "Unlock cosmic coordinates.",
-        advice: "Maintain balance with daily meditation.",
-        strategy: "Perform regular actions.",
-        remedy: "Carry standard crystals."
+        lesson: "सामान्य ऊर्जा संतुलन की जांच।",
+        challenge: "मौलिक तत्वों को समन्वित करें।",
+        growth: "ब्रह्मांडीय ऊर्जा को जाग्रत करें।",
+        advice: "नियमित ध्यान और प्राणायाम से संतुलन बनाए रखें।",
+        strategy: "नियमित व समयबद्ध कार्य करें।",
+        remedy: "अनुकूल क्रिस्टल अपने पास रखें।"
       };
 
       const data = lessonsMap[digit] || emptyLesson;
@@ -1202,18 +1062,18 @@ export function computeLoshuMasterReport(
       };
     }),
     soulMission: {
-      lifePurpose: `To translate deep inner spiritual vision (Driver #${driver}) into an active structural legacy (Conductor #${conductor}) that supports societal progress.`,
-      soulMissionText: `Your soul selected path #${conductor} as its primary destination. This requires mastering lessons of patience, structural integrity, and divine trade.`,
-      higherCalling: `To act as a beacon of advice and grounding balance during times of rapid geopolitical shifts.`,
-      societyContribution: `Designing structured, safe spaces for team operations and providing clean planetary advice.`,
-      spiritualDirection: `Moving inward via standard occult studies while maintaining pristine commercial boundaries.`,
-      purposeStatement: `I manifest my driver willpower to build long-term legacy structures that stabilize everyone around me.`,
-      legacyPotential: `Highly profound! Marked by massive multi-generational real estates and ethical family codes.`
+      lifePurpose: `आंतरिक आध्यात्मिक दृष्टि (मूलांक #${driver}) को एक स्थायी व्यावहारिक धरोहर (भाग्यांक #${conductor}) में बदलना, जो समाज और परिवार के काम आए।`,
+      soulMissionText: `आपकी आत्मा ने मुख्य गंतव्य के रूप में भाग्यांक #${conductor} को चुना है। इसके लिए धैर्य, सत्यनिष्ठा और सेवा-भाव के पाठ सीखने होंगे।`,
+      higherCalling: `बदलते समय में लोगों के लिए सही मार्गदर्शन, संतुलन और शांति का प्रेरणास्रोत बनना।`,
+      societyContribution: `सुरक्षित और व्यवस्थित कार्य वातावरण तैयार करना तथा लोगों को सही जीवन-दिशा देना।`,
+      spiritualDirection: `व्यावहारिक सीमाओं का पालन करते हुए आत्म-चिंतन और ध्यान के माध्यम से भीतर की यात्रा करना।`,
+      purposeStatement: `मैं अपने मूलांक की इच्छाशक्ति से ऐसे स्थायी कार्य करता हूँ जो मेरे साथ सभी को स्थिरता और समृद्धि दें।`,
+      legacyPotential: `अत्यंत प्रभावशाली! बहु-पीढ़ीगत संपत्तियों और सम्मानित पारिवारिक संस्कारों के लिए अनुकूल।`
     },
     arrowsAnalysis,
     mobileFusion: {
       checked: !!mobileNum,
-      mobileNumber: mobileNum || "Not provided",
+      mobileNumber: mobileNum || "दर्ज नहीं किया गया",
       strengths: mStrengths,
       weaknesses: mWeaknesses,
       compensationAnalysis: mComp,
@@ -1224,17 +1084,17 @@ export function computeLoshuMasterReport(
     vaastuFusion: {
       kuaNumber,
       groupType,
-      directionAnalysis: `Your Kua Number is ${kuaNumber} belonging to the ${groupType === 'EAST_GROUP' ? 'East Mansion (पूर्व समूह)' : 'West Mansion (पश्चिम समूह)'}.`,
+      directionAnalysis: `आपका कुआ अंक ${kuaNumber} है, जो ${groupType === 'EAST_GROUP' ? 'पूर्व समूह (East Group)' : 'पश्चिम समूह (West Group)'} से संबंधित है।`,
       bestDirections,
       avoidDirections,
       zones: {
-        career: `North (उत्तर): Place metal fountain structures to multiply career path files.`,
-        money: `South-East (दक्षिण-पूर्व): Keep green plants or wooden windchimes to clear blocked cash flows.`,
-        health: `East (पूर्व): Place healthy Tulsi plants and avoid storing old metallic junk.`,
-        relationship: `South-West (दक्षिण-पश्चिम): Keep solid heavy clay or pink crystal pairs to cement marital trust.`
+        career: `उत्तर (North): करियर में प्रगति और नए अवसरों के लिए धातु का फव्वारा या जल तत्व रखें।`,
+        money: `दक्षिण-पूर्व (South-East): धन आगमन को निर्बाध रखने के लिए हरे पौधे या लकड़ी की विंड चाइम लगाएं।`,
+        health: `पूर्व (East): उत्तम स्वास्थ्य के लिए तुलसी का पौधा लगाएं और पुराना कबाड़ न रखें।`,
+        relationship: `दक्षिण-पश्चिम (South-West): वैवाहिक विश्वास और मधुरता के लिए मिट्टी की कलाकृतियां या रोज़ क्वार्ट्ज रखें।`
       },
-      homeRemedies: `Remove any blue paint from South-West bedrooms; introduce soft off-white or cream tiles.`,
-      officeRemedies: `Always sit facing your favorable direction ${bestDirections[0]} to prevent legal hazards.`
+      homeRemedies: `दक्षिण-पश्चिम बेडरूम से नीला रंग हटाएं; दीवारों पर क्रीम या हल्के बादामी रंग का प्रयोग करें।`,
+      officeRemedies: `अनावश्यक कानूनी अड़चनों से बचने के लिए महत्वपूर्ण बैठकों में अनुकूल दिशा ${bestDirections[0]} की ओर मुंह करके बैठें।`
     },
     healthAnalysis: {
       healthScore,
@@ -1245,43 +1105,43 @@ export function computeLoshuMasterReport(
       primaryDosha,
       secondaryDosha,
       healthTendencies: primaryDosha === 'PITTA' 
-        ? "Prone to warm hyper-acidity, skin eruptions, and liver heat. Requires cool leafy diets."
-        : "Tendencies toward cold dry joints, neural blockages, and dry digestive tracts. Requires warm oily structures.",
+        ? "अग्नि तत्व की अधिकता से एसिडिटी, त्वचा में जलन और पित्त बढ़ने की प्रवृत्ति। शीतल और सात्विक आहार लाभदायक रहेगा।"
+        : "वात तत्व के प्रभाव से जोड़ों में रूखापन, नसों में खिंचाव और पाचन में गैस बनने की प्रवृत्ति। गर्म व पौष्टिक आहार अनुकूल रहेगा।",
       lifestyleRecommendations: primaryDosha === 'PITTA'
-        ? ["Consume sweet, bitter and cooling food items.", "Avoid extremely spicy meals and direct noon sun.", "Practice moon-gazing on Monday nights."]
-        : ["Eat warm, moist, heavy and sweet food profiles.", "Introduce warm sesame oil massages daily.", "Engage in slow, grounding yoga formats."],
-      preventiveWellness: `Practice intermittent hydration under Moon skies; avoid high-stress meetings post sunset.`
+        ? ["मीठे, कड़वे और तासीर में ठंडे खाद्य पदार्थों का सेवन करें।", "अत्यधिक तीखे-मसालेदार भोजन और दोपहर की तेज धूप से बचें।", "सोमवार की रात्रि को चंद्र दर्शन या ध्यान का अभ्यास करें।"]
+        : ["हल्का गर्म, सुपाच्य और ताजा पका हुआ भोजन लें।", "तिल के तेल से नियमित मालिश का अभ्यास करें।", "धीमी गति वाले प्राणायाम और योगासनों को दिनचर्या में शामिल करें।"],
+      preventiveWellness: `सूर्यास्त के बाद तनावपूर्ण बैठकों से बचें; नियमित जल पिएं और शांत निद्रा का ध्यान रखें।`
     },
     forecasts: {
       personalYear,
       personalMonth,
       personalDay,
-      career: `Vibrational indicators show positive structural adjustments in career paths. Excellent for initiating new tasks.`,
-      money: `Steady flow; assets compound smoothly. Avoid sudden risky investments on Saturn days.`,
-      relationships: `Balanced year; deep communication helps resolve old structural family delays.`,
-      health: `Strong wellness index; ensure regular sleep and warm morning tea routines.`,
-      business: `Highly favorable for commercial startups and legal agreements.`,
-      travel: `Opportunities for short-distance travels for business negotiations are active.`,
-      spiritualGrowth: `Occult insights and cosmic meditation experiences deepen swiftly.`,
-      opportunities: [`Launch a new digital platform or trade project.`, `Strengthen ancestral relationships.`],
-      warnings: [`Avoid loud verbal arguments during moon days.`, `Ignore fake speculative stock channels.`]
+      career: `ऊर्जा के संकेत करियर में सकारात्मक और स्थायी बदलाव दर्शा रहे हैं। नई पहलों के लिए अनुकूल समय है।`,
+      money: `धन प्रवाह स्थिर रहेगा; बचत में क्रमिक वृद्धि होगी। शनिवार के दिन बिना सोचे-समझे जोखिम भरे निवेश से बचें।`,
+      relationships: `रिश्तों के लिए संतुलित वर्ष; खुलकर बातचीत करने से पुरानी पारिवारिक गलतफहमियां दूर होंगी।`,
+      health: `स्वास्थ्य सूचकांक उत्तम; दिनचर्या नियमित रखें और सुबह गुनगुने पानी या हर्बल चाय का सेवन करें।`,
+      business: `व्यापारिक शुरुआत, नए सौदों और कानूनी समझौतों के लिए यह समय अत्यंत अनुकूल है।`,
+      travel: `व्यापारिक बातचीत और कार्य के सिलसिले में छोटी दूरी की उपयोगी यात्राओं के योग बन रहे हैं।`,
+      spiritualGrowth: `अध्यात्म, योग और ध्यान के अनुभवों में स्वाभाविक गहराई और शांति प्राप्त होगी।`,
+      opportunities: [`नया व्यावसायिक उपक्रम या व्यापारिक प्रोजेक्ट शुरू करना।`, `पारिवारिक और सामाजिक संबंधों को मजबूत बनाना।`],
+      warnings: [`महत्वपूर्ण दिनों में किसी भी उत्तेजक विवाद से बचें।`, `सट्टा या फर्जी त्वरित-धन वाली योजनाओं से दूर रहें।`]
     },
     remedies: {
       luckyNumbers: [driver, conductor, 5, 1, 6],
-      luckyDates: [`${driver}th`, `${conductor}th`, '5th', '14th', '23rd'],
-      luckyDays: ['Wednesday', 'Thursday', 'Friday'],
-      luckyColours: ['Emerald Green', 'Royal Blue', 'Champagne Cream'],
+      luckyDates: [`${driver} तारीख`, `${conductor} तारीख`, '5 तारीख', '14 तारीख', '23 तारीख'],
+      luckyDays: ['बुधवार (Wednesday)', 'गुरुवार (Thursday)', 'शुक्रवार (Friday)'],
+      luckyColours: ['पन्ना हरा (Emerald Green)', 'रॉयल ब्लू (Royal Blue)', 'हल्का क्रीम (Champagne Cream)'],
       luckyDirections: bestDirections,
-      personalRemedies: [`Meditate daily for 15 minutes facing your success direction: ${bestDirections[0]}.`, `Respect maternal and paternal figures unconditionally.`],
-      careerRemedies: [`Keep a green aventurine tree on your office table.`, `Always face ${bestDirections[0]} during important corporate calls.`],
-      relationshipRemedies: [`Keep a pair of rose quartz hearts in the South-West corner of your flat.`, `Avoid storing broken metals or old clocks under marital beds.`],
-      financialRemedies: [`Water a leafy green plant daily of Wednesday morning.`, `Donate black sesame seeds to down-and-out construction workers on Saturdays.`],
-      spiritualRemedies: [`Chant your archetype mantra: ${archetypeMantra} 27 times every morning.`, `Practice absolute silence (Mauna) for 30 minutes every Sunday.`],
-      actionPlan: `Cast your attention onto resolving missing grid nodes. Introduce corresponding elements in the designated Vastu sectors. Maintain an organic, high-hydration sleep routine and perform your 90-day plan without delays.`,
+      personalRemedies: [`प्रतिदिन 15 मिनट अपनी सफलता दिशा (${bestDirections[0]}) की ओर मुंह करके ध्यान करें।`, `माता-पिता और बुजुर्गों का नियमित आशीर्वाद लें।`],
+      careerRemedies: [`अपने ऑफिस टेबल पर हरा एवेंच्यूरिन क्रिस्टल ट्री रखें।`, `महत्वपूर्ण मीटिंग्स में अपनी अनुकूल दिशा (${bestDirections[0]}) की ओर मुख करके बैठें।`],
+      relationshipRemedies: [`घर के दक्षिण-पश्चिम कोने में रोज़ क्वार्ट्ज का जोड़ा रखें।`, `बेडरूम में पुराने बंद पड़े इलेक्ट्रॉनिक्स या टूटी घड़ियां बिल्कुल न रखें।`],
+      financialRemedies: [`बुधवार की सुबह हरे-भरे पत्तों वाले पौधे में जल दें।`, `शनिवार को जरूरतमंदों को भोजन या काले तिल का दान करें।`],
+      spiritualRemedies: [`अपने आर्केटाइप मंत्र: "${archetypeMantra}" का प्रतिदिन सुबह 27 बार जाप करें।`, `प्रति रविवार 30 मिनट मौन (Mauna) का अभ्यास करें।`],
+      actionPlan: `ग्रिड के अनुपस्थित अंकों के संतुलन पर ध्यान दें। संबंधित वास्तु क्षेत्रों में उपयुक्त तत्व स्थापित करें। दिनचर्या नियमित रखें और 90 दिनों की कार्ययोजना का निष्ठापूर्वक पालन करें।`,
       plan90Days: {
-        days1_30: "Audit all physical spaces. Clear old broken clocks and metallic junk. Sit facing your success direction and start your weekly chant routines.",
-        days31_60: "Introduce elemental Vastu corrections (plants in SE, clay lamps in SW). Perform weekly food donations matching your Driver profile planets on designated days.",
-        days61_90: "Establish a strict daily budget logger. Review mobile improvements. Note down the subtle enhancements in cash collections and sleep depth parameters."
+        days1_30: "घर और ऑफिस के सभी स्थानों की सफाई करें। बंद घड़ियां और पुराना कबाड़ हटाएं। अपनी सफलता दिशा की ओर मुंह करके बैठें और दैनिक मंत्र जाप शुरू करें।",
+        days31_60: "वास्तु उपाय लागू करें (दक्षिण-पूर्व में हरे पौधे, दक्षिण-पश्चिम में मिट्टी का दीपक)। अपने मूलांक ग्रह के अनुकूल दिन पर जरूरतमंदों को अन्न दान करें।",
+        days61_90: "दैनिक खर्चों का व्यवस्थित हिसाब रखें। मोबाइल नंबर के सुझावों पर अमल करें। धन के आगमन और मानसिक शांति में क्रमिक वृद्धि का अवलोकन करें।"
       }
     }
   };

@@ -32,84 +32,84 @@ export function generateDomainInterpretations(
   const pBhagyank = NUMBER_PROFILES[bhagyank] || NUMBER_PROFILES[1];
 
   const personality: DomainInterpretation = {
-    domain: 'Personality & Identity',
+    domain: 'व्यक्तित्व एवं आत्म-पहचान (Personality & Identity)',
     score: 85,
-    headline: `${pMulank.grahaHi} Archetype with ${pBhagyank.grahaHi} Destiny Horizon`,
-    detailedAnalysis: `Your core individuality is expressed through the vibrant traits of ${pMulank.grahaEn}. ${pMulank.personality} In day-to-day choices, ${synthesis.instinctiveNature}`,
+    headline: `${pMulank.grahaHi} मूलांक स्वभाव एवं ${pBhagyank.grahaHi} भाग्य दिशा`,
+    detailedAnalysis: `आपका मूल स्वभाव ${pMulank.grahaHi} के विशिष्ट गुणों से संचालित है। ${pMulank.personality} दैनिक निर्णयों में ${synthesis.instinctiveNature}`,
     strengths: pMulank.positiveTraits.slice(0, 4),
     growthAreas: pMulank.shadowTraits.slice(0, 3),
     actionableGuidance: [
-      `Anchor your personal presence in ${pMulank.balancedExpression.toLowerCase()}`,
-      `Consciously balance ${pMulank.element} elemental currents with regular grounding.`
+      `अपने व्यक्तित्व को ${pMulank.balancedExpression} में स्थिर रखें।`,
+      `${pMulank.element} तत्व के ऊर्जा प्रवाह को नियमित ध्यान और शांति द्वारा संतुलित रखें।`
     ]
   };
 
   const career: DomainInterpretation = {
-    domain: 'Career & Professional Destiny',
+    domain: 'करियर एवं व्यावसायिक भाग्य (Career & Professional Destiny)',
     score: 88,
-    headline: `Strategic Executive & Commercial Evolution`,
-    detailedAnalysis: `Professionally, your path is shaped by the confluence of ${pMulank.grahaEn} (initiation) and ${pBhagyank.grahaEn} (destination). You excel in roles requiring ${pBhagyank.decisionMaking.toLowerCase()}`,
+    headline: `रणनीतिक कार्यकुशलता एवं व्यावसायिक प्रगति`,
+    detailedAnalysis: `करियर के क्षेत्र में आपकी राह ${pMulank.grahaHi} की पहल और ${pBhagyank.grahaHi} के अंतिम लक्ष्य के सुंदर समन्वय से तय होती है। आप ऐसे कार्यों में विशेष सफल होते हैं जहां ${pBhagyank.decisionMaking} की आवश्यकता हो।`,
     strengths: [...new Set([...pMulank.career.slice(0, 3), ...pBhagyank.career.slice(0, 3)])],
-    growthAreas: ['Balancing rapid personal initiative with institutional patience'],
+    growthAreas: ['तीव्र व्यक्तिगत पहल और संगठनात्मक धैर्य के बीच संतुलन बनाए रखना'],
     actionableGuidance: [
-      `Focus on industries directly aligned with your chart: ${pBhagyank.career.slice(0, 3).join(', ')}.`,
-      `Leverage personal years governed by ${pBhagyank.grahaEn} for career transitions.`
+      `अपनी जन्म कुंडली के अनुकूल प्रमुख क्षेत्रों पर ध्यान दें: ${pBhagyank.career.slice(0, 3).join(', ')}।`,
+      `करियर में महत्वपूर्ण बदलावों के लिए ${pBhagyank.grahaHi} से प्रभावित पर्सनल ईयर का लाभ उठाएं।`
     ]
   };
 
   const wealth: DomainInterpretation = {
-    domain: 'Wealth & Material Prosperity',
+    domain: 'धन एवं भौतिक समृद्धि (Wealth & Material Prosperity)',
     score: 82,
-    headline: `Sustained Asset Creation & Strategic Compounding`,
-    detailedAnalysis: `Your wealth psychology reflects ${pMulank.wealth} Supported by ${pBhagyank.business}`,
-    strengths: ['Long-term asset creation', 'Commercial acumen', 'Protective family reserves'],
-    growthAreas: ['Impulsive investments during volatile market phases'],
+    headline: `दीर्घकालिक परिसंपत्ति निर्माण एवं आर्थिक स्थिरता`,
+    detailedAnalysis: `आपकी वित्तीय समझ ${pMulank.wealth} को दर्शाती है, जिसे ${pBhagyank.business} का मजबूत सहयोग मिलता है।`,
+    strengths: ['दीर्घकालिक संपत्ति निर्माण', 'व्यापारिक सूझबूझ', 'सुरक्षित पारिवारिक बचत'],
+    growthAreas: ['अस्थिर बाजार के समय जल्दबाजी में जोखिम भरे निवेश से बचना'],
     actionableGuidance: [
-      `Cultivate wealth through ethical, disciplined compounding.`,
-      `Keep financial ledgers organized, especially if digit 4 or 8 is missing.`
+      `अनुशासित और नैतिक तरीकों से निरंतर पूंजी संचय करें।`,
+      `आर्थिक कागजात और बहीखाते हमेशा सुव्यवस्थित रखें।`
     ]
   };
 
   const relationships: DomainInterpretation = {
-    domain: 'Relationships & Family Dynamics',
+    domain: 'संबंध एवं पारिवारिक जीवन (Relationships & Family Dynamics)',
     score: 80,
-    headline: `Loyal Commitment & Mutual Honor`,
-    detailedAnalysis: `${pMulank.relationships} Your deeper relational growth lesson is: ${pBhagyank.relationships}`,
-    strengths: ['Emotional loyalty', 'Family stewardship', 'Protective generosity'],
-    growthAreas: ['Over-protectiveness or expecting partners to mirror your exact pace'],
+    headline: `पारस्परिक आदर, निष्ठा एवं पारिवारिक समर्पण`,
+    detailedAnalysis: `${pMulank.relationships} आपके संबंधों की गहरी सीख है: ${pBhagyank.relationships}`,
+    strengths: ['भावनात्मक निष्ठा', 'पारिवारिक जिम्मेदारी', 'सुरक्षात्मक देखभाल'],
+    growthAreas: ['अति-सुरक्षात्मक स्वभाव या साथी से अपने जैसी ही गति की अपेक्षा करना'],
     actionableGuidance: [
-      `Practice open, non-judgmental communication to maintain domestic harmony.`,
-      `Honor the sacred space of partners and close collaborators.`
+      `पारिवारिक सामंजस्य के लिए शांत और निष्कपट बातचीत का अभ्यास करें।`,
+      `जीवनसाथी और सहयोगियों की व्यक्तिगत स्वतंत्रता का पूरा सम्मान करें।`
     ]
   };
 
   const healthWellness: DomainInterpretation = {
-    domain: 'Wellness & Energy Vitality',
+    domain: 'स्वास्थ्य एवं प्राण ऊर्जा (Wellness & Energy Vitality)',
     score: 78,
-    headline: `Holistic Elemental Balance & Vitality`,
-    detailedAnalysis: `Symbolically governed by ${pMulank.healthSymbolism}. Sustaining high performance requires rhythmic self-care and respecting bodily limits.`,
-    strengths: ['Resilient recuperative reserves', 'Natural vitality'],
-    growthAreas: ['Stress accumulation during high-pressure work sprints'],
+    headline: `प्राकृतिक तत्व संतुलन एवं ऊर्जा सामंजस्य`,
+    detailedAnalysis: `पारंपरिक रूप से यह ऊर्जा ${pMulank.healthSymbolism} से जुड़ी है। निरंतर उच्च कार्यक्षमता के लिए नियमित जीवनशैली और शरीर की सीमाओं का सम्मान जरूरी है।`,
+    strengths: ['प्राकृतिक जीवन शक्ति', 'सहनशीलता व ऊर्जा'],
+    growthAreas: ['अत्यधिक काम के दबाव में मानसिक व शारीरिक तनाव'],
     actionableGuidance: [
-      `Integrate mindful breathing and hydration into daily routines.`,
-      `Consult healthcare professionals for any medical needs; use numerology for reflection only.`
+      `दैनिक दिनचर्या में प्राणायाम और भरपूर जलपान को शामिल करें।`,
+      `चिकित्सीय सलाह का यह विकल्प नहीं है; किसी भी शारीरिक परेशानी में डॉक्टर से परामर्श लें।`
     ]
   };
 
   const spirituality: DomainInterpretation = {
-    domain: 'Spiritual Growth & Higher Consciousness',
+    domain: 'आध्यात्मिक विकास एवं उच्च चेतना (Spiritual Growth)',
     score: 90,
-    headline: `Inner Light Awakening & Karmic Realization`,
-    detailedAnalysis: `${pBhagyank.spirituality} Your spiritual evolution bridges active worldly duty (Karma Yoga) with contemplative realization.`,
-    strengths: ['Intuitive discernment', 'Reverence for cosmic order', 'Generous humanitarian spirit'],
-    growthAreas: ['Spiritual bypass or cynicism during challenging karmic phases'],
+    headline: `अंतःप्रकाश जागरण एवं कर्म योग सिद्धि`,
+    detailedAnalysis: `${pBhagyank.spirituality} आपकी आत्मिक यात्रा सांसारिक कर्तव्यों (कर्म योग) को निभाते हुए अंतर्मुखी ज्ञान प्राप्त करने का मार्ग है।`,
+    strengths: ['अंतर्ज्ञान और विवेक', 'सृष्टि के नियमों के प्रति आदर', 'परोपकारी मानवीय भावना'],
+    growthAreas: ['कठिन समय में विरक्ति या निराशा से बचना'],
     actionableGuidance: [
-      `Engage in daily silent meditation or mantra japa: ${pMulank.remedialTheme}`,
-      `Engage in selfless service (Seva) on your planetary day.`
+      `दैनिक शांत ध्यान अथवा मंत्र जप करें: ${pMulank.remedialTheme}।`,
+      `अपने मुख्य ग्रह के दिन निःस्वार्थ सेवा (दान) करें।`
     ]
   };
 
-  const synthesisSummary = `Within the LeoFamily numerology framework, your chart demonstrates a ${synthesis.relationship.toUpperCase()} alignment between Driver ${mulank} and Destiny ${bhagyank}, with ${enhancedGrid.effectivePresentDigits.length} active vibrational coordinates in your enhanced Lo Shu grid.`;
+  const synthesisSummary = `LeoFamily वैदिक अंकज्योतिष के अनुसार, आपकी जन्म कुंडली में मूलांक (ड्राइवर) ${mulank} और भाग्यांक (कंडक्टर) ${bhagyank} के बीच ${synthesis.relationship === 'harmonious' ? 'अत्यंत मित्रवत व शुभ' : synthesis.relationship === 'supportive' ? 'सहयोगात्मक' : 'विशेष साधना योग्य'} संबंध है, और आपके Lo Shu ग्रिड में ${enhancedGrid.effectivePresentDigits.length} अंक सक्रिय हैं।`;
 
   return {
     personality,

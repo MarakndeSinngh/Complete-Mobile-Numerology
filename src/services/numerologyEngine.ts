@@ -383,37 +383,37 @@ export function analyzeMobileNumber(mobileStr: string): MobileAnalysis {
 
   const posDescriptions: Record<number, Record<number, string>> = {
     1: {
-      1: 'Sun Frequency: Starts projects with high initiative, sovereign leadership, and great confidence.',
-      2: 'Moon Frequency: Approaches initiatives creatively but with fragile mood-dependent energy.',
-      3: 'Jupiter Frequency: Highly oriented to wisdom, guruship, and extensive, well-planned programs.',
-      4: 'Rahu Frequency: Starts with sudden unconventional intensity, often facing initial delays.',
-      5: 'Mercury Frequency: Driven by business calculation, quick networking, and communication.',
-      6: 'Venus Frequency: Prefers luxury, artistic designs, and initiates projects with comforting warmth.',
-      7: 'Ketu Frequency: Renders original approaches deep, spiritual, but highly prone to logical doubt.',
-      8: 'Saturn Frequency: Starts with structured discipline, laborious persistence, and slow progress.',
-      9: 'Mars Frequency: Direct, rapid, highly daring, and prompt action taker right from the launch.'
+      1: 'सूर्य ऊर्जा: उच्च नेतृत्व क्षमता, आत्मविश्वास और संप्रभुता के साथ नए प्रोजेक्ट्स की शुरुआत करते हैं।',
+      2: 'चंद्र ऊर्जा: रचनात्मक शुरुआत, लेकिन कार्य में मूड और भावनात्मक ऊर्जा का गहरा प्रभाव रहता है।',
+      3: 'गुरु ऊर्जा: ज्ञान, सलाह और सुविचारित दीर्घकालिक योजनाओं के साथ कार्य आरंभ करते हैं।',
+      4: 'राहु ऊर्जा: अचानक और अप्रत्याशित तेजी के साथ शुरुआत, हालांकि प्रारंभिक विलंब संभव है।',
+      5: 'बुध ऊर्जा: व्यापारिक गणना, त्वरित नेटवर्किंग और स्पष्ट कम्युनिकेशन द्वारा संचालित।',
+      6: 'शुक्र ऊर्जा: सुख-सुविधा, कलात्मक सौंदर्य और सौहार्दपूर्ण दृष्टिकोण से प्रोजेक्ट्स शुरू करते हैं।',
+      7: 'केतु ऊर्जा: गहरा और आध्यात्मिक नजरिया, लेकिन अत्यधिक संशय व विश्लेषण की संभावना।',
+      8: 'शनि ऊर्जा: अनुशासित, कड़ी मेहनत, धैर्य और धीमी किंतु मजबूत प्रगति के साथ शुरुआत।',
+      9: 'मंगल ऊर्जा: प्रत्यक्ष, साहसी, तीव्र और तुरंत एक्शन लेने की स्वाभाविक प्रवृत्ति।'
     },
     2: {
-      1: 'Quick, authoritative, and sovereign-driven decision framework.',
-      2: 'Decisions are moody, fluctuating, and easily impacted by environment.',
-      3: 'Decisions prioritize long-term wisdom and scholarly advice.',
-      4: 'Decisions are erratic, sudden, or guided by illusion states.',
-      5: 'Highly business-centric, calculative, and strategic decisions.',
-      6: 'Decisions favor beauty, high luxury, and family comfort.',
-      7: 'Deeply analytical but prone to delay due to acute overthinking.',
-      8: 'Extremely cautious, law-respecting, and delayed outcomes.',
-      9: 'Daring, high-risk, physical, and action-driven decisions.'
+      1: 'त्वरित, अधिकारपूर्ण और स्वतंत्र निर्णय लेने की शैली।',
+      2: 'भावुक और चंचल निर्णय, जो बाहरी माहौल से जल्दी प्रभावित होते हैं।',
+      3: 'दीर्घकालिक ज्ञान, विद्वता और अनुभवी सलाह को प्राथमिकता देने वाले निर्णय।',
+      4: 'अनपेक्षित, अप्रत्याशित या कभी-कभी भ्रम की स्थिति में लिए गए निर्णय।',
+      5: 'व्यापार-उन्मुख, तार्किक और रणनीतिक गणनाओं पर आधारित निर्णय।',
+      6: 'पारिवारिक सुख, सौंदर्य और भौतिक संतुष्टि को महत्व देने वाले निर्णय।',
+      7: 'गहन विश्लेषणात्मक, लेकिन ओवरथिंकिंग के कारण निर्णय में देरी।',
+      8: 'अत्यंत सतर्क, कानूनी नियमों का पालन करने वाले और धैर्यवान निर्णय।',
+      9: 'साहसी, ऊर्जावान और तुरंत क्रियान्वयन को प्राथमिकता देने वाले निर्णय।'
     },
     3: {
-      1: 'Sun: Strong vital physical defense. Prone to general optical or heat distress.',
-      2: 'Moon: Highly sensitive health, related to hydration and emotional anxiety.',
-      3: 'Jupiter: High resilience, strong immunity, wisdom in diet.',
-      4: 'Rahu: Sudden headaches, mysterious diagnostic issues, or stress overload.',
-      5: 'Mercury: Superb mental-nervous coordination but prone to minor lethargy.',
-      6: 'Venus: Prone to sweet cravings, skin allergies, or bladder strain.',
-      7: 'Ketu: Renders health sensitive to deep thoughts, causing sleeplessness.',
-      8: 'Saturn: Vulnerable to chronic joint pains or slower physical healing.',
-      9: 'Mars: Robust, high energy but prone to surgical incidents or blood conditions.'
+      1: 'सूर्य: मजबूत रोग प्रतिरोधक क्षमता; सिरदर्द, आंखों या गर्मी से जुड़े विकार संभव।',
+      2: 'चंद्र: संवेदनशील स्वास्थ्य; जल संतुलन, कफ और भावनात्मक चिंता (anxiety) का ध्यान रखें।',
+      3: 'गुरु: उत्तम शारीरिक ऊर्जा, मजबूत इम्युनिटी; खानपान में संतुलन आवश्यक।',
+      4: 'राहु: अचानक सिरदर्द, अज्ञात स्वास्थ्य समस्याएं या अत्यधिक तनाव से सावधानी।',
+      5: 'बुध: बेहतरीन तंत्रिका-मानसिक तालमेल, लेकिन कभी-कभी सुस्ती की संभावना।',
+      6: 'शुक्र: त्वचा की संवेदनशीलता, मीठा खाने की आदत या गले से जुड़ी समस्याएं।',
+      7: 'केतु: अत्यधिक विचारों के कारण अनिद्रा या मानसिक थकान की प्रवृत्ति।',
+      8: 'शनि: जोड़ों के दर्द या धीमी शारीरिक रिकवरी का जोखिम; नियमित योग लाभकारी।',
+      9: 'मंगल: उच्च शारीरिक ऊर्जा; चोट, सर्जरी या रक्त से संबंधित विकारों से सावधान रहें।'
     }
   };
 
@@ -421,7 +421,7 @@ export function analyzeMobileNumber(mobileStr: string): MobileAnalysis {
     const posNum = idx + 1;
     const digit = parseInt(modifiedNumber[idx] || '5', 10);
     const descGroup = posDescriptions[posNum];
-    const description = (descGroup && descGroup[digit]) || `Digit ${digit} in this position brings balanced, supportive planetary waves directly aiding ${heading.toLowerCase()}.`;
+    const description = (descGroup && descGroup[digit]) || `इस स्थान पर अंक ${digit} संतुलित ऊर्जा प्रदान करता है, जो ${heading} को सीधा सहयोग देती है।`;
     return {
       position: posNum,
       heading,
@@ -438,15 +438,15 @@ export function analyzeMobileNumber(mobileStr: string): MobileAnalysis {
   }
 
   const alarmDescriptions: Record<number, string> = {
-    1: 'High ego, self-centered behavior, and severe friction in relationship adjustments.',
-    2: 'High mood swings, persistent anxiety, and emotional outbursts.',
-    3: 'Weight gain risks, ignoring advice from mentors, and over-talking.',
-    4: 'Sudden headaches, illusion loops, and heavy physical struggles.',
-    5: 'Lethargy, risk of money losses, and threat of falling victim to financial scams.',
-    6: 'Defamation risks, relationship entanglements, and female disease concerns.',
-    7: 'Chronic overthinking, loss in partnerships, and trust issues.',
-    8: 'Obstacles, court cases, delays in careers, and land blockages.',
-    9: 'Rude behavior, quick temper flare-ups, and danger of fire or surgery/accidents.'
+    1: 'अहंकार, आत्म-केंद्रित व्यवहार और रिश्तों में तालमेल की कमी का जोखिम।',
+    2: 'मूड स्विंग्स, निरंतर चिंता (anxiety) और अत्यधिक भावुकता।',
+    3: 'वजन बढ़ने का जोखिम, बड़ों व गुरुजनों की सलाह की अनदेखी और अति-भाषण।',
+    4: 'अचानक सिरदर्द, मानसिक भ्रम और जीवन में अप्रत्याशित संघर्ष।',
+    5: 'मानसिक अस्थिरता, आर्थिक नुकसान का जोखिम और लेन-देन में सतर्कता की आवश्यकता।',
+    6: 'रिश्तों में उलझनें, सामाजिक बदनामी का जोखिम और स्वास्थ्य संबंधी चिंताएं।',
+    7: 'अत्यधिक सोचना (Overthinking), साझेदारी में गलतफहमी और विश्वास की कमी।',
+    8: 'कार्यों में रुकावटें, कानूनी विवाद, करियर में विलंब और संपत्ति के मामलों में बाधाएं।',
+    9: 'गुस्सैल स्वभाव, वाणी में तल्खी और चोट या सर्जरी का जोखिम।'
   };
 
   const repeatingAlarms: { digit: number; count: number; meaning: string }[] = [];
@@ -457,7 +457,7 @@ export function analyzeMobileNumber(mobileStr: string): MobileAnalysis {
       repeatingAlarms.push({
         digit,
         count,
-        meaning: alarmDescriptions[digit] || 'Excess representation triggers mild vibrational hurdles.'
+        meaning: alarmDescriptions[digit] || 'अंकों की अधिक पुनरावृत्ति से ऊर्जा में हल्का असंतुलन संभव।'
       });
     }
   });
@@ -465,12 +465,12 @@ export function analyzeMobileNumber(mobileStr: string): MobileAnalysis {
   // Hostile missing middle number relationships (Vedic Grid rules)
   const digitSet = new Set(digits.split('').map(d => parseInt(d, 10)));
   const hostileMap = [
-    { numA: 4, numB: 2, missing: 8, title: 'Moon & Rahu (8 Missing)', meaning: 'Vulnerable to sudden accidents, intense family conflicts, and bad company influence.' },
-    { numA: 3, numB: 9, missing: 1, title: 'Jupiter & Mars (1 Missing)', meaning: 'Hardworker but faces less gain; profits are very low relative to hard efforts.' },
-    { numA: 4, numB: 9, missing: 5, title: 'Mars & Rahu (5 Missing)', meaning: 'Extremely risky tasks attractor, surgery vulnerability but good for defense/police.' },
-    { numA: 1, numB: 8, missing: 7, title: 'Sun & Saturn (7 Missing)', meaning: 'Government work obstructions, disputes with father or boss, servants do not stay long.' },
-    { numA: 3, numB: 2, missing: 6, title: 'Jupiter & Moon (6 Missing)', meaning: 'Disturbance in higher education, delays in learning progress.' },
-    { numA: 6, numB: 5, missing: 7, title: 'Venus & Mercury (7 Missing)', meaning: 'Good education with barriers, love/romance failures, money gets stuck.' }
+    { numA: 4, numB: 2, missing: 8, title: 'Moon & Rahu (8 Missing)', meaning: 'अचानक दुर्घटनाओं का जोखिम, परिवार में वैचारिक मतभेद और गलत संगति का प्रभाव।' },
+    { numA: 3, numB: 9, missing: 1, title: 'Jupiter & Mars (1 Missing)', meaning: 'कड़ी मेहनत के बावजूद अपेक्षाकृत कम लाभ; प्रयासों की तुलना में परिणाम धीमे।' },
+    { numA: 4, numB: 9, missing: 5, title: 'Mars & Rahu (5 Missing)', meaning: 'जोखिम भरे कार्यों की ओर आकर्षण, सर्जरी का योग लेकिन सुरक्षा व पुलिस सेवाओं के लिए अनुकूल।' },
+    { numA: 1, numB: 8, missing: 7, title: 'Sun & Saturn (7 Missing)', meaning: 'सरकारी कार्यों में रुकावट, पिता या वरिष्ठ अधिकारियों से मतभेद, अधीनस्थों का साथ न मिलना।' },
+    { numA: 3, numB: 2, missing: 6, title: 'Jupiter & Moon (6 Missing)', meaning: 'उच्च शिक्षा में रुकावटें और ज्ञान अर्जन में समय-समय पर विलंब।' },
+    { numA: 6, numB: 5, missing: 7, title: 'Venus & Mercury (7 Missing)', meaning: 'शिक्षा में अवरोध, प्रेम संबंधों में चुनौतियां और धन का अटक जाना।' }
   ];
 
   const hostileRelationships: { pair: string; title: string; meaning: string }[] = [];
@@ -540,23 +540,23 @@ export function generateCompatibility(nameA: string, dobA: string, nameB: string
   let longTermPotential = '';
 
   if (baseScore >= 85) {
-    relationship = 'Highly harmonious alignment. Energetically sympathetic vibrations.';
-    marriage = 'Excellent marital bond forecast. Deep spiritual compatibility.';
-    friendship = 'Exceptionally loyal, long-standing and mutual supportive partnership.';
-    business = 'Fortunate combination. Mutual financial strategies succeed smoothly.';
-    longTermPotential = 'Permanent harmony. Highly resilient against planetary transit stress.';
+    relationship = 'अत्यंत सामंजस्यपूर्ण और अनुकूल तालमेल। दोनों की ऊर्जाएं एक-दूसरे को सहज रूप से सहारा देती हैं।';
+    marriage = 'उत्कृष्ट वैवाहिक योग। गहरा भावनात्मक व आत्मिक जुड़ाव बना रहता है।';
+    friendship = 'अत्यंत वफादार, दीर्घकालिक और एक-दूसरे को आगे बढ़ाने वाली साझेदारी।';
+    business = 'शुभ और भाग्यशाली संयोजन। संयुक्त वित्तीय और व्यापारिक रणनीतियों में सहज सफलता।';
+    longTermPotential = 'स्थायी सामंजस्य। जीवन के उतार-चढ़ाव में भी आपसी विश्वास अटूट रहता है।';
   } else if (baseScore >= 70) {
-    relationship = 'Satisfactory mutual resonance. Occasional adjustments required but helpful.';
-    marriage = 'Strong family foundation, with balanced planetary influences.';
-    friendship = 'Generous and helpful friendship. Reliable in crisis phases.';
-    business = 'Stable partnership. Strategy division should follow clear definitions.';
-    longTermPotential = 'Good long term potential, provided ego-struggles are regulated.';
+    relationship = 'संतोषजनक तालमेल। कभी-कभार छोटे-मोटे समझौते करने होंगे, जो रिश्ते को मजबूत बनाएंगे।';
+    marriage = 'मजबूत पारिवारिक नींव और संतुलित ग्रह प्रभाव का सुंदर योग।';
+    friendship = 'सच्ची और मददगार मित्रता। संकट के समय एक-दूसरे के काम आते हैं।';
+    business = 'स्थिर साझेदारी। जिम्मेदारियों और कार्यक्षेत्र का स्पष्ट विभाजन आवश्यक है।';
+    longTermPotential = 'उत्कृष्ट दीर्घकालिक संभावनाएं, बशर्ते अहंकार के टकराव से बचा जाए।';
   } else {
-     relationship = 'Average alignment. Significant planetary differences found in charts.';
-     marriage = 'Requires strong understanding and planetary remedies. Possible minor delays.';
-     friendship = 'Fair-weather friendship. Vulnerable under emotional disagreements.';
-     business = 'Requires strict legal structuring. High disagreement chances.';
-     longTermPotential = 'Challenging. Regular planetary mantra meditation is suggested.';
+     relationship = 'सामान्य तालमेल। दोनों की कुंडलियों में कुछ प्रमुख ऊर्जा भिन्नताएं हैं।';
+     marriage = 'आपसी समझ और धैर्य की आवश्यकता। ग्रहों के संतुलन हेतु उपाय लाभकारी रहेंगे।';
+     friendship = 'सामान्य मित्रता। भावनात्मक मतभेदों के समय संयम बनाए रखें।';
+     business = 'स्पष्ट कानूनी व लिखित समझौतों के साथ ही कार्य करें; गलतफहमी से बचें।';
+     longTermPotential = 'चुनौतीपूर्ण। नियमित ध्यान और अनुकूल मंत्र जाप से शांति बनी रहेगी।';
   }
 
   return {
@@ -598,15 +598,15 @@ export function generateRemedies(dobStr: string, name: string): remediesAdvice {
   };
 
   const nameCorrectionMap: Record<number, string> = {
-    1: 'Adjust spelling so name adds up to 1 or 5. Avoid endings on 8 or 4.',
-    2: 'Make spelling sum 1, 5, or 3. Restrain spelling ending count on 9.',
-    3: 'Balance name spellings to 3 or 9. Avoid spelling modifications yielding 6.',
-    4: 'Orthodox adjustments: bring name expression spelling to 5 or 1 strictly.',
-    5: 'Name spelling sum 5 or 6 is extremely auspicious for business acceleration.',
-    6: 'AUSPICIOUS: Spelling summing to 6, 1, or 5. Ensure vowels align to 1.',
-    7: 'Adjust name speller so total resolves to 1, 5, or 6. Avoid 2.',
-    8: 'Spelling adjustment should strictly bring the Conductor (Bhagyank) to 3, 5, or 6.',
-    9: 'Spelling correction: change to sum up to 9, 3, or 1. Keep vowels on odd numbers.'
+    1: 'नाम की स्पेलिंग को 1 या 5 पर लाएं। 8 या 4 के अंत से बचें।',
+    2: 'नाम का जोड़ 1, 5 या 3 पर रखें। 9 पर समाप्त होने वाले नाम से बचें।',
+    3: 'नाम की स्पेलिंग को 3 या 9 पर संतुलित करें। 6 पर जाने वाले संशोधनों से बचें।',
+    4: 'विशेष संशोधन: नाम का कुल योग केवल 5 या 1 पर ही लाएं।',
+    5: 'नाम का योग 5 या 6 होना व्यापार वृद्धि के लिए अत्यंत शुभ और फलदायी है।',
+    6: 'अति शुभ: नाम का कुल जोड़ 6, 1 या 5 पर रखें। स्वरों का योग 1 के अनुकूल रखें।',
+    7: 'नाम की स्पेलिंग को 1, 5 या 6 पर लाएं। 2 के जोड़ से बचें।',
+    8: 'नाम संशोधन द्वारा भाग्यांक (Conductor) को 3, 5 या 6 के अनुकूल बनाएं।',
+    9: 'नाम संशोधन: कुल योग 9, 3 या 1 पर लाएं। स्वर विषम अंकों पर रखें।'
   };
 
   const mobileEndingsMap: Record<number, string[]> = {
@@ -626,9 +626,9 @@ export function generateRemedies(dobStr: string, name: string): remediesAdvice {
     gemstones: gemstoneMap[num] || gemstoneMap[1],
     nameCorrection: nameCorrectionMap[num] || nameCorrectionMap[1],
     mobileEndings: mobileEndingsMap[num] || mobileEndingsMap[1],
-    signatureAdvice: 'Begin signature upwards at a 15-degree angle. Never put a dot below the signature; underline it to signify stable ambition.',
+    signatureAdvice: 'हस्ताक्षर (Signature) को 15 डिग्री के कोण पर ऊपर की ओर शुरू करें। हस्ताक्षर के नीचे कभी भी डॉट (बिंदु) न लगाएं; नीचे सीधी रेखा खींचें जो स्थिर महत्वाकांक्षा को दर्शाती है।',
     luckyDates: [1, 5, 9, 14, 19, 23, 27],
-    luckyDays: ['Monday', 'Wednesday', 'Sunday']
+    luckyDays: ['सोमवार (Monday)', 'बुधवार (Wednesday)', 'रविवार (Sunday)']
   };
 }
 
@@ -687,30 +687,30 @@ export function checkMobileDOBCompatibility(
 
   score = Math.max(10, Math.min(100, score));
 
-  let rating = 'Neutral';
+  let rating = 'तटस्थ (Neutral)';
   let verdict = '';
   if (score >= 85) {
-    rating = 'Highly Compatible (Auspicious) 🌟';
-    verdict = `Your mobile total ${mobileReduced} forms an exceptionally favorable planetary alignment with your Driver #${driver} and Conductor #${conductor}. This amplifies active material vibrations and clears financial bottlenecks.`;
+    rating = 'अति अनुकूल एवं शुभ (Highly Auspicious) 🌟';
+    verdict = `आपका मोबाइल कुल योग ${mobileReduced} आपके मूलांक (Driver) #${driver} और भाग्यांक (Conductor) #${conductor} के साथ अद्भुत ग्रह तालमेल बनाता है। यह वित्तीय अड़चनों को दूर कर भौतिक समृद्धि को आकर्षित करता है।`;
   } else if (score >= 70) {
-    rating = 'Compatible (Favorable) 👍';
-    verdict = `The mobile total ${mobileReduced} has a balanced, supportive energy with your core charts. It remains a reliable channel for business and daily communications.`;
+    rating = 'अनुकूल एवं फलदायी (Favorable) 👍';
+    verdict = `मोबाइल कुल योग ${mobileReduced} आपकी जन्मतिथि के साथ संतुलित ऊर्जा साझा करता है। यह व्यापार और दैनिक संवाद के लिए एक विश्वसनीय माध्यम है।`;
   } else if (score >= 50) {
-    rating = 'Average (Adjustments Suggested) ⚖️';
-    verdict = `Your mobile total ${mobileReduced} is neutral or slightly frictional. Spelling modifications or a revised primary digit ending can help bypass the structural static.`;
+    rating = 'सामान्य (सुधार आवश्यक) ⚖️';
+    verdict = `आपका मोबाइल कुल योग ${mobileReduced} तटस्थ या हल्का घर्षणकारी है। स्पेलिंग में सुधार या अंतिम अंकों में सकारात्मक बदलाव से ऊर्जा को अनुकूल बनाया जा सकता है।`;
   } else {
-    rating = 'Hostile / Incompatible (Remedies Required) ⚠️';
-    verdict = `Significant energetic resistance exists. Mobile total ${mobileReduced} clashes with either your Driver #${driver} or Conductor #${conductor}. This can trigger unexpected career delays or miscommunications. Planetary corrections are highly advised.`;
+    rating = 'प्रतिकूल / उपाय आवश्यक ⚠️';
+    verdict = `ऊर्जा में स्पष्ट प्रतिरोध दिखाई दे रहा है। मोबाइल कुल योग ${mobileReduced} आपके मूलांक #${driver} या भाग्यांक #${conductor} के साथ टकराव पैदा करता है। इससे अनपेक्षित विलंब या संवाद में गलतफहमी हो सकती है। उपाय करना अत्यंत लाभकारी रहेगा।`;
   }
 
   const explanations: string[] = [];
-  explanations.push(`Your Driver Number (Mulank) is ${driver}, which has a ${driverRel.toLowerCase()} vibration with your mobile root number ${mobileReduced}.`);
-  explanations.push(`Your Conductor Number (Bhagyank) is ${conductor}, which has a ${conductorRel.toLowerCase()} relationship with the mobile total.`);
+  explanations.push(`आपका मूलांक (Driver) ${driver} है, जिसकी आपके मोबाइल के मूल अंक ${mobileReduced} के साथ ${driverRel === 'Friendly' ? 'मित्रवत' : driverRel === 'Enemy / Hostile' ? 'शत्रुतापूर्ण' : 'तटस्थ'} ऊर्जा है।`);
+  explanations.push(`आपका भाग्यांक (Conductor) ${conductor} है, जिसका मोबाइल कुल योग के साथ ${conductorRel === 'Friendly' ? 'मित्रवत' : conductorRel === 'Enemy / Hostile' ? 'शत्रुतापूर्ण' : 'तटस्थ'} संबंध है।`);
 
   if (isDriverEnemy || isConductorEnemy) {
-    explanations.push(`Warning: Planetary friction is active. The clashing frequency can introduce auric noise or slow down the clearance of karmic transits.`);
+    explanations.push(`सावधानी: ग्रहों के बीच ऊर्जा टकराव सक्रिय है। यह असंतुलन कार्यों में रुकावट या मानसिक तनाव उत्पन्न कर सकता है।`);
   } else if (isDriverFriendly && isConductorFriendly) {
-    explanations.push(`Auspicious Double-Resonance: The mobile root number harmonizes with both core birthday coordinates, forming a strong protective shield (Yantra).`);
+    explanations.push(`शुभ दोहरा तालमेल: मोबाइल का मूल अंक जन्मतिथि के दोनों प्रमुख अंकों (मूलांक व भाग्यांक) के साथ पूर्ण सामंजस्य में है, जो एक रक्षात्मक सुरक्षा चक्र बनाता है।`);
   }
 
   return {

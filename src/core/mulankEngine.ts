@@ -27,11 +27,11 @@ export function analyzeMulank(mulankOrDob: number | string): MulankAnalysis {
 
   return {
     mulank,
-    title: `Mulank ${mulank} — ${profile.grahaHi} Sovereign Impulse`,
+    title: `मूलांक (Mulank) ${mulank} — ${profile.grahaHi} का स्वाभाविक स्वभाव`,
     graha: profile.grahaHi,
     element: profile.element,
     naturalPersonality: profile.personality,
-    instinctiveBehaviour: `Instinctively acts with ${profile.positiveTraits.slice(0, 3).join(', ')}. Tends to respond to challenges via ${profile.thinkingStyle.toLowerCase()}`,
+    instinctiveBehaviour: `मुख्य रूप से ${profile.positiveTraits.slice(0, 3).join(', ')} के साथ कार्य करते हैं। जीवन की चुनौतियों में आपकी सोच ${profile.thinkingStyle.toLowerCase()} की ओर स्वाभाविक रूप से झुकती है।`,
     leadershipStyle: profile.leadership,
     relationshipApproach: profile.relationships,
     communicationStyle: profile.communication,
@@ -42,14 +42,14 @@ export function analyzeMulank(mulankOrDob: number | string): MulankAnalysis {
     keyStrengths: profile.positiveTraits,
     possibleChallenges: profile.shadowTraits,
     suitableEnvironments: [
-      `High-autonomy spaces aligned with ${profile.element} element`,
-      `Collaborative arenas that honor ${profile.grahaEn}'s natural leadership rhythm`,
-      `Professional sectors such as ${profile.career.slice(0, 2).join(', ')}`
+      `${profile.element} तत्व के अनुकूल स्वतंत्र और प्रभावशाली वातावरण`,
+      `${profile.grahaHi} के स्वाभाविक नेतृत्व और सम्मान के अनुकूल कार्यक्षेत्र`,
+      `प्रमुख कार्यक्षेत्र जैसे ${profile.career.slice(0, 2).join(', ')}`
     ],
     traditionalSupportivePractices: [
       profile.remedialTheme,
-      `Chant planetary mantra during the active hour of ${profile.grahaEn}`,
-      `Align key initiatives with planetary day: ${NUMBER_PROFILES[mulank].travel}`
+      `${profile.grahaHi} के अनुकूल समय में वैदिक मंत्र का शांत मन से जप`,
+      `महत्वपूर्ण कार्यों में शुभ दिशा और अनुकूल दिन का ध्यान रखना`
     ]
   };
 }

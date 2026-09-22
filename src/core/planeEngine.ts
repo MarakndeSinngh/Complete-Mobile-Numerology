@@ -31,23 +31,23 @@ export function calculatePlanes(
     if (presentCount === 3) {
       status = 'COMPLETE';
       completionPercentage = 100;
-      interpretation = `The ${template.name} (${template.coordinates.join('-')}) is fully complete. All three vibrational nodes are active, channeling maximum harmonic power.`;
-      practicalMeaning = `Outstanding natural mastery in ${template.name.toLowerCase()} domains: ${template.strengths.slice(0, 2).join('; ')}.`;
+      interpretation = `${template.title} (${template.coordinates.join('-')}) पूरी तरह से पूर्ण (100%) है। इसके तीनों अंक सक्रिय हैं, जिससे यह प्लेन पूर्ण सामर्थ्य और उत्तम परिणाम प्रदान कर रहा है।`;
+      practicalMeaning = `${template.name} के क्षेत्र में स्वाभाविक महारत और सकारात्मक ऊर्जा: ${template.strengths.slice(0, 2).join('; ')}`;
     } else if (presentCount === 2) {
       status = 'PARTIAL';
       completionPercentage = 66;
-      interpretation = `The ${template.name} (${template.coordinates.join('-')}) is partially formed (2/3 active). Missing node: ${missingDigits.join(', ')}.`;
-      practicalMeaning = `Strong functional capability, though occasional support or mindful focus is recommended for the missing digit (${missingDigits.join(', ')}).`;
+      interpretation = `${template.title} (${template.coordinates.join('-')}) आंशिक रूप से सक्रिय (2/3) है। इसमें मिसिंग अंक: ${missingDigits.join(', ')} है।`;
+      practicalMeaning = `इस प्लेन में अच्छा कार्यात्मक सामर्थ्य है। मिसिंग अंक (${missingDigits.join(', ')}) के लिए सरल उपायों और सजगता से संतुलन बनाया जा सकता है।`;
     } else if (presentCount === 1) {
       status = 'PARTIAL';
       completionPercentage = 33;
-      interpretation = `The ${template.name} (${template.coordinates.join('-')}) is partially activated with 1 node present (${presentDigits.join(', ')}). Missing nodes: ${missingDigits.join(', ')}.`;
-      practicalMeaning = `Foundational seed active; conscious development of ${missingDigits.join(' and ')} brings balance.`;
+      interpretation = `${template.title} (${template.coordinates.join('-')}) का 1 अंक सक्रिय (${presentDigits.join(', ')}) है। बाकी मिसिंग अंक: ${missingDigits.join(', ')} हैं।`;
+      practicalMeaning = `बुनियादी बीज सक्रिय है; मिसिंग अंक (${missingDigits.join(' और ')}) पर ध्यान देने से इस क्षेत्र में स्थिरता और प्रगति मिलेगी।`;
     } else {
       status = 'EMPTY';
       completionPercentage = 0;
-      interpretation = `The ${template.name} (${template.coordinates.join('-')}) has no active nodes in the chart.`;
-      practicalMeaning = `Traditionally represents an area requiring conscious development through lifestyle remedies and practical mentorship.`;
+      interpretation = `${template.title} (${template.coordinates.join('-')}) के तीनों अंक ग्रिड में रिक्त (Empty) हैं।`;
+      practicalMeaning = `यह क्षेत्र जीवन में सजग विकास की मांग करता है। उचित मार्गदर्शन और उपायों के माध्यम से इसे संतुलित किया जा सकता है।`;
     }
 
     // Determine sources for each present digit

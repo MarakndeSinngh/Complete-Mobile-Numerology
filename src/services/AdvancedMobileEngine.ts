@@ -1,5 +1,6 @@
 import { reduceToSingleDigit } from './numerologyEngine';
 import { PAIR_MEANINGS, PairMeaning } from './pairMeanings';
+import { HINDI_PAIR_MEANINGS } from './hindiPairs';
 
 export interface MobileAnalysisNew {
   mobileNumber: string;
@@ -274,8 +275,18 @@ export function analyzeMobileNumberAdvanced(mobileStr: string): MobileAnalysisNe
   const pairsList: MobileAnalysisNew['pairs'] = [];
   for (let i = 0; i < modifiedNumber.length - 1; i++) {
     const pStr = modifiedNumber.substring(i, i + 2);
+    const hindiLookup = HINDI_PAIR_MEANINGS[pStr];
     const lookup = PAIR_MEANINGS[pStr];
-    if (lookup) {
+    if (hindiLookup) {
+      pairsList.push({
+        pair: pStr,
+        meaning: hindiLookup.meaning,
+        positive: hindiLookup.positive,
+        negative: hindiLookup.negative,
+        area: lookup?.area || 'General',
+        severity: lookup?.severity || 70
+      });
+    } else if (lookup) {
       pairsList.push({
         pair: pStr,
         meaning: lookup.meaning,
@@ -291,9 +302,9 @@ export function analyzeMobileNumberAdvanced(mobileStr: string): MobileAnalysisNe
       const friendly = FRIENDLY_MATRIX[p1]?.includes(p2) ? 'Harmonious' : 'Neutral';
       pairsList.push({
         pair: pStr,
-        meaning: `${PLANET_NAMES_MAP[p1]?.split(' ')[0]} to ${PLANET_NAMES_MAP[p2]?.split(' ')[0]} Connection`,
-        positive: `Fosters balanced digital transitions and stable conversation flows.`,
-        negative: `Requires constant checks to keep ego clashes at bay.`,
+        meaning: `${PLANET_NAMES_MAP[p1]?.split(' ')[0]} से ${PLANET_NAMES_MAP[p2]?.split(' ')[0]} का संबंध`,
+        positive: `डिजिटल संवाद और बातचीत में संतुलित प्रवाह बनाए रखता है।`,
+        negative: `अहंकार और मतभेदों से बचने के लिए सजगता आवश्यक है।`,
         area: 'General',
         severity: friendly === 'Harmonious' ? 80 : 60
       });
@@ -308,30 +319,30 @@ export function analyzeMobileNumberAdvanced(mobileStr: string): MobileAnalysisNe
     // Check repeating triples (AAA)
     if (tStr[0] === tStr[1] && tStr[1] === tStr[2]) {
       const digit = parseInt(tStr[0], 10);
-      let title = `Triple Repeating Freq ${digit}${digit}${digit}`;
-      let vibe = `Extreme consolidation of ${PLANET_NAMES_MAP[digit]}. Creates heavy surge in this department.`;
-      let advice = `Avoid long calls or intense debates when this planet is in negative phase.`;
+      let title = `त्रिक पुनरावृत्ति आवृत्ति ${digit}${digit}${digit}`;
+      let vibe = `${PLANET_NAMES_MAP[digit]} की ऊर्जा का अत्यधिक संकेंद्रण। इस क्षेत्र में तीव्र प्रभाव उत्पन्न करता है।`;
+      let advice = `ग्रह के प्रतिकूल गोचर के समय लंबी कॉल या तीखी बहसों से बचें।`;
       
-      if (digit === 1) { title = 'Sovereign Triple Crown (111)'; vibe = 'Intense solar focus, high pride, administrative leadership.'; advice = 'Control ego issues and consult colleagues.'; }
-      else if (digit === 2) { title = 'Lunar Whirlpool (222)'; vibe = 'Extreme emotional mood swings, creative but sensitive.'; advice = 'Meditate daily to normalize feelings.'; }
-      else if (digit === 3) { title = 'Scholarly Summit (333)'; vibe = 'Academic pride, desire to guide everyone.'; advice = 'Learn to listen to younger people with humility.'; }
-      else if (digit === 5) { title = 'Commerce Windfall (555)'; vibe = 'Superb commercial and public relations, speedy transactions.'; advice = 'Ensure legal steps when finalizing contracts.'; }
-      else if (digit === 9) { title = 'Mars Firestorm (999)'; vibe = 'High courage, extreme physical energy but explosive anger.'; advice = 'Keep away from matches, check driving speed.'; }
+      if (digit === 1) { title = 'सूर्य त्रिक मुकुट (111)'; vibe = 'अत्यधिक आत्म-सम्मान, नेतृत्व क्षमता और प्रशासनिक प्रभाव।'; advice = 'अहंकार को नियंत्रित रखें और वरिष्ठों से सलाह लें।'; }
+      else if (digit === 2) { title = 'चंद्रमा त्रिक भंवर (222)'; vibe = 'तीव्र भावनात्मक संवेदनशीलता, रचनात्मकता और कल्पनाशीलता।'; advice = 'मन को शांत रखने के लिए नियमित ध्यान व प्राणायाम करें।'; }
+      else if (digit === 3) { title = 'गुरु विद्या शिखर (333)'; vibe = 'गहरा ज्ञान, दूसरों को सिखाने की इच्छा और मान-सम्मान।'; advice = 'विनम्रता से दूसरों के विचार भी सुनें।'; }
+      else if (digit === 5) { title = 'व्यापार समृद्धि योग (555)'; vibe = 'उत्कृष्ट व्यावसायिक व जनसंपर्क क्षमता, तीव्र लेन-देन गति।'; advice = 'समझौते करते समय कानूनी पहलुओं की पूरी जांच करें।'; }
+      else if (digit === 9) { title = 'मंगल तेज प्रवाह (999)'; vibe = 'अदम्य साहस, उच्च शारीरिक ऊर्जा और तुरंत एक्शन का जज्बा।'; advice = 'गुस्से और तेज गति से वाहन चलाने पर नियंत्रण रखें।'; }
 
       triplesList.push({ triple: tStr, title, vibe, advice });
     } else if (tStr === '135' || tStr === '531') {
       triplesList.push({
         triple: tStr,
-        title: 'Shri Ganesha Abundant Flow (गणेश योग)',
-        vibe: 'Blends wisdom (3), communication (5), and action (1). Extremely lucky for commerce.',
-        advice: 'Propel major sales campaigns when this number is active!'
+        title: 'श्री गणेश प्रचुर प्रवाह (गणेश योग)',
+        vibe: 'ज्ञान (3), संवाद (5) और कर्म (1) का सुंदर संगम। व्यापार के लिए अत्यंत शुभ।',
+        advice: 'इस नंबर के सक्रिय रहने पर मुख्य व्यावसायिक योजनाएं शुरू करें!'
       });
     } else if (tStr === '246' || tStr === '642') {
       triplesList.push({
         triple: tStr,
-        title: 'Luxurious Comforts Node (लक्ष्मी योग)',
-        vibe: 'Blends Venusian art (6) and lunar feelings (2) with Rahu support.',
-        advice: 'Perfect for buying vehicles or design assets.'
+        title: 'लक्जरी व सुख-सुविधा योग (लक्ष्मी योग)',
+        vibe: 'शुक्र की कला (6), चंद्रमा की भावनाएं (2) और राहु के विस्तार का संगम।',
+        advice: 'वाहन, संपत्ति या कलात्मक संपत्तियों के क्रय हेतु उत्तम।'
       });
     }
   }

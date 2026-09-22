@@ -1,6 +1,8 @@
 import React from 'react';
 import { CompleteNumerologyProfile } from '../core/types';
 import { MANDATORY_WELLNESS_DISCLAIMER } from '../core/methodology';
+import { MedicalVedicDashaPanel } from './MedicalVedicDashaPanel';
+import { NumeroVastuDashboard } from './NumeroVastuDashboard';
 import { 
   Sparkles, Award, Shield, AlertTriangle, CheckCircle, Compass, 
   Heart, TrendingUp, BookOpen, Layers, Activity, Calendar, Clock, 
@@ -514,62 +516,22 @@ export const KarmicVedicAnalysisView: React.FC<KarmicVedicAnalysisViewProps> = (
         </section>
       )}
 
-      {/* SECTION 6: TRADITIONAL WELLNESS & AYURVEDIC REFLECTION */}
+      {/* SECTION 6: TRADITIONAL MEDICAL NUMEROLOGY & VEDIC MAHADASHA (COURSE MODULE) */}
       {medical && (
-        <section id="sec-wellness-reflection" className="bg-white p-8 md:p-10 rounded-[35px] border border-[#E5E7EB] shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#E5E7EB] pb-6">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-[#D97706]">
-                <Activity className="w-4 h-4" /> Traditional Astrological & Ayurvedic Wellness
-              </div>
-              <h4 className="font-playfair text-2xl font-bold text-[#1F2937]">
-                Tridosha Energetics & Lifestyle Harmony
-              </h4>
-            </div>
-
-            <span className="px-4 py-2 bg-amber-50 text-[#D97706] border border-amber-200 rounded-full text-xs font-bold font-mono">
-              Primary: {medical.dosha.primary} (Balance: {medical.dosha.balanceScore}%)
-            </span>
-          </div>
-
-          {/* MANDATORY DISCLAIMER BANNER */}
-          <div className="p-5 bg-amber-50/80 border-2 border-amber-300 rounded-2xl flex items-start gap-3 text-xs text-amber-950">
-            <Info className="w-5 h-5 text-[#D97706] flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold uppercase tracking-wide text-[10px] text-[#B45309]">Official Disclaimer</p>
-              <p className="leading-relaxed mt-0.5">
-                {MANDATORY_WELLNESS_DISCLAIMER}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            <div className="p-5 bg-[#FAF8F5] border border-[#E5E7EB] rounded-2xl space-y-2">
-              <span className="text-xs font-bold text-[#1F2937] block">Sattvic Dietary Guidelines</span>
-              <ul className="space-y-1 text-xs text-[#6B7280]">
-                {medical.dietaryAdvice.map((diet, i) => (
-                  <li key={i} className="flex items-start gap-1.5">
-                    <span className="text-[#D97706] font-bold">•</span>
-                    <span>{diet}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="p-5 bg-[#FAF8F5] border border-[#E5E7EB] rounded-2xl space-y-2">
-              <span className="text-xs font-bold text-[#1F2937] block">Lifestyle & Routine Alignment</span>
-              <ul className="space-y-1 text-xs text-[#6B7280]">
-                {medical.lifestyleAdvice.map((life, i) => (
-                  <li key={i} className="flex items-start gap-1.5">
-                    <span className="text-[#D97706] font-bold">•</span>
-                    <span>{life}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+        <section id="sec-medical-vedic-dasha-module">
+          <MedicalVedicDashaPanel profile={profile} />
         </section>
       )}
+
+      {/* SECTION 7: NUMERO VASTU, KUA & PROPERTY HARMONICS */}
+      <section id="sec-numero-vastu-kua-module">
+        <NumeroVastuDashboard
+          profile={profile}
+          dob={profile.dob}
+          name={profile.identity.fullName}
+          gender={profile.gender as 'MALE' | 'FEMALE'}
+        />
+      </section>
 
     </div>
   );

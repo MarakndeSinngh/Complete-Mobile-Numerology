@@ -19,10 +19,11 @@ import CompleteLoshuGridAnalysis from './components/CompleteLoshuGridAnalysis';
 import MarriageCompatibility from './components/MarriageCompatibility';
 import PremiumConsultations from './components/PremiumConsultations';
 import AIConsultationPortal from './components/AIConsultationPortal';
+import NameNumerologyDashboard from './components/NameNumerologyDashboard';
 import DateInput from './components/DateInput';
 import { formatDateIndian } from './utils/dateUtils';
 
-type ViewTab = 'DASHBOARD' | 'MOBILE' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
+type ViewTab = 'DASHBOARD' | 'MOBILE' | 'NAME' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
 
 const App: React.FC = () => {
   const [personalDetails, setPersonalDetails] = useState<PersonalDetails | null>(null);
@@ -834,8 +835,11 @@ const App: React.FC = () => {
               <nav className="flex flex-wrap gap-2 w-full lg:w-auto">
                 {[
                   { id: 'MOBILE', label: 'Mobile Diagnostics' },
+                  ...(analysisMode === 'ADVANCED' || Boolean(dobData) ? [
+                    { id: 'DASHBOARD', label: 'Dashboard & Transit Tracker' },
+                    { id: 'NAME', label: 'Name Numerology' }
+                  ] : []),
                   ...(analysisMode === 'ADVANCED' ? [
-                    { id: 'DASHBOARD', label: 'Overview Planes' },
                     { id: 'COMPATIBILITY', label: 'Hostile/Lover Match' },
                     { id: 'REMEDIES', label: 'Remedies Altar' },
                     { id: 'REPORT', label: 'AI printable Report' },
@@ -870,6 +874,16 @@ const App: React.FC = () => {
                 />
               )}
 
+              {activeTab === 'NAME' && numerologyProfile?.nameNumerology && dobData && (
+                <NameNumerologyDashboard
+                  nameAnalysis={numerologyProfile.nameNumerology}
+                  mulank={dobData.birthNumber}
+                  bhagyank={dobData.lifePathNumber}
+                  mobile={personalDetails.mobile}
+                  dob={personalDetails.dob}
+                />
+              )}
+
               {activeTab === 'MOBILE' && dobData && nameData && mobileData && remedies && (
                 <MobileDiagnosticsPanel
                   personalDetails={personalDetails}
@@ -896,6 +910,7 @@ const App: React.FC = () => {
                   nameData={nameData}
                   mobileData={mobileData}
                   remedies={remedies}
+                  profile={numerologyProfile}
                 />
               )}
 

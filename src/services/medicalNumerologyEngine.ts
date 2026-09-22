@@ -68,15 +68,15 @@ const DIGIT_DOSHA_WEIGHTS: Record<number, [number, number, number]> = {
 };
 
 const PLANET_NAMES: Record<number, string> = {
-  1: 'Sun (सूर्य - Sovereign Life Energy)',
-  2: 'Moon (चन्द्र - Fluid Consciousness)',
-  3: 'Jupiter (गुरु - Expansion, Liver Balance & Wisdom)',
-  4: 'Rahu (राहु - Nervous Matrix & Mystery Stressors)',
-  5: 'Mercury (बुध - Neural Speed & Speech Coordination)',
-  6: 'Venus (शुक्र - Kidney Vitality & Aesthetic Balance)',
-  7: 'Ketu (केतु - Cellular Matrix & Psychological Depth)',
-  8: 'Saturn (शनि - Bone Integrity & Chronic Resistance)',
-  9: 'Mars (मंगल - Blood Iron Energy & Muscle Vitality)'
+  1: 'सूर्य (Sun - प्राण ऊर्जा एवं आत्मबल)',
+  2: 'चंद्रमा (Moon - मानसिक शांति एवं जल तत्व)',
+  3: 'बृहस्पति / गुरु (Jupiter - विस्तार, ज्ञान एवं संतुलन)',
+  4: 'राहु (Rahu - तंत्रिका तंत्र एवं अप्रत्याशित ऊर्जा)',
+  5: 'बुध (Mercury - बौद्धिक गति एवं वाणी समन्वय)',
+  6: 'शुक्र (Venus - लावण्य, सौंदर्य एवं शारीरिक तेज)',
+  7: 'केतु (Ketu - सूक्ष्म चेतना एवं आत्मिक गहराई)',
+  8: 'शनि (Saturn - अनुशासन, सहनशक्ति एवं कर्म बल)',
+  9: 'मंगल (Mars - पराक्रम, रक्त प्रवाह एवं शारीरिक शक्ति)'
 };
 
 export function generateMedicalNumerologyReport(dobStr: string, name: string = ''): MedicalReport {
@@ -107,9 +107,9 @@ export function generateMedicalNumerologyReport(dobStr: string, name: string = '
 
   // Sort to find dominant/secondary
   const sorted: { name: string; val: number }[] = [
-    { name: 'Vata (वायु-आकाश)', val: vata },
-    { name: 'Pitta (अग्नि-जल)', val: pitta },
-    { name: 'Kapha (पृथ्वी-जल)', val: kapha }
+    { name: 'वात (Vata - वायु/आकाश)', val: vata },
+    { name: 'पित्त (Pitta - अग्नि/जल)', val: pitta },
+    { name: 'कफ (Kapha - पृथ्वी/जल)', val: kapha }
   ].sort((a, b) => b.val - a.val);
 
   const dominantDosha = sorted[0].name;
@@ -117,102 +117,102 @@ export function generateMedicalNumerologyReport(dobStr: string, name: string = '
 
   let prakritiType = '';
   if (sorted[0].val - sorted[1].val < 15 && sorted[1].val - sorted[2].val < 15) {
-    prakritiType = 'Tri-Doshic (Sama Prakriti - Tridosha)';
+    prakritiType = 'त्रिदोषज (Sama Prakriti - Tridosha)';
   } else if (sorted[0].val - sorted[1].val < 15) {
     const partsName = [sorted[0].name.split(' ')[0], sorted[1].name.split(' ')[0]].sort();
-    prakritiType = `Bi-Doshic (${partsName.join('-')} dominant)`;
+    prakritiType = `द्विदोषज (${partsName.join('-')} प्रधान)`;
   } else {
-    prakritiType = `Single-Doshic (${sorted[0].name.split(' ')[0]} Prakriti)`;
+    prakritiType = `एकदोषज (${sorted[0].name.split(' ')[0]} प्रकृति)`;
   }
 
   // Dynamic Analysis based on Prakriti
   let doshaBalanceAnalysis = '';
-  if (prakritiType.includes('Tri-Doshic')) {
-    doshaBalanceAnalysis = `Your birth chart reflects a rare Sama Dhatu (Tridosha) cellular setup. Vata, Pitta, and Kapha exist in native alignment. While highly adaptive, any sudden climate or schedule modifications disrupt all three doshas simultaneously, calling for a very balanced, non-extreme dietary profile.`;
-  } else if (prakritiType.includes('Vata')) {
-    if (prakritiType.includes('Pitta')) {
-      doshaBalanceAnalysis = `Vata-Pitta dual prakriti represents high mental acuity paired with physical speed. The wind of Vata tends to fan the flames of Pitta, resulting in rapid digestion but sudden physical exhaustion or acidity spikes if high stakes work deadlines are maintained without cooling fluids.`;
-    } else if (prakritiType.includes('Kapha')) {
-      doshaBalanceAnalysis = `Vata-Kapha dual constitution combines a creative, sensitive mental screen of Vata with the structural water-retentive habits of Kapha. This results in fluctuating joint lubrication and immediate reactions to cold foods. Deep warmth and thermal spices are essential.`;
+  if (prakritiType.includes('त्रिदोषज')) {
+    doshaBalanceAnalysis = `आपकी जन्म कुंडली एक दुर्लभ समधातु (Tridosha) संतुलन को दर्शाती है। वात, पित्त और कफ तीनों प्रवृत्तियां लगभग संतुलित अनुपात में हैं। यह आपको बेहतरीन अनुकूलन क्षमता देती है, परंतु मौसम या दिनचर्या में अचानक बड़ा बदलाव तीनों दोषों को एक साथ प्रभावित कर सकता है। अतः नियमित और संतुलित सात्विक दिनचर्या बनाए रखें।`;
+  } else if (prakritiType.includes('वात')) {
+    if (prakritiType.includes('पित्त')) {
+      doshaBalanceAnalysis = `वात-पित्त द्विदोष प्रकृति तीव्र बौद्धिक क्षमता के साथ तेज शारीरिक गतिशीलता प्रदान करती है। वात की वायु पित्त की अग्नि को प्रज्वलित करती है, जिससे पाचन तेज रहता है परंतु काम के भारी तनाव में अचानक ऊर्जा में गिरावट या एसिडिटी की शिकायत हो सकती है। शीतल पेय और समय पर भोजन अति आवश्यक है।`;
+    } else if (prakritiType.includes('कफ')) {
+      doshaBalanceAnalysis = `वात-कफ प्रकृति रचनात्मक कल्पनाशीलता और धैर्यपूर्ण सहनशीलता का संगम है। इसमें मौसम के ठंडे होने पर जोड़ों में जकड़न या सुस्ती आ सकती है। गर्म मसालों, सूप और नियमित शारीरिक सक्रियता से ऊर्जा का प्रवाह निरंतर बनाए रखें।`;
     } else {
-      doshaBalanceAnalysis = `Vata-dominant constitution is governed by the Ether-Air parameters of Saturn (${driver === 8 || conductor === 8 ? '8' : '4'}). Your cellular nervous sheath reacts directly to high stress, inducing digestive gas, body stiff dryness, and light sleeping cycles. Regular warm sesame oil self-massages (Abhyanga) are highly defensive.`;
+      doshaBalanceAnalysis = `वात प्रधान प्रकृति में वायु और आकाश तत्व की अधिकता रहती है। तनाव के समय तंत्रिका तंत्र अति-संवेदनशील हो जाता है, जिससे पेट में गैस, त्वचा में रूखापन और नींद में रुकावट की संभावना रहती है। नियमित रूप से तिल के तेल से अभ्यंग (मालिश) और गर्म सुपाच्य भोजन अत्यधिक लाभकारी सिद्ध होता है।`;
     }
-  } else if (prakritiType.includes('Pitta')) {
-    if (prakritiType.includes('Kapha')) {
-      doshaBalanceAnalysis = `Pitta-Kapha dual-doshic energy integrates the structural stamina of Kapha with the sharp fire of Pitta. This allows outstanding recovery powers and muscular density. However, stagnation of damp heat can trigger secondary skin rashes or inflammatory responses if excessive red spices are consumed.`;
+  } else if (prakritiType.includes('पित्त')) {
+    if (prakritiType.includes('कफ')) {
+      doshaBalanceAnalysis = `पित्त-कफ द्विदोष ऊर्जा कफ के शारीरिक बल को पित्त के तेज के साथ जोड़ती है। यह उत्कृष्ट रोग प्रतिरोधक क्षमता और मजबूत मांसपेशियां देती है। हालांकि, अधिक तला-भुना या मसालेदार भोजन त्वचा पर गर्मी के दाने या पित्त वृद्धि कर सकता है। शीतल आहार का संतुलन आवश्यक है।`;
     } else {
-      doshaBalanceAnalysis = `Pitta-dominant constitution is thoroughly fiery, governed directly by Mars (9) or Sun (1). Your Jatharagni (digestive fire) runs hot, demanding timely meals to prevent the acids from attacking stomach walls. High susceptibility to blood pressure spikes, minor skin heat rashes, and direct sharp anger outbreaks.`;
+      doshaBalanceAnalysis = `पित्त प्रधान प्रकृति में अग्नि तत्व का प्रभुत्व रहता है। जठराग्नि (पाचन अग्नि) बहुत तीव्र रहती है, इसलिए समय पर भोजन न करने पर तुरंत सिरदर्द या एसिडिटी हो सकती है। अधिक धूप और अत्यधिक तीखे मसालों से बचें, नारियल पानी और शीतल फल पित्त को शांत रखते हैं।`;
     }
   } else {
-    doshaBalanceAnalysis = `Kapha-dominant constitution is thick and water-grounded, governed mainly by Moon (2) or Jupiter (3). This translates as strong structural memory, slow but highly consistent digestion, and peaceful sleep. However, excess fluid accumulation can cause weight retention, heavy mucus congestion during seasonal turns, and mental lethargy.`;
+    doshaBalanceAnalysis = `कफ प्रधान प्रकृति में पृथ्वी और जल तत्व की प्रधानता होती है। यह मजबूत शारीरिक संरचना, स्थिर स्वभाव और गहरी सुखद नींद प्रदान करता है। हालांकि, सुस्त जीवनशैली से वजन बढ़ने या मौसमी कफ की संभावना रहती है। सुबह जल्दी जागना और हल्का व्यायाम कफ को सक्रिय रखता है।`;
   }
 
   // Body tendencies and risk mappings based on Driver/Conductor planet
   const pPhys: Record<number, string[]> = {
-    1: ['Strong skeletal structure', 'Warm skin temperature', 'Prone to heart palpitation under heat', 'Vulnerable to eye strain or vision issues'],
-    2: ['High cellular fluid levels', 'Cold sensitivity', 'Vulnerable to immediate mucous chest congestions', 'Water retention in limbs'],
-    3: ['Active fat metabolism', 'High liver-gall secretion sensitivity', 'Prone to weight accumulation in waistline', 'Good physical endurance'],
-    4: ['Highly sensitive nervous system', 'Spasmodic digestive cramps', 'Sudden mystery muscle twitches', 'Dry, cold skin texture'],
-    5: ['Insensitive neural signal peaks', 'Weak bronchial sheath', 'Highly fluctuating sleep hormone regulation', 'Skin sensitivity to environmental allergies'],
-    6: ['Throat and tonsil sensitivity', 'Vulnerable urinary tract filtration', 'High reproductive tissue health', 'Prone to sweet cravings'],
-    7: ['Unpredictable allergy reactions', 'Lower bowel flatulence', 'Sudden cold sweat outbreaks', 'Sensitive skin rashes'],
-    8: ['Joint dryness and cracking', 'Slow intestinal peristalsis (chronic constipation)', 'Dental bone density fluctuations', 'Cold extremities'],
-    9: ['Highly acidic blood parameters', 'Susceptible to nosebleeds or blood heat', 'Muscular inflammations', 'Prone to rapid fever responses']
+    1: ['मजबूत शारीरिक बनावट एवं स्वाभाविक स्फूर्ति', 'शरीर में उष्णता (गर्मी) की अधिकता', 'अत्यधिक तनाव में हृदय स्पंदन या पसीना', 'आंखों में थकान या दृष्टि संवेदनशीलता'],
+    2: ['शरीर में जल तत्व एवं तरलता का अधिक स्तर', 'ठंड व नमी के प्रति विशेष संवेदनशीलता', 'मौसम बदलते ही कफ या जुकाम की प्रवृत्ति', 'शरीर में सूजन या जल भराव की संभावना'],
+    3: ['सक्रिय वसा मेटाबॉलिज्म एवं अच्छा पाचन बल', 'लिवर व पित्त रस की संवेदनशीलता', 'कमर या पेट के आसपास वजन बढ़ने की प्रवृत्ति', 'दीर्घकालिक शारीरिक सहनशक्ति'],
+    4: ['अति-संवेदनशील तंत्रिका तंत्र (Nervous System)', 'अचानक मांसपेशियों में खिंचाव या जकड़न', 'त्वचा में रूखापन व ठंडक का अनुभव', 'अनियमित ऊर्जा स्तर'],
+    5: ['अत्यधिक तीव्र न्यूरोलॉजिकल सिग्नल व फुर्ती', 'कमजोर या संवेदनशील श्वास नलियां', 'नींद के समय में उतार-चढ़ाव', 'पर्यावरणीय धूल व प्रदूषण से त्वचा संवेदनशीलता'],
+    6: ['गले, कंठ व टॉन्सिल की संवेदनशीलता', 'किडनी एवं यूरिनरी ट्रैक्ट का जल संतुलन', 'त्वचा में प्राकृतिक सौम्यता व लावण्य', 'मीठे और गरिष्ठ भोजन के प्रति आकर्षण'],
+    7: ['अप्रत्यक्ष एलर्जी एवं अचानक ठंड लगना', 'पेट के निचले हिस्से में गैस व अपच', 'पसीने की ग्रंथि व त्वचा पर संवेदनशीलता', 'भीड़भाड़ वाले वातावरण में त्वरित शारीरिक थकान'],
+    8: ['जोड़ों व हड्डियों में अकड़न या सूखापन', 'आंतों की धीमी गति (कब्ज की प्रवृत्ति)', 'दांतों व हड्डियों में कैल्शियम संतुलन की आवश्यकता', 'हाथों और पैरों में ठंडक महसूस होना'],
+    9: ['रक्त में हीमोग्लोबिन व पित्त का उच्च प्रवाह', 'अचानक तेज बुखार या रक्त में गर्मी', 'मांसपेशियों में सूजन या चोट का जोखिम', 'उच्च शारीरिक गतिशीलता व ऊर्जा']
   };
 
   const pMent: Record<number, string[]> = {
-    1: ['Natural command-oriented intelligence', 'Prone to ego-fatigue', 'Determined focus targets', 'Dislikes secondary supportive roles'],
-    2: ['Highly intuitive and fluctuating emotional thoughts', 'Deep creative empathy', 'Prone to nocturnal melancholy', 'Overly sensitive to public criticism'],
-    3: ['Vast scholastic memory', 'Methodical storage of details', 'Generous outlook', 'Can become highly dogmatic under conflict'],
-    4: ['Sudden out-of-the-box revolutionary thoughts', 'High nervous pacing', 'Obsessive deep dives', 'Prone to deep futuristic anxieties'],
-    5: ['Exceptional rapid communication synapses', 'Constant mental movement', 'Excellent multitasking processing', 'Can trigger nervous burnout easily'],
-    6: ['Highly visual aesthetic appreciation', 'Peace-seeking inner mind', 'High expectation from partnerships', 'Prone to luxury indulgence stress'],
-    7: ['Frequent analytical detouring', 'Deep subconscious dream state', 'High philosophical detachment', 'Sudden withdrawals from crowd environments'],
-    8: ['Highly structured long-term strategy thinking', 'Patient risk-avoidance planning', 'Heavy mental self-burdening', 'Prone to pessimistic feedback loops'],
-    9: ['Courageous, crisis-ready mental state', 'Direct objective focus', 'Impatient command structures', 'Prone to immediate aggressive reactions']
+    1: ['स्वाभाविक नेतृत्व एवं निर्णय लेने की तीव्र क्षमता', 'अहम (Ego) की संतुष्टि न होने पर मानसिक तनाव', 'दृढ़ लक्ष्य केंद्रित सोच', 'किसी के अधीन काम करने में असहजता'],
+    2: ['अत्यंत संवेदनशील व अंतर्ज्ञानी विचार प्रक्रिया', 'गहरी रचनात्मक सहानुभूति एवं कलात्मक दृष्टि', 'अकेलेपन या रात के समय मन में उदासी की लहरें', 'आलोचना को बहुत व्यक्तिगत रूप से लेना'],
+    3: ['विशाल ज्ञान संचय एवं शोधपरक स्मरण शक्ति', 'चीजों को विस्तृत और व्यवस्थित रूप से समझना', 'उदार व मार्गदर्शक दृष्टिकोण', 'सिद्धांतों पर वाद-विवाद में हठधर्मिता'],
+    4: ['अचानक क्रांतिकारी एवं लीक से हटकर विचार', 'भविष्य को लेकर गहरी आंतरिक चिंता या बेचैनी', 'किसी भी विषय की गहराई में खो जाने की आदत', 'विचारों में अप्रत्याशित उतार-चढ़ाव'],
+    5: ['अत्यंत तीव्र संचार एवं त्वरित सोचने की क्षमता', 'मन में निरंतर नए विचारों का प्रवाह', 'उत्कृष्ट मल्टीटास्किंग और त्वरित निर्णय', 'अत्यधिक सोचने से मानसिक थकान (Burnout)'],
+    6: ['कला, सौंदर्य एवं संतुलन की गहरी समझ', 'सदा शांति और सामंजस्य चाहने वाला मन', 'संबंधों में अत्यधिक अपेक्षाएं', 'परिवेश की अव्यवस्था से मानसिक अशांति'],
+    7: ['गहन दार्शनिक एवं विश्लेषणात्मक चिंतन', 'गहरे अवचेतन स्वप्न व सूक्ष्म अंतर्दृष्टि', 'सांसारिक कोलाहल से एकांत की तीव्र चाह', 'भीड़ में भावनात्मक रूप से कट जाने की आदत'],
+    8: ['दीर्घकालिक रणनीतिक एवं यथार्थवादी सोच', 'धैर्यपूर्वक जोखिमों का आकलन करने की क्षमता', 'स्वयं पर अत्यधिक जिम्मेदारियों का बोझ डालना', 'निराशावादी विचारों के चक्र में फंसने का जोखिम'],
+    9: ['साहसी, निडर एवं संकट के समय त्वरित सक्रिय मन', 'सीधे और स्पष्ट लक्ष्य पर ध्यान', 'धीमी गति से काम करने वालों पर अधीरता', 'अचानक तेज क्रोध या प्रतिक्रियावादी स्वभाव']
   };
 
   const pEmo: Record<number, string[]> = {
-    1: ['Needs consistent recognition', 'Protective family instincts', 'Strong pride', 'Fragile self-image if ignored'],
-    2: ['Frequent mood fluctuations matching lunar cycles', 'Maternal caregiving urges', 'Deep security requirements', 'Vulnerable to grief'],
-    3: ['Optimistic emotional anchoring', 'Moral counseling outlook', 'Rarely holds long-term petty grudges', 'Feels hurt if wisdom is questioned'],
-    4: ['Feels misunderstood by mainstream circles', 'Sudden extreme affection then sudden withdrawal', 'High protective wall around feelings'],
-    5: ['Apt to joke or logicize feelings', 'Detached but highly communicative', 'Needs intellectual peer communication to stay emotionally balanced'],
-    6: ['Sought-after aesthetic warmth', 'Grounded romantic urges', 'Highly loving but demands absolute physical surrounding beauty'],
-    7: ['Deep spiritual or quiet romantic longings', 'Extremely private feelings', 'Prone to psychic absorption of room stress', 'Rarely expresses hurt directly'],
-    8: ['Guarded emotional expression', 'Loyalty built slowly over years', 'Fears being dependent on others', 'Quietly carries ancestral duty'],
-    9: ['Fiery passion surges', 'Defensive of siblings/allies', 'Extremely honest (sometimes blunt)', 'Prone to sudden reactive flashes of anger']
+    1: ['सम्मान और स्वीकार्यता की स्वाभाविक चाह', 'परिवार और अपने लोगों के प्रति गहरी रक्षात्मक भावना', 'स्वाभिमान को ठेस लगने पर गहरा आघात', 'अपनी भावनाएं आसानी से व्यक्त न करना'],
+    2: ['चंद्रमा की कलाओं के अनुसार भावनात्मक उतार-चढ़ाव', 'मातृवत देखभाल व दूसरों को सहारा देने की वृत्ति', 'सुरक्षा और स्नेह की निरंतर आवश्यकता', 'भावनात्मक रूप से जल्दी आहत होना'],
+    3: ['आशावादी और सकारात्मक भावनात्मक संतुलन', 'दूसरों को सही सलाह देकर संतुष्टि पाना', 'लंबे समय तक मन में द्वेष न रखना', 'ज्ञान या निष्ठा पर प्रश्न उठने पर आहत होना'],
+    4: ['समाज में स्वयं को अनूठा या गलत समझा गया महसूस करना', 'अचानक अत्यधिक अपनापन फिर तुरंत दूरी बना लेना', 'अपनी सच्ची भावनाओं के चारों ओर सुरक्षात्मक दीवार बनाना'],
+    5: ['भावनाओं को भी तर्क और हास्य के तराजू में तौलना', 'भावनात्मक रूप से स्वतंत्र परंतु बातचीत में जीवंत', 'बौद्धिक संवाद मिलने पर ही भावनात्मक जुड़ाव'],
+    6: ['प्रेम, सौहार्द और माधुर्य की तीव्र आंतरिक चाह', 'सुंदर और कलात्मक वातावरण में ही प्रसन्नता', 'अपनों के लिए सर्वस्व न्योछावर करने का भाव', 'रिश्तों में तकरार से आंतरिक रूप से बिखर जाना'],
+    7: ['गहरी आध्यात्मिक एवं शांत भावनात्मक तड़प', 'अपनी भावनाओं को अत्यंत गोपनीय रखना', 'कमरे या माहौल के तनाव को तुरंत सोख लेना', 'चोट लगने पर भी चुपचाप सह जाना'],
+    8: ['भावनाओं का बहुत संयमित और गंभीर प्रदर्शन', 'वर्षों में धीरे-धीरे विश्वास और वफादारी विकसित होना', 'दूसरों पर निर्भर होने से आंतरिक भय', 'कर्तव्य और उत्तरदायित्व को सर्वोपरि रखना'],
+    9: ['तीव्र और प्रगाढ़ भावनात्मक आवेश', 'मित्रों व सहयोगियों के लिए आगे बढ़कर लड़ने की तत्परता', 'अत्यंत स्पष्टवादी (कभी-कभी कड़वी) सच्चाई बोलना', 'अचानक तेज गुस्सा जो कुछ देर बाद शांत हो जाता है']
   };
 
   const weakSys: Record<number, string[]> = {
-    1: ['Cardiovascular System', 'Spinal column bones', 'Right eye (for male), Left eye (for female)', 'Blood Pressure regulation'],
-    2: ['Lymphatic and Fluid Circulation', 'Stomach and gastric mucosa', 'Left eye (for male), Right eye (for female)', 'Lungs and breathing passages'],
-    3: ['Liver and Biliary passages', 'Pancreas (glucose processing)', 'Hip joints and femora', 'Arterial blood flow'],
-    4: ['Central and Peripheral Nervous System', 'Lower digestive tract', 'Sudden erratic heart palpitations', 'Calf muscles'],
-    5: ['Vocal cord and thyroid systems', 'Nervous synapses', 'Hands and skin epidermis', 'Outer respiratory passages'],
-    6: ['Renal Filtration (Kidneys)', 'Reproductive tissues & hormones', 'Throat, larynx, and vocal cords', 'Dermal hydration levels'],
-    7: ['Gastrointestinal Absorption', 'Cellular mitotic system', 'Psychosomatic response matrix', 'Foot bones'],
-    8: ['Skeletal structure (Knees and joints)', 'Large intestines (excretory speed)', 'Teeth calcium and jaw stability', 'Hair follicle vital oils'],
-    9: ['Blood Composition & Iron channels', 'Bone marrow production', 'Muscular system & tendons', 'Head and skull vessels']
+    1: ['हृदय एवं रक्त परिसंचरण तंत्र (Cardiovascular)', 'रीढ़ की हड्डी एवं पीठ के ऊपरी हिस्से', 'नेत्र ज्योति (दाहिनी आंख पुरुष, बाईं महिला)', 'ब्लड प्रेशर संतुलन'],
+    2: ['लसीका (Lymphatic) एवं शारीरिक जल संतुलन', 'आमाशय (Stomach) व पाचन म्यूकोसा', 'कफ व फेफड़ों के श्वास मार्ग', 'मानसिक एकाग्रता व नींद चक्र'],
+    3: ['लिवर (यकृत) एवं पित्त थैली कार्यप्रणाली', 'अग्न्याशय (Pancreas) एवं ग्लूकोज संतुलन', 'कूल्हे व जांघों के जोड़', 'धमनियों में रक्त प्रवाह'],
+    4: ['केंद्रीय एवं परिधीय तंत्रिका तंत्र (Nervous System)', 'निचला पाचन तंत्र एवं आंतों की गैस', 'अचानक अनियमित धड़कन', 'पिंडलियां व घुटने के स्नायु'],
+    5: ['कंठ, स्वर रज्जु (Vocal Cords) व थायरॉइड', 'न्यूरोलॉजिकल तंत्रिकाएं व हाथ-कलाई', 'त्वचा की ऊपरी परत (Epidermis)', 'ऊपरी श्वास नलियां'],
+    6: ['किडनी (गुर्दे) एवं यूरिनरी फिल्ट्रेशन', 'हार्मोनल संतुलन एवं प्रजनन स्वास्थ्य', 'गला, स्वर तंत्र एवं टॉन्सिल्स', 'त्वचा का प्राकृतिक नमी स्तर'],
+    7: ['गैस्ट्रोइंटेस्टाइनल अवशोषण (पाचन रस)', 'कोशिकीय पुनरुत्पादन एवं सूक्ष्म ग्रंथियां', 'मनोदैहिक (Psychosomatic) प्रतिक्रियाएं', 'पैरों के तलवे व जोड़'],
+    8: ['अस्थि तंत्र (घुटने, रीढ़ एवं हड्डियां)', 'बड़ी आंत (मल विसर्जन गति / कब्ज)', 'दांतों का इनेमल एवं जबड़े का घनत्व', 'बालों का स्वास्थ्य एवं सूखापन'],
+    9: ['रक्त संरचना, हीमोग्लोबिन एवं आयरन स्तर', 'अस्थि मज्जा (Bone Marrow) उत्पादन', 'मांसपेशियां एवं टेंडन्स', 'सिर, खोपड़ी एवं रक्त वाहिकाएं']
   };
 
   const strengthsLib: Record<number, string[]> = {
-    1: ['High solar vitality and rapid cells recovery', 'Strong core protective field (Ojas)', 'Excellent upright back stamina'],
-    2: ['High natural body moisture and tissue lubrication', 'Quick intuitive recognition of health changes', 'Strong fertility parameters'],
-    3: ['Generous glandular enzyme secretions', 'Stable cellular resilience against long term strains', 'Excellent hip mobility'],
-    4: ['Sudden, immediate healing power during critical moments', 'Highly adaptive muscular reflexes', 'High pain threshold'],
-    5: ['Extremely rapid metabolic adaptability', 'Excellent lung capacity when aerated', 'Fast motor-nerve healing speeds'],
-    6: ['Excellent toxic discharge capacity via kidneys', 'High throat vocal resonance and deep facial glow (Tejas)', 'Strong immunity against general dry wind'],
-    7: ['High resistance to common synthetic medicines', 'Amazing sub-conscious dream-state rejuvenation', 'Intuitive avoidance of toxic food'],
-    8: ['Exceptional skeletal endurance and bone longevity', 'High resistance to epidemic diseases due to dry skin field', 'Outstanding long-term survival cellular stamina'],
-    9: ['High red blood cell count potential', 'Rapid muscle fiber repair speeds', 'Intense natural competitive sports metabolic output']
+    1: ['उत्कृष्ट सौर जीवन शक्ति एवं तीव्र कोशिकीय पुनर्लाभ (Recovery)', 'मजबूत आंतरिक ओजस एवं सुरक्षात्मक कवच', 'शानदार शारीरिक सहनशक्ति एवं दृढ़ मुद्रा'],
+    2: ['शरीर में प्राकृतिक तरलता एवं ऊतकों का सहज लचीलापन', 'स्वास्थ्य परिवर्तनों को तुरंत भांप लेने की अंतर्दृष्टि', 'सौम्य एवं शांत शारीरिक ऊर्जा'],
+    3: ['स्वस्थ ग्रंथि स्राव एवं मजबूत मेटाबॉलिक सहनशीलता', 'दीर्घकालिक कार्यभार में भी स्थिर रहने की क्षमता', 'कूल्हों व जोड़ों का सहज लचीलापन'],
+    4: ['कठिन या संकटपूर्ण पलों में अप्रत्याशित शारीरिक प्रतिरोधक क्षमता', 'अत्यंत फुर्तीली और अनुकूलनशील मांसपेशियां', 'दर्द सहने की उच्च स्वाभाविक क्षमता'],
+    5: ['अत्यंत तीव्र चयापचय (Metabolic) अनुकूलन क्षमता', 'खुली हवा में उत्कृष्ट श्वसन क्षमता व फेफड़ों का बल', 'त्वरित न्यूरोलॉजिकल रिकवरी गति'],
+    6: ['गुर्दों द्वारा शरीर से टॉक्सिन्स को बाहर निकालने की क्षमता', 'कंठ की स्पष्ट आवाज और चेहरे पर सौम्य चमक (तेजस)', 'सामान्य शुष्क हवा के प्रति अच्छा सुरक्षा कवच'],
+    7: ['कृत्रिम रसायनों या अस्वस्थ भोजन को तुरंत पहचान कर अस्वीकार करना', 'शांत गहरी नींद में आश्चर्यजनक आंतरिक ऊर्जा संचय', 'अति-सूक्ष्म स्तर पर रोग प्रतिरोधक क्षमता'],
+    8: ['अभूतपूर्व अस्थि सहनशक्ति और हड्डियों का दीर्घकालिक घनत्व', 'कठिन मौसम और विपरीत परिस्थितियों में अडिग रहने का बल', 'दीर्घकालिक जीवन शक्ति और धीरज'],
+    9: ['लाल रक्त कोशिकाओं (RBC) की उच्च उत्पादन क्षमता', 'मांसपेशियों के तंतुओं की तीव्र मरम्मत गति', 'प्राकृतिक एथलेटिक ऊर्जा और खेलों में उच्च प्रदर्शन']
   };
 
-  const physicalTendencies = pPhys[driver] || ['General physical balance. Check schedules.'];
-  const mentalTendencies = pMent[driver] || ['Balanced conscious thoughts.'];
-  const emotionalTendencies = pEmo[driver] || ['Stable emotional coordinates.'];
-  const weakBodySystems = weakSys[driver] || ['General vascular checkups recommended.'];
-  const healthStrengths = strengthsLib[driver] || ['Good cellular recuperative index.'];
+  const physicalTendencies = pPhys[driver] || ['सामान्य शारीरिक संतुलन। नियमित दिनचर्या का पालन करें।'];
+  const mentalTendencies = pMent[driver] || ['संतुलित चेतन विचार एवं व्यावहारिक दृष्टिकोण।'];
+  const emotionalTendencies = pEmo[driver] || ['स्थिर एवं सकारात्मक भावनात्मक स्थिति।'];
+  const weakBodySystems = weakSys[driver] || ['नियमित सामान्य स्वास्थ्य जांच एवं दिनचर्या पालन की सलाह।'];
+  const healthStrengths = strengthsLib[driver] || ['उत्कृष्ट कोशिकीय पुनर्लाभ सूचकांक।'];
 
   // Health scores calculations
   let hVal = 75;
@@ -250,37 +250,38 @@ export function generateMedicalNumerologyReport(dobStr: string, name: string = '
   const immunityScore = Math.max(30, Math.min(99, iVal));
   const mentalWellnessScore = Math.max(30, Math.min(99, mVal));
 
-  let overallVibration = 'Average';
-  if (healthScore >= 85) overallVibration = 'Highly Radiant, Tejas Powered';
-  else if (healthScore >= 75) overallVibration = 'Balanced, Stable Wellness Vibration';
-  else overallVibration = 'Prone to Nervous Drain, Requires Saffron-Tulsi Shields';
+  let overallVibration = 'मध्यम संतुलित (Average)';
+  if (healthScore >= 85) overallVibration = 'अत्यंत तेजस्वी एवं ओजस्वी ग्रहीय बल (Radiant & Strong)';
+  else if (healthScore >= 75) overallVibration = 'संतुलित एवं स्थिर स्वास्थ्य ऊर्जा (Balanced & Stable)';
+  else overallVibration = 'संवेदनशील तंत्रिका तंत्र, नियमित सात्विक दिनचर्या आवश्यक';
 
   // Ayurvedic diets map
   const recommendedFoodsMap: Record<string, string[]> = {
-    Vata: ['Warm cooked rice', 'Steamed split mung dhal', 'Warm milk with nutmeg', 'Ghee unsalted', 'Sweet potato cooked with cumin', 'Toasted sesame soup', 'Cooked oats'],
-    Pitta: ['Steamed basmati rice', 'Fresh coconut chunks', 'Cottage cheese (paneer)', 'Cucumber raita with coriander', 'Lentils split green', 'Soaked almond skinless', 'Melons'],
-    Kapha: ['Spiced barley soup', 'Spiced boiled quinoa', 'Roasted chickpeas', 'Red lentils (Masoor dhal)', 'Steamed bitter gourd', 'Buttermilk with roasted cumin', 'Ginger infused warm stew']
+    Vata: ['गरम पका हुआ ताजा चावल', 'उबली हुई मूंग की दाल', 'जायफल युक्त गुनगुना दूध', 'देसी गाय का शुद्ध घी', 'जीरा युक्त पकी शकरकंद', 'तिल का हल्का सूप', 'पका हुआ ओट्स'],
+    Pitta: ['बासमती चावल', 'ताजा नारियल गिरी व जल', 'ताजा पनीर', 'खीरे का रायता (हरी धनिया युक्त)', 'उबली हरी मूंग', 'भीगे हुए छिलके उतरे बादाम', 'मीठा खरबूजा व तरबूज'],
+    Kapha: ['जौ का हल्का दलिया या सूप', 'उबली हुई क्विनोआ', 'भुने हुए चने', 'मसूर की दाल', 'उबला हुआ करेला', 'भुने जीरे युक्त छाछ (मट्ठा)', 'अदरक युक्त सब्जियों का गर्म सूप']
   };
 
   const foodsToAvoidMap: Record<string, string[]> = {
-    Vata: ['Raw salad greens', 'Cold carbonated drinks', 'Dry corn flakes', 'Uncooked cabbage', 'Ice creams', 'Deep fried dry chips', 'Refined dry flour pastries'],
-    Pitta: ['Red chili hot peppers', 'Fermented vinegar', 'Hard sour curd', 'Deep fried garlic chips', 'Mustard oil excess', 'Citrus tomatoes raw', 'Aged salty cheese'],
-    Kapha: ['Chilled thick milkshakes', 'Aged red meat', 'Bananas late night', 'Deep fried white sugar sweets', 'Excess table salt refined', 'Cold water right after meals']
+    Vata: ['कच्ची ठंडी सलाद', 'बर्फ मिले ठंडे पेय व कोल्ड ड्रिंक्स', 'सूखा भुना पॉपकॉर्न व कॉर्नफ्लेक्स', 'कच्ची पत्तागोभी', 'आइसक्रीम', 'सूखे तले हुए चिप्स', 'मैदे से बने बासी खाद्य पदार्थ'],
+    Pitta: ['अत्यधिक तीखी लाल मिर्च', 'खमीर उठा सिरका युक्त भोजन', 'बासी खट्टा गाढ़ा दही', 'अधिक तले हुए लहसुन के स्नैक्स', 'कच्चा अत्यधिक सरसों तेल', 'अति खट्टे टमाटर', 'अत्यधिक नमकीन प्रोसेस्ड चीज़'],
+    Kapha: ['अत्यधिक ठंडे गाढ़े मिल्कशेक', 'देर रात खाया गया भारी भोजन', 'देर रात केला खाना', 'मैदे की सफेद चीनी वाली भारी मिठाइयां', 'अत्यधिक सादा रिफाइंड नमक', 'भोजन के तुरंत बाद फ्रिज का ठंडा पानी']
   };
 
   const recFruits: Record<string, string[]> = {
-    Vata: ['Soaked raisins', 'Sweet ripe mangoes', 'Fresh figs', 'Sweet papayas', 'Stewed apples in cinnamon'],
-    Pitta: ['Watermelons', 'Sweet red cherries', 'Sweet grapes', 'Fully ripe pears', 'Pomegranates (Anar)'],
-    Kapha: ['Dry prunes', 'Astringent pomegranates', 'Apples crisp raw', 'Papaya slices', 'Amla (Indian Gooseberry)']
+    Vata: ['भीगी हुई किशमिश व मुनक्का', 'मीठे पके आम', 'ताजा अंजीर', 'मीठा पका पपीता', 'दालचीनी के साथ पके सेब'],
+    Pitta: ['ताजा तरबूज', 'मीठी चेरी', 'मीठे अंगूर', 'पके हुए नाशपाती', 'ताजा मीठा अनार'],
+    Kapha: ['सूखे आलूबुखारे (Prunes)', 'हल्का कसैला अनार', 'कच्चा ताजा कुरकुरा सेब', 'पपीते के ताजे टुकड़े', 'ताजा आंवला']
   };
 
   const recVegs: Record<string, string[]> = {
-    Vata: ['Carrots roasted', 'Zucchini stewed', 'Asparagus', 'Cumin pumpkins', 'Cooked beetroots'],
-    Pitta: ['Asparagus green', 'Cabbage soft steamed', 'Leafy coriander greens', 'Sweet potato', 'Broccoli florets'],
-    Kapha: ['Radish white sections', 'Spinach spiced', 'Bitter melon (Karela)', 'Bell peppers grilled', 'Garlic roasted greens']
+    Vata: ['हल्की सिकी गाजर', 'पकी हुई तोरी व लौकी', 'शतावरी', 'जीरा लगा पका कद्दू', 'उबला हुआ चुकंदर'],
+    Pitta: ['हरी शतावरी', 'हल्की उबली पत्तागोभी', 'ताजा हरी धनिया की पत्तियां', 'शकरकंद', 'उबली ब्रोकली'],
+    Kapha: ['सफेद मूली के टुकड़े', 'हल्के मसालों में पकी पालक', 'करेला', 'सेंकी हुई शिमला मिर्च', 'हल्का सिका लहसुन ও साग']
   };
 
-  const dKey = dominantDosha.split(' ')[0] as 'Vata' | 'Pitta' | 'Kapha';
+  const dKey = (dominantDosha.includes('वात') || dominantDosha.includes('Vata')) ? 'Vata' :
+               (dominantDosha.includes('पित्त') || dominantDosha.includes('Pitta')) ? 'Pitta' : 'Kapha';
   const recommendedFoods = recommendedFoodsMap[dKey] || recommendedFoodsMap.Vata;
   const foodsToAvoid = foodsToAvoidMap[dKey] || foodsToAvoidMap.Vata;
   const recommendedFruits = recFruits[dKey] || recFruits.Vata;
@@ -289,105 +290,105 @@ export function generateMedicalNumerologyReport(dobStr: string, name: string = '
   const recommendedWaterMl = dKey === 'Pitta' ? 2800 : dKey === 'Vata' ? 2400 : 1800;
 
   const fastDays: Record<number, string> = {
-    1: 'Sunday (Sūryavār - Solar focus, absolute light salt intake)',
-    2: 'Monday (Somavār - Lunar liquid fast with milk and fruits)',
-    3: 'Thursday (Guruvār - Jupiter light yellow split mung khichdi)',
-    4: 'Saturday (Shanivār - Rahu safety charcoal/sesame oil donation, grain-free day)',
-    5: 'Wednesday (Budhavār - Budha green mung water soup fast)',
-    6: 'Friday (Shukravār - Venus white food milk/paneer fast, no sour items)',
-    7: 'Tuesday (Maṅgalavār - Ketu simple fruit pulp fast during sunset)',
-    8: 'Saturday (Shanivār - Saturn strict black sesame seeds water fast)',
-    9: 'Tuesday (Maṅgalavār - Mars red coral solar sunrise liquid fast)'
+    1: 'रविवार (सूर्यवार - हल्का सात्विक फलाहार, सायंकाल नमक का त्याग)',
+    2: 'सोमवार (सोमवार - चंद्रमा जल व दूध युक्त सात्विक अल्पाहार)',
+    3: 'गुरुवार (गुरुवार - पीली मूंग दाल की खिचड़ी, बेसन या फलों का सेवन)',
+    4: 'शनिवार (शनिवार - राहु शांति हेतु हल्का शाकाहारी सुपाच्य भोजन)',
+    5: 'बुधवार (बुधवार - हरी मूंग दाल के सूप व ताजा फलों का सेवन)',
+    6: 'शुक्रवार (शुक्रवार - सफेद सात्विक खीर, दूध, मखाना, खटाई का त्याग)',
+    7: 'मंगलवार (मंगलवार - केतु शांति हेतु सूर्यास्त समय सात्विक फलाहार)',
+    8: 'शनिवार (शनिवार - शनि कृपा हेतु सात्विक खिचड़ी या तिल युक्त जल)',
+    9: 'मंगलवार (मंगलवार - मंगल बल हेतु मीठे सात्विक भोजन का अल्पाहार)'
   };
-  const recommendedFastingDay = fastDays[driver] || 'Thursday';
+  const recommendedFastingDay = fastDays[driver] || 'गुरुवार';
 
   // Lifestyle
   const yogaSug: Record<string, string[]> = {
-    Vata: ['Slow gentle Sun Salutation (Surya Namaskar)', 'Pawanmuktasana (Wind releasing pose)', 'Shavasana (Deep relaxation)', 'Vrikshasana (Tree pose for balance)'],
-    Pitta: ['Sheetali cooling moon sequence', 'Paschimottanasana (Seated forward bend)', 'Bhujangasana (Gentle Cobra)', 'Ardha Matsyendrasana (Spinal twist)'],
-    Kapha: ['Dynamic Sun Salutations (12 rounds fast)', 'Virabhadrasana (warrior series)', 'Dhanurasana (Bow pose)', 'Ustrasana (Camel pose for chest openings)']
+    Vata: ['धीमी व सहज गति से सूर्य नमस्कार (Surya Namaskar)', 'पवनमुक्तासन (गैस व तनाव मुक्ति)', 'शवासन (गहरी मानसिक विश्रांति)', 'वृक्षासन (संतुलन व एकाग्रता)'],
+    Pitta: ['शीतली चंद्र नमस्कार श्रृंखला', 'पश्चिमोत्तानासन (आगे झुकने का आसन)', 'भुजंगासन (सौम्य कोबरा मुद्रा)', 'अर्ध मत्स्येन्द्रासन (रीढ़ की हड्डी का घुमाव)'],
+    Kapha: ['तेज गति से 12 चक्र सूर्य नमस्कार', 'वीरभद्रासन (योद्धा मुद्रा)', 'धनुरासन (छाती खोलने हेतु)', 'उष्ट्रासन (ऊर्जावान मुद्रा)']
   };
 
   const pranayamaSug: Record<string, string[]> = {
-    Vata: ['Anulom Vilom (Alternate nostril breathing with slow retention)', 'Nadi Shodhana'],
-    Pitta: ['Sheetali Pranayama (Sipping cold air through curled tongue)', 'Chandra Bhedana'],
-    Kapha: ['Kapalbhati Pranayama (Active skull-shining exhalations)', 'Bhastrika (Bellows breath)']
+    Vata: ['अनुलोम-विलोम (नाड़ी शोधन प्राणायाम - धीमी गति से)', 'भ्रामरी प्राणायाम'],
+    Pitta: ['शीतली प्राणायाम (जिह्वा को मोड़कर शीतल श्वास लेना)', 'चंद्र भेदन प्राणायाम'],
+    Kapha: ['कपालभाति प्राणायाम (सक्रिय उच्छ्वास)', 'भस्त्रिका प्राणायाम']
   };
 
   const yogaSuggestions = yogaSug[dKey] || yogaSug.Vata;
   const pranayamaSuggestions = pranayamaSug[dKey] || pranayamaSug.Vata;
 
-  const meditationSuggestions = dKey === 'Vata' ? ['Soothing grounding root sound meditation (OM)', 'Body scan relaxation'] :
-                           dKey === 'Pitta' ? ['Compassion and loving-kindness Metta meditation', 'Soma blue light visualization'] :
-                           ['Kinetic chanting walking meditation', 'Dynamic bellows breathing focusing on solar plexus'];
+  const meditationSuggestions = dKey === 'Vata' ? ['मूलाधार चक्र पर ॐ (OM) की गूंज के साथ ध्यान', 'शरीर के अंगों को विश्राम देने वाला बॉडी-स्कैन ध्यान'] :
+                           dKey === 'Pitta' ? ['करुणा एवं मैत्री भाव (Loving-Kindness) ध्यान', 'शीतल नीली चंद्र-किरणों का विजुअलाइजेशन'] :
+                           ['मंत्र जप के साथ सक्रिय ध्यान', 'नाभि चक्र (मणिपुर) पर केंद्रित ऊर्जा ध्यान'];
 
   const lifestyleSuggestions = dKey === 'Vata' ? [
-    'Maintain absolute consistent sleep and waking hours.',
-    'Oil your hair and temples with warm sesame oil before bed.',
-    'Minimize hyper-stimulating action-movie viewing or screen time after 8:30 PM.',
-    'Protect ears with a cotton sheet under cold direct morning winds.'
+    'सोने और जागने का समय बिल्कुल निश्चित रखें।',
+    'सोने से पहले सिर और पैरों के तलवों पर गुनगुने तिल के तेल की मालिश करें।',
+    'रात 8:30 बजे के बाद उत्तेजक स्क्रीन टाइम और वीडियो देखने से बचें।',
+    'ठंडी हवा के मौसम में कानों को सूती कपड़े से ढककर रखें।'
   ] : dKey === 'Pitta' ? [
-    'Walk bare feet on early morning green grass loaded with natural dew.',
-    'Keep your desk well ventilated and sleep under light-weight cotton sheets.',
-    'Avoid executing heated business discussions under direct hot noon Sun.',
-    'Perform sweet sandalwood body mist sprays after shower sessions.'
+    'प्रातःकाल ओस से भीगी हरी घास पर नंगे पैर 15 मिनट टहलें।',
+    'कार्यस्थल को हवादार रखें और हल्के सूती वस्त्रों का उपयोग करें।',
+    'दोपहर की तेज चिलचिलाती धूप में गंभीर व्यावसायिक बहस से बचें।',
+    'स्नान के पश्चात चंदन या गुलाब के प्राकृतिक इत्र का हल्का उपयोग करें।'
   ] : [
-    'Wake up early (Brahma Muhurta - around 5:15 AM) to activate static Kapha.',
-    'Avoid daytime napping after lunch completely as it accumulates bodily dampness.',
-    'Utilize warming dry-brush massages (Udvartana) with herbal powders.',
-    'Include active dynamic aerobics, running or brisk sports for 30 minutes daily.'
+    'प्रातः ब्रह्म मुहूर्त (लगभग 5:30 AM) में उठकर सुस्ती को दूर भगाएं।',
+    'दोपहर के भोजन के बाद दिन में सोने से पूर्ण परहेज करें, इससे कफ बढ़ता है।',
+    'हर्बल चूर्ण से सूखे शरीर पर उबटन (उद्वर्तन) मालिश करें।',
+    'प्रतिदिन कम से कम 30 मिनट तेज गति से व्यायाम या खेलकूद में भाग लें।'
   ];
 
   const routines: Record<string, string> = {
-    Vata: 'Wake up by 6:00 AM. Drink 2 glasses of lukewarm copper cup water. Perform gentle spinal twists. Apply almond oil inside nasal path (Pratimarsha Nasya). Have a completely warm, sweet cooked spiced oatmeal breakfast.',
-    Pitta: 'Wake up by 5:45 AM. Drink fresh coconut water or coriander water cold. Perform cooling sheetali breaths. Avoid hot showers; prefer lukewarm water. Have sweet apples or soaked almond-dates for breakfast.',
-    Kapha: 'Wake up by 5:15 AM. Perform active dry skin brushing. Drink hot ginger water with raw honey (only after water cools slightly). Perform rapid sun salutations. Skip heavy breakfast; have highly spiced bitter black tea with 3 dry figs.'
+    Vata: 'प्रातः 6:00 बजे तक उठें। तांबे के बर्तन में रखा 2 गिलास गुनगुना पानी पिएं। हल्के रीढ़ के व्यायाम करें। नाक में बादाम रोगन की 2 बूंदें (प्रतिमर्श नस्य) डालें। गर्म, हल्का मीठा व सुपाच्य दलिया का नाश्ता लें।',
+    Pitta: 'प्रातः 5:45 बजे तक उठें। ताजा नारियल पानी या रात को भिगोया हुआ धनिया का पानी पिएं। शीतल शीतली प्राणायाम करें। बहुत गर्म पानी से स्नान न करें; सामान्य जल चुनें। नाश्ते में मीठे फल या भीगे बादाम लें।',
+    Kapha: 'प्रातः 5:15 बजे तक उठें। त्वचा की सूखी मालिश करें। हल्का गुनगुना अदरक का पानी पिएं। तेज सूर्य नमस्कार करें। भारी नाश्ता न लें; काली चाय या हर्बल काढ़े के साथ 2-3 सूखे अंजीर लें।'
   };
   const morningRoutine = routines[dKey] || routines.Vata;
 
   const sleepTips: Record<string, string> = {
-    Vata: 'Retire strictly by 10:00 PM. Massage the soles of your feet with warm Brahmi Sesame oil. Drink 1/2 cup organic warm milk with cardamom and a pinch of turmeric. Maintain a totally dark quiet warm room.',
-    Pitta: 'Retire around 10:30 PM. Apply pure coconut oil to the crown of your head and soles. Keep window slightly open for fresh cool air flow. Avoid using electric blankets or highly heavy thick woolen quilts.',
-    Kapha: 'Retire around 11:00 PM. Avoid any fluid intake 1 hr before sleeping. Sleep on a hard mattress with one single light pillow. Do not keep room extra warm; use a light humidifier if air has dryness.'
+    Vata: 'रात 10:00 बजे तक अवश्य सो जाएं। तलवों पर ब्राह्मी-तिल के तेल की मालिश करें। इलायची व चुटकी भर हल्दी युक्त आधा कप गुनगुना दूध लें। शयनकक्ष को बिल्कुल शांत और हल्का गर्म रखें।',
+    Pitta: 'रात 10:30 बजे तक बिस्तर पर जाएं। सिर के तालु और तलवों पर शुद्ध नारियल तेल लगाएं। कमरे में ताजी शीतल हवा का आवागमन रखें। बहुत भारी या गर्म रजाई का प्रयोग न करें।',
+    Kapha: 'रात 11:00 बजे तक सोएं। सोने से 1 घंटा पहले किसी भी तरल पदार्थ का सेवन न करें। सख्त गद्दे और एक हल्के तकिए का प्रयोग करें। कमरे को अत्यधिक गर्म न रखें।'
   };
   const sleepRecommendations = sleepTips[dKey] || sleepTips.Vata;
 
-  // Let's generate professional reasonings for each score
+  // Professional reasonings for each score
   const reasoning = {
-    health: `Your global Health Score ($healthScore/100) is dictated by your Driver ${driver} and Conductor ${conductor}. ${
+    health: `आपका समग्र स्वास्थ्य स्कोर ($healthScore/100) मूलांक ${driver} और भाग्यांक ${conductor} द्वारा संचालित है। ${
       driver === 1 || driver === 9 || driver === 3 
-        ? `Beneficial planetary vitality from the ${driver === 1 ? 'Sun' : driver === 9 ? 'Mars' : 'Jupiter'} provides high self-regeneration.`
-        : `Saturn, Rahu, or Ketu-governed frequencies trigger subtle stress vectors inside tissues, requiring active regular dosha pacification guides.`
+        ? `${driver === 1 ? 'सूर्य' : driver === 9 ? 'मंगल' : 'बृहस्पति'} की शुभ प्राण ऊर्जा शरीर को स्वतः तेजी से स्वस्थ करने की क्षमता देती है।`
+        : `शनि, राहु या केतु की ऊर्जाएं ऊतकों में सूक्ष्म तनाव ला सकती हैं, जिसके लिए नियमित संतुलित आहार आवश्यक है।`
     }`,
-    digestive: `The Digestive index of $digestiveScore/100 represents your Jatharagni strength. ${
-      dKey === 'Pitta' ? 'Fiery Pitta digestion is energetic but susceptible to acidity spikes and acid-refluxes if meals are skipped.' :
-      dKey === 'Vata' ? 'Vata wind indices trigger variable digestion (Vishama Agni), inducing periodic bloating, gut coldness and gas.' :
-      'Kapha water leads to slow digestive processing (Manda Agni), requiring pungent digestive bitter spices (ginger, black pepper, pipali).'
+    digestive: `पाचन सूचकांक ($digestiveScore/100) आपकी जठराग्नि की शक्ति को दर्शाता है। ${
+      dKey === 'Pitta' ? 'तीव्र पित्त अग्नि भोजन को जल्दी पचाती है, परंतु भोजन छोड़ने पर तुरंत एसिडिटी की संभावना रहती है।' :
+      dKey === 'Vata' ? 'वात वायु के प्रभाव से पाचन में उतार-चढ़ाव (विषमाग्नि) रहता है, जिससे कभी गैस व पेट फूलने की समस्या हो सकती है।' :
+      'कफ की प्रधानता से पाचन मंद (मंदाग्नि) रहता है, जिसके लिए भोजन में सौंठ, काली मिर्च व जीरा लाभकारी हैं।'
     }`,
-    energy: `Energy index of $energyScore/100 is supported by Conductor ${conductor}. ${
+    energy: `ऊर्जा सूचकांक ($energyScore/100) भाग्यांक ${conductor} के ग्रहीय सहयोग से संचालित है। ${
       conductor === 1 || conductor === 5 || conductor === 9
-        ? 'High dynamic cellular recharge speed enables long working days with low sleep.'
-        : 'Steady but slow lymphatic recharge cycles require natural breaks and avoiding continuous high-intensity cardio.'
+        ? 'तीव्र कोशिकीय ऊर्जा आपको दिन भर बिना थके सक्रिय और कर्मठ बनाए रखती है।'
+        : 'स्थिर किंतु मध्यम ऊर्जा प्रवाह के कारण दिन में छोटे-छोटे विश्राम और पर्याप्त पानी आवश्यक है।'
     }`,
-    stress: `Stress vulnerability metric ($stressScore/100) shows response triggers. ${
-      dKey === 'Vata' ? 'Sensitive nervous synapses absorb surrounding emotional noise, leading to muscle tightening or anxiety cycles.' :
-      dKey === 'Pitta' ? 'Ambitious fire drives high work pressure, creating impatience, irritability, and heated blood pressure surges.' :
-      'Grounded Kapha stamina absorbs substantial environmental stress passively, maintaining mental stability under complex corporate crises.'
+    stress: `तनाव संवेदनशीलता स्कोर ($stressScore/100) मानसिक प्रतिक्रिया को दर्शाता है। ${
+      dKey === 'Vata' ? 'संवेदनशील तंत्रिकाएं वातावरण के तनाव को जल्दी सोखती हैं, जिससे मांसपेशियों में खिंचाव या चिंता हो सकती है।' :
+      dKey === 'Pitta' ? 'उच्च महत्वाकांक्षा और कार्यभार के कारण कभी-कभी अधीरता, झुंझलाहट या रक्तचाप में वृद्धि हो सकती है।' :
+      'धैर्यवान कफ ऊर्जा विपरीत परिस्थितियों में भी मन को शांत व स्थिर रखने में आपकी ढाल बनती है।'
     }`,
-    sleep: `Sleep Score of $sleepScore/100 tracks melatonin and rapid-eye cycles. ${
-      dKey === 'Vata' ? 'Hyper-imaginative brainwaves make sleep shallow and interrupted, especially during wind transits.' :
-      dKey === 'Pitta' ? 'Sharp planning thoughts keep the mind active late in the evening. Keep screens closed.' :
-      'An exceptional natural deep sleep index allows your system to regenerate thoroughly. Watch against sleeping over 8 hours.'
+    sleep: `नींद गुणवत्ता सूचकांक ($sleepScore/100) विश्रांति चक्र को मापता है। ${
+      dKey === 'Vata' ? 'अति-सक्रिय विचारों के कारण नींद उथली या बीच-बीच में टूटने की प्रवृत्ति हो सकती है। रात्रि ध्यान लाभकारी है।' :
+      dKey === 'Pitta' ? 'भविष्य की योजनाएं देर रात तक मन को जगाए रख सकती हैं। सोने से पहले स्क्रीन बंद रखें।' :
+      'प्राकृतिक गहरी सुखद नींद शरीर के ऊतकों को पूर्ण रूप से नवजीवन प्रदान करती है।'
     }`,
-    immunity: `Immunity defense strength is $immunityScore/100. ${
+    immunity: `रोग प्रतिरोधक क्षमता (Immunity) स्कोर ($immunityScore/100) है। ${
       driver === 1 || driver === 8 || driver === 3
-        ? 'A very resilient cellular protection shield (Ojas) successfully repels viral seasonal outbreaks.'
-        : 'Lymphatic and mucous node vulnerabilities require daily Tulsi-Turmeric defensive armor drinks.'
+        ? 'मजबूत आंतरिक ओजस मौसमी बदलावों और संक्रमणों से शरीर की सफलतापूर्वक रक्षा करता है।'
+        : 'लसीका व कफ ग्रंथियों की सुरक्षा हेतु प्रतिदिन तुलसी, गिलोय व हल्दी का गुनगुना पानी उत्तम रक्षा कवच है।'
     }`,
-    mental: `Mental wellness index stands at $mentalWellnessScore/100. ${
+    mental: `मानसिक संतुलन सूचकांक ($mentalWellnessScore/100) है। ${
       driver === 2 || driver === 7 || driver === 4
-        ? 'Highly active spiritual or emotional antenna requires quiet meditation hours to ground fluctuating currents.'
-        : 'A highly structured logical system helps you separate personal emotions from professional duties.'
+        ? 'अत्यधिक सूक्ष्म अंतर्ज्ञान और भावनात्मक संवेदनशीलता के कारण प्रतिदिन 15 मिनट का मौन ध्यान मानसिक स्थिरता लाता है।'
+        : 'व्यावहारिक और तार्किक सोच व्यक्तिगत भावनाओं को पेशेवर कर्तव्यों से अलग रखने में मदद करती है।'
     }`
   };
 
@@ -406,7 +407,7 @@ export function generateMedicalNumerologyReport(dobStr: string, name: string = '
     driver,
     conductor,
     compound,
-    rulerPlanet: PLANET_NAMES[driver] || 'Sun',
+    rulerPlanet: PLANET_NAMES[driver] || 'सूर्य',
     dominantDosha,
     secondaryDosha,
     doshaComposition: { vata, pitta, kapha },

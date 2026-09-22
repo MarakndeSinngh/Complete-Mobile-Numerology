@@ -54,67 +54,67 @@ const PLANET_DASHA_DESCS: Record<number, {
   financial: string;
 }> = {
   1: {
-    general: 'A highly radiant solar era. Prompts intense self-confidence, recognition, and vertical career elevations.',
-    health: 'Generally excellent health vitality. Beware of minor eye strains or heat-related acidity spikes.',
-    career: 'Outstanding leadership phase. Perfect for starting independent corporate ventures or government contract works.',
-    relationship: 'Ego conflicts are possible if partner advice is completely shut off. Maintain humility.',
-    financial: 'Stable financial gains from royal assets or high executive promotions; luxury spend increases.'
+    general: 'सूर्य देव की अत्यंत प्रभावशाली महादशा। यह काल आत्मविश्वास, सामाजिक प्रतिष्ठा और करियर में उच्च पदोन्नति प्रदान करता है।',
+    health: 'सामान्यतः उत्तम स्वास्थ्य और जीवन शक्ति। आंखों में तनाव, पित्त दोष या गर्मी से होने वाली एसिडिटी से सावधान रहें।',
+    career: 'शानदार नेतृत्व और अधिकार का समय। स्वतंत्र व्यापार शुरू करने, सरकारी अनुबंध या प्रशासनिक पदों के लिए सर्वश्रेष्ठ अवधि।',
+    relationship: 'अहंकार और हठ से बचें। जीवनसाथी या परिवार के सुझावों को ध्यान से सुनें और विनम्रता बनाए रखें।',
+    financial: 'अधिकार और पदोन्नति से मजबूत वित्तीय लाभ। पैतृक संपत्ति में लाभ और विलासिता पर व्यय में वृद्धि।'
   },
   2: {
-    general: 'An emotional lunar period focusing on creative intuition, alliances, and home renovations.',
-    health: 'Sensitive digestive cycles. Susceptibility to coughs, chest congestions, or minor mood fluctuations.',
-    career: 'Success in fluid fields like hospitality, food imports, writing, marketing, or design alliances.',
-    relationship: 'Deep sentimental and emotional connection. High marital matching possibilities.',
-    financial: 'Fluctuating cash velocity. Good gains from liquid assets but avoid bulk hasty cash speculative investments.'
+    general: 'चंद्रमा की कोमल व भावनात्मक महादशा। यह समय रचनात्मक कल्पना, मानसिक शांति, नए सहयोग और गृह निर्माण के लिए श्रेष्ठ है।',
+    health: 'पाचन तंत्र और कफ दोष का ध्यान रखें। मौसम परिवर्तन के समय सर्दी-जुकाम और मन में भावनात्मक उतार-चढ़ाव संभव हैं।',
+    career: 'हॉस्पिटैलिटी, कला, लेखन, मार्केटिंग, फूड इंडस्ट्री और रचनात्मक साझेदारियों में विशेष सफलता।',
+    relationship: 'गहरा भावनात्मक जुड़ाव और संवेदनशीलता। प्रेम संबंधों और विवाह के लिए अत्यंत अनुकूल समय।',
+    financial: 'तरल धन (Liquid Cash) का अच्छा प्रवाह रहेगा। सट्टेबाजी या जल्दबाजी में बड़े निवेश से बचें।'
   },
   3: {
-    general: 'The golden Jupiter cycle of wisdom expansion, spiritual focus, learning, and steady financial building.',
-    health: 'Good general physical wellness. Avoid heavy sugary diets to protect hepatic and pancreatic balances.',
-    career: 'Promotions to advisor, administrative supervisor, or educational consultant roles.',
-    relationship: 'Deep respect and values alignment with family. Auspicious period for childbirth or marriages.',
-    financial: 'Generous, reliable, long-term wealth growth, real estate accumulation, and highly secure returns.'
+    general: 'बृहस्पति (गुरु) का स्वर्ण काल। ज्ञान का विस्तार, आध्यात्मिक प्रगति, उच्च अध्ययन और स्थायी आर्थिक समृद्धि का योग।',
+    health: 'शारीरिक स्वास्थ्य उत्तम रहेगा। खान-पान में अत्यधिक मीठे और वसायुक्त भोजन से बचें ताकि लिवर संतुलित रहे।',
+    career: 'सलाहकार, शिक्षक, वित्तीय विशेषज्ञ, प्रशासनिक अधिकारी या मेंटर की भूमिका में बड़ी पदोन्नति।',
+    relationship: 'पारिवारिक सम्मान और नैतिक मूल्यों में वृद्धि। घर में मांगलिक कार्य, विवाह या संतान सुख के लिए अति शुभ समय।',
+    financial: 'सुरक्षित और दीर्घकालिक धन वृद्धि। अचल संपत्ति, भूमि और सुरक्षित निवेशों में निरंतर लाभ।'
   },
   4: {
-    general: 'A chaotic, fast-moving Rahu period. Expect unexpected business opportunities and global travel.',
-    health: 'Nervous tension, deep-seated unexplained back pains, or skin sensitivities. Rest is crucial.',
-    career: 'High gains in software, digital platforms, defense, or sudden speculative trades. Keep plans private.',
-    relationship: 'Sudden romantic attachments or unexpected disagreements. Guard family stability closely.',
-    financial: 'Highly erratic, sudden massive profits alternate with sudden overhead expenses. Keep assets locked.'
+    general: 'राहु की तीव्र और अप्रत्याशित महादशा। जीवन में अचानक बड़े व्यावसायिक अवसर, तकनीकी लाभ और दूरस्थ यात्राओं के योग।',
+    health: 'मानसिक तनाव, अनिद्रा और पीठ या त्वचा की संवेदनशीलता। नियमित ध्यान और पर्याप्त नींद अति आवश्यक है।',
+    career: 'सॉफ्टवेयर, डिजिटल प्लेटफॉर्म, मीडिया या विदेशी अनुबंधों में अचानक बड़ी सफलता। योजनाओं को गोपनीय रखें।',
+    relationship: 'अचानक नए संबंध बनना या गलतफहमी होना संभव है। पारिवारिक शांति और विश्वास को प्राथमिकता दें।',
+    financial: 'अचानक बड़ा धन लाभ, जिसके साथ ही अप्रत्याशित खर्च भी संभव हैं। धन को सुरक्षित संपत्ति में लॉक रखें।'
   },
   5: {
-    general: 'A business-accelerating Mercury period. Prompts quick mathematical reasoning, marketing success, and travel.',
-    health: 'High mental energy. Prevent nervous head exhaustion by keeping regular sleeping hours.',
-    career: 'Perfect for trading, writing software coding, counseling, brokerage, or major public relations roles.',
-    relationship: 'Light, playful, conversational interactions. New intellectual friendships flourish.',
-    financial: 'Rapid cash rotation. Multiple streams of small trading incomes; excellent for commercial growth.'
+    general: 'बुध ग्रह की तीव्र व्यापारिक महादशा। त्वरित तार्किक बुद्धि, मार्केटिंग में सफलता, संचार कौशल और व्यावसायिक यात्राओं का समय।',
+    health: 'मानसिक स्फूर्ति भरपूर रहेगी। दिमाग को शांत रखने के लिए नियमित दिनचर्या और पर्याप्त नींद लें।',
+    career: 'ट्रेडिंग, अकाउंट्स, सॉफ्टवेयर कोडिंग, जनसंपर्क, काउंसलिंग और वाणिज्यिक व्यापार के लिए सर्वोत्तम काल।',
+    relationship: 'सहज, खुशनुमा और बौद्धिक संवाद। नए प्रभावशाली मित्रों और शुभचिंतकों का दायरा बढ़ेगा।',
+    financial: 'तेज कैश फ्लो और व्यापार में त्वरित लाभ। आय के कई छोटे-बड़े स्रोत विकसित होंगे।'
   },
   6: {
-    general: 'The luxury Venus epoch. Brings brand fame, aesthetic comforts, material vehicles, and massive love vibrations.',
-    health: 'Good recovery. Keep urinary tracts flushed, avoiding high sugary luxury desserts containing artificial dyes.',
-    career: 'Brilliant for cosmetic imports, fashion designs, high retail, jewelry, fine dining, or architecture.',
-    relationship: 'Extreme romantic harmony, domestic happiness, and luxury marriage activities.',
-    financial: 'Sovereign spending power. Fortunate asset purchases (such as matching household luxury or vehicles).'
+    general: 'शुक्र देव का ऐश्वर्यशाली काल। भौतिक सुख-सुविधाएं, ब्रांड प्रसिद्धि, वाहन सुख और प्रेम-सौहार्द की भरपूर वृद्धि।',
+    health: 'स्वास्थ्य उत्तम रहेगा। खान-पान में अत्यधिक मीठे और गरिष्ठ भोजन से बचें और जल का प्रचुर सेवन करें।',
+    career: 'फैशन, ग्लैमर, आभूषण, इंटीरियर डिजाइन, लग्जरी रिटेल, कला और आर्किटेक्चर में अपार सफलता।',
+    relationship: 'रोमांस, दांपत्य सुख और पारिवारिक जीवन में मधुरता। विवाह और नए संबंधों के लिए स्वर्णिम काल।',
+    financial: 'शानदार वित्तीय स्थिति। वाहन, आभूषण और घरेलू सुख-सुविधाओं की खरीदारी के लिए अनुकूल समय।'
   },
   7: {
-    general: 'An introspective, analytical Ketu phase. Encourages spiritual studies, research projects, and mental detachment.',
-    health: 'Unexplained bodily allergies. Daily pranayama and natural detox diets offer profound relief.',
-    career: 'Outstanding for technical research, research auditing, astrology, medical diagnostic labs, or philosophy writing.',
-    relationship: 'Desire for quiet isolation or deep mutual spiritual journeys; avoids loud family arguments.',
-    financial: 'Moderate material accumulation. High inner wealth development. Avoid giving bulk cash borrowings.'
+    general: 'केतु की आत्म-विश्लेषणात्मक व आध्यात्मिक महादशा। गूढ़ अध्ययन, शोध कार्य, ध्यान और आंतरिक ज्ञान में गहरी रुचि।',
+    health: 'अस्पष्ट शारीरिक संवेदनशीलता या एलर्जी। नियमित प्राणायाम, योग और प्राकृतिक सात्विक आहार से विशेष लाभ।',
+    career: 'रिसर्च, ऑडिटिंग, न्यूमरोलॉजी, ज्योतिष, मेडिकल डायग्नोस्टिक्स और शोधपरक लेखन में सर्वोच्च सफलता।',
+    relationship: 'शांत और एकांतप्रिय स्वभाव। वाद-विवाद से दूर रहने और परस्पर वैचारिक तालमेल पर जोर रहेगा।',
+    financial: 'आंतरिक संतोष और आध्यात्मिक संपदा। किसी को बिना लिखा-पढ़ी के बड़ा उधार देने से बचें।'
   },
   8: {
-    general: 'The testing but highly rewarding Saturn era. Demands systematic hard work, patient building, and total honesty.',
-    health: 'Joint pains, dry skin, or slower digestion. Daily intake of warm mustard/sesame oil foods is helpful.',
-    career: 'Gradual, highly secure progress. Heavy corporate tasks, manufacturing, iron trades, or law.',
-    relationship: 'Demands absolute duty and elder parenting responsibility. Strong bonds consolidated slowly.',
-    financial: 'Delayed but rock-solid assets creation. Real estate investments are profitable over 7+ years.'
+    general: 'शनि देव की कर्म-प्रधान महादशा। धैर्य, कड़ी मेहनत, ईमानदारी और व्यवस्थित योजना से स्थायी साम्राज्य का निर्माण।',
+    health: 'जोड़ों का दर्द, हड्डियों में जकड़न या धीमी पाचन क्रिया। सरसों/तिल के तेल से मालिश और सात्विक आहार लाभप्रद।',
+    career: 'स्थायी और सुरक्षित प्रगति। भारी उद्योग, मैन्युफैक्चरिंग, निर्माण कार्य, लोहा-कोयला व्यापार या कानून में बड़ी सफलता।',
+    relationship: 'पारिवारिक कर्तव्यों और जिम्मेदारियों का पालन। रिश्ते धीरे-धीरे लेकिन बेहद मजबूत बनते हैं।',
+    financial: 'धीमी शुरुआत के बाद चट्टान की तरह मजबूत धन संचय। रियल एस्टेट और जमीन के सौदों में भारी लाभ।'
   },
   9: {
-    general: 'The energetic Mars period. Gives explosive working drive, competitive combat, and raw mechanical stamina.',
-    health: 'High blood circulation. Prone to minor muscular sprains, head rushes, or accidental heat bruises. Stay calm.',
-    career: 'Success in industrial operations, security, land developing, athletics, surgery, or defense.',
-    relationship: 'Highly protective, direct feelings. Possible verbal sparring due to rapid short temper.',
-    financial: 'Rapid capital investments. Profitable deals in brick-kiln properties, farming lands, or raw copper holdings.'
+    general: 'मंगल देव की ऊर्जावान महादशा। अदम्य साहस, कार्य करने की तीव्र गति, निर्भीकता और नेतृत्व क्षमता का विकास।',
+    health: 'रक्त प्रवाह और शारीरिक ऊर्जा उच्च रहेगी। जल्दबाजी, चोट या मांसपेशियों में खिंचाव से बचने के लिए मन शांत रखें।',
+    career: 'सुरक्षा बल, भूमि विकास, इंजीनियरिंग, सर्जरी, खेलकूद या औद्योगिक प्रबंधन में शीर्ष मुकाम।',
+    relationship: 'अत्यधिक सुरक्षात्मक और स्पष्टवादी भावना। गुस्से या जल्दबाजी में तीखे शब्दों के प्रयोग से बचें।',
+    financial: 'तेज पूंजी निवेश। कृषि भूमि, रियल एस्टेट और व्यावसायिक संपत्तियों में लाभकारी सौदे।'
   }
 };
 
@@ -218,15 +218,15 @@ export function calculateDashaAndYearForecast(dobStr: string, currentCalYear: nu
   const subPlanet = ((currentMahadasha.planet + subIdx - 1) % 9) + 1;
 
   const antardashaForecasts: Record<number, string> = {
-    1: 'Sun Sub-period adds immense administrative spotlight. Ideal for clearing out corporate delays, securing senior endorsements, and showcasing creative works.',
-    2: 'Moon Sub-period calms the mind. Prompts beautiful domestic changes, real estate decoration, and deep emotional bonding. Protect against sudden cold waves.',
-    3: 'Jupiter Sub-period brings auspicious guidance. Solves complex financial knots, expands learning and study opportunities, and attracts highly reliable mentors.',
-    4: 'Rahu Sub-period is a sudden wild card. Be alert for sudden foreign deals or technology breakthroughs. Avoid any haste, locking in important contracts safely.',
-    5: 'Mercury Sub-period favors business speed. Outstanding for website launches, public relations scripts, billing audits, and writing clean computer codes.',
-    6: 'Venus Sub-period brings luxurious relaxation. Excellent cash flows, social status rises, asset additions, and deep marital matching sync.',
-    7: 'Ketu Sub-period is ideal for deep-dive technical research and spiritual detox plans. Highly intuitive dreams will protect you.',
-    8: 'Saturn Sub-period tests your discipline. Demands structured patience, long hours of dedicated coding, and checking physical joint health regularly.',
-    9: 'Mars Sub-period injects high physical stamina and decisive action-taking powers. Perfect for executing tough, backlogged files and leading land projects.'
+    1: 'सूर्य की अंतर्दशा: आत्मविश्वास और नेतृत्व क्षमता में वृद्धि। सरकारी कार्यों, वरिष्ठ अधिकारियों के सहयोग और मान-सम्मान के लिए उत्तम।',
+    2: 'चंद्रमा की अंतर्दशा: मन में शांति और रचनात्मकता। पारिवारिक सुख, गृह सज्जा और भावनात्मक संबंधों में प्रगाढ़ता का समय।',
+    3: 'बृहस्पति (गुरु) की अंतर्दशा: ज्ञान, विवेक और भाग्य का साथ। जटिल वित्तीय समस्याएं सुलझेंगी और श्रेष्ठ गुरुओं का मार्गदर्शन मिलेगा।',
+    4: 'राहु की अंतर्दशा: अप्रत्याशित अवसर और तकनीकी प्रगति। नए अनुबंधों को सोच-समझकर जांचें और जल्दबाजी में जोखिम न लें।',
+    5: 'बुध की अंतर्दशा: व्यापार, नेटवर्किंग और संवाद में तेजी। मार्केटिंग, नए व्यावसायिक प्रोजेक्ट्स और वित्तीय प्लानिंग के लिए श्रेष्ठ।',
+    6: 'शुक्र की अंतर्दशा: सुख-सुविधाओं और धन का आगमन। सामाजिक प्रतिष्ठा, कलात्मक कार्यों और दांपत्य जीवन में सुखद वातावरण।',
+    7: 'केतु की अंतर्दशा: गूढ़ अध्ययन, शोध और आध्यात्मिक शांति। गहन आत्म-मंथन और अंतर्ज्ञान के लिए अत्यंत फलदायी।',
+    8: 'शनि की अंतर्दशा: अनुशासन और धैर्य की परीक्षा। निरंतर परिश्रम से लंबे समय तक टिकने वाले स्थायी परिणाम प्राप्त होंगे।',
+    9: 'मंगल की अंतर्दशा: ऊर्जा, साहस और त्वरित निर्णय क्षमता। रुके हुए कार्यों को तेजी से पूरा करने और भूमि संबंधी कार्यों के लिए अनुकूल।'
   };
 
   const currentAntardasha: AntardashaPeriod = {
@@ -235,7 +235,7 @@ export function calculateDashaAndYearForecast(dobStr: string, currentCalYear: nu
     durationYears: 1,
     ageOfInfluence: currentMahadasha.startAge + subIdx,
     calendarYear: currentCalYear,
-    forecast: antardashaForecasts[subPlanet] || 'Supportive planetary sub-frequency coordinates.'
+    forecast: antardashaForecasts[subPlanet] || 'ग्रहों का अनुकूल सूक्ष्म प्रभाव सक्रिय है।'
   };
 
   // Personal Year Calculations
@@ -246,18 +246,18 @@ export function calculateDashaAndYearForecast(dobStr: string, currentCalYear: nu
   const personalYearNumber = reduceToSingleDigit(dayReduced + monthReduced + calYearReduced);
 
   const pyForecasts: Record<number, string> = {
-    1: 'Vaidic Personal Year 1 (Sūryāṅk - New Dawn): A year of dynamic beginnings, clean leadership targets, and establishing new brand directions. Face East and begin bold independent initiatives with supreme conviction.',
-    2: 'Vaidic Personal Year 2 (Somāṅk - Harmonious Union): Focus is fully on team coordination, joint accounts, writing scripts, and liquid cash stabilization. Drink water from silver cups to keep emotional waves balanced.',
-    3: 'Vaidic Personal Year 3 (Gurvāṅk - Wisdom Harvest): An exceptionally lucky, growth-oriented period for publishing, financial consulting, higher studies, and teaching. Seek paternal blessings and wear saffron gold colors.',
-    4: 'Vaidic Personal Year 4 (Rahuāṅk - Unorthodox Expansion): Expect unexpected global travel and high tech opportunities. Guard against impulsive, sudden business ventures. Keep a solid wooden block on your work desk.',
-    5: 'Vaidic Personal Year 5 (Budhāṅk - Mercantile Acceleration): The ultimate business communication and PR year. Quick sales, multiple micro-incomes, script code deployments, and rapid network builds. Feed green grass to cows.',
-    6: 'Vaidic Personal Year 6 (Shukrāṅk - Domestic Splendor): The year of luxury, wedding drapes, automobile purchases, and high creative recognition. Use light sandalwood fragrances to invite extreme luxury.',
-    7: 'Vaidic Personal Year 7 (Ketuāṅk - Introspective Wisdom): A deeper year of core analytical research, meditation, and physical detoxification. Avoid loaning massive cash sums. Keep standard bird grains on windows.',
-    8: 'Vaidic Personal Year 8 (Shaniāṅk - Systematic Consolidation): A year of extreme real estate planning, ancestral duties, and grinding labor. Light mustard oil lamps under Peepal trees on Saturdays to clear delays.',
-    9: 'Vaidic Personal Year 9 (Maṅgalāṅk - Karmic Completion): A vibrant fire year of ending old bad habits, cleaning your office clutter, and preparing for the next 9-year loop. Do daily charity work with absolute humbleness.'
+    1: 'वैदिक Personal Year 1 (सूर्यांक - नई शुरुआत): नए संकल्पों, नेतृत्व और नए कार्यों की शुरुआत का वर्ष। आत्मविश्वास के साथ स्वतंत्र पहल करें और नई दिशा तय करें।',
+    2: 'वैदिक Personal Year 2 (सोमांक - सौहार्द और तालमेल): टीम वर्क, साझेदारी, वित्तीय संतुलन और शांत संवाद का वर्ष। जल का सम्मान करें और भावनात्मक संतुलन बनाए रखें।',
+    3: 'वैदिक Personal Year 3 (गुर्वांक - ज्ञान और विस्तार): भाग्य और ज्ञान का श्रेष्ठ वर्ष। उच्च अध्ययन, वित्तीय परामर्श, लेखन और आध्यात्मिक प्रगति के लिए अत्यंत शुभ।',
+    4: 'वैदिक Personal Year 4 (राह्वंक - संरचना और तकनीकी विस्तार): अप्रत्याशित अवसर, तकनीकी विकास और नए संपर्कों का वर्ष। योजनाओं को व्यवस्थित रखें और जल्दबाजी से बचें।',
+    5: 'वैदिक Personal Year 5 (बुधांक - व्यापार और संचार): व्यापारिक प्रगति, जनसंपर्क और त्वरित यात्राओं का वर्ष। नए व्यावसायिक नेटवर्क और संवाद से भारी लाभ।',
+    6: 'वैदिक Personal Year 6 (शुक्रांक - सुख और पारिवारिक वैभव): पारिवारिक सुख, सौंदर्य, नए वाहन या गृह सज्जा और भौतिक समृद्धि का श्रेष्ठ वर्ष।',
+    7: 'वैदिक Personal Year 7 (केतुक - चिंतन और अनुसंधान): अंतर्मुखी होकर अध्ययन, शोध और स्वास्थ्य सुधार का वर्ष। मानसिक शांति और ध्यान साधना पर बल दें।',
+    8: 'वैदिक Personal Year 8 (शन्यंक - कर्म और सुदृढ़ निर्माण): कड़ी मेहनत, संपत्ति निर्माण और दीर्घकालिक लक्ष्यों को हासिल करने का वर्ष। धैर्य और ईमानदारी से काम करें।',
+    9: 'वैदिक Personal Year 9 (मंगलांक - समापन और पूर्णता): पुराने रुके कार्यों को पूरा करने, व्यर्थ के बंधनों को समाप्त करने और नए 9-वर्षीय चक्र की तैयारी का वर्ष।'
   };
 
-  const personalYearForecast = pyForecasts[personalYearNumber] || 'Supportive numeric transit influences.';
+  const personalYearForecast = pyForecasts[personalYearNumber] || 'अनुकूल संख्या गोचर का प्रभाव सक्रिय है।';
 
   return {
     birthYear: bYear,

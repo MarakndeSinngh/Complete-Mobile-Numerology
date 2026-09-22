@@ -24,30 +24,30 @@ export function analyzeBhagyank(bhagyankOrDob: number | string): BhagyankAnalysi
 
   return {
     bhagyank,
-    title: `Bhagyank ${bhagyank} — ${profile.grahaHi} Destiny Conduit`,
+    title: `भाग्यांक (Bhagyank) ${bhagyank} — ${profile.grahaHi} जीवन पथ एवं भाग्य`,
     graha: profile.grahaHi,
     element: profile.element,
     lifeDirection: profile.bhagyankMeaning,
     longTermThemes: [
-      `Cultivating the highest octaves of ${profile.grahaEn}: ${profile.positiveTraits.slice(0, 3).join(', ')}`,
-      `Overcoming inherent karmic shadow tendencies: ${profile.shadowTraits.slice(0, 2).join(', ')}`,
-      `Mastering authority and service in ${profile.career.slice(0, 2).join(' and ')}`
+      `${profile.grahaHi} के सर्वश्रेष्ठ गुणों का विकास: ${profile.positiveTraits.slice(0, 3).join(', ')}`,
+      `स्वभाव की संभावित कमजोरियों पर नियंत्रण: ${profile.shadowTraits.slice(0, 2).join(', ')}`,
+      `${profile.career.slice(0, 2).join(' और ')} में विशेषज्ञता व सेवा का भाव`
     ],
     majorOpportunities: [
-      `Natural elevation during personal years governed by ${profile.grahaEn}`,
-      `Leadership recognition through ${profile.decisionMaking.toLowerCase()}`,
-      `Commercial and wealth expansion via ${profile.wealth.toLowerCase()}`
+      `${profile.grahaHi} द्वारा शासित वर्षों व समय में स्वाभाविक उन्नति`,
+      `${profile.decisionMaking} द्वारा मान-सम्मान व पहचान`,
+      `${profile.wealth} के माध्यम से आर्थिक स्थिरता व विस्तार`
     ],
     responsibilities: [
-      `Fulfilling family and social obligations with ${profile.discipline.toLowerCase()}`,
-      `Guiding others through your mastery of ${profile.balancedExpression.toLowerCase()}`
+      `पारिवारिक और सामाजिक उत्तरदायित्वों का अनुशासन के साथ निर्वहन`,
+      `${profile.balancedExpression} द्वारा दूसरों का मार्गदर्शन`
     ],
     careerDirection: profile.career,
     financialEvolution: profile.wealth,
     relationshipLessons: profile.relationships,
     growthThemes: [
-      `Balancing instinctive desires with long-term destiny dharma`,
-      `Integrating ${profile.element} elemental harmony`
+      `दैनिक इच्छाओं और दीर्घकालिक जीवन ध्येय (Dharma) में संतुलन`,
+      `${profile.element} तत्व की ऊर्जा का सामंजस्य`
     ],
     coreStrengths: profile.positiveTraits,
     possibleChallenges: profile.shadowTraits
@@ -130,27 +130,28 @@ export function calculateMulankBhagyankRelationship(
     }
   }
 
-  const instinctiveNature = `Driven by Mulank ${mulank} (${pMulank.grahaHi}): Your instinctive impulse is to operate with ${pMulank.positiveTraits.slice(0, 3).join(', ')}. In everyday interactions, you lead with ${pMulank.thinkingStyle.toLowerCase()}`;
-  const destinyTrajectory = `Governed by Bhagyank ${bhagyank} (${pBhagyank.grahaHi}): Your broader life path steers you into situations demanding ${pBhagyank.positiveTraits.slice(0, 3).join(', ')}. Long-term success emerges through ${pBhagyank.bhagyankMeaning.toLowerCase()}`;
+  const instinctiveNature = `मूलांक ${mulank} (${pMulank.grahaHi}): आपका स्वाभाविक स्वभाव ${pMulank.positiveTraits.slice(0, 3).join(', ')} के साथ कार्य करने का है। दैनिक जीवन में आप ${pMulank.thinkingStyle.toLowerCase()} के साथ आगे बढ़ते हैं।`;
+  const destinyTrajectory = `भाग्यांक ${bhagyank} (${pBhagyank.grahaHi}): आपका जीवन पथ आपको ऐसे अवसरों की ओर ले जाता है जहां ${pBhagyank.positiveTraits.slice(0, 3).join(', ')} की आवश्यकता होती है। दीर्घकालिक सफलता ${pBhagyank.bhagyankMeaning.toLowerCase()} से मिलती है।`;
 
   let dynamicTension = '';
   let integrationAdvice = '';
 
   if (relationship === 'harmonious') {
-    dynamicTension = 'High natural synergy: Your immediate desires and your ultimate destiny march in lockstep.';
-    integrationAdvice = `Channel the combined vitality of ${pMulank.grahaEn} and ${pBhagyank.grahaEn} into decisive, visionary projects.`;
+    dynamicTension = 'उत्कृष्ट प्राकृतिक तालमेल: आपकी स्वाभाविक इच्छाएं और आपका भाग्य एक ही दिशा में साथ-साथ चलते हैं।';
+    integrationAdvice = `${pMulank.grahaHi} और ${pBhagyank.grahaHi} की सम्मिलित ऊर्जा को बड़े और दूरदर्शी प्रोजेक्ट्स में लगाएं।`;
   } else if (relationship === 'supportive') {
-    dynamicTension = 'Constructive complement: Minor adjustments required between personal impulse and external circumstances.';
-    integrationAdvice = `Allow your Mulank ${mulank} actions to patiently serve your Bhagyank ${bhagyank} overarching objectives.`;
+    dynamicTension = 'रचनात्मक सहयोग: व्यक्तिगत इच्छाओं और बाहरी परिस्थितियों के बीच थोड़े से तालमेल की आवश्यकता होती है।';
+    integrationAdvice = `मूलांक ${mulank} के उत्साह को धैर्यपूर्वक भाग्यांक ${bhagyank} के मुख्य लक्ष्यों की पूर्ति में लगाएं।`;
   } else if (relationship === 'challenging') {
-    dynamicTension = `Elemental friction between ${pMulank.grahaEn} (Driver) and ${pBhagyank.grahaEn} (Destiny). You may feel internal conflict between what you impulsively desire and where life repeatedly steers you.`;
-    integrationAdvice = `Recognize that your Mulank (${mulank}) is the vehicle, but your Bhagyank (${bhagyank}) is the destination. Consciously adopt ${pBhagyank.balancedExpression.toLowerCase()} to avoid friction.`;
+    dynamicTension = `${pMulank.grahaHi} (मूलांक/ड्राइवर) और ${pBhagyank.grahaHi} (भाग्यांक/कंडक्टर) के बीच ऊर्जा का अंतर। कभी-कभी मन की इच्छा और जीवन की परिस्थितियों में द्वंद्व महसूस हो सकता है।`;
+    integrationAdvice = `ध्यान रखें कि मूलांक (${mulank}) आपका वाहन है और भाग्यांक (${bhagyank}) आपकी मंजिल। दोनों में सामंजस्य बनाए रखें और संतुलित मार्ग चुनें।`;
   } else {
-    dynamicTension = 'Dynamic multi-faceted flow: Balance between rapid personal action and measured karmic pacing.';
-    integrationAdvice = `Embrace flexibility; alternate between the active drive of ${pMulank.grahaEn} and the wisdom lessons of ${pBhagyank.grahaEn}.`;
+    dynamicTension = 'बहुआयामी ऊर्जा: व्यक्तिगत सक्रियता और समय की चाल के बीच संतुलन बनाए रखने की आवश्यकता।';
+    integrationAdvice = `लचीला रुख अपनाएं; ${pMulank.grahaHi} के उत्साह और ${pBhagyank.grahaHi} की सीख का सुंदर समन्वय करें।`;
   }
 
-  const summary = `Within the LeoFamily numerology framework, your Mulank ${mulank} (${pMulank.grahaEn}) and Bhagyank ${bhagyank} (${pBhagyank.grahaEn}) share a ${relationship.toUpperCase()} (${score}/100) dynamic alignment.`;
+  const relLabel = relationship === 'harmonious' ? 'मित्रवत व शुभ' : relationship === 'supportive' ? 'सहयोगात्मक' : relationship === 'challenging' ? 'संवेदनशील व चुनौतीपूर्ण' : 'मिश्रित';
+  const summary = `LeoFamily वैदिक अंकशास्त्र के अनुसार, आपका मूलांक ${mulank} (${pMulank.grahaHi}) और भाग्यांक ${bhagyank} (${pBhagyank.grahaHi}) आपस में ${relLabel} (${score}/100) संबंध साझा करते हैं।`;
 
   return {
     mulank,

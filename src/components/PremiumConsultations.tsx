@@ -23,6 +23,8 @@ import { generateNumeroVaastuReport, NumeroVaastuResult } from '../services/nume
 import { calculateDashaAndYearForecast, DashaAnalysisReport } from '../services/dashaEngine';
 import DateInput from './DateInput';
 import { formatDateIndian } from '../utils/dateUtils';
+import { VehicleNumerologyDashboard } from './VehicleNumerologyDashboard';
+import { BusinessNumerologyDashboard } from './BusinessNumerologyDashboard';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 15 },
@@ -245,15 +247,15 @@ export default function PremiumConsultations() {
     if (finalStyleId === "TRAILING_DOT_BELOW") {
       return {
         analysis: {
-          direction: "Flat or slightly wave-like direction, showing high resilience and adaptability under changing corporate environments.",
-          size: "Compact but highly dense strokes, symbolizing a focused, detail-oriented personality with high privacy boundaries.",
-          firstLetterSize: `The first letter of '${name}' is exceptionally prominent, almost 3x larger than lowercase characters, showing strong personal pride but also a subconscious defensive shield.`,
-          underlineStyle: "No active underline is used, signifying a desire to operate independently without relying on traditional safety nets.",
-          endStroke: "The end stroke curves backward or stops abruptly, indicating an analytical mind that thoroughly evaluates risks before executing actions.",
-          dotPlacement: "A single prominent trailing dot is placed below the final character, which acts as a subconscious anchor but can sometimes create blockages if too heavy.",
-          letterLegibility: "Moderate legibility with stylized trailing loops, reflecting a highly strategic thinker who keeps their core plans close to their chest.",
-          nameCompletion: "First name is fully spelled out with a bold, stylized dot, while the surname is omitted, indicating a self-made persona.",
-          overallFlow: "Calculated, rhythmic, but with sharp angular turns that show high analytical power and mechanical precision."
+          direction: "समतल या हल्की तरंग जैसी दिशा, जो कार्यक्षेत्र में परिस्थितियों के अनुसार ढलने और दृढ़ रहने की क्षमता दर्शाती है।",
+          size: "सघन और सुगठित स्ट्रोक, जो गोपनीयता और बारीकियों पर ध्यान केंद्रित करने वाले स्वभाव का प्रतीक हैं।",
+          firstLetterSize: `'${name}' का पहला अक्षर बाकी अक्षरों से लगभग 3 गुना बड़ा है, जो मजबूत आत्मसम्मान और सुरक्षात्मक सीमाओं को दर्शाता है।`,
+          underlineStyle: "कोई अंडरलाइन नहीं है, जो किसी सहारे के बिना स्वतंत्र रूप से कार्य करने की इच्छा दर्शाती है।",
+          endStroke: "अंतिम स्ट्रोक पीछे मुड़ता है या अचानक रुकता है, जो निर्णय लेने से पहले जोखिम को गहराई से जांचने की प्रवृत्ति दिखाता है।",
+          dotPlacement: "अंतिम अक्षर के नीचे एक प्रमुख बिंदु (Dot) है, जो स्थिरता देता है लेकिन भारी होने पर काम में रुकावट भी डाल सकता है।",
+          letterLegibility: "मध्यम स्पष्टता और लूप्स, जो रणनीतिक सोच और योजनाओं को गोपनीय रखने की आदत को दर्शाते हैं।",
+          nameCompletion: "पहला नाम पूरी तरह से लिखा गया है और उपनाम छोड़ा गया है, जो स्वावलंबी व्यक्तित्व का प्रतीक है।",
+          overallFlow: "संतुलित और तीखे मोड़, जो उच्च विश्लेषणात्मक क्षमता और तार्किक सोच को दर्शाते हैं।"
         },
         scores: {
           careerScore: 78,
@@ -265,53 +267,53 @@ export default function PremiumConsultations() {
           overallSignatureScore: 79
         },
         assessment: {
-          currentSignatureAssessment: `This style features an exceptionally large first letter paired with a trailing dot below or after the signature. For ${name}, with Driver #${driver} and Conductor #${conductor}, this indicates high self-reliance, strategic reserve, and a strong self-protection mechanism. Co-ruled by Rahu and Saturn, it gives you deep investigative powers and a sharp, critical mind. However, the isolated trailing dot acts as a cosmic full-stop or anchor. While it provides deep grounding, it can also manifest as subconscious roadblocks, sudden delays, or a tendency to stall key decisions at the final hour.`,
+          currentSignatureAssessment: `इस हस्ताक्षर शैली में बड़ा पहला अक्षर और अंत में एक बिंदु (Dot) शामिल है। ${name} के मूलांक ${driver} और भाग्यांक ${conductor} के लिए, यह मजबूत आत्मनिर्भरता और रणनीतिक सोच को दर्शाता है। राहु और शनि के प्रभाव से यह आपको गहरी विश्लेषणात्मक शक्ति देता है। हालांकि, अंत में अकेला बिंदु कभी-कभार काम में अप्रत्याशित देरी या निर्णय में संकोच उत्पन्न कर सकता है।`,
           strengths: [
-            "Exceptional self-image and individual drive symbolized by the large initial.",
-            "Excellent risk management and analytical evaluation of details.",
-            "High capacity for independent decision-making and strategic planning."
+            "बड़े प्रारंभिक अक्षर द्वारा दर्शाया गया उत्कृष्ट आत्मविश्वास और कार्यक्षमता।",
+            "बारीकियों का विश्लेषण और जोखिम प्रबंधन में महारत।",
+            "स्वतंत्र निर्णय लेने और रणनीतिक योजना बनाने की उच्च क्षमता।"
           ],
           weaknesses: [
-            "The isolated dot creates a sudden energy block, slowing down progress.",
-            "Lack of an underline foundation may cause feelings of being unsupported in critical situations.",
-            "Abrupt end strokes can lead to sudden, unexplained endings in partnerships."
+            "अंतिम बिंदु कभी-कभार ऊर्जा के प्रवाह को धीमा कर प्रगति में रुकावट डाल सकता है।",
+            "नीचे बेसलाइन अंडरलाइन न होने से महत्वपूर्ण पलों में सहारे की कमी महसूस हो सकती है।",
+            "अचानक समाप्त होने वाला स्ट्रोक साझेदारियों में अचानक बदलाव ला सकता है।"
           ],
           riskAreas: [
-            "Tendency to attract sudden administrative audits or legal hurdles due to the Rahu-Saturn dot configuration.",
-            "Communication blockages or misunderstanding with close business associates."
+            "राहु-शनि डॉट संरचना के कारण कभी-कभार प्रशासनिक या दस्तावेजी कार्यों में अनावश्यक रुकावट।",
+            "व्यावसायिक साझेदारों के साथ बातचीत में गलतफहमी की संभावना।"
           ],
           recommendedCorrections: [
-            "Shift the trailing dot from being a solitary stop to a supporting double dot below a new foundation underline.",
-            "Soften the sharp angles in the middle characters to allow smoother energy flow and reduce internal stress.",
-            "Ensure the end stroke of your last letter sweeps forward and upward rather than stopping abruptly.",
-            "Write your new signature with a green or black ink pen on clean unruled paper 21 times before sleeping."
+            "अंतिम अकेले बिंदु को हटाकर हस्ताक्षर के नीचे खींची गई अंडरलाइन के नीचे दो संतुलित बिंदु लगाएं।",
+            "बीच के अक्षरों के तीखे कोनों को थोड़ा गोल और सहज बनाएं ताकि ऊर्जा का प्रवाह सुगम रहे।",
+            "सुनिश्चित करें कि हस्ताक्षर का अंतिम स्ट्रोक अचानक रुकने के बजाय आगे और ऊपर की ओर उठे।",
+            "सोने से पहले बिना लाइन वाले सादे कागज पर हरे या काले पेन से 21 बार नए हस्ताक्षर का अभ्यास करें।"
           ],
-          idealSignatureStyle: "A prominent first letter, followed by fluid legible middle letters, supported by a clean ascending underline with two balanced dots below.",
-          personalizedSignatureBlueprint: "Start with a grand, rounded first letter. Write the rest of your name in a flowing, legible script. Draw a straight, slightly rising underline. Place two small, neat dots horizontally below the middle of the underline."
+          idealSignatureStyle: "पहला अक्षर बड़ा व स्पष्ट, उसके बाद सहज पठनीय अक्षर, नीचे एक 15 डिग्री उठती हुई सीधी अंडरलाइन और उसके नीचे दो संतुलित बिंदु।",
+          personalizedSignatureBlueprint: "पहला अक्षर थोड़ा बड़ा और गोल बनाएं। बाकी नाम को साफ और सुंदर अक्षरों में लिखें। नीचे एक हल्की ऊपर उठती हुई सीधी रेखा खींचें और उसके नीचे दो छोटे बिंदु लगाएं।"
         },
         beforeAfter: {
           before: {
-            visualDescription: "A heavy, isolated dot at the very end of a flat signature, with sharp angles and a closed, abrupt ending.",
-            impact: "Manifests as sudden blockages in cash flow and unexpected operational delays right when deals are about to close."
+            visualDescription: "समतल हस्ताक्षर के अंत में एक भारी अकेला बिंदु, तीखे कोने और अचानक रुकने वाला अंतिम अक्षर।",
+            impact: "अंतिम चरण में सौदों में अनावश्यक देरी और धन के प्रवाह में अचानक रुकावट का कारण बनता है।"
           },
           after: {
-            visualDescription: "A fluid, legible script with an upward-pointing exit stroke, supported by a clean underline and two balanced dots beneath it.",
-            impact: "Releases stagnant funds, brings friendly mentors into your sphere, and unlocks continuous opportunities."
+            visualDescription: "ऊपर की ओर उठता हुआ प्रवाहमय हस्ताक्षर, जिसके नीचे एक साफ अंडरलाइन और दो संतुलित बिंदु हैं।",
+            impact: "रुके हुए धन को गति देता है, वरिष्ठों और मार्गदर्शकों का सहयोग दिलाता है और नए अवसर खोलता है।"
           }
         }
       };
     } else if (finalStyleId === "FALLING_LINE") {
       return {
         analysis: {
-          direction: "Downward sloping (Southwest descent) in the trailing segment, showing a gradual drop in stamina or confidence toward the end of tasks.",
-          size: "Medium at the start but shrinking significantly toward the end, signaling an energy leak or fatigue.",
-          firstLetterSize: "Standard first letter, but the succeeding letters gradually lose their height and scale, representing vulnerability to external pressure.",
-          underlineStyle: "Absent or a downward-drooping line, which drains the grounding element and increases anxiety.",
-          endStroke: "Declining or pointing downwards, representing a leak in the wealth sector and sudden loss of interest.",
-          dotPlacement: "Irregular dotting or a dot cutting the baseline, signifying minor health issues or frequent energy drains.",
-          letterLegibility: "Low to moderate legibility, indicating a tendency to feel overwhelmed or misunderstood by peers.",
-          nameCompletion: "Letters get compressed or scribbled at the end, showing a rush to finish and a lack of patience with administrative details.",
-          overallFlow: "Declining momentum, starting with high enthusiasm but closing with high tension or friction."
+          direction: "दाहिनी ओर नीचे की ओर ढलान (Southwest Descent), जो काम के अंतिम चरण में ऊर्जा या उत्साह में कमी को दर्शाता है।",
+          size: "शुरुआत में मध्यम लेकिन अंत में अक्षर छोटे हो जाते हैं, जो थकान या ऊर्जा के रिसाव का संकेत है।",
+          firstLetterSize: "सामान्य पहला अक्षर, लेकिन बाद के अक्षर ऊंचाई खो देते हैं, जो दबाव में आत्मविश्वास कम होने को दर्शाता है।",
+          underlineStyle: "अंडरलाइन अनुपस्थित है या नीचे की ओर झुकी हुई है, जिससे आत्मविश्वास का आधार कमजोर होता है।",
+          endStroke: "नीचे की ओर झुकता हुआ, जो धन के क्षेत्र में रिसाव और अचानक रुचि समाप्त होने का संकेत देता है।",
+          dotPlacement: "अनियमित बिंदु या बेसलाइन को काटने वाला बिंदु, जो मानसिक तनाव और ऊर्जा की कमी का प्रतीक है।",
+          letterLegibility: "कम से मध्यम स्पष्टता, जो विचारों को दूसरों तक पहुंचाने में संकोच को दर्शाती है।",
+          nameCompletion: "अंतिम अक्षर सिकुड़े हुए या घसीटकर लिखे गए हैं, जो काम को जल्दबाजी में निपटाने की आदत दर्शाते हैं।",
+          overallFlow: "घटती हुई गति, जो शुरुआत में बहुत उत्साह लेकिन अंत में खिंचाव या तनाव दिखाती है।"
         },
         scores: {
           careerScore: 60,
@@ -323,52 +325,52 @@ export default function PremiumConsultations() {
           overallSignatureScore: 58
         },
         assessment: {
-          currentSignatureAssessment: `Your current signature exhibits a downward slope, particularly in the trailing segment. In Handwriting Vastu, this is a critical energy drain known as the 'Descent Trap'. For someone with Driver #${driver} and Conductor #${conductor}, it indicates that while you start projects with immense enthusiasm (ruled by Mars/Sun), you face substantial stamina drains, mental fatigue, or self-doubt as you approach the finish line. This downward angle acts as a siphoning force in your wealth and career sectors, causing hard-earned gains or recognition to slip away at the last moment. Immediate structural alignment is strongly recommended.`,
+          currentSignatureAssessment: `आपके वर्तमान हस्ताक्षर में दाहिनी ओर नीचे की ओर झुकाव देखा गया है। हस्तलेखन वास्तु में इसे 'ढलान जाल (Descent Trap)' कहा जाता है। मूलांक ${driver} और भाग्यांक ${conductor} वाले जातक के लिए, इसका अर्थ है कि आप काम बहुत उत्साह से शुरू करते हैं (सूर्य/मंगल प्रभाव), लेकिन अंत तक आते-आते मानसिक थकान या परिणाम मिलने में देरी का सामना करते हैं। यह नीचे की ओर झुकता कोण करियर और धन संचय में रिसाव करता है। इसे तुरंत सुधारना अत्यंत लाभकारी रहेगा।`,
           strengths: [
-            "Energetic and powerful start to new initiatives.",
-            "Strong initial presentation and personal charm."
+            "नई योजनाओं और पहलों की बहुत ऊर्जावान और आकर्षक शुरुआत।",
+            "मजबूत प्रारंभिक प्रस्तुति और स्वाभाविक प्रभाव।"
           ],
           weaknesses: [
-            "Downward trailing slope drains career energy and causes fatigue.",
-            "Shrinking letter size indicates falling confidence under sustained pressure.",
-            "Scribbled ending letters lead to misunderstandings and administrative delays."
+            "नीचे की ओर झुकता कोण करियर की ऊर्जा को घटाता है और थकान लाता है।",
+            "अक्षरों का छोटा होना निरंतर दबाव में आत्मविश्वास की कमी दर्शाता है।",
+            "अस्पष्ट अंतिम अक्षर गलतफहमी और प्रशासनिक देरी का कारण बनते हैं।"
           ],
           riskAreas: [
-            "High vulnerability to financial losses, unexpected expenses, or leakage of liquid wealth.",
-            "Frequent delays in receiving credit or recognition for your hard work."
+            "अचानक अनावश्यक खर्चों या संचित धन के रिसाव की संभावना।",
+            "कड़ी मेहनत के बावजूद पूरा श्रेय या पदोन्नति मिलने में बार-बार देरी।"
           ],
           recommendedCorrections: [
-            "You MUST consciously tilt your signature upwards. Ensure the entire signature slopes at a 10 to 15-degree angle from left to right.",
-            "Keep all letters in your name uniform in height, rather than letting them shrink toward the end.",
-            "Add a solid, straight, independent horizontal underline that rises slightly at the end to act as a cosmic support shield.",
-            "Practice the new ascending signature 33 times daily for 21 days with a high-quality indigo rollerball pen."
+            "हस्ताक्षर को हमेशा बाएं से दाएं 10 से 15 डिग्री के कोण पर ऊपर की ओर उठाएं।",
+            "नाम के सभी अक्षरों का आकार एक समान रखें, उन्हें अंत में छोटा न होने दें।",
+            "हस्ताक्षर के नीचे एक मजबूत, सीधी स्वतंत्र रेखा (Underline) खींचें जो अंत में हल्की ऊपर उठे।",
+            "एक अच्छे नीले या इंडिगो पेन से बिना लाइन वाले सफेद कागज पर प्रतिदिन 33 बार 21 दिनों तक नए हस्ताक्षर का अभ्यास करें।"
           ],
-          idealSignatureStyle: "A 15-degree rising line with uniform character sizing and an independent upward-flicking underline foundation.",
-          personalizedSignatureBlueprint: "Write on unruled white paper. Keep your hand relaxed. Write your name so that each letter is legible and stays on an ascending line. Draw a bold, straight underline underneath, starting from the second letter and flicking upwards at the end."
+          idealSignatureStyle: "15 डिग्री ऊपर उठता हुआ हस्ताक्षर, अक्षरों का एक समान आकार और नीचे ऊपर की ओर उठती हुई अंडरलाइन।",
+          personalizedSignatureBlueprint: "सफेद सादे कागज पर हाथ ढीला रखकर लिखें। अपने नाम को साफ अक्षरों में ऊपर की ओर 15 डिग्री पर ले जाएं। दूसरे अक्षर के नीचे से शुरू करके अंत तक एक सीधी रेखा खींचें जो अंत में ऊपर मुड़े।"
         },
         beforeAfter: {
           before: {
-            visualDescription: "A signature that starts strong but slopes downwards toward the right, with letters shrinking and scribbling at the end.",
-            impact: "Drains your financial savings, causes minor joint or energy health issues, and delays promotions."
+            visualDescription: "शुरुआत में मजबूत लेकिन दाहिनी ओर नीचे की ओर झुकता हस्ताक्षर, जिसके अंत में अक्षर छोटे और अस्पष्ट हो जाते हैं।",
+            impact: "बचत में कमी, ऊर्जा स्तर में गिरावट और पदोन्नति व श्रेय मिलने में देरी।"
           },
           after: {
-            visualDescription: "An ascending signature with beautifully spaced, uniform letters and a firm, rising underline foundation.",
-            impact: "Secures your financial assets, boosts daily energy levels, and ensures you receive full credit and fame for your achievements."
+            visualDescription: "15 डिग्री ऊपर उठता हुआ सुंदर अक्षरों वाला हस्ताक्षर, जिसके नीचे मजबूत सीधी अंडरलाइन है।",
+            impact: "धन संचय को सुरक्षित करता है, दैनिक ऊर्जा बढ़ाता है और मेहनत का पूरा श्रेय व मान-सम्मान दिलाता है।"
           }
         }
       };
     } else if (finalStyleId === "DOUBLE_UNDERLINE") {
       return {
         analysis: {
-          direction: "Stable, perfectly flat horizontal alignment, representing a highly structured, objective, and realistic approach to life.",
-          size: "Large, bold, and expansive, commanding immediate attention and establishing a powerful physical presence.",
-          firstLetterSize: "Strong, blocky, and wide first letter, representing a solid corporate base and high protective instincts.",
-          underlineStyle: "Two clean, parallel underlines run beneath the signature. In Vastu, this represents a double-foundation (Earth and Metal elements) which guarantees massive stability.",
-          endStroke: "Horizontal or curving slightly upward, representing a careful, calculated exit that locks in profits.",
-          dotPlacement: "Perfectly balanced dots placed precisely between or below the underlines, serving as protective anchors.",
-          letterLegibility: "Highly structured and legible, showing absolute clarity of purpose and high commercial acumen.",
-          nameCompletion: "Uses both first name and surname clearly, establishing strong connection to lineage and a desire for legacy building.",
-          overallFlow: "Robust, authoritative, with clear spacing and powerful deliberate strokes that show immense discipline."
+          direction: "स्थिर, पूरी तरह से सीधी क्षैतिज दिशा, जो जीवन में अत्यंत व्यावहारिक, व्यवस्थित और यथार्थवादी दृष्टिकोण दर्शाती है।",
+          size: "बड़ा, स्पष्ट और विस्तृत, जो तुरंत ध्यान आकर्षित करता है और समाज में ठोस उपस्थिति बनाता है।",
+          firstLetterSize: "मजबूत, चौड़ा और स्पष्ट पहला अक्षर, जो व्यावसायिक मजबूती और सुरक्षात्मक प्रवृत्ति का प्रतीक है।",
+          underlineStyle: "हस्ताक्षर के नीचे दो समानांतर सीधी रेखाएं हैं। वास्तु में यह दोहरा आधार (पृथ्वी व धातु तत्व) कहलाता है जो अत्यधिक स्थिरता देता है।",
+          endStroke: "सीधा या हल्का ऊपर मुड़ता हुआ, जो मुनाफे और सफलता को सुरक्षित रखने का प्रतीक है।",
+          dotPlacement: "अंडरलाइन के नीचे या बीच में पूरी तरह संतुलित बिंदु, जो सुरक्षात्मक आधार का काम करते हैं।",
+          letterLegibility: "अत्यधिक व्यवस्थित और पठनीय, जो लक्ष्यों की पूर्ण स्पष्टता और उच्च व्यापारिक समझ दर्शाता है।",
+          nameCompletion: "पहला नाम और उपनाम दोनों स्पष्ट रूप से उपयोग किए गए हैं, जो कुल-परंपरा और स्थायी विरासत बनाने की इच्छा दर्शाते हैं।",
+          overallFlow: "प्रभावशाली, अधिकारपूर्ण, संतुलित अंतर और गहरा अनुशासन दर्शाने वाले स्ट्रोक।"
         },
         scores: {
           careerScore: 88,
@@ -380,52 +382,52 @@ export default function PremiumConsultations() {
           overallSignatureScore: 89
         },
         assessment: {
-          currentSignatureAssessment: `Your current signature uses a straight horizontal style with a double underline support. In Handwriting Vastu, this is known as the 'Fortress' or 'Double Vault' structure. It is an exceptionally strong format for corporate leaders, business owners, and financial experts. For someone with Driver #${driver} and Conductor #${conductor}, co-ruled by Mercury and Saturn, it instills immense commercial intelligence, deep financial discipline, and a highly systematic way of working. The double parallel lines create an unbreakable barrier against financial losses and ensure that your business ventures have a permanent, rock-solid foundation.`,
+          currentSignatureAssessment: `आपका वर्तमान हस्ताक्षर सीधी क्षैतिज शैली में है जिसके नीचे दोहरी अंडरलाइन (Double Underline) है। हस्तलेखन वास्तु में इसे 'किला' या 'डबल वॉल्ट' संरचना कहा जाता है। यह कॉरपोरेट लीडर्स, व्यापारियों और वित्तीय विशेषज्ञों के लिए बहुत मजबूत प्रारूप है। मूलांक ${driver} और भाग्यांक ${conductor} (बुध व शनि प्रभाव) के लिए यह असाधारण व्यावसायिक बुद्धि, गहरा वित्तीय अनुशासन और व्यवस्थित कार्यप्रणाली प्रदान करता है। दोहरी समानांतर रेखाएं धन हानि से रक्षा करती हैं और स्थायी सफलता की नींव रखती हैं।`,
           strengths: [
-            "Unmatched financial stability and asset protection from the double underline.",
-            "Immense administrative and executive authority.",
-            "Outstanding clarity of goals and methodical execution."
+            "दोहरी अंडरलाइन द्वारा वित्तीय स्थिरता और संपत्तियों की मजबूत सुरक्षा।",
+            "असाधारण प्रशासनिक और नेतृत्वकारी अधिकार।",
+            "लक्ष्यों की पूर्ण स्पष्टता और व्यवस्थित कार्यशैली।"
           ],
           weaknesses: [
-            "Can sometimes indicate extreme rigidity or a reluctance to adapt to rapid changes.",
-            "The double lines can occasionally attract heavy responsibilities that cause mental pressure."
+            "कभी-कभार अत्यधिक हठधर्मिता या बदलावों को तुरंत स्वीकार न करने की प्रवृत्ति।",
+            "दोहरी रेखाएं कभी-कभार अत्यधिक जिम्मेदारियों का मानसिक दबाव ला सकती हैं।"
           ],
           riskAreas: [
-            "Over-analyzing simple situations, leading to missed fast-paced opportunities.",
-            "Creating an overly formal barrier in personal relationships due to high structure."
+            "साधारण बातों का बहुत अधिक विश्लेषण करना, जिससे तेजी से मिलने वाले अवसर छूट सकते हैं।",
+            "अत्यधिक औपचारिकता के कारण निजी रिश्तों में दूरी का अनुभव।"
           ],
           recommendedCorrections: [
-            "Keep the double underlines exactly parallel and ensure they never cross each other or touch any descending loops.",
-            "Soften the starting letters slightly with a gentle curve to improve personal relationship harmony and adaptability.",
-            "Ensure the underlines do not extend too far beyond the signature itself, keeping the energy concentrated.",
-            "Practice your signature 15 times daily using a premium black or deep blue fountain pen on rich paper."
+            "सुनिश्चित करें कि दोनों अंडरलाइन बिल्कुल समानांतर हों और किसी भी अक्षर के निचले लूप को न काटें।",
+            "शुरुआती अक्षरों को हल्का घुमावदार बनाएं ताकि रिश्तों में मधुरता और अनुकूलनशीलता बढ़े।",
+            "अंडरलाइन को नाम की लंबाई से बहुत आगे न ले जाएं, ताकि ऊर्जा केंद्रित रहे।",
+            "प्रीमियम नीले या काले पेन से सादे कागज पर प्रतिदिन 15 बार हस्ताक्षर का अभ्यास करें।"
           ],
-          idealSignatureStyle: "A stable horizontal signature supported by two parallel lines that are clean, distinct, and end with a slight upward tilt.",
-          personalizedSignatureBlueprint: "Write your full name in a clean, bold horizontal line. Draw two perfectly straight, parallel lines underneath, separated by 2mm. Ensure both lines are clean and unbroken, ending exactly where your name ends."
+          idealSignatureStyle: "एक स्थिर क्षैतिज हस्ताक्षर जिसके नीचे दो साफ समानांतर रेखाएं हों और अंत में हल्का ऊपर की ओर झुकाव हो।",
+          personalizedSignatureBlueprint: "पूरा नाम साफ और बोल्ड अक्षरों में लिखें। नीचे 2 मिमी की दूरी पर दो बिल्कुल सीधी समानांतर रेखाएं खींचें। दोनों रेखाएं नाम के अंत में ही समाप्त हों।"
         },
         beforeAfter: {
           before: {
-            visualDescription: "Double underlines that are uneven, crossing, or touching the bottom loops of your letters.",
-            impact: "Manifests as excessive workload, minor back-and-forth delays in partnerships, and unnecessary rigid arguments."
+            visualDescription: "दोहरी अंडरलाइन जो असमान हैं, एक-दूसरे को काटती हैं या अक्षरों के निचले हिस्से को छूती हैं।",
+            impact: "अत्यधिक काम का बोझ, साझेदारियों में छोटी-मोटी बहस और निर्णयों में रुकावट लाता है।"
           },
           after: {
-            visualDescription: "Two beautiful, clean, perfectly parallel underlines below a bold, clearly spaced horizontal signature.",
-            impact: "Locks in massive wealth accumulation, secures corporate leadership positions, and builds an enduring personal legacy."
+            visualDescription: "स्पष्ट क्षैतिज हस्ताक्षर के नीचे दो सुंदर, साफ और बिल्कुल समानांतर सीधी रेखाएं।",
+            impact: "विशाल धन संचय को सुरक्षित करता है, नेतृत्व पदों पर सफलता देता है और स्थायी मान-सम्मान बनाता है।"
           }
         }
       };
     } else {
       return {
         analysis: {
-          direction: "The signature maintains a beautiful, precise 15-degree upward slope (Eastward ascent), symbolizing constant growth and healthy ambition.",
-          size: "A healthy medium-to-large size, occupying the page space with confidence without spilling over or crowding other elements.",
-          firstLetterSize: `The first letter of '${name}' is perfectly scaled, being approximately 2x larger than the lowercase characters, showing strong self-image and protective boundaries.`,
-          underlineStyle: "A straight, single underline starts after the first letter and runs to the end. This acts as a firm, stable foundation (Earth Element) to support your endeavors.",
-          endStroke: "The end stroke finishes with an assertive upward-right flick, signaling positive closure and inviting prosperous future partnerships.",
-          dotPlacement: "No unnecessary blocking dots are present, which ensures smooth movement and lack of communication gaps with outer allies.",
-          letterLegibility: "Highly legible and distinct letters, establishing that the subject has clear, transparent intentions and values direct public relationships.",
-          nameCompletion: "The full first name is clearly utilized, reinforcing personal identity, followed by a stylized last name initial to manage family heritage elegantly.",
-          overallFlow: "Extremely fluid, consistent rhythm, showing a balanced flow of personal energy and healthy stamina."
+          direction: "हस्ताक्षर में 15 डिग्री का सुंदर ऊपर की ओर झुकाव (पूर्वोन्मुख आरोहण) है, जो निरंतर उन्नति और सकारात्मक महत्वाकांक्षा का प्रतीक है।",
+          size: "संतुलित मध्यम से बड़ा आकार, जो पृष्ठ पर आत्मविश्वास से जगह बनाता है बिना दूसरों को दबाए।",
+          firstLetterSize: `'${name}' का पहला अक्षर बाकी अक्षरों से लगभग 2.5 गुना बड़ा है, जो मजबूत आत्मसम्मान और सुरक्षात्मक सीमाओं को दर्शाता है।`,
+          underlineStyle: "पहले अक्षर के बाद से शुरू होकर अंत तक जाने वाली एक सीधी अंडरलाइन है, जो कार्यों को ठोस आधार (पृथ्वी तत्व) प्रदान करती है।",
+          endStroke: "अंतिम स्ट्रोक ऊपर-दाहिनी ओर मुड़ता है, जो कार्यों के सफल समापन और भविष्य के नए अवसरों का स्वागत करता है।",
+          dotPlacement: "कोई अनावश्यक रुकावट पैदा करने वाला बिंदु नहीं है, जिससे बातचीत और अवसरों का प्रवाह निर्बाध रहता है।",
+          letterLegibility: "अत्यधिक स्पष्ट और पठनीय अक्षर, जो पारदर्शी नीयत और सीधे संबंधों के महत्व को रेखांकित करते हैं।",
+          nameCompletion: "पहला नाम स्पष्ट रूप से लिखा गया है और उपनाम सुरुचिपूर्ण रूप से जोड़ा गया है, जो व्यक्तिगत और पारिवारिक संतुलन दर्शाता है।",
+          overallFlow: "अत्यंत प्रवाहमय और संतुलित लय, जो सकारात्मक जीवन ऊर्जा और उत्तम सहनशक्ति को दर्शाता है।"
         },
         scores: {
           careerScore: 92,
@@ -437,37 +439,37 @@ export default function PremiumConsultations() {
           overallSignatureScore: 91
         },
         assessment: {
-          currentSignatureAssessment: `Your current signature utilizes an upward ascending style with a solid underline foundation. In Handwriting Vastu, this style is known as the 'Vanguard' or 'Sovereign Path'. For someone with Driver #${driver} and Conductor #${conductor}, this progressive mindset aligns perfectly with your cosmic timeline. The planetary vibrations of the Sun and Jupiter are well-aligned here, creating strong leadership traits and natural executive abilities. The underline acts as a horizontal anchor, providing a steady support system for your career decisions and preventing sudden energy drops.`,
+          currentSignatureAssessment: `आपका वर्तमान हस्ताक्षर 15 डिग्री ऊपर उठती हुई शैली में है जिसके नीचे एक ठोस अंडरलाइन आधार है। हस्तलेखन वास्तु में इसे 'राजमार्ग (Sovereign Path)' या 'अग्रणी शैली' कहा जाता है। मूलांक ${driver} और भाग्यांक ${conductor} वाले व्यक्ति के लिए, यह प्रगतिशील दृष्टिकोण आपके लिए उत्तम है। सूर्य और गुरु की ग्रह ऊर्जाएं यहां पूरी तरह संतुलित हैं, जो नेतृत्व गुण और निर्णय लेने की क्षमता प्रदान करती हैं। नीचे की रेखा करियर के निर्णयों को स्थिरता देती है।`,
           strengths: [
-            "Excellent ascending confidence that drives persistent progress.",
-            "Underline acts as a firm Vastu foundation, securing long-term career stability.",
-            "Upward end stroke invites healthy recognition and lucrative opportunities."
+            "ऊपर उठता कोण जो निरंतर प्रगति और आत्मविश्वास को बढ़ाता है।",
+            "अंडरलाइन एक मजबूत वास्तु आधार का काम करती है जो करियर में स्थिरता देती है।",
+            "ऊपर मुड़ता अंतिम स्ट्रोक मान-सम्मान और लाभदायक अवसरों को आकर्षित करता है।"
           ],
           weaknesses: [
-            "Minor rush in ending letters can sometimes lead to impatience in closing deals.",
-            "The underline must be kept clean; any overlapping lower loop letters like g, j, p, y could create self-sabotaging traps."
+            "अंतिम अक्षरों में हल्की जल्दबाजी कभी-कभार बड़े सौदों को बंद करने में अधीरता ला सकती है।",
+            "अंडरलाइन बिल्कुल साफ होनी चाहिए; 'g, j, p, y' जैसे अक्षरों के निचले लूप को काटना नहीं चाहिए।"
           ],
           riskAreas: [
-            "Potential financial leakages if the underline crosses or cuts the baseline of any trailing letters.",
-            "Slight over-commitment of personal resources due to high ambition slope."
+            "यदि अंडरलाइन किसी अक्षर को काट दे तो वित्तीय रिसाव की संभावना बन सकती है।",
+            "उच्च महत्वाकांक्षा के कारण अपनी क्षमताओं से अधिक कार्यों की जिम्मेदारी लेना।"
           ],
           recommendedCorrections: [
-            "Ensure the underline begins after the first letter and never cuts any lower loops (g, j, p, y) of your name.",
-            "Enlarge the first letter slightly so it stands exactly 2.5 times higher than the succeeding lowercase letters.",
-            "Ensure the upward trailing stroke rises exactly at a 15 to 20 degree angle to keep Jupiter vibrations active.",
-            "Begin practicing this corrected script 11 times daily on unruled white paper with an indigo gel pen."
+            "सुनिश्चित करें कि अंडरलाइन पहले अक्षर के बाद से शुरू हो और कभी भी 'g, j, p, y' के लूप को न काटे।",
+            "पहले अक्षर को थोड़ा बड़ा रखें ताकि वह बाद के अक्षरों से 2.5 गुना बड़ा दिखे।",
+            "अंतिम स्ट्रोक 15 से 20 डिग्री के कोण पर ऊपर उठे ताकि गुरु ग्रह की सकारात्मक ऊर्जा सक्रिय रहे।",
+            "सादे सफेद कागज पर नीले या इंडिगो जेल पेन से प्रतिदिन 11 बार इस हस्ताक्षर का अभ्यास करें।"
           ],
-          idealSignatureStyle: "A 15-degree rising line with a single clean underline and a bold first letter, matching the 'Sovereign Path' archetype.",
-          personalizedSignatureBlueprint: "Use an indigo or deep blue ink pen. Write your first name clearly, sloping upwards at a 15-degree angle. Draw a single straight line underneath from the second letter to the end, ending with an upward flick at the top right. Leave a 1mm gap between letters."
+          idealSignatureStyle: "15 डिग्री ऊपर उठता हुआ हस्ताक्षर, स्पष्ट पहला अक्षर और नीचे एक साफ स्वतंत्र अंडरलाइन।",
+          personalizedSignatureBlueprint: "नीले या इंडिगो पेन का उपयोग करें। अपना पहला नाम साफ और 15 डिग्री ऊपर की ओर लिखें। दूसरे अक्षर से शुरू करके अंत तक एक सीधी रेखा खींचें जो अंत में ऊपर मुड़े।"
         },
         beforeAfter: {
           before: {
-            visualDescription: "Slightly congested letters with an underline that occasionally touches or cuts through the lower loops of your characters.",
-            impact: "Creates minor delays in project approvals and causes occasional unexpected expenditure or leakages of liquid cash."
+            visualDescription: "थोड़े सिकुड़े हुए अक्षर और एक ऐसी अंडरलाइन जो अक्षरों के निचले हिस्सों को छूती या काटती है।",
+            impact: "काम की मंजूरी में छोटी-मोटी देरी और कभी-कभार अप्रत्याशित खर्च या धन का रिसाव।"
           },
           after: {
-            visualDescription: "A pristine, spacious script ascending at 15 degrees, supported by a clean, independent horizontal foundation line and a larger initial letter.",
-            impact: "Unlocks supreme cash-flow stability, accelerates pending executive promotions, and commands high social respect."
+            visualDescription: "15 डिग्री पर ऊपर उठता हुआ खुला और सुंदर हस्ताक्षर, जिसके नीचे एक साफ स्वतंत्र आधार रेखा है।",
+            impact: "नियमित धन प्रवाह की स्थिरता, पदोन्नति में गति और समाज में उच्च मान-सम्मान।"
           }
         }
       };
@@ -715,6 +717,18 @@ export default function PremiumConsultations() {
       }
 
       setSigAuditResult(result);
+      try {
+        localStorage.setItem('leofamily_saved_signature_audit', JSON.stringify({
+          auditResult: result,
+          image: sigImage || null,
+          fileName: sigFileName || null,
+          name: sigName,
+          dob: sigDob,
+          timestamp: new Date().toISOString()
+        }));
+      } catch (saveErr) {
+        console.error("Failed to save signature audit to localStorage:", saveErr);
+      }
     } catch (err: any) {
       console.error("Signature Audit API Flow Error:", err);
       // Ensure we display the exact user-friendly message requested
@@ -724,6 +738,18 @@ export default function PremiumConsultations() {
       const fallbackResult = generateLocalFallbackSignatureAudit(signatureStyle || 'RISING_UNDERLINE', sigName, sigDob);
       setSigAuditResult(fallbackResult);
       handleSignatureTrigger(signatureStyle || 'RISING_UNDERLINE');
+      try {
+        localStorage.setItem('leofamily_saved_signature_audit', JSON.stringify({
+          auditResult: fallbackResult,
+          image: sigImage || null,
+          fileName: sigFileName || null,
+          name: sigName,
+          dob: sigDob,
+          timestamp: new Date().toISOString()
+        }));
+      } catch (saveErr) {
+        console.error("Failed to save fallback signature audit:", saveErr);
+      }
     } finally {
       setIsAnalyzingSig(false);
     }
@@ -789,149 +815,7 @@ export default function PremiumConsultations() {
         {/* VEHICLE MODULE */}
         {activeModule === 'VEHICLE' && (
           <motion.div variants={cardVariants} initial="hidden" animate="visible" className="space-y-6">
-            <div className="border-b border-[#F2E8DC] pb-4">
-              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">Pro Vehicle Numerology Analyzer</h3>
-              <p className="text-xs text-slate-500 font-sans">Calculate precise cumulative Chaldean vibrations, accident risks, and suitability ratings of your vehicle.</p>
-            </div>
-
-            <form onSubmit={handleVehicleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Vehicle Plate Number (eg. MH12AB1234)</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. MH12AB1234"
-                  value={vehiclePlate}
-                  onChange={(e) => setVehiclePlate(e.target.value)}
-                  className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Your Driver / Birth Root Number</label>
-                <select
-                  value={vehicleDriver}
-                  onChange={(e) => setVehicleDriver(parseInt(e.target.value, 10))}
-                  className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>Driver {n}</option>)}
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="col-span-1 sm:col-span-2 w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white py-3.5 rounded-xl font-mono text-xs uppercase tracking-widest font-bold cursor-pointer transition-all"
-              >
-                Scan Plate Compatibility (500+ Words)
-              </button>
-            </form>
-
-            {vehicleResult && (
-              <div className="p-6 md:p-8 bg-white border rounded-3xl space-y-6 animate-in fade-in duration-500 leading-relaxed font-sans">
-                
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
-                  <div>
-                    <span className="text-[9px] font-mono bg-indigo-50 text-[#1E3A8A] font-extrabold px-3 py-1 rounded-full uppercase">Chaldean Sum: {vehicleResult.totalSum}</span>
-                    <h4 className="font-playfair text-lg font-bold text-slate-800 mt-2">Vehicle Root Index: {vehicleResult.reducedTotal}</h4>
-                    <p className="text-xs text-amber-600 font-mono mt-1">Ruler Planet: {vehicleResult.rulerPlanet}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`px-4 py-1.5 rounded-full text-xs font-bold font-mono tracking-wider ${
-                      vehicleResult.suitability === 'EXCELLENT' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
-                      vehicleResult.suitability === 'AVOID' ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-slate-50 text-slate-600'
-                    }`}>{vehicleResult.suitability} SUITABILITY</span>
-                  </div>
-                </div>
-
-                {/* Score meters */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-3.5 bg-slate-50 rounded-2xl text-center border">
-                    <p className="text-[10px] font-mono text-slate-450 uppercase font-bold">Business Suitability</p>
-                    <p className="text-xl font-bold font-mono text-[#1E3A8A] mt-1">{vehicleResult.businessUsageScore}/100</p>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 rounded-2xl text-center border">
-                    <p className="text-[10px] font-mono text-slate-450 uppercase font-bold">Travel Luck Rating</p>
-                    <p className="text-xl font-bold font-mono text-emerald-600 mt-1">{vehicleResult.travelLuckScore}/100</p>
-                  </div>
-                  <div className="p-3.5 bg-slate-50 rounded-2xl text-center border">
-                    <p className="text-[10px] font-mono text-slate-450 uppercase font-bold font-bold">Protection Level</p>
-                    <p className="text-xl font-bold font-mono text-indigo-600 mt-1">{vehicleResult.protectionEnergyScore}/100</p>
-                  </div>
-                </div>
-
-                {/* Core meanings & predictions */}
-                <div className="space-y-3">
-                  <h5 className="font-playfair text-sm font-bold text-[#1E3A8A] flex items-center gap-1"><Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" /> Complete Astral Meaning</h5>
-                  <p className="text-xs text-slate-600 font-sans leading-relaxed">{vehicleResult.meaning}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <h5 className="font-playfair text-sm font-bold text-slate-800">Detailed Vehicle Prediction</h5>
-                  <p className="text-xs text-slate-500 mt-1">{vehicleResult.prediction}</p>
-                  <p className="text-xs text-slate-500 mt-1">{vehicleResult.ownershipAnalysis}</p>
-                </div>
-
-                {/* Risk and safety block */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-slate-500">Accident Risk</span>
-                    <p className={`text-xs font-bold mt-0.5 ${vehicleResult.accidentRisk === 'HIGH' ? 'text-rose-600' : 'text-emerald-600'}`}>{vehicleResult.accidentRisk}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-slate-500">Theft Vulnerability</span>
-                    <p className="text-xs font-bold text-slate-700 mt-0.5">{vehicleResult.theftRisk}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-slate-500">Breakdown Probability</span>
-                    <p className="text-xs font-bold text-slate-700 mt-0.5">{vehicleResult.mechanicalBreakdownRisk}</p>
-                  </div>
-                </div>
-
-                {/* Remedies & Elements Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-100">
-                    <strong className="text-rose-800 text-xs flex items-center gap-1"><ShieldAlert className="w-4 h-4" /> Vibration Flaws:</strong>
-                    <p className="text-xs text-slate-600 mt-1">{vehicleResult.vulnerability}</p>
-                  </div>
-                  <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
-                    <strong className="text-emerald-800 text-xs flex items-center gap-1"><CheckCircle className="w-4 h-4" /> Vastu & Puja Remedies:</strong>
-                    <p className="text-xs text-slate-600 mt-1">{vehicleResult.remedy}</p>
-                  </div>
-                </div>
-
-                {/* Lucky details */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-amber-50/30 rounded-2xl p-4 border border-amber-500/10 text-xs">
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-[#D97706] font-bold">Auspicious Colors</span>
-                    <p className="font-bold text-slate-700 mt-0.5">{vehicleResult.luckyColors.join(', ')}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-[#D97706] font-bold font-bold">Best Service Days</span>
-                    <p className="font-bold text-slate-700 mt-0.5">{vehicleResult.luckyServiceDays.join(', ')}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-mono text-[#D97706] font-bold font-bold">First Travel Days</span>
-                    <p className="font-bold text-slate-700 mt-0.5">{vehicleResult.luckyTravelDays.join(', ')}</p>
-                  </div>
-                </div>
-
-                {/* Expandable Why section */}
-                <div className="border-t pt-4">
-                  <button
-                    onClick={() => setShowVehicleWhy(!showVehicleWhy)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-[#1E3A8A] hover:underline cursor-pointer"
-                  >
-                    <Info className="w-4 h-4" /> {showVehicleWhy ? 'Hide' : 'Show'} "Why This Result?" Detailed Logic Breakdown
-                  </button>
-                  {showVehicleWhy && (
-                    <div className="mt-3 p-4 bg-slate-50 rounded-2xl border text-xs text-slate-600 space-y-2">
-                      <p><strong>Calculations Matrix:</strong> The system sums the alphabetical values of your vehicle plate under classical Chaldean rules (A=1, B=2, R=2 etc.) and adds the numeric sequence to obtain Compound total {vehicleResult.totalSum}. This reduces to Root {vehicleResult.reducedTotal}.</p>
-                      <p><strong>Driver Alignment:</strong> Your Driver Number is {vehicleDriver} (governed by traditional rules). Based on the ancient planetary relationships chart, the value {vehicleResult.reducedTotal} is {vehicleResult.suitability === 'EXCELLENT' ? 'ultra-friendly' : vehicleResult.suitability === 'AVOID' ? 'inimical / hostile' : 'neutral'} to your lifestyle energy coordinates.</p>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            )}
+            <VehicleNumerologyDashboard />
           </motion.div>
         )}
 
@@ -1050,127 +934,7 @@ export default function PremiumConsultations() {
         {/* BUSINESS MODULE */}
         {activeModule === 'BUSINESS' && (
           <motion.div variants={cardVariants} initial="hidden" animate="visible" className="space-y-6">
-            <div className="border-b border-[#F2E8DC] pb-4">
-              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">Pro Business Firm Name Suite</h3>
-              <p className="text-xs text-slate-500 font-sans">Evaluate if your corporate brand name, customer attraction scores, and growth potentials align beautifully with your path.</p>
-            </div>
-
-            <form onSubmit={handleBusinessSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Business Firm Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Leo Occult Enterprises"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Primary Owner's Driver Number</label>
-                <select
-                  value={businessDriver}
-                  onChange={(e) => setBusinessDriver(parseInt(e.target.value, 10))}
-                  className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>Driver {n}</option>)}
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="col-span-1 sm:col-span-2 w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white py-3.5 rounded-xl font-mono text-xs uppercase tracking-widest font-bold cursor-pointer transition-all"
-              >
-                Scan Corporate Vibration
-              </button>
-            </form>
-
-            {businessResult && (
-              <div className="p-6 md:p-8 bg-white border rounded-3xl space-y-6 animate-in fade-in duration-500 leading-relaxed font-sans">
-                
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
-                  <div>
-                    <span className="text-[9px] font-mono bg-indigo-50 text-[#1E3A8A] font-extrabold px-3 py-1 rounded-full uppercase">Chaldean Name Value: {businessResult.chaldeanTotal}</span>
-                    <h4 className="font-playfair text-lg font-bold text-slate-800 mt-2">Business Expression root: {businessResult.reducedTotal}</h4>
-                    <p className="text-xs text-slate-500 mt-1 font-mono">Marketing Energy Level: {businessResult.marketingEnergy}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`px-4 py-1.5 rounded-full text-xs font-bold font-mono tracking-wider ${
-                      businessResult.suitability === 'OUTSTANDING' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
-                      businessResult.suitability === 'POOR' ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-slate-50 text-slate-600'
-                    }`}>{businessResult.suitability} SUITABILITY</span>
-                  </div>
-                </div>
-
-                {/* Score meters */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-3 bg-slate-50 rounded-2xl text-center border">
-                    <p className="text-[10px] font-mono text-slate-450 uppercase font-bold">Brand Strength</p>
-                    <p className="text-lg font-bold font-mono text-[#1E3A8A] mt-1">{businessResult.brandStrengthScore}/100</p>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-2xl text-center border">
-                    <p className="text-[10px] font-mono text-slate-450 uppercase font-bold font-bold">Customer Loyalty</p>
-                    <p className="text-lg font-bold font-mono text-emerald-600 mt-1">{businessResult.customerAttractionScore}/100</p>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-2xl text-center border">
-                    <p className="text-[10px] font-mono text-slate-450 uppercase font-bold font-bold">Financial health</p>
-                    <p className="text-lg font-bold font-mono text-indigo-600 mt-1">{businessResult.financialStrength}/100</p>
-                  </div>
-                  <div className="p-3 bg-slate-50 rounded-2xl text-center border">
-                    <p className="text-[10px] font-mono text-slate-450 uppercase font-bold font-bold">Growth Potential</p>
-                    <p className="text-lg font-bold font-mono text-amber-600 mt-1">{businessResult.growthPotential}/100</p>
-                  </div>
-                </div>
-
-                {/* Core meanings */}
-                <div className="space-y-3">
-                  <h5 className="font-playfair text-sm font-bold text-[#1E3A8A] flex items-center gap-1"><Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" /> Planetary Brand Meaning</h5>
-                  <p className="text-xs text-slate-600 leading-relaxed font-sans">{businessResult.meaning}</p>
-                </div>
-
-                <div className="p-4 bg-slate-50 border rounded-2xl text-xs space-y-2">
-                  <p><strong>Auspicious Industries:</strong> {businessResult.industrySuitability}</p>
-                  <p className="text-[#D97706]"><strong>Corporate expansion tip:</strong> {businessResult.expansionTip}</p>
-                </div>
-
-                <div className="space-y-2">
-                  <h5 className="font-playfair text-sm font-bold text-slate-800">Remedial Corrections</h5>
-                  <p className="text-xs text-slate-650 leading-relaxed">{businessResult.suggestedCorrections}</p>
-                  <p className="text-xs text-slate-505 leading-relaxed italic">{businessResult.longTermForecast}</p>
-                </div>
-
-                {/* Business Remedies */}
-                <div className="bg-amber-50/10 p-5 rounded-2xl border border-amber-500/10 text-xs">
-                  <h6 className="font-bold text-[#D97706] mb-2 font-mono uppercase">Grandmaster Business Remedies list</h6>
-                  <ul className="space-y-2 text-slate-600">
-                    {businessResult.businessRemedies.map((r, idx) => (
-                      <li key={idx} className="flex gap-2 items-start">
-                        <CheckCircle className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
-                        <span>{r}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Expandable Why */}
-                <div className="border-t pt-4">
-                  <button
-                    onClick={() => setShowBusinessWhy(!showBusinessWhy)}
-                    className="flex items-center gap-1.5 text-xs font-bold text-[#1E3A8A] hover:underline cursor-pointer"
-                  >
-                    <Info className="w-4 h-4" /> {showBusinessWhy ? 'Hide' : 'Show'} "Why This Result?" Detailed Logic Breakdown
-                  </button>
-                  {showBusinessWhy && (
-                    <div className="mt-3 p-4 bg-slate-50 rounded-2xl border text-xs text-slate-600 space-y-2">
-                      <p><strong>Calculations Matrix:</strong> The system sums your business name letter values under Chaldean rules, resolving to initial sum {businessResult.chaldeanTotal}, reducing to Root {businessResult.reducedTotal}.</p>
-                      <p><strong>Owner Synastry:</strong> Your Driver Number is {businessDriver}. In the Indian system, business totals like 5 (Merchant Mercury) or 6 (Venus) are friendly with almost all driver matrices except for Saturn delays under specific sectors.</p>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            )}
+            <BusinessNumerologyDashboard />
           </motion.div>
         )}
 
@@ -1447,7 +1211,7 @@ export default function PremiumConsultations() {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 text-amber-300" /> Start AI Signature Audit Pro
+                    <Sparkles className="w-4 h-4 text-amber-300" /> Start LeoFamily Signature Audit Pro
                   </>
                 )}
               </button>
@@ -1458,10 +1222,10 @@ export default function PremiumConsultations() {
               <div className="bg-white border rounded-3xl p-6 space-y-8 animate-in fade-in duration-500 mt-6" id="signature-dossier-report">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-4">
                   <div>
-                    <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">
-                      AI Handwriting Vastu Completed
+                    <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 font-extrabold px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1.5 w-fit">
+                      <CheckCircle className="w-3 h-3" /> LeoFamily Signature Audit Pro Completed & Synced to Master Report
                     </span>
-                    <h3 className="font-playfair text-xl font-bold text-[#1E3A8A] mt-2">Personalized Signature Vastu Dossier</h3>
+                    <h3 className="font-playfair text-xl font-bold text-[#1E3A8A] mt-2">LeoFamily Signature Audit Pro Dossier</h3>
                     <p className="text-xs text-slate-500">Tailored to Driver {getDriverNumber(sigDob)} & Conductor {getConductorNumber(sigDob)} cosmic coordinates.</p>
                   </div>
                   <div className="flex gap-2">
@@ -1471,7 +1235,7 @@ export default function PremiumConsultations() {
                       }}
                       className="py-1.5 px-4 rounded-xl text-xs font-bold border hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 transition-all cursor-pointer"
                     >
-                      <FileText className="w-3.5 h-3.5" /> Print Report
+                      <FileText className="w-3.5 h-3.5" /> Print Dossier
                     </button>
                     <button
                       onClick={() => {

@@ -145,15 +145,15 @@ export function analyzeVehicleNumerology(plateStr: string, driver: number): Vehi
 
   // Ruler Planets
   const planetNames: Record<number, string> = {
-    1: 'Sun (सूर्य) - Sovereign gold speed',
-    2: 'Moon (चंद्र) - Emotional white water',
-    3: 'Jupiter (गुरु) - Scholar yellow wisdom',
-    4: 'Rahu (राहु) - Unorthodox shadow wind',
-    5: 'Mercury (बुध) - High agile communication',
-    6: 'Venus (शुक्र) - Luxury, silver comfort',
-    7: 'Ketu (केतु) - Silent research charcoal',
-    8: 'Saturn (शनि) - Systematic iron structure',
-    9: 'Mars (मंगल) - Fire red torques'
+    1: 'Sun (सूर्य) - राजसी प्रतिष्ठा व गति',
+    2: 'Moon (चंद्र) - शांति व भावनात्मक गतिशीलता',
+    3: 'Jupiter (गुरु) - ज्ञान, सुरक्षा व समृद्धि',
+    4: 'Rahu (राहु) - अप्रत्याशित व तकनीकी ऊर्जा',
+    5: 'Mercury (बुध) - तीव्र गति व व्यापारिक संचार',
+    6: 'Venus (शुक्र) - विलासिता, ऐश्वर्य व आराम',
+    7: 'Ketu (केतु) - एकांत, शोध व शांत यात्रा',
+    8: 'Saturn (शनि) - ठोस, मजबूत व अनुशासित निर्माण',
+    9: 'Mars (मंगल) - तेज गति, साहस व ऊर्जा'
   };
 
   // Scores based on planet rules
@@ -166,27 +166,27 @@ export function analyzeVehicleNumerology(plateStr: string, driver: number): Vehi
   const mechanicalBreakdownRisk = reducedTotal === 4 ? 'HIGH' : reducedTotal === 8 ? 'MEDIUM' : 'LOW';
 
   const meaningsMap: Record<number, string> = {
-    1: 'Sun ruled total. Prompts great royalty, administrative prestige, high visual attention, outstanding engine performance, and supreme safety indicators on highways.',
-    2: 'Moon ruled total. Very comfortable and creative but prone to fuel line fluctuations and mood-dependent travel velocities.',
-    3: 'Jupiter ruled total. A highly safe, scholarly number. Extremely reliable for long devotional or educational journeys, bringing blessings and wealth.',
-    4: 'Rahu ruled. Brings sudden unexpected optical sensor or electrical wire failures. Highly unorthodox stream; requires consistent oil level audits.',
-    5: 'Mercury ruled. Highly agile, fast-paced commercial trading vehicle. Perfect for sales managers and global digital operators.',
-    6: 'Venus ruled. Enriched with maximum luxury, high suspension comforts, majestic speaker sound systems, and exquisite cosmetic details.',
-    7: 'Ketu ruled. Safe, spiritual but isolated. Perfect for quiet nocturnal travelers and independent researchers.',
-    8: 'Saturn ruled. Heavy duty, metal solid, robust construction. Slowly crawls through early years but establishes supreme mechanical durability.',
-    9: 'Mars ruled. Brave, high torque, extremely courageous but warns of sudden aggressive acceleration impulses. Wear helmet strictly.'
+    1: 'Sun का प्रभाव। यह नंबर वाहन को राजसी पहचान, प्रशासनिक प्रतिष्ठा, आकर्षण और लंबी यात्राओं में उत्कृष्ट सुरक्षा ऊर्जा प्रदान करता है।',
+    2: 'Moon का प्रभाव। यात्रा में आरामदायक और शांत अनुभव देता है, पर ईंधन खपत में उतार-चढ़ाव और मूड के अनुसार यात्रा गति का योग बनता है।',
+    3: 'Jupiter का प्रभाव। अत्यंत सुरक्षित, ज्ञानवर्धक व शुभ नंबर। पारिवारिक, शैक्षणिक व धार्मिक यात्राओं के लिए बेहद भरोसेमंद और मंगलकारी।',
+    4: 'Rahu का प्रभाव। अचानक इलेक्ट्रॉनिक सेंसर, वायरिंग या अप्रत्याशित रुकावटों का जोखिम रह सकता है; नियमित सर्विसिंग और देखभाल आवश्यक है।',
+    5: 'Mercury का प्रभाव। अत्यंत फुर्तीला, व्यापारिक यात्राओं, सेल्स व मार्केटिंग कार्यों के लिए सर्वोत्तम वाहन नंबर।',
+    6: 'Venus का प्रभाव। विलासिता, उत्तम सस्पेंशन, बेहतरीन म्यूजिक सिस्टम और शानदार कॉस्मेटिक फिनिश का सुखद अनुभव।',
+    7: 'Ketu का प्रभाव। शांत, सुरक्षित और स्वतंत्र यात्राओं के लिए उत्तम; एकांत प्रिय शोधकर्ताओं और लंबी शांत यात्राओं हेतु अनुकूल।',
+    8: 'Saturn का प्रभाव। भारी, मजबूत और टिकाऊ बॉडी। शुरुआत में गति धीमी लग सकती है परंतु लंबे समय में यह बेहद विश्वसनीय रहता है।',
+    9: 'Mars का प्रभाव। साहसी, उच्च पिकअप और दमदार इंजन; तेज गति में सावधानी रखें और सुरक्षा नियमों का कड़ाई से पालन करें।'
   };
 
   const vulnerabilityMap: Record<number, string> = {
-    4: 'Sensor and headlamp failures. Sudden electric spark hazards.',
-    8: 'Tyre punctures, slow gear transmission lag, or mud accumulation.',
-    9: 'Bumper scratches or thermal radiation issues from excessive speeding.'
+    4: 'सेंसर व हेडलाइट की खराबी; अचानक इलेक्ट्रिक स्पार्क या वायरिंग की समस्या।',
+    8: 'टायर पंचर, गियर ट्रांसमिशन में रुकावट या अधिक गंदगी/कीचड़ जमा होना।',
+    9: 'बंपर पर खरोंच या तेज गति के कारण हीटिंग की समस्या।'
   };
 
   const remedyMap: Record<number, string> = {
-    4: 'Place a small copper pyramid or a solid wooden sphere inside the dashboard glove tray.',
-    8: 'Keep a clean iron coin wrapped in black silk under the driver’s floor mat, and donate mustard seeds.',
-    9: 'Hang a natural copper thread or a saffron Lord Hanuman pendant near the rear-view mirror view.'
+    4: 'डैशबोर्ड या ग्लव बॉक्स में छोटा तांबे का पिरामिड या लकड़ी का टुकड़ा रखें।',
+    8: 'ड्राइवर मैट के नीचे काले कपड़े में लोहे का सिक्का रखें और शनिवार को सरसों के तेल का दान करें।',
+    9: 'रियर-व्यू मिरर के पास तांबे का धागा या भगवान हनुमान जी का चित्र/पेंडेंट लगाएं।'
   };
 
   const luckyColorsMap: Record<number, string[]> = {
@@ -225,14 +225,14 @@ export function analyzeVehicleNumerology(plateStr: string, driver: number): Vehi
     accidentRisk,
     theftRisk,
     mechanicalBreakdownRisk,
-    meaning: meaningsMap[reducedTotal] || 'Generates progressive, supportive vibrations for active commuting.',
-    vulnerability: vulnerabilityMap[reducedTotal] || 'No critical structural vulnerability flagged under driver chart.',
-    remedy: remedyMap[reducedTotal] || 'Keep the windshield completely pristine and spray lemon oil monthly.',
+    meaning: meaningsMap[reducedTotal] || 'दैनिक आवागमन के लिए सकारात्मक और सहयोगी ऊर्जा उत्पन्न करता है।',
+    vulnerability: vulnerabilityMap[reducedTotal] || 'ड्राइवर चार्ट के अनुसार कोई गंभीर संरचनात्मक दोष नहीं पाया गया।',
+    remedy: remedyMap[reducedTotal] || 'वाहन की विंडशील्ड को हमेशा साफ रखें और माह में एक बार नींबू के रस से सफाई करें।',
     luckyColors: luckyColorsMap[reducedTotal] || ['White', 'Silver'],
     luckyServiceDays: daysMap[reducedTotal] || ['Wednesday'],
     luckyTravelDays: daysMap[reducedTotal] || ['Monday'],
-    prediction: `This vehicle plate ${plateStr} holds the secret key to your travel growth. Under the rule of root ${reducedTotal}, it is predicted to open major career pipelines, particularly when commuting towards North-East directions. If suitability is AVOID, perform remedies to shield your travels.`,
-    ownershipAnalysis: `Long term analysis suggests this car/bike will remain in your service with excellent resale equity. It brings highly stable family weekend laughter and locks in your physical safety under major stellar planetary transitions.`
+    prediction: `वाहन नंबर ${plateStr} आपके यात्रा भाग्य को दिशा देता है। मूलांक ${reducedTotal} के प्रभाव से यह विशेष रूप से उत्तर-पूर्व दिशा की यात्राओं में करियर लाभ के नए रास्ते खोलता है। यदि अनुकूलता कमजोर हो तो सुरक्षा हेतु बताए गए उपाय करें।`,
+    ownershipAnalysis: `दीर्घकालिक विश्लेषण के अनुसार यह वाहन आपको लंबे समय तक उत्तम सेवा और अच्छी रीसेल वैल्यू देगा। यह पारिवारिक यात्राओं में सुखद यादें और सुरक्षा प्रदान करता है।`
   };
 }
 
@@ -281,15 +281,15 @@ export function analyzeHouseNumerology(houseStr: string): HouseReport {
   };
 
   const energyVibs: Record<number, string> = {
-    1: 'Solar Authority Force. Perfect for dynamic display of personal accolades, boosting self-reliance, and driving executive speed.',
-    2: 'Lunar Cozy Harmony. Focuses on peaceful soft lighting, decorative art frames, and family dining tables, creating absolute mutual empathy.',
-    3: 'Scholarly Guru Sanctum. Best suited for study altars, massive book reading chambers, and spiritual chanting, spreading peaceful protective aura.',
-    4: 'Structured Rahu Fort. High systematic physical discipline, customized technical workspaces, and extreme security alarms protection.',
-    5: 'Agile Mercury Lounge. Multi-communal space, highly active high-speed mobile routers, constant guests visits, and bright smart decorations.',
-    6: 'Venus Luxury Temple. Outstanding brand layout, high leather cushion details, aromatic candles, and premium clothing collections storage.',
-    7: 'Quiet Ketu Ashram. Deep tranquil silence, minimal electronic noise, massive yoga cushions, and excellent metaphysical books catalog.',
-    8: 'Saturn Iron Fortress. Heavy robust brickwork, dark stable wood structures, solid family legacy building, and powerful slow achievements.',
-    9: 'Martial Mars Arena. Highly active, containing fitness gyms, sports gear, bright natural lights, and fearless administrative ambitions.'
+    1: 'Sun ऊर्जा केंद्र। नेतृत्व क्षमता, आत्म-विश्वास, प्रशासनिक उपलब्धियों और मान-सम्मान के विकास के लिए उत्तम।',
+    2: 'Moon सौहार्द केंद्र। शांतिपूर्ण प्रकाश, कलात्मक साज-सज्जा और पारिवारिक भोजन कक्ष में आपसी प्रेम व तालमेल का वास।',
+    3: 'Guru ज्ञान धाम। अध्ययन कक्ष, विस्तृत पुस्तकालय और आध्यात्मिक साधना के लिए श्रेष्ठ; घर में सुरक्षात्मक आभा फैलाता है।',
+    4: 'Rahu व्यवस्था केंद्र। तकनीकी कार्यक्षेत्र, सख्त अनुशासन और आधुनिक सुरक्षा उपकरणों से युक्त स्थान।',
+    5: 'Mercury संचार केंद्र। जीवंत सामाजिक माहौल, तेज इंटरनेट, मेहमानों का आना-जाना और त्वरित व्यावसायिक विचार।',
+    6: 'Venus समृद्धि मंदिर। सुरुचिपूर्ण इंटीरियर, आरामदायक बैठक, सुगंधित वातावरण और सुख-सुविधाओं की प्रचुरता।',
+    7: 'Ketu शांत आश्रम। गहन शांति, कम शोरगुल, योग-ध्यान कक्ष और आध्यात्मिक स्वाध्याय के लिए आदर्श वातावरण।',
+    8: 'Saturn ठोस दुर्ग। मजबूत निर्माण, स्थायी लकड़ी का फर्नीचर, पारिवारिक विरासत और निरंतर स्थिर प्रगति।',
+    9: 'Mars पराक्रम स्थल। ऊर्जावान माहौल, फिटनेस उपकरण, भरपूर प्राकृतिक रोशनी और साहसिक लक्ष्यों की प्राप्ति।'
   };
 
   vibe = vibeMap[reducedTotal];
@@ -300,50 +300,50 @@ export function analyzeHouseNumerology(houseStr: string): HouseReport {
   const spiritualEnergy = [3, 7].includes(reducedTotal) ? 96 : reducedTotal === 2 ? 88 : 60;
 
   if ([1, 5, 6].includes(reducedTotal)) {
-    businessSuitability = 'Highly Recommended. Perfect for global trading consultancies, design showrooms, or public relations coaching.';
+    businessSuitability = 'अत्यंत अनुशंसित। वैश्विक व्यापार, डिजाइन शोरूम, कॉर्पोरेट कोचिंग व वित्तीय परामर्श के लिए सर्वोत्तम।';
   } else if ([3, 7].includes(reducedTotal)) {
-    businessSuitability = 'Excellent for independent research work, software programming, healing, or remote education development.';
+    businessSuitability = 'शोध कार्य, सॉफ्टवेयर कोडिंग, हीलिंग और दूरस्थ शिक्षा (Education) के लिए अत्यंत श्रेष्ठ।';
   } else {
-    businessSuitability = 'Suited for administrative system logs, logistical planning, heavy inventory audits, and local operations.';
+    businessSuitability = 'प्रशासनिक रिकॉर्ड्स, लॉजिस्टिक्स योजना, इन्वेंट्री प्रबंधन और स्थानीय संचालन के लिए उपयुक्त।';
   }
 
   const meaningsMap: Record<number, string> = {
-    1: 'Fosters extreme leadership development. Highly recommended for corporate bosses, politicians, and master brand promoters.',
-    2: 'Nurtures deep relationships, marital fidelity, creative songwriting, and emotional healing.',
-    3: 'Highly protective scholarly environment. Guards against sudden legal errors and invites divine ancestral guidance.',
-    4: 'Forces systematic lifestyle and software development. Prone to sudden electronic circuit trips; requires perfect Vastu wiring.',
-    5: 'Active commercial hub. Rapid change cycles, constant travel suitcase packings, and swift monetary turnover patterns.',
-    6: 'Brings immense financial prosperity, luxury vehicle upgrades, artistic masteries, and joyful celebration events.',
-    7: 'Increases introverted analytical focus. Excellent for software debugging, publishing books, and mystical healing.',
-    8: 'Constructs massive permanent physical assets. Promotes persistent hard work, stable slow growth, and outstanding long-term security.',
-    9: 'Inspires deep athletic stamina, physical defense command, and extreme willpower to complete major targets ahead of schedule.'
+    1: 'नेतृत्व और आत्मनिर्भरता को बढ़ावा देता है। कॉर्पोरेट अधिकारियों, स्वतंत्र उद्यमियों और राजनेताओं के लिए अनुकूल।',
+    2: 'गहरे पारिवारिक रिश्ते, वैवाहिक सौहार्द, रचनात्मक सोच और भावनात्मक शांति प्रदान करता है।',
+    3: 'सुरक्षात्मक और ज्ञानवर्धक माहौल। कानूनी विवादों से रक्षा करता है और ईश्वरीय आशीर्वाद आकर्षित करता है।',
+    4: 'अनुशासित जीवनशैली और तकनीकी विकास को प्रेरित करता है; बिजली की वायरिंग और Vastu संतुलन का ध्यान रखें।',
+    5: 'सक्रिय व्यापारिक केंद्र। त्वरित वित्तीय लेनदेन, लगातार यात्राएं और व्यावसायिक अवसरों का निरंतर प्रवाह।',
+    6: 'अपार धन-समृद्धि, वाहन सुख, कलात्मक सफलता और पारिवारिक मांगलिक उत्सवों का केंद्र।',
+    7: 'गहन एकाग्रता और विश्लेषणात्मक क्षमता बढ़ाता है। सॉफ्टवेयर विकास, पुस्तक लेखन व गूढ़ विधाओं हेतु श्रेष्ठ।',
+    8: 'दीर्घकालिक स्थायी संपत्ति का निर्माण करता है। निरंतर मेहनत और मजबूत वित्तीय सुरक्षा प्रदान करता है।',
+    9: 'शारीरिक स्फूर्ति, दृढ़ संकल्प और बड़े लक्ष्यों को समय से पूर्व पूरा करने का साहस देता है।'
   };
 
   const adviceMap: Record<number, string> = {
-    1: 'Install bright brass warm lights in the front entry and keep clutter out of the eastern hallways.',
-    2: 'Keep a clean silver bowl with freshwater and white jasmines in the North sector.',
-    3: 'Maintain a yellow mustard tilak bottle in your study desk and read philosophic files facing East.',
-    4: 'Place a small copper pyramid block near the core electric distribution box of the house.',
-    5: 'Keep fresh mint leaf pots or bright money plants in the North corner to speed up income.',
-    6: 'Spray high-taste rose sandalwood mists around your entry foyers at sunsets daily.',
-    7: 'Introduce an amethyst crystal cluster near your study laptop and minimize violent media noise.',
-    8: 'Light a traditional mustard oil brass lamp on Saturday sunsets in the West patio.',
-    9: 'Store kitchen equipment clean and dry daily, and decorative and functional sports gear nicely.'
+    1: 'मुख्य प्रवेश द्वार पर पीतल की हल्की रोशनी लगाएं और पूर्व दिशा के गलियारों को साफ व खुला रखें।',
+    2: 'उत्तर दिशा में चांदी के बर्तन में स्वच्छ जल और सफेद ताजे फूल रखें।',
+    3: 'अध्ययन कक्ष में केसरिया/पीला तिलक रखें और पूर्व की ओर मुख करके महत्वपूर्ण कार्य करें।',
+    4: 'घर के मुख्य बिजली वितरण बॉक्स के पास तांबे का छोटा पिरामिड स्थापित करें।',
+    5: 'आय बढ़ाने के लिए उत्तर दिशा में ताजा मनी प्लांट या हरे पौधे लगाएं।',
+    6: 'शाम के समय मुख्य प्रवेश द्वार पर गुलाब या चंदन की सुगंधित अगरबत्ती/धूप लगाएं।',
+    7: 'अध्ययन कक्ष में एमेथिस्ट (Amethyst) क्रिस्टल रखें और घर में अनावश्यक शोरगुल से बचें।',
+    8: 'शनिवार की शाम पश्चिम दिशा में सरसों के तेल का पीतल का दीपक जलाएं।',
+    9: 'रसोई घर को हमेशा साफ और सूखा रखें और दक्षिण दिशा में व्यवस्था सुदृढ़ रखें।'
   };
 
   const remedyMap: Record<number, string> = {
-    1: 'Pray daily facing Sunrise, and keep a clean copper plate on the master workspace table.',
-    2: 'Respect maternal elders, and make sure no water fittings drip continuously in the kitchen.',
-    3: 'Gift yellow sweets to local scholars, and keep a wooden OM symbol on the entry door.',
-    4: 'Hang a brass bell at the main entry point to dissolve sudden stagnant Rahu sound vibrations.',
-    5: 'Feed fresh green vegetables to street cows on Wednesday mornings.',
-    6: 'Adorn your entry space with fresh white lilies or rose quartz crystals.',
-    7: 'Place a small clean water fountain in the North-East zone of the balcony.',
-    8: 'Light a sesame oil lamp near a Peepal tree and avoid hoarding scrap iron on the balcony.',
-    9: 'Keep fresh copper items on your desk, and chant Hanuman Chalisa once at dusk.'
+    1: 'प्रतिदिन सूर्योदय के समय सूर्य देव को जल अर्पित करें और कार्य मेज पर तांबे का पात्र रखें।',
+    2: 'घर के बुजुर्गों और माता का सम्मान करें; सुनिश्चित करें कि रसोई में कोई नल टपकता न हो।',
+    3: 'गुरुवार को पीले फल/मिठाई का दान करें और मुख्य द्वार पर लकड़ी का ॐ प्रतीक लगाएं।',
+    4: 'मुख्य द्वार पर पीतल की घंटी लगाएं जिससे नकारात्मक ऊर्जा दूर हो।',
+    5: 'बुधवार की सुबह गाय को हरा चारा या हरी सब्जियां खिलाएं।',
+    6: 'प्रवेश द्वार को ताजे सफेद फूलों या रोज क्वार्ट्ज क्रिस्टल से सजाएं।',
+    7: 'बालकनी या उत्तर-पूर्व क्षेत्र में छोटा जल फव्वारा स्थापित करें।',
+    8: 'पीपल के वृक्ष के पास तिल के तेल का दीपक जलाएं और बालकनी में कबाड़ लोहा न रखें।',
+    9: 'कार्य मेज पर तांबे का सामान रखें और संध्या समय हनुमान चालीसा का पाठ करें।'
   };
 
-  const predictions = `Under the rule of Root number ${reducedTotal}, this house has a destined forecast of highly steady progression. It is predicted that the primary occupant will receive major corporate elevations within months of moving in, provided Vastu coordinates are followed. If reduced total is 4 or 8, perform standard entry bells remedy to bypass local delays.`;
+  const predictions = `मूलांक ${reducedTotal} के प्रभाव से यह घर निरंतर स्थिर प्रगति का संकेत देता है। वास्तु नियमों के पालन के साथ इस घर में रहने वाले परिवार को करियर व आर्थिक क्षेत्र में महत्वपूर्ण तरक्की प्राप्त होगी। यदि मूलांक 4 या 8 हो तो प्रवेश द्वार पर बताए गए उपाय अवश्य करें।`;
 
   return {
     houseNumber: houseStr,
@@ -355,9 +355,9 @@ export function analyzeHouseNumerology(houseStr: string): HouseReport {
     familyHarmony,
     spiritualEnergy,
     businessSuitability,
-    meaning: meaningsMap[reducedTotal] || 'Establishes a highly protective, balanced energetic dome.',
-    advice: adviceMap[reducedTotal] || 'Maintain clean ventilation pathways.',
-    remedy: remedyMap[reducedTotal] || 'Chant positive mantras daily.',
+    meaning: meaningsMap[reducedTotal] || 'संतुलित व सुरक्षात्मक ऊर्जा क्षेत्र स्थापित करता है।',
+    advice: adviceMap[reducedTotal] || 'घर में स्वच्छ हवा और प्रकाश का प्रवाह बनाए रखें।',
+    remedy: remedyMap[reducedTotal] || 'नियमित रूप से सकारात्मक मंत्रों का उच्चारण करें।',
     predictions,
     luckyDirections: directionsMap[reducedTotal] || ['East'],
     luckyColors: colorsMap[reducedTotal] || ['Cream', 'Soft Yellow']
@@ -388,25 +388,25 @@ export function analyzeBusinessNumerology(nameStr: string, driver: number): Busi
   if (friendly) suitability = 'OUTSTANDING';
   else if (poor) suitability = 'POOR';
 
-  let industrySuitability = 'General consulting, dynamic services, and administrative logistics.';
+  let industrySuitability = 'सामान्य कंसल्टिंग, गतिशील सेवाएं और प्रशासनिक लॉजिस्टिक्स।';
   if (cSum === 5 || cSum === 6) {
-    industrySuitability = 'Highly recommended for premium fashion retail, cosmetic branding, digital media portals, global import trading, and high-frequency hospitality networks.';
+    industrySuitability = 'प्रीमियम फैशन रिटेल, कॉस्मेटिक ब्रांडिंग, डिजिटल मीडिया पोर्टल, ग्लोबल इम्पोर्ट-एक्सपोर्ट और हॉस्पिटैलिटी नेटवर्क्स के लिए अत्यंत अनुशंसित।';
   } else if (cSum === 1 || cSum === 3) {
-    industrySuitability = 'Outstanding for administrative corporate advisory, state contracts, legal court arbitrations, higher academic colleges, and medical surgery logistics.';
+    industrySuitability = 'कॉर्पोरेट प्रशासनिक सलाहकार, सरकारी कॉन्ट्रैक्ट्स, कानूनी मध्यस्थता, उच्च शिक्षण संस्थान और चिकित्सा उपकरण आपूर्ति के लिए श्रेष्ठ।';
   } else if (cSum === 8 || cSum === 4) {
-    industrySuitability = 'Perfect for heavy industrial machinery fabrication, metallurgy, coal mining sites, and specialized digital encryption code design services.';
+    industrySuitability = 'भारी औद्योगिक मशीनरी निर्माण, धातु विज्ञान (Metallurgy), खनन और विशेष तकनीकी व सॉफ्टवेयर एन्क्रिप्शन सेवाओं के लिए उपयुक्त।';
   }
 
   const meaningMap: Record<number, string> = {
-    1: 'The Solar Command (1): Promotes high brand authority, majestic corporate confidence, and unmatched customer trust recall on public boards.',
-    2: 'The Lunar Grace (2): Empathy-driven, highly suited for design aesthetics, psychological councils, maternal goods imports, and wellness.',
-    3: 'The Chancellor Citadel (3): Multiplies client trust, high compliance rating, perfect for finance advisors, legal cells, and publishing houses.',
-    4: 'The Unorthodox Disruptor (4): Tech software developer suitability, dynamic crypto coding, sudden market sweeps capability.',
-    5: 'The Merchant Sovereign (5): The ultimate commercial total. Speeds up retail inventory turnover, opens fluid money gates, and ensures active public communication.',
-    6: 'The Luxury Palace (6): Aesthetic refinement, beautiful premium box mockups, highly magnetic attraction to elite, high-paying corporate partners.',
-    7: 'The Deep Hermitage (7): Research diagnostics labs, custom herbal formulations, occult science platforms, and niche database consultancies.',
-    8: 'The Steel Monument (8): Demands intense mechanical labor and absolute corporate compliance. Slow in early stages but secures infinite asset legacy.',
-    9: 'The Strategic Shield (9): Direct mechanical construction command, real estate works, security grids, and brave physical training institutions.'
+    1: 'The Solar Command (1): मजबूत ब्रांड प्रतिष्ठा, उत्कृष्ट कॉर्पोरेट विश्वसनीयता और बाजार में अग्रणी स्थान दिलाता है।',
+    2: 'The Lunar Grace (2): आत्मीय व भावनात्मक जुड़ाव; डिजाइन, काउंसलिंग, मातृत्व/शिशु उत्पाद और वेलनेस के लिए उत्तम।',
+    3: 'The Chancellor Citadel (3): ग्राहकों का उच्च विश्वास, कानूनी अनुपालन और वित्तीय सलाहकारों व पब्लिकेशन हाउसेस हेतु श्रेष्ठ।',
+    4: 'The Unorthodox Disruptor (4): तकनीकी सॉफ्टवेयर विकास, आधुनिक डिजिटल प्रोडक्ट्स और बाजार में तेजी से नया ट्रेंड स्थापित करने की क्षमता।',
+    5: 'The Merchant Sovereign (5): सर्वोच्च व्यापारिक कुल योग। इन्वेंट्री का त्वरित रोटेशन, निर्बाध धन प्रवाह और निरंतर सक्रिय संवाद।',
+    6: 'The Luxury Palace (6): सौंदर्यपरक परिष्कार, प्रीमियम पैकेजिंग और समृद्ध, उच्च-भुगतान वाले ग्राहकों को आकर्षित करने की अद्भुत शक्ति।',
+    7: 'The Deep Hermitage (7): रिसर्च एवं डायग्नोस्टिक्स लैब, आयुर्वेदिक व हर्बल उत्पाद, ज्योतिष/गूढ़ विज्ञान और विशेष डेटा कंसल्टेंसी।',
+    8: 'The Steel Monument (8): कड़ी मेहनत और पूर्ण कानूनी अनुपालन की मांग करता है। शुरुआत में धीमा पर दीर्घकालिक विशाल साम्राज्य स्थापित करता है।',
+    9: 'The Strategic Shield (9): कंस्ट्रक्शन, रियल एस्टेट, सुरक्षा तंत्र और साहसिक खेल या शारीरिक प्रशिक्षण संस्थानों के लिए उपयुक्त।'
   };
 
   // Generate pro metrics
@@ -418,16 +418,16 @@ export function analyzeBusinessNumerology(nameStr: string, driver: number): Busi
   const leadershipStrength = cSum === 1 || cSum === 9 ? 96 : 74;
 
   const businessRemedies = [
-    `Spelling tuning: Modify corporate letters to resolve strictly to Chaldean Sum ${cSum === 8 ? 5 : cSum === 4 ? 6 : cSum}.`,
-    `Branding design: Use deep green colors for Mercury 5 total, or champagne silver for Venus 6 total.`,
-    `Main Entry: Do not place a large garbage container directly adjacent to the commercial gate.`
+    `नाम वर्तनी सुधार: कंपनी के नाम की स्पेलिंग को समायोजित करके Chaldean कुल योग ${cSum === 8 ? 5 : cSum === 4 ? 6 : cSum} पर लाएं।`,
+    `ब्रांडिंग रंग: Mercury 5 कुल योग हेतु गहरे हरे रंग, या Venus 6 कुल योग हेतु शैम्पेन सिल्वर/क्रीम रंगों का प्रयोग करें।`,
+    `मुख्य प्रवेश: व्यावसायिक परिसर के मुख्य द्वार के ठीक सामने कचरा या कबाड़ न रखें।`
   ];
 
   const suggestedCorrections = cSum === 8 
-    ? 'Highly suggested to add a letter (e.g. duplicating a vowel) to shift the Chaldean name total to 5 or 6, which completely removes Saturn delays.' 
-    : 'No severe spelling modifications required. Your current Chaldean total aligns cleanly with positive planetary aspects.';
+    ? 'शनि जनित देरी को दूर करने के लिए नाम में एक अतिरिक्त अक्षर (जैसे वोवेल) जोड़कर Chaldean योग को 5 या 6 पर लाने की अत्यधिक सलाह दी जाती है।' 
+    : 'किसी बड़े स्पेलिंग संशोधन की आवश्यकता नहीं है। आपका वर्तमान Chaldean कुल योग सकारात्मक ग्रहों के साथ सुसंगत है।';
 
-  const longTermForecast = `For the next decade, under current Chaldean total ${cSum}, this brand is forecasted to capture massive local market respect. If total is friendly, expect easy expansion into international export lines. If total is poor, maintain clean corporate record filing to prevent legal penalties during Saturn transits.`;
+  const longTermForecast = `आगामी दशक में, वर्तमान Chaldean कुल ${cSum} के तहत यह ब्रांड मजबूत स्थानीय बाजार प्रतिष्ठा हासिल करेगा। यदि कुल योग मित्रवत है, तो निर्यात और व्यापार विस्तार में सुगमता रहेगी। यदि कुल योग कमजोर है, तो वित्तीय रिकॉर्ड्स में पूर्ण पारदर्शिता रखें।`;
 
   return {
     businessName: nameStr,
@@ -441,8 +441,8 @@ export function analyzeBusinessNumerology(nameStr: string, driver: number): Busi
     leadershipStrength,
     suitability,
     industrySuitability,
-    meaning: meaningMap[nameAna.expressionNumber] || 'Standard commercial portal aligned with Chaldean properties.',
-    expansionTip: `Adopt premium green cards design (Mercury) if total is 5 or warm golden lights (Sun) if total is 1, targeting elite global clients.`,
+    meaning: meaningMap[nameAna.expressionNumber] || 'Chaldean गुणों के साथ संरेखित मानक व्यावसायिक ऊर्जा।',
+    expansionTip: `वैश्विक ग्राहकों को आकर्षित करने के लिए ${cSum === 5 ? 'प्रीमियम ग्रीन कार्ड्स डिजाइन (Mercury)' : 'वॉर्म गोल्डन लाइट्स (Sun)'} अपनाएं।`,
     businessRemedies,
     suggestedCorrections,
     longTermForecast
@@ -454,66 +454,66 @@ export function analyzeSignatureStyle(styleId: string): SignatureReport {
   let directionStyle = 'Neutral';
   let endingStroke = 'Stable';
   let nameFlow = 'Balanced';
-  let planetaryEnergy = 'Mercury (Agile)';
-  let careerImpact = 'Maintains standard growth.';
-  let financialImpact = 'Fluid but standard.';
+  let planetaryEnergy = 'Mercury (फुर्तीला व संतुलित)';
+  let careerImpact = 'सामान्य वृद्धि बनाए रखता है।';
+  let financialImpact = 'स्थिर और सामान्य वित्तीय प्रवाह।';
   let publicRecognitionScore = 70;
   let corrections: string[] = [];
   let recommendations = '';
 
   if (styleId === 'RISING_UNDERLINE') {
-    directionStyle = '15-Degree Eastward Ascent';
-    endingStroke = 'Strong, clean forward stroke';
-    nameFlow = 'Continuous, connected lettering';
-    planetaryEnergy = 'Sun & Jupiter - Infinite ambition alignment';
-    careerImpact = 'Accelerates executive corporate promotions, commands public respect, and brings fast independent brand ownership.';
-    financialImpact = 'Provides high asset shield, preventing leakage of funds under negative planetary transits.';
+    directionStyle = '15-डिग्री ऊपर की ओर झुकाव (Ascending)';
+    endingStroke = 'मजबूत, स्पष्ट आगे बढ़ता हुआ स्ट्रोक';
+    nameFlow = 'निरंतर, आपस में जुड़े हुए सुंदर अक्षर';
+    planetaryEnergy = 'Sun और Jupiter - असीम महत्वाकांक्षा व प्रगति';
+    careerImpact = 'कॉर्पोरेट पदोन्नति में तेजी लाता है, सामाजिक मान-सम्मान बढ़ाता है और स्वतंत्र नेतृत्व शक्ति प्रदान करता है।';
+    financialImpact = 'धन सुरक्षा कवच प्रदान करता है, प्रतिकूल समय में भी वित्तीय लीकेज को रोकता है।';
     publicRecognitionScore = 96;
     corrections = [
-      'Ensure the underline does not cut any lower loop letters like g, j, p, y.',
-      'Begin the first letter of your name significantly larger than the rest.'
+      'सुनिश्चित करें कि नीचे की रेखा g, j, p, y जैसे लूप वाले अक्षरों को न काटे।',
+      'हस्ताक्षर का पहला अक्षर बाकी अक्षरों की तुलना में स्पष्ट रूप से बड़ा रखें।'
     ];
-    recommendations = 'This is the signature style of Grandmasters! Highly helpful for entrepreneurs, lawyers, and administrative leaders. Maintain this ascending structure always.';
+    recommendations = 'यह सफल दिग्गजों की हस्ताक्षर शैली है! उद्यमियों, वकीलों और प्रशासनिक लीडर्स के लिए अत्यंत लाभकारी। इस ऊपर उठती संरचना को हमेशा बनाए रखें।';
   } else if (styleId === 'TRAILING_DOT_BELOW') {
-    directionStyle = 'Flat Horizon';
-    endingStroke = 'Heavy terminal dot';
-    nameFlow = 'First letter large, rest highly cluttered';
-    planetaryEnergy = 'Rahu & Saturn - Disruption loop';
-    careerImpact = 'Brings persistent unexplainable corporate project halts and constant peer politics hurdles.';
-    financialImpact = 'Unexpected expenditure bursts. Money enters nicely but leaks through unexpected medical or vehicle repairs.';
+    directionStyle = 'समतल क्षैतिज (Flat Horizon)';
+    endingStroke = 'अंत में भारी पूर्णविराम (Dot)';
+    nameFlow = 'पहला अक्षर बड़ा, बाकी अक्षर दबे हुए';
+    planetaryEnergy = 'Rahu और Saturn - रुकावट चक्र';
+    careerImpact = 'प्रोजेक्ट्स में अप्रत्याशित ठहराव, सहकर्मियों से राजनीति और अकारण देरी लाता है।';
+    financialImpact = 'अचानक अनचाहे खर्चों का योग। धन आता अच्छा है पर अप्रत्याशित रिपेयर या स्वास्थ्य में निकल जाता है।';
     publicRecognitionScore = 48;
     corrections = [
-      'IMMEDIATELY remove the terminal full-stop dot from the bottom of your name.',
-      'Shift the signature angle from flat to 15 degrees rising upward.'
+      'नाम के अंत से तुरंत पूर्णविराम (Dot) को हटा दें।',
+      'हस्ताक्षर के कोण को समतल से बदलकर 15 डिग्री ऊपर की ओर उठाएं।'
     ];
-    recommendations = 'A terminal dot serves as a cosmic barrier, stopping the flow of commercial ideas. Erase the dot today and replace with a clean single solid underline.';
+    recommendations = 'हस्ताक्षर के नीचे या अंत में डॉट ऊर्जा प्रवाह को रोक देता है। आज ही डॉट हटाएं और नीचे एक सीधी सुंदर अंडरलाइन लगाएं।';
   } else if (styleId === 'FALLING_LINE') {
-    directionStyle = 'Downward Sloping Westward';
-    endingStroke = 'Faded lower stroke';
-    nameFlow = 'Inwardly curled letters';
-    planetaryEnergy = 'Ketu - Deep skepticism and isolation';
-    careerImpact = 'Triggers severe trust deficits with authorities, falling executive confidence levels, and workspace depression cycles.';
-    financialImpact = 'Losses in stock speculation networks. S&P or index holdings underperform.';
+    directionStyle = 'नीचे की ओर ढलान वाला (Downward Sloping)';
+    endingStroke = 'धुंधला गिरता हुआ स्ट्रोक';
+    nameFlow = 'अंदर की ओर मुड़े हुए अक्षर';
+    planetaryEnergy = 'Ketu - संशय और एकाकीपन';
+    careerImpact = 'उच्चाधिकारियों के साथ विश्वास में कमी, घटता आत्मविश्वास और कार्यस्थल पर निराशा की स्थिति।';
+    financialImpact = 'सट्टा या जोखिम भरे निवेशों में नुकसान का जोखिम; रिटर्न अपेक्षा से कम रहना।';
     publicRecognitionScore = 32;
     corrections = [
-      'Force your handwriting to climb upwards like an ascending staircase.',
-      'Ensure the last letter of the signature is higher than the first letter.'
+      'हस्ताक्षर को सीढ़ियों की तरह ऊपर की ओर चढ़ने का अभ्यास करें।',
+      'सुनिश्चित करें कि हस्ताक्षर का अंतिम अक्षर पहले अक्षर से ऊंचाई पर समाप्त हो।'
     ];
-    recommendations = 'Downward signatures indicate falling cellular energies. Correct this script today to reclaim active control over your career outcomes.';
+    recommendations = 'नीचे झुकता हस्ताक्षर घटती ऊर्जा का प्रतीक है। अपने करियर पर पूर्ण नियंत्रण पाने के लिए आज ही इसे ऊपर की ओर उठाएं।';
   } else {
     // DOUBLE_UNDERLINE or default
-    directionStyle = 'Perfect Horizontal Line';
-    endingStroke = 'Double bold lines below';
-    nameFlow = 'Evenly spaced, clean font script';
-    planetaryEnergy = 'Saturn & Venus - Support structures';
-    careerImpact = 'Highly stable. Superb for administrative clerks, legal attorneys, banking consultants, and government staff.';
-    financialImpact = 'Continuous caging of money assets. The double line serves as a structural cushion protecting generational holdings.';
+    directionStyle = 'सटीक क्षैतिज रेखा (Horizontal Line)';
+    endingStroke = 'नीचे दो समानांतर मजबूत रेखाएं';
+    nameFlow = 'समान दूरी पर लिखे गए स्पष्ट अक्षर';
+    planetaryEnergy = 'Saturn और Venus - मजबूत आधार व स्थिरता';
+    careerImpact = 'अत्यंत स्थिर। प्रशासनिक अधिकारियों, अधिवक्ताओं, बैंकिंग सलाहकारों व सरकारी कर्मियों के लिए श्रेष्ठ।';
+    financialImpact = 'संपत्ति और बचत को सुरक्षित रखता है। दोहरी रेखा पैतृक व संचित संपत्ति को स्थिरता देती है।';
     publicRecognitionScore = 86;
     corrections = [
-      'Keep the underline lines exactly parallel and neat.',
-      'Do not let the lines intersect the name letters at any point.'
+      'दोनों अंडरलाइन रेखाओं को बिल्कुल समानांतर और साफ रखें।',
+      'रेखाएं किसी भी अक्षर को काटनी नहीं चाहिए।'
     ];
-    recommendations = 'Superb for high financial stability and family harmony. Provides a steady, safe, non-volatile career path.';
+    recommendations = 'वित्तीय स्थिरता और पारिवारिक संतुलन के लिए अत्यंत उत्तम। सुरक्षित और गैर-जोखिम भरा करियर मार्ग प्रदान करता है।';
   }
 
   return {
@@ -555,51 +555,51 @@ export function generateChildNumerology(dobStr: string): ChildReport {
     startingAlphabets = ['A', 'I', 'Y', 'J', 'Q', 'E', 'H', 'N'];
     suggestedPlanets = ['Sun (1)', 'Mercury (5)', 'Jupiter (3)'];
     cautionaryAlphabets = ['B', 'K', 'R', 'F', 'P'];
-    careerPrecedence = 'Sovereign leadership, solar executive command, medical science research, independent brand startups, or elite civil operations.';
-    learningStyle = 'Visual and highly independent. Prefers self-paced books and projects rather than micro-managed schedules.';
-    educationStrength = 'Excellent logical reasoning, natural class mentor capabilities, and strong math concentration.';
-    creativity = 'Pioneering structural graphic concepts, digital gaming setups, and leadership scriptwriting talent.';
-    communication = 'Loud, highly confident, direct, and authoritative speech delivery.';
-    parentingGuidance = 'Encourage independent thought but teach mutual cooperative tolerance with peers. Avoid harsh public rebukes; instead, use calm logic.';
-    remedies = ['Offer clean copper vessel water to birds on Sunday mornings.', 'Keep white light shades in the child\'s study foyer.'];
-    luckyActivities = ['Corporate chess clubs', 'Public debate speaking', 'Dynamic track athletics'];
+    careerPrecedence = 'स्वतंत्र नेतृत्व, प्रशासनिक अधिकारी, चिकित्सा विज्ञान शोध, स्वतंत्र ब्रांड फाउंडर या उच्च सिविल सेवाएं।';
+    learningStyle = 'दृश्य (Visual) और अत्यधिक स्वतंत्र शिक्षार्थी। दूसरों के अत्यधिक नियंत्रण की बजाय अपनी गति से सीखना पसंद करते हैं।';
+    educationStrength = 'उत्कृष्ट तार्किक क्षमता, स्वाभाविक क्लास लीडरशिप और गणित में तीव्र एकाग्रता।';
+    creativity = 'नवाचारी ग्राफिक विचार, डिजिटल गेमिंग संरचना और नेतृत्वकारी पटकथा लेखन।';
+    communication = 'स्पष्ट, आत्मविश्वासी, सीधा और प्रभावशाली संवाद कौशल।';
+    parentingGuidance = 'स्वतंत्र सोच को बढ़ावा दें पर साथियों के साथ सहयोग भी सिखाएं। सार्वजनिक डांट से बचें, शांत तर्क से समझाएं।';
+    remedies = ['रविवार की सुबह पक्षियों को तांबे के पात्र से स्वच्छ जल दें।', 'बच्चे के अध्ययन कक्ष में सफेद/हल्की रोशनी रखें।'];
+    luckyActivities = ['शतरंज (Chess)', 'वाद-विवाद प्रतियोगिता (Debate)', 'एथलेटिक्स व ट्रैक स्पोर्ट्स'];
   } else if (dayReduced === 2) {
     startingAlphabets = ['C', 'G', 'L', 'S', 'F', 'P'];
     suggestedPlanets = ['Moon (2)', 'Jupiter (3)', 'Venus (6)'];
     cautionaryAlphabets = ['M', 'T', 'D'];
-    careerPrecedence = 'Splendid artistic design, children literature creation, counseling psychology, and global diplomatic peace missions.';
-    learningStyle = 'Aura-sensitive and highly emotional learner. Excels under gentle, highly encouraging teachers with positive music patterns.';
-    educationStrength = 'Creative poetry writing, botanical studies, language sciences, and child psychology.';
-    creativity = 'Exquisite canvas drawing watercolor talents, instrumental play, and soft interior decorations design.';
-    communication = 'Soft, highly empathetic, conversational, and highly comforting tone.';
-    parentingGuidance = 'Support their sensitive nervous heart from violent media structures. Build stable physical courage through regular family water swimming sessions.';
-    remedies = ['Keep a round silver bar wrapped in cream silk near their study drawer.', 'Offer sweet white rice pudding to birds on Mondays.'];
-    luckyActivities = ['Classical music keyboard play', 'Creative water swimming', 'Clay molding arts'];
+    careerPrecedence = 'कलात्मक डिजाइन, बाल साहित्य लेखन, परामर्श मनोविज्ञान (Counseling) और राजनयिक शांति मिशन।';
+    learningStyle = 'भावनात्मक और संवेदनशील शिक्षार्थी। सौम्य, सकारात्मक और संगीत से भरे वातावरण में सबसे अच्छा सीखते हैं।';
+    educationStrength = 'रचनात्मक कविता लेखन, वनस्पति विज्ञान, भाषा विज्ञान और बाल मनोविज्ञान।';
+    creativity = 'जल-रंग (Water Color) पेंटिंग, वाद्य यंत्र वादन और कलात्मक साज-सज्जा।';
+    communication = 'मधुर, सहानुभूतिपूर्ण, आत्मीय और दूसरों को संबल देने वाली संवाद शैली।';
+    parentingGuidance = 'अत्यधिक हिंसक दृश्यों से इनके संवेदनशील मन को बचाएं। तैराकी या पारिवारिक खेलों से आत्मविश्वास बढ़ाएं।';
+    remedies = ['अध्ययन की दराज में क्रीम सिल्क में चांदी का चौकोर/गोल टुकड़ा रखें।', 'सोमवार को पक्षियों को मीठे चावल की खीर दें।'];
+    luckyActivities = ['शास्त्रीय संगीत व कीबोर्ड', 'तैराकी (Swimming)', 'मिट्टी की कलाकृतियां (Clay Modeling)'];
   } else if (dayReduced === 3) {
     startingAlphabets = ['A', 'I', 'Y', 'U', 'V', 'W'];
     suggestedPlanets = ['Jupiter (3)', 'Sun (1)', 'Venus (6)'];
     cautionaryAlphabets = ['E', 'H', 'N'];
-    careerPrecedence = 'Higher academic chancellorships, legal supreme judges, state finance advising, and traditional spiritual mentors.';
-    learningStyle = 'Highly scholarly. Enjoys deep research library environments, encyclopedia directories, and wisdom files.';
-    educationStrength = 'Ancient history, jurisprudence, complex auditing, and philosophical world translations.';
-    creativity = 'Oratorical master speeches, sacred geometric sand play, and administrative club coordination.';
-    communication = 'Extremely clear, wise, containing rich vocabulary, excellent advisory capability.';
-    parentingGuidance = 'Nurture their active intellectual hunger with rich science and philosophical papers. Respect their mature outlook from an early age.';
-    remedies = ['Plant a clean tulsi herb on a yellow Thursday morning.', 'Add a tiny pinch of saffron in water baths on Thursdays.'];
-    luckyActivities = ['Scholarly reading tournaments', 'Creative science camps', 'Social charity clubs'];
+    careerPrecedence = 'उच्च शैक्षणिक संस्थान प्रमुख, न्यायाधीश, वित्तीय सलाहकार और आध्यात्मिक मार्गदर्शक।';
+    learningStyle = 'गहन अध्ययनशील। पुस्तकालय, विश्वकोश और ज्ञानवर्धक ग्रंथों में विशेष रुचि।';
+    educationStrength = 'इतिहास, न्यायशास्त्र (Law), जटिल ऑडिटिंग और दार्शनिक अध्ययन।';
+    creativity = 'प्रभावशाली वक्तव्य कला (Oratory), पवित्र ज्यामितीय कला और संस्थागत समन्वय।';
+    communication = 'अत्यंत स्पष्ट, ज्ञानपूर्ण, समृद्ध शब्दावली और सटीक परामर्श क्षमता।';
+    parentingGuidance = 'इनकी बौद्धिक जिज्ञासा को विज्ञान और दर्शन की अच्छी किताबों से संतुष्ट करें। इनके परिपक्व विचारों का सम्मान करें।';
+    remedies = ['गुरुवार को तुलसी के पौधे की सेवा करें।', 'गुरुवार को स्नान के जल में चुटकी भर हल्दी मिलाएं।'];
+    luckyActivities = ['पुस्तक पठन प्रतियोगिताएं', 'विज्ञान मॉडल निर्माण', 'सामाजिक सेवा क्लब'];
   } else {
     // Falls to Mercury / Venus agile defaults for 4, 5, 6, 7, 8, 9
     startingAlphabets = ['A', 'I', 'E', 'H', 'N', 'X', 'U', 'V', 'W'];
     suggestedPlanets = ['Mercury (5)', 'Venus (6)', 'Jupiter (3)'];
     cautionaryAlphabets = ['F', 'P', 'R'];
-    careerPrecedence = 'Agile business consulting, telecom trading, premium visual brand architectures, and logistical operations planning.';
-    learningStyle = 'Highly experimental, hands-on, leveraging coding software applications and dynamic screen presentations.';
-    educationStrength = 'Digital computer sciences, foreign language arts, global geography trade tracks.';
-    creativity = 'Brilliant graphic animations, dynamic Lego architecture building, and digital music mixing.';
-    communication = 'Extremely prompt, multitasking conversation speeds, multilingual dexterity.';
-    parentingGuidance = 'Channels their immense mental speeds into daily physical gymnastics or yoga to prevent midnight restless sleep patterns.';
-    remedies = ['Keep green plants on their study desks.', 'Chant Gayatri Mantra once together before sunset.'];
-    luckyActivities = ['Coding computer program camps', 'Sovereign design workshops', 'Agility football sports'];
+    careerPrecedence = 'सक्रिय बिजनेस कंसल्टिंग, टेलीकॉम ट्रेडिंग, विजुअल ब्रांडिंग और लॉजिस्टिक्स ऑपरेशंस।';
+    learningStyle = 'प्रायोगिक और व्यावहारिक (Hands-on)। सॉफ्टवेयर कोडिंग, डिजिटल ऐप्स और इंटरैक्टिव स्क्रीन के माध्यम से तेजी से सीखते हैं।';
+    educationStrength = 'कंप्यूटर साइंस, विदेशी भाषाएं और वैश्विक व्यापार भूगोल।';
+    creativity = 'ग्राफिक एनिमेशन, लेगो आर्किटेक्चर और डिजिटल म्यूजिक मिक्सिंग।';
+    communication = 'अत्यंत त्वरित, बहु-आयामी (Multitasking) बातचीत की गति और बहुभाषी दक्षता।';
+    parentingGuidance = 'इनकी तीव्र मानसिक ऊर्जा को दैनिक खेलकूद, जिम्नास्टिक या योग में लगाएं जिससे रात में अच्छी नींद आए।';
+    remedies = ['अध्ययन की मेज पर हरे-भरे पौधे रखें।', 'संध्या समय एक बार गायत्री मंत्र का साथ में जाप करें।'];
+    luckyActivities = ['कंप्यूटर कोडिंग कैंप्स', 'डिजाइन वर्कशॉप्स', 'फुटबॉल व चपलता वाले खेल'];
   }
 
   return {

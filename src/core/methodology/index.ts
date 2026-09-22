@@ -10,3 +10,4 @@ export * from './mobileDefinitions';
 export * from './vastuDefinitions';
 export * from './dashaDefinitions';
 export * from './wellnessDefinitions';
+export * from './medicalDefinitions';

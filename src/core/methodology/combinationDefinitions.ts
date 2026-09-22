@@ -46,13 +46,13 @@ export function getCombination81(mulank: number, bhagyank: number): Combination8
       planetaryAssociation: `${p1} - ${p2}`,
       title: base.title,
       positiveMeaning: base.positiveMeaning,
-      negativeMeaning: base.negativeMeaning || 'Vulnerability to planetary excess or friction under stress.',
-      challengeMeaning: base.negativeMeaning || 'Vulnerability to planetary excess or friction under stress.',
-      careerMeaning: base.careerMeaning || 'Excels in roles aligning with the dual planetary resonance.',
-      wealthMeaning: base.wealthMeaning || 'Wealth compounds when disciplined strategy meets natural talent.',
-      relationshipMeaning: base.relationshipMeaning || 'Thrives in mutually respectful, supportive partnerships.',
-      spiritualMeaning: base.spiritualMeaning || 'Soul evolution through harmonizing dual cosmic vibrations.',
-      remedy: base.remedy || 'Maintain daily grounding, meditation, and respectful ethical conduct.',
+      negativeMeaning: base.negativeMeaning || 'तनाव या दबाव में ग्रहों के असंतुलन या आपसी टकराव की संभावना।',
+      challengeMeaning: base.negativeMeaning || 'तनाव या दबाव में ग्रहों के असंतुलन या आपसी टकराव की संभावना।',
+      careerMeaning: base.careerMeaning || 'दोनों ग्रहों की अनुकूल ऊर्जा वाले क्षेत्रों में उत्कृष्ट सफलता।',
+      wealthMeaning: base.wealthMeaning || 'अनुशासित रणनीति और प्राकृतिक प्रतिभा के मेल से निरंतर धन वृद्धि।',
+      relationshipMeaning: base.relationshipMeaning || 'पारस्परिक सम्मान और समझ पर आधारित प्रेम व पारिवारिक संबंध।',
+      spiritualMeaning: base.spiritualMeaning || 'दोनों ग्रहों की ऊर्जा को संतुलित कर आत्मिक शांति व उन्नति प्राप्त करना।',
+      remedy: base.remedy || 'दैनिक ध्यान, गुरुजनों का आदर और सदाचार का पालन करें।',
       source: base.source || 'LeoFamily 81 Combinations Master Matrix / Raajeev Singh Chauhann Course'
     };
   }
@@ -63,14 +63,14 @@ export function getCombination81(mulank: number, bhagyank: number): Combination8
     mulank,
     bhagyank,
     planetaryPair: `${p1} - ${p2}`,
-    title: `LeoFamily ${p1}-${p2} Archetypal Synthesis (${code})`,
-    positiveMeaning: `Harmonious interplay of ${p1} core driver and ${p2} life destiny. Endows strong purposeful momentum and distinct professional aptitude.`,
-    negativeMeaning: `Friction may arise if the spontaneous instincts of ${p1} conflict with the karmic obligations of ${p2}.`,
-    careerMeaning: `Thrives in multidisciplinary environments bridging ${p1} leadership and ${p2} analytical or creative execution.`,
-    wealthMeaning: `Steady wealth creation through systematic application of innate talents and ethical business conduct.`,
-    relationshipMeaning: `Values authenticity, mutual growth, and shared life purpose in relationships.`,
-    spiritualMeaning: `Balancing individual willpower with collective destiny to fulfill soul dharma.`,
-    remedy: `Perform daily morning reflection, respect elders, and maintain clean energetic boundaries.`,
+    title: `मूलांक ${mulank} एवं भाग्यांक ${bhagyank} (${p1}-${p2}) समन्वय योग`,
+    positiveMeaning: `मूलांक #${mulank} (${p1}) और भाग्यांक #${bhagyank} (${p2}) का सुंदर संगम। यह योग दृढ़ इच्छाशक्ति, उद्देश्यपूर्ण जीवन और करियर में विशिष्ट पहचान दिलाता है।`,
+    negativeMeaning: `यदि मूलांक की स्वाभाविक सोच और भाग्यांक की कर्म-दिशा में तालमेल न हो, तो कभी-कभी मन में असमंजस या तनाव आ सकता है।`,
+    careerMeaning: `${p1} की ऊर्जा और ${p2} की कार्यकुशलता के मेल से प्रबंधन, व्यापार या स्वतंत्र कार्यक्षेत्र में उन्नति।`,
+    wealthMeaning: `योजनाबद्ध बचत और सही दिशा में प्रयासों से निरंतर व स्थिर धन लाभ।`,
+    relationshipMeaning: `संबंधों में सत्यनिष्ठा, पारस्परिक विश्वास और एक-दूसरे के विकास में सहयोग को महत्व देते हैं।`,
+    spiritualMeaning: `व्यक्तिगत संकल्प को अपने कर्म के साथ जोड़कर आत्मिक उन्नति की प्राप्ति।`,
+    remedy: `प्रातःकाल शांत चित्त से ध्यान करें, बड़ों का सम्मान करें और अपने आराध्य का स्मरण करें।`,
     source: 'LeoFamily 81 Combinations Master Matrix'
   };
 }

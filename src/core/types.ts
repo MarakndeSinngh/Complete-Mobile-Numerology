@@ -3,8 +3,12 @@ import { RepetitionAnalysisResult, MissingNumberAnalysisResult } from './numberM
 import { MulankBhagyankSynthesis } from './bhagyankEngine';
 import { UnifiedVastuAnalysis } from './vastuEngine';
 import { MedicalNumerologyAnalysis } from './medicalNumerologyEngine';
+import { CompleteVedicDashaAndMedicalAnalysis } from './vedicDashaEngine';
 import { UnifiedMobileAnalysis } from './mobileNumerologyEngine';
 import { ComprehensiveInterpretationReport } from './interpretationEngine';
+import { ComprehensiveNameAnalysis } from './nameNumerologyEngine';
+import { VehicleNumerologyReport } from './vehicleEngine';
+import { BusinessNumerologyReport } from './businessEngine';
 
 export interface LoshuGridDigit {
   count: number;
@@ -176,7 +180,12 @@ export interface CompleteNumerologyProfile {
   };
   vastu: UnifiedVastuAnalysis;
   medical: MedicalNumerologyAnalysis;
+  nameNumerology?: ComprehensiveNameAnalysis;
+  nameAnalysis?: ComprehensiveNameAnalysis;
+  vedicDasha?: CompleteVedicDashaAndMedicalAnalysis;
   mobileAnalysis?: UnifiedMobileAnalysis;
+  vehicleAnalysis?: VehicleNumerologyReport;
+  businessAnalysis?: BusinessNumerologyReport;
   interpretations: ComprehensiveInterpretationReport;
   remedies: RemedyDetails;
   consultation: any;

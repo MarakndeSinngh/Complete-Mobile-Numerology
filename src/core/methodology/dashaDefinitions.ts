@@ -28,93 +28,93 @@ export interface PersonalYearProfile {
 export const PERSONAL_YEAR_DEFINITIONS: Record<number, PersonalYearProfile> = {
   1: {
     personalYear: 1,
-    title: 'Year of New Beginnings & Pioneering Ventures (Sun Year)',
-    theme: 'Planting seeds, embarking on fresh career trajectories, asserting independence, and personal rebranding.',
-    career: 'Start new businesses, launch independent ventures, seek leadership roles, and take bold initiatives.',
-    finance: 'Invest in foundational assets and skills; early outlays bring compounded long-term returns.',
-    relationship: 'Focus on personal autonomy; establish healthy self-respect and boundaries in romance.',
-    learning: 'Learn leadership, public speaking, and executive decision-making.',
-    remedy: 'Offer morning water to the Sun; wear gold or ruby red accents on Sundays.'
+    title: 'नई शुरुआत और पहल का वर्ष (Sun Year - Personal Year 1)',
+    theme: 'नए बीज बोने, करियर में नई दिशा तय करने, स्वतंत्रता और आत्मविश्वास के साथ नई योजनाएं शुरू करने का वर्ष।',
+    career: 'नया व्यापार शुरू करने, स्वतंत्र प्रोजेक्ट्स हाथ में लेने, लीडरशिप पद हासिल करने और साहसिक पहल करने के लिए उत्तम समय।',
+    finance: 'दीर्घकालिक संपत्तियों और नए कौशल सीखने में निवेश करें; इस साल की गई मेहनत आगे चलकर बड़ा लाभ देगी।',
+    relationship: 'व्यक्तिगत स्वाभिमान और स्वस्थ सीमाओं का ध्यान रखें; पार्टनर के साथ खुलकर और सम्मानपूर्वक संवाद करें।',
+    learning: 'लीडरशिप स्किल्स, पब्लिक स्पीकिंग और त्वरित निर्णय लेने की क्षमता का विकास करें।',
+    remedy: 'प्रतिदिन सुबह उगते सूर्य को तांबे के लोटे से जल (अर्घ्य) दें; रविवार को केसरिया या लाल रंग के वस्त्र धारण करें।'
   },
   2: {
     personalYear: 2,
-    title: 'Year of Patience, Diplomacy & Cooperation (Moon Year)',
-    theme: 'Nurturing relationships, emotional patience, collaborative alliances, and waiting for seeds to sprout.',
-    career: 'Focus on partnerships, teamwork, diplomacy, client retention, and background research rather than aggressive expansion.',
-    finance: 'Save liquid capital; avoid impulsive speculative risks; partner with trusted allies.',
-    relationship: 'Deep emotional bonding; potential for marriage or healing lingering conflicts.',
-    learning: 'Study psychology, interpersonal communication, and meditation.',
-    remedy: 'Drink water from a silver tumbler; avoid emotional arguments during full moon phases.'
+    title: 'धैर्य, सहयोग और साझेदारी का वर्ष (Moon Year - Personal Year 2)',
+    theme: 'रिश्तों को सींचने, भावनात्मक संतुलन, टीम वर्क, सहयोग और पिछले साल बोए गए बीजों के अंकुरित होने की प्रतीक्षा का समय।',
+    career: 'साझेदारी (Partnership), डिप्लोमेसी, टीम वर्क, क्लाइंट्स के साथ मधुर संबंध और गहन शोध पर ध्यान दें; आक्रामक विस्तार से बचें।',
+    finance: 'लिक्विड कैपिटल और बचत बढ़ाएं; बिना सोचे-समझे सट्टेबाजी या जोखिम भरे निवेश से बचें; विश्वसनीय साथियों के साथ काम करें।',
+    relationship: 'गहरा भावनात्मक जुड़ाव; विवाह के उत्तम योग या पुराने आपसी मनमुटाव सुलझाने का सबसे अच्छा समय।',
+    learning: 'मानव मनोविज्ञान, संवाद कला (Communication), मेडिटेशन और माइंडफुलनेस का अभ्यास करें।',
+    remedy: 'चांदी के गिलास में पानी पिएं; पूर्णिमा के दिन ध्यान करें और माता का आशीर्वाद लें।'
   },
   3: {
     personalYear: 3,
-    title: 'Year of Creative Expansion, Learning & Social Joy (Jupiter Year)',
-    theme: 'Social visibility, creative expression, academic achievements, writing, and optimism.',
-    career: 'Publish work, take on training or speaking engagements, expand marketing reach, and launch creative campaigns.',
-    finance: 'Income expands through knowledge work, media, and consulting; monitor social expenditures.',
-    relationship: 'Joyful, communicative, and celebratory; exciting social circle expansion.',
-    learning: 'Pursue certifications, deep philosophy, languages, and artistic crafts.',
-    remedy: 'Wear yellow on Thursdays; apply saffron/turmeric tilak; support students with books.'
+    title: 'रचनात्मक विस्तार, ज्ञान और सामाजिक उल्लास का वर्ष (Jupiter Year - Personal Year 3)',
+    theme: 'सामाजिक पहचान, रचनात्मक अभिव्यक्ति, शैक्षणिक सफलता, लेखन, नेटवर्किंग और आशावादी दृष्टिकोण का वर्ष।',
+    career: 'पब्लिक स्पीकिंग, ट्रेनिंग, कोचिंग, मार्केटिंग विस्तार, रचनात्मक प्रोजेक्ट्स और ज्ञान के क्षेत्र में बड़ी उपलब्धियां।',
+    finance: 'ज्ञान, मीडिया, कंसल्टेंसी और शिक्षण के माध्यम से आमदनी में वृद्धि; फिजूलखर्ची और दिखावे पर थोड़ा नियंत्रण रखें।',
+    relationship: 'उल्लासपूर्ण, खुशहाल और जीवंत संबंध; नए सामाजिक संपर्कों और मित्रों के दायरे में विस्तार।',
+    learning: 'उच्च शिक्षा, सर्टिफिकेशन्स, दर्शनशास्त्र, भाषाएं और रचनात्मक कलाओं में दक्षता हासिल करें।',
+    remedy: 'गुरुवार को पीले वस्त्र पहनें, माथे पर केसर या हल्दी का तिलक लगाएं और विद्यार्थियों को पुस्तकों का दान दें।'
   },
   4: {
     personalYear: 4,
-    title: 'Year of Foundation Building, Hard Work & Discipline (Rahu Year)',
-    theme: 'System building, disciplined labor, attention to health, legal compliance, and laying permanent bedrock.',
-    career: 'Organize operations, streamline tech infrastructure, complete pending backlogs, and secure legal contracts.',
-    finance: 'Budget strictly; build emergency savings; invest in tangible systems and tools.',
-    relationship: 'Demands patience and practical duty; avoid hasty emotional confrontations.',
-    learning: 'Master technical software, data management, and operational mechanics.',
-    remedy: 'Feed stray dogs on Saturdays; chant OM RAHAVE NAMAH; organize your work desk.'
+    title: 'ठोस नींव, अनुशासन और कठोर परिश्रम का वर्ष (Rahu Year - Personal Year 4)',
+    theme: 'सिस्टम निर्माण, अनुशासित दिनचर्या, स्वास्थ्य पर ध्यान, कानूनी अनुपालन और जीवन की स्थायी नींव तैयार करने का समय।',
+    career: 'कार्यप्रणाली को व्यवस्थित करें, तकनीकी इंफ्रास्ट्रक्चर मजबूत करें, रुके हुए काम पूरे करें और कानूनी अनुबंधों पर ध्यान दें।',
+    finance: 'बजट का सख्ती से पालन करें; इमरजेंसी फंड बनाएं और स्थायी व उपयोगी उपकरणों/संपत्तियों में निवेश करें।',
+    relationship: 'धैर्य और व्यावहारिक समझ की आवश्यकता; जल्दबाजी में भावनात्मक विवादों या गलतफहमियों से बचें।',
+    learning: 'तकनीकी सॉफ्टवेयर, डेटा मैनेजमेंट, प्रोसेस ऑटोमेशन और व्यावहारिक कौशल सीखें।',
+    remedy: 'शनिवार को पक्षियों व आवारा पशुओं को भोजन दें; ॐ राहवे नमः का जप करें और अपनी वर्क-डेस्क को हमेशा व्यवस्थित रखें।'
   },
   5: {
     personalYear: 5,
-    title: 'Year of Dynamic Change, Freedom & Exploration (Mercury Year)',
-    theme: 'Rapid transitions, unexpected travel, networking breakthroughs, commercial agility, and versatility.',
-    career: 'Pivot career strategy, explore international markets, engage in high-velocity trading, and embrace media.',
-    finance: 'High liquidity and sudden commercial gains; stay alert against impulsive speculative gambles.',
-    relationship: 'Exciting, spontaneous encounters; needs personal space and intellectual stimulation.',
-    learning: 'Learn digital marketing, new languages, and negotiation techniques.',
-    remedy: 'Feed green grass to cows on Wednesdays; keep indoor plants in your study.'
+    title: 'गतिशीलता, सकारात्मक बदलाव और नए अवसरों का वर्ष (Mercury Year - Personal Year 5)',
+    theme: 'तेज बदलाव, अप्रत्याशित यात्राएं, नए संपर्कों का विस्तार, व्यापारिक चपलता और बहुमुखी प्रतिभा का प्रदर्शन।',
+    career: 'करियर में नई रणनीति अपनाएं, नए मार्केट्स एक्सप्लोर करें, ट्रेडिंग/मार्केटिंग बढ़ाएं और डिजिटल मीडिया का पूरा उपयोग करें।',
+    finance: 'अच्छा कैश फ्लो और अचानक व्यापारिक लाभ के अवसर; बिना सोचे-समझे किए गए सट्टेबाजी निवेश से बचें।',
+    relationship: 'रोमांचक और नए अनुभव; संबंधों में आपसी स्वतंत्रता और मानसिक समझ की आवश्यकता।',
+    learning: 'डिजिटल मार्केटिंग, नई भाषाएं, बातचीत और नेगोशिएशन की कला में निपुणता लाएं।',
+    remedy: 'बुधवार को गाय को हरी घास या पालक खिलाएं और अपने स्टडी रूम में हरे पौधे रखें।'
   },
   6: {
     personalYear: 6,
-    title: 'Year of Family, Domestic Harmony, Luxury & Service (Venus Year)',
-    theme: 'Domestic bliss, marriage, renovating the home, caring for family, and aesthetic indulgence.',
-    career: 'Excel in design, hospitality, customer relations, healthcare, and creative arts.',
-    finance: 'Expenditures on home luxury and family assets; steady compounding of beautiful possessions.',
-    relationship: 'Ideal year for marriage, family expansion, and deepening romantic devotion.',
-    learning: 'Study interior styling, culinary arts, relationship psychology, and music.',
-    remedy: 'Wear clean, fragrant clothes; donate white sweets to young girls on Fridays.'
+    title: 'पारिवारिक सौहार्द, सुख-सुविधा और प्रेम का वर्ष (Venus Year - Personal Year 6)',
+    theme: 'पारिवारिक सुख, विवाह, घर का नवीनीकरण/सजावट, परिजनों की देखभाल और सौंदर्यपूर्ण जीवनशैली का आनंद।',
+    career: 'डिजाइन, हॉस्पिटैलिटी, कस्टमर रिलेशंस, हेल्थकेयर, इवेंट मैनेजमेंट और कलात्मक क्षेत्रों में बेहतरीन सफलता।',
+    finance: 'घर की सुख-सुविधाओं और पारिवारिक संपत्तियों पर निवेश; भौतिक सुखों और ऐश्वर्य में वृद्धि।',
+    relationship: 'विवाह, परिवार नियोजन और दांपत्य जीवन में गहरा प्रेम व समर्पण बढ़ाने के लिए सबसे अनुकूल वर्ष।',
+    learning: 'इंटीरियर स्टाइलिंग, पाक कला (Culinary), संगीत और रिलेशनशिप मैनेजमेंट का अध्ययन करें।',
+    remedy: 'स्वच्छ व सुगंधित वस्त्र पहनें; शुक्रवार को कन्याओं को सफेद मिठाई खिलाएं और महिलाओं का सम्मान करें।'
   },
   7: {
     personalYear: 7,
-    title: 'Year of Introspection, Research & Spiritual Awakening (Ketu Year)',
-    theme: 'Solitary contemplation, deep R&D, spiritual seeking, sabbatical, and metaphysical insight.',
-    career: 'Focus on in-depth research, writing, patent development, and technical diagnostics rather than aggressive sales.',
-    finance: 'Maintain conservative investments; avoid unverified speculative joint ventures.',
-    relationship: 'Desires quiet emotional companionship; avoid unnecessary social drama.',
-    learning: 'Study ancient philosophy, occult sciences, meditation, and advanced analytical research.',
-    remedy: 'Worship Lord Ganesha; feed stray animals; practice daily 20-minute meditation.'
+    title: 'आत्म-चिंतन, शोध और आध्यात्मिक जागरण का वर्ष (Ketu Year - Personal Year 7)',
+    theme: 'एकांत में गहराई से विचार, गहन रिसर्च व डेवलपमेंट, आध्यात्मिक खोज, आत्म-मूल्यांकन और मानसिक शांति का समय।',
+    career: 'गहन शोध, लेखन, तकनीकी डायग्नोस्टिक्स, डेटा विश्लेषण और विशेषज्ञता पर ध्यान दें; आक्रामक सेल्स से बचें।',
+    finance: 'सुरक्षित और पारंपरिक निवेश बनाए रखें; बिना जांचे-परखे नए साझेदारियों में पूंजी लगाने से बचें।',
+    relationship: 'शांत और समझदार साथी की चाहत; अनावश्यक सामाजिक दिखावे और ड्रामे से दूर रहकर शांति पसंद करेंगे।',
+    learning: 'प्राचीन दर्शन, ज्योतिष, मेटाफिजिक्स, मेडिटेशन और एडवांस एनालिटिकल रिसर्च में गहरी रुचि लें।',
+    remedy: 'भगवान गणेश की आराधना करें; आवारा कुत्तों को रोटी खिलाएं और प्रतिदिन 20 मिनट मौन ध्यान करें।'
   },
   8: {
     personalYear: 8,
-    title: 'Year of Material Harvest, Karmic Justice & Executive Power (Saturn Year)',
-    theme: 'Harvesting rewards of previous 7 years, executive authority, real estate transactions, and karmic accountability.',
-    career: 'Assume senior executive responsibilities, direct large enterprises, negotiate major property deals.',
-    finance: 'Major wealth accumulation through long-term investments; strictly uphold financial ethics.',
-    relationship: 'Demands mutual maturity, responsibility, and emotional steadfastness.',
-    learning: 'Master corporate governance, asset portfolio management, and institutional law.',
-    remedy: 'Serve laborers and elderly workers on Saturdays; light mustard oil lamp under Peepal tree.'
+    title: 'कर्म फल, अधिकार और भौतिक उपलब्धियों का वर्ष (Saturn Year - Personal Year 8)',
+    theme: 'पिछले 7 वर्षों की मेहनत का प्रतिफल, प्रशासनिक अधिकार, रियल एस्टेट व बड़ी संपत्तियों का निर्माण और कर्मों का हिसाब।',
+    career: 'वरिष्ठ पदों की जिम्मेदारी संभालें, बड़े संस्थानों का नेतृत्व करें, प्रॉपर्टी या बड़े प्रोजेक्ट्स के सौदे तय करें।',
+    finance: 'दीर्घकालिक निवेश से बड़ा धन संचय; वित्तीय मामलों में हमेशा ईमानदारी और पारदर्शिता का पालन करें।',
+    relationship: 'पारस्परिक परिपक्वता, जिम्मेदारी और एक-दूसरे के प्रति ठोस भावनात्मक संबल की मांग।',
+    learning: 'कॉर्पोरेट गवर्नेंस, एसेट पोर्टफोलियो मैनेजमेंट, फाइनेंशियल प्लानिंग और कानूनी बारीकियों को समझें।',
+    remedy: 'शनिवार को जरूरतमंदों व श्रमिकों की सेवा करें; पीपल के पेड़ के नीचे सरसों के तेल का दीपक जलाएं।'
   },
   9: {
     personalYear: 9,
-    title: 'Year of Completion, Release & Humanitarian Transformation (Mars Year)',
-    theme: 'Clearing out old baggage, finishing multi-year projects, forgiveness, charitable giving, and rebirth.',
-    career: 'Wrap up stagnant endeavors; resolve pending disputes; prepare clean slate for the next 9-year cycle.',
-    finance: 'Settle old debts; clear loans; engage in generous philanthropy.',
-    relationship: 'Release toxic ties gracefully; deepen forgiveness and unconditional love with family.',
-    learning: 'Practice yoga, forgiveness meditations, and humanitarian service.',
-    remedy: 'Recite Hanuman Chalisa; donate red lentils or blankets to homeless shelters on Tuesdays.'
+    title: 'पूर्णता, विदाई और मानवीय रूपांतरण का वर्ष (Mars Year - Personal Year 9)',
+    theme: 'पुराने रुके हुए मामलों को सुलझाना, बहुवर्षीय प्रोजेक्ट्स पूरे करना, क्षमाभाव, परोपकार और नए 9-वर्षीय चक्र की तैयारी।',
+    career: 'निष्फल या अटके प्रोजेक्ट्स को खत्म करें; पुराने विवाद सुलझाएं; अगले 9-वर्षीय चक्र के लिए नई योजनाएं तैयार करें।',
+    finance: 'पुराने कर्ज या देनदारियां चुकता करें; दान-पुण्य और सामाजिक कल्याण में सहयोग दें।',
+    relationship: 'अनावश्यक कड़वाहट को भूलकर आगे बढ़ें; परिजनों के साथ क्षमाभाव और निस्वार्थ प्रेम को गहरा करें।',
+    learning: 'योग, क्षमा ध्यान (Forgiveness Meditation) और समाज सेवा के माध्यम से आंतरिक शांति पाएं।',
+    remedy: 'मंगलवार को हनुमान चालीसा का पाठ करें; जरूरतमंदों को गुड़, चना या लाल मसूर की दाल दान करें।'
   }
 };
 

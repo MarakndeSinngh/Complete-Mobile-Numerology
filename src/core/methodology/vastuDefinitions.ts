@@ -20,10 +20,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Mercury / Sun (Lo Shu 1: Water)',
     element: 'Water',
     loShuDigit: 1,
-    lifeDomain: 'Career opportunities, new financial avenues, cash flow',
-    favorableActivities: ['Open spaces', 'Water fountains', 'Cash locker facing North', 'Study desk facing North'],
-    unfavorableElements: ['Kitchen/Fire', 'Heavy clutter', 'Toilet directly in North'],
-    remedy: 'Keep a clean brass bowl of fresh water; use blue or green accents; place money plant in water.'
+    lifeDomain: 'करियर के नए अवसर, धन आगमन के स्रोत, कैश फ्लो और व्यावसायिक प्रगति',
+    favorableActivities: ['खुला व साफ स्थान', 'पानी का फव्वारा (Water Fountain)', 'उत्तर मुखी तिजोरी / कैश लॉकर', 'उत्तर की ओर मुख करके अध्ययन/कार्य'],
+    unfavorableElements: ['रसोई / अग्नि तत्व', 'भारी कबाड़ या गंदगी', 'उत्तर दिशा में सीधा शौचालय (Toilet)'],
+    remedy: 'उत्तर दिशा में पीतल के बर्तन में स्वच्छ जल रखें; नीले या हरे रंग का उपयोग करें; पानी में मनी प्लांट लगाएं।'
   },
   NORTH_EAST: {
     direction: 'North-East',
@@ -31,10 +31,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Jupiter (Lo Shu 8: Earth / Wisdom)',
     element: 'Water / Space',
     loShuDigit: 8,
-    lifeDomain: 'Clarity of mind, spiritual growth, divine blessings, intuition',
-    favorableActivities: ['Prayer room (Puja)', 'Meditation altar', 'Reading / Study sanctuary', 'Underground water tank'],
-    unfavorableElements: ['Heavy junk storage', 'Overhead water tank', 'Kitchen stove', 'Toilet'],
-    remedy: 'Keep crystal pyramid or fresh Gangajal in copper vessel; ensure maximum natural light.'
+    lifeDomain: 'मानसिक स्पष्टता, आध्यात्मिक उन्नति, ईश्वरीय कृपा और अंतर्ज्ञान (Intuition)',
+    favorableActivities: ['पूजा घर / मंदिर', 'ध्यान व मेडिटेशन केंद्र', 'शांत अध्ययन कक्ष', 'भूमिगत जल टैंक (Underground Tank)'],
+    unfavorableElements: ['भारी कबाड़ या स्टोर रूम', 'छत पर भारी पानी की टंकी', 'रसोई का चूल्हा', 'शौचालय'],
+    remedy: 'क्रिस्टल पिरामिड या तांबे के पात्र में गंगाजल रखें; इस दिशा में अधिकतम प्राकृतिक रोशनी और स्वच्छता सुनिश्चित करें।'
   },
   EAST: {
     direction: 'East',
@@ -42,10 +42,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Sun / Jupiter (Lo Shu 3: Wood)',
     element: 'Wood',
     loShuDigit: 3,
-    lifeDomain: 'Social connections, health vitality, paternal lineage support, reputation',
-    favorableActivities: ['Main entrance', 'Living room seating', 'Morning sun exposure', 'Green indoor plants'],
-    unfavorableElements: ['Darkness', 'Tall blind walls', 'Garbage bin'],
-    remedy: 'Hang a copper Sun yantra on East wall; place healthy green foliage plants.'
+    lifeDomain: 'सामाजिक संपर्क, स्वास्थ्य व जीवन शक्ति, पिता का सहयोग और समाज में मान-सम्मान',
+    favorableActivities: ['मुख्य प्रवेश द्वार', 'बैठक (Living Room)', 'प्रातःकालीन सूर्य का प्रकाश', 'हरे-भरे इनडोर पौधे'],
+    unfavorableElements: ['अंधेरा', 'ऊंची बंद दीवारें', 'कूड़ेदान या कचरा'],
+    remedy: 'पूर्व की दीवार पर तांबे का सूर्य यंत्र लगाएं; स्वस्थ हरे पत्तेदार पौधे रखें।'
   },
   SOUTH_EAST: {
     direction: 'South-East',
@@ -53,10 +53,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Venus (Lo Shu 4: Wood/Wealth)',
     element: 'Fire',
     loShuDigit: 4,
-    lifeDomain: 'Cash liquidity, female health vitality, physical vigor, kitchen wealth',
-    favorableActivities: ['Kitchen / Cooking stove', 'Electrical panels', 'Inverter / Generator', 'Warm lighting'],
-    unfavorableElements: ['Water fountain', 'Underground water tank', 'Master bedroom'],
-    remedy: 'Light a red/orange bulb or use camphor diffuser in South-East; avoid blue or black decor here.'
+    lifeDomain: 'नकद तरलता (Cash Liquidity), महिलाओं का स्वास्थ्य, शारीरिक ऊर्जा और रसोई की समृद्धि',
+    favorableActivities: ['रसोई घर / गैस चूल्हा', 'इलेक्ट्रिकल पैनल / मीटर', 'इन्वर्टर / जनरेटर', 'हल्का वॉर्म प्रकाश'],
+    unfavorableElements: ['पानी का फव्वारा', 'भूमिगत पानी की टंकी', 'मास्टर बेडरूम'],
+    remedy: 'आग्नेय कोण में लाल या नारंगी रंग का नाइट बल्ब लगाएं या कपूर डिफ्यूज़र का उपयोग करें; यहाँ नीला या काला रंग न लगाएं।'
   },
   SOUTH: {
     direction: 'South',
@@ -64,10 +64,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Mars (Lo Shu 9: Fire)',
     element: 'Fire',
     loShuDigit: 9,
-    lifeDomain: 'Fame, societal standing, public recognition, confidence, legal victory',
-    favorableActivities: ['Awards and certificate display', 'Heavy furniture storage', 'Bed headboard facing South'],
-    unfavorableElements: ['Main water borewell', 'Excessive open glass facades'],
-    remedy: 'Display certificates and red coral or crimson artwork; keep South wall solid and elevated.'
+    lifeDomain: 'प्रसिद्धि, सामाजिक प्रतिष्ठा, यश, आत्मविश्वास और कानूनी मामलों में सफलता',
+    favorableActivities: ['पुरस्कार और प्रमाण-पत्रों का प्रदर्शन', 'भारी फर्नीचर या अलमारी', 'दक्षिण की ओर सिर करके सोना'],
+    unfavorableElements: ['मुख्य जल बोरवेल', 'अत्यधिक खुले कांच के शीशे/खिड़कियां'],
+    remedy: 'अपनी उपलब्धियों/सर्टिफिकेशन्स को दक्षिण दीवार पर लगाएं; लाल या सिंदूरी रंग की कलाकृतियां लगाएं; दक्षिण की दीवार को ठोस और ऊंचा रखें।'
   },
   SOUTH_WEST: {
     direction: 'South-West',
@@ -75,10 +75,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Rahu / Saturn (Lo Shu 2: Earth)',
     element: 'Earth',
     loShuDigit: 2,
-    lifeDomain: 'Stability, relationship harmony, master bedroom, decision authority, land mastery',
-    favorableActivities: ['Master bedroom for family head', 'Heavy stone artifacts', 'Important family safe / locker'],
-    unfavorableElements: ['Main entrance', 'Underground water tank', 'Balcony extension / open cuts'],
-    remedy: 'Place heavy brass artifacts or yellow jasper stone; keep South-West corner heaviest and highest.'
+    lifeDomain: 'पारिवारिक स्थिरता, संबंधों में मधुरता, मुखिया का बेडरूम, निर्णय क्षमता और भूमि लाभ',
+    favorableActivities: ['घर के मुखिया का मास्टर बेडरूम', 'भारी पत्थर की कलाकृतियां', 'परिवार की मुख्य तिजोरी'],
+    unfavorableElements: ['मुख्य प्रवेश द्वार', 'भूमिगत जल टैंक / बोरवेल', 'बड़ी खुली बालकनी या कटाव'],
+    remedy: 'पीतल के भारी सजावटी सामान या पीले रंग का स्टोन रखें; नैऋत्य कोण को घर का सबसे भारी और ऊंचा हिस्सा बनाएं।'
   },
   WEST: {
     direction: 'West',
@@ -86,10 +86,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Saturn (Lo Shu 7: Metal)',
     element: 'Metal',
     loShuDigit: 7,
-    lifeDomain: 'Children prosperity, creative output, profitability from investments',
-    favorableActivities: ['Children bedroom', 'Dining room', 'Overhead water tank', 'Metal wind chimes'],
-    unfavorableElements: ['Underground tank', 'Broken electronics'],
-    remedy: 'Hang a 6-rod metal wind chime; keep white or grey metallic decor.'
+    lifeDomain: 'संतान सुख, रचनात्मक क्षमता, निवेश से लाभ और व्यापारिक प्राप्तियां',
+    favorableActivities: ['बच्चों का बेडरूम', 'डाइनिंग रूम', 'छत पर रखी पानी की टंकी (Overhead Tank)', 'मेटल विंड चाइम्स'],
+    unfavorableElements: ['भूमिगत पानी का गड्ढा', 'खराब या टूटे इलेक्ट्रॉनिक उपकरण'],
+    remedy: '6 रॉड वाली धातु की विंड चाइम (Wind Chime) लगाएं; सफेद, स्लेटी या मेटैलिक रंगों का प्रयोग करें।'
   },
   NORTH_WEST: {
     direction: 'North-West',
@@ -97,10 +97,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Moon (Lo Shu 6: Metal / Venus)',
     element: 'Air / Metal',
     loShuDigit: 6,
-    lifeDomain: 'Helpful friends, banking support, international travel, finished goods transit',
-    favorableActivities: ['Guest room', 'Finished goods warehouse', 'Travel documents locker', 'Garage'],
-    unfavorableElements: ['Heavy permanent clutter', 'Dark suffocating colors'],
-    remedy: 'Keep light silver or cream colors; ensure continuous fresh air circulation.'
+    lifeDomain: 'मददगार मित्र व सहयोगी (Support System), बैंकिंग लोन सहायता, विदेश यात्रा और तैयार माल का व्यापार',
+    favorableActivities: ['अतिथि कक्ष (Guest Room)', 'तैयार माल का स्टॉक (Finished Goods)', 'यात्रा व पासपोर्ट दस्तावेज लॉकर', 'गैराज / पार्किंग'],
+    unfavorableElements: ['स्थायी भारी कचरा/मलबा', 'अत्यधिक गहरे घुटन भरे रंग'],
+    remedy: 'सफेद, चांदी (Silver) या क्रीम रंगों का प्रयोग करें; इस दिशा में ताजी हवा का निरंतर प्रवाह सुनिश्चित करें।'
   },
   CENTER: {
     direction: 'Center (Brahmasthan)',
@@ -108,10 +108,10 @@ export const VASTU_ZONES: Record<string, VastuDirectionZone> = {
     rulingPlanet: 'Mercury (Lo Shu 5: Earth)',
     element: 'Space / Ether',
     loShuDigit: 5,
-    lifeDomain: 'Core life equilibrium, cosmic breath, central health, whole-family prosperity',
-    favorableActivities: ['Open central courtyard', 'Soft central lighting', 'Clear uncluttered walking space'],
-    unfavorableElements: ['Heavy pillar', 'Staircase', 'Kitchen or toilet in exact center'],
-    remedy: 'Strictly keep the geometric center of home uncluttered, clean, and spiritually revered.'
+    lifeDomain: 'समग्र जीवन का संतुलन, घर की मुख्य प्राण ऊर्जा, स्वास्थ्य और पूरे परिवार की सुख-समृद्धि',
+    favorableActivities: ['खुला केंद्रीय आंगन', 'हल्का व संतुलित प्रकाश', 'बिल्कुल साफ-सुथरा आवागमन क्षेत्र'],
+    unfavorableElements: ['भारी खंभा (Pillar)', 'सीढ़ियां (Staircase)', 'केंद्र में सीधा शौचालय या रसोई का चूल्हा'],
+    remedy: 'घर के बिल्कुल केंद्र (नाभि स्थान) को हमेशा खाली, स्वच्छ, हल्का और पवित्र रखें; यहाँ भारी वजन न रखें।'
   }
 };
 

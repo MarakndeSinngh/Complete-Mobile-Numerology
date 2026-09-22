@@ -4,6 +4,7 @@ import { NumerologyProfile, buildBirthGrid, buildEnhancedGrid } from '../core';
 import { CompleteNumerologyProfile } from '../core/types';
 import { MANDATORY_WELLNESS_DISCLAIMER } from '../core/methodology';
 import { Sparkles, Shield, AlertTriangle, CheckCircle, Compass, Award, Star, Activity, Info, Heart, TrendingUp } from 'lucide-react';
+import PlanetaryTransitTracker from './PlanetaryTransitTracker';
 
 interface AstroDashboardProps {
   dobData: DOBAnalysis;
@@ -122,6 +123,13 @@ const AstroDashboard: React.FC<AstroDashboardProps> = ({ dobData, nameData, mobi
           </div>
         </div>
       )}
+
+      {/* Planetary Transit Tracker Widget */}
+      <PlanetaryTransitTracker
+        driverNumber={dobData.birthNumber}
+        conductorNumber={dobData.lifePathNumber}
+        name={name}
+      />
 
       {/* Grids Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

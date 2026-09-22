@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdvice, PersonalDetails } from '../types';
 import { computeLoshuAnalysis, LoshuAnalysisResult } from '../services/loshuEngine';
-import { Sparkles, Briefcase, Heart, Activity } from 'lucide-react';
+import { analyzeNumeroVastu } from '../core/vastuEngine';
+import { analyzeComprehensiveName } from '../core/nameNumerologyEngine';
+import { generateCompleteNumerologyProfile } from '../core/calculationEngine';
+import { CompleteNumerologyProfile } from '../core/types';
+import { MasterReportUnified } from './MasterReportUnified';
+import { Sparkles, Briefcase, Heart, Activity, FileText, Cpu } from 'lucide-react';
 import { generateLeoAdvisorActions } from '../services/leoAdvisorEngine';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -14,13 +19,23 @@ interface ReportTabProps {
   nameData: NameAnalysis;
   mobileData: MobileAnalysis;
   remedies: remediesAdvice;
+  profile?: CompleteNumerologyProfile | null;
 }
 
-const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameData, mobileData, remedies }) => {
+const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameData, mobileData, remedies, profile }) => {
+  const [reportMode, setReportMode] = useState<'MASTER_DOSSIER' | 'AI_NARRATIVE'>('MASTER_DOSSIER');
   const [loading, setLoading] = useState(false);
   const [reportText, setReportText] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
+
+  // Compute unified profile if not directly provided
+  const effectiveProfile: CompleteNumerologyProfile = profile || generateCompleteNumerologyProfile({
+    dob: personalDetails.dob,
+    name: personalDetails.name,
+    mobile: personalDetails.mobile,
+    gender: (personalDetails.gender as any) || 'MALE'
+  });
 
   const advisorActions = reportText ? generateLeoAdvisorActions(dobData, nameData, mobileData) : null;
 
@@ -349,6 +364,24 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
     const currentYear = 2026;
 
     const dosha = getDoshaData(analysis.mulank);
+    
+    const missingNums = analysis.missingNumbers ? analysis.missingNumbers.map(n => n.number) : [];
+    const vastuData = analyzeNumeroVastu({
+      dob: details.dob,
+      gender: details.gender || 'MALE',
+      mulank: analysis.mulank,
+      bhagyank: analysis.bhagyank,
+      houseNumber: '42',
+      missingNumbers: missingNums
+    });
+    
+    const nameNumData = analyzeComprehensiveName({
+      name: details.name,
+      dob: details.dob,
+      mulank: analysis.mulank,
+      bhagyank: analysis.bhagyank,
+      mobile: details.mobile
+    });
     
     const forecastYears = [2026, 2027, 2028, 2029, 2030].map(y => 
       getPersonalYearData(y, bDay, bMonth)
@@ -844,11 +877,216 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
           </div>
         </div>
 
-        <!-- PAGE 6: SHIFTING PERSONAL YEARS FORECAST TABLE (2026 - 2030) -->
+        <!-- PAGE 6: NUMERO VASTU, KUA DIRECTIONS & PROPERTY HARMONICS -->
         <div class="pdf-page">
           <div class="pdf-header">
-            <span class="pdf-header-title">VI. Shifting Personal Years Forecast Table</span>
+            <span class="pdf-header-title">VI. Numero Vastu, Kua Directions & Property Harmonics</span>
             <span class="pdf-header-tag">${reportId} • Page 6</span>
+          </div>
+          
+          <div style="background-color: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 12px; padding: 6px 12px; margin-bottom: 8px; font-size: 8.5px; color: #92400E; font-weight: 600; line-height: 1.3;">
+            <strong>TRADITIONAL NUMERO VASTU LAYER:</strong> Classical Indian & Eight Mansions spatial balancing. Harmonizes directional Chi and property vibrations with birth numbers.
+          </div>
+
+          <div class="pdf-row" style="margin-bottom: 8px;">
+            <div class="pdf-col-1-2">
+              <div class="pdf-card" style="height: 100%; margin-bottom: 0;">
+                <h4 class="pdf-card-title">Kua Number & Group Profile</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 9.5px; line-height: 1.6;">
+                  <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="color: #6B7280;">Kua Number (दिशा अंक):</td>
+                    <td style="font-weight: bold; text-align: right; color: #B45309;"># ${vastuData.kuaNumber}</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="color: #6B7280;">Kua Group (दिशा वर्ग):</td>
+                    <td style="font-weight: bold; text-align: right; color: #111827;">${vastuData.groupType === 'EAST_GROUP' ? 'East Group (ईस्ट वर्ग)' : 'West Group (वेस्ट वर्ग)'}</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="color: #6B7280;">Primary Success Direction:</td>
+                    <td style="font-weight: bold; text-align: right; color: #047857;">${vastuData.compatibleDirections[0]?.direction || 'North'} (Sheng Chi)</td>
+                  </tr>
+                  <tr>
+                    <td style="color: #6B7280;">Sitting Direction:</td>
+                    <td style="font-weight: bold; text-align: right; color: #1E40AF; font-size: 8.5px;">${vastuData.workspaceVastu.recommendedSittingDirection}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="pdf-col-1-2">
+              <div class="pdf-card" style="height: 100%; margin-bottom: 0;">
+                <h4 class="pdf-card-title">Core Functional Vastu Zones</h4>
+                <div style="font-size: 8.5px; line-height: 1.35; display: flex; flex-direction: column; gap: 4px;">
+                  <div><strong style="color: #1E40AF;">Career (उत्तर):</strong> ${vastuData.zonesSummary.careerZone.hindiGuidance.substring(0, 85)}...</div>
+                  <div><strong style="color: #B45309;">Wealth (आग्नेय):</strong> ${vastuData.zonesSummary.wealthZone.hindiGuidance.substring(0, 85)}...</div>
+                  <div><strong style="color: #047857;">Health (पूर्व/ईशान):</strong> ${vastuData.zonesSummary.healthZone.hindiGuidance.substring(0, 85)}...</div>
+                  <div><strong style="color: #BE185D;">Harmony (नैऋत्य):</strong> ${vastuData.zonesSummary.relationshipZone.hindiGuidance.substring(0, 85)}...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pdf-card" style="margin-bottom: 8px; padding: 10px 14px;">
+            <h4 class="pdf-card-title">Lo Shu + Numero Vastu Fusion (Missing Nodes Balancing)</h4>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 8.5px;">
+              ${vastuData.loShuVastuFusion.slice(0, 6).map(f => `
+                <div style="background-color: ${f.status === 'MISSING' ? '#FEF2F2' : '#ECFDF5'}; border: 1px solid ${f.status === 'MISSING' ? '#FCA5A5' : '#A7F3D0'}; border-radius: 8px; padding: 6px;">
+                  <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 2px;">
+                    <span style="color: ${f.status === 'MISSING' ? '#991B1B' : '#065F46'};">Node #${f.digit} (${f.associatedDirection.split(' ')[0]})</span>
+                    <span style="font-size: 7px; text-transform: uppercase;">${f.status}</span>
+                  </div>
+                  <div style="color: #4B5563; font-size: 7.5px; line-height: 1.2;">${f.balancingSuggestionHindi.substring(0, 65)}...</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="pdf-card" style="margin-bottom: 0; padding: 10px 14px;">
+            <h4 class="pdf-card-title">Traditional Workspace & Property Balancing Remedies</h4>
+            <div style="display: flex; gap: 10px; font-size: 8.5px; line-height: 1.35;">
+              <div style="flex: 1;">
+                <strong style="color: #B45309; display: block; margin-bottom: 2px;">Office / Study Desk:</strong>
+                <span style="color: #4B5563;">कार्य करते समय मुख ${vastuData.workspaceVastu.recommendedSittingDirection} रखें। मेज के उत्तर-पूर्व कोने में स्फटिक पिरामिड रखें।</span>
+              </div>
+              <div style="flex: 1; border-left: 1px solid #E5E7EB; padding-left: 10px;">
+                <strong style="color: #047857; display: block; margin-bottom: 2px;">Residence Entrance:</strong>
+                <span style="color: #4B5563;">मुख्य द्वार पर पीतल का स्वास्तिक या तोरण लगाएं। दहलीज को साफ व हल्का रखें।</span>
+              </div>
+              <div style="flex: 1; border-left: 1px solid #E5E7EB; padding-left: 10px;">
+                <strong style="color: #1E40AF; display: block; margin-bottom: 2px;">Colour Resonance:</strong>
+                <span style="color: #4B5563;">शुभ रंग: ${vastuData.layeredReport.layer5_traditionalRemedies.colourHarmonization.luckyColours.slice(0, 3).join(', ')}।</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="pdf-footer">
+            <span>Prepared Specially For: ${details.name}</span>
+            <span>Rajeev Astrological Methods</span>
+          </div>
+        </div>
+
+        <!-- PAGE 7: NAME NUMEROLOGY (CHALDEAN, FIRST LETTER, COMPOUNDS & SYSTEMIC ALIGNMENT) -->
+        <div class="pdf-page">
+          <div class="pdf-header">
+            <span class="pdf-header-title">VII. Name Numerology, Chaldean Phonetics & Harmonic Alignment</span>
+            <span class="pdf-header-tag">${reportId} • Page 7</span>
+          </div>
+          
+          <div style="background-color: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 12px; padding: 6px 12px; margin-bottom: 8px; font-size: 8.5px; color: #92400E; font-weight: 600; line-height: 1.3;">
+            <strong>DUAL ENGINE NAME NUMEROLOGY:</strong> Chaldean Phonetic Frequencies (1–8) with Western Pythagorean validation. Evaluates spelling vibration, compound title, soul desire, and birth date harmonics.
+          </div>
+
+          <!-- Key Metrics Grid -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px;">
+            <div style="background-color: #FAF5EE; border: 1px solid #FDE68A; border-radius: 10px; padding: 6px 8px; text-align: center;">
+              <span style="font-size: 7.5px; color: #92400E; text-transform: uppercase; font-weight: bold; display: block;">Chaldean Compound</span>
+              <span style="font-size: 16px; font-weight: 900; color: #B45309; font-family: 'Playfair Display', serif;">${nameNumData.chaldean.compoundNumber}</span>
+              <span style="font-size: 7.5px; color: #6B7280; display: block;">${nameNumData.chaldean.compoundTitle}</span>
+            </div>
+            <div style="background-color: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: 10px; padding: 6px 8px; text-align: center;">
+              <span style="font-size: 7.5px; color: #92400E; text-transform: uppercase; font-weight: bold; display: block;">Chaldean Root (नाम अंक)</span>
+              <span style="font-size: 16px; font-weight: 900; color: #92400E; font-family: 'Playfair Display', serif;"># ${nameNumData.chaldean.rootNumber}</span>
+              <span style="font-size: 7.5px; color: #92400E; display: block;">मूल अभिव्यक्ति अंक</span>
+            </div>
+            <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 6px 8px; text-align: center;">
+              <span style="font-size: 7.5px; color: #1E40AF; text-transform: uppercase; font-weight: bold; display: block;">Talent Number</span>
+              <span style="font-size: 16px; font-weight: 900; color: #1E40AF; font-family: 'Playfair Display', serif;"># ${nameNumData.talent.number}</span>
+              <span style="font-size: 7.5px; color: #3B82F6; display: block;">मूलांक + नाम योग</span>
+            </div>
+            <div style="background-color: #FDF2F8; border: 1px solid #FBCFE8; border-radius: 10px; padding: 6px 8px; text-align: center;">
+              <span style="font-size: 7.5px; color: #9D174D; text-transform: uppercase; font-weight: bold; display: block;">Heart / Soul Root</span>
+              <span style="font-size: 16px; font-weight: 900; color: #9D174D; font-family: 'Playfair Display', serif;"># ${nameNumData.heart.number}</span>
+              <span style="font-size: 7.5px; color: #EC4899; display: block;">स्वरों का योग (Vowels)</span>
+            </div>
+          </div>
+
+          <!-- Compound Analysis Card -->
+          <div class="pdf-card" style="margin-bottom: 8px; padding: 8px 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <h4 class="pdf-card-title" style="margin-bottom: 0;">Chaldean Compound #${nameNumData.chaldean.compoundNumber} — ${nameNumData.chaldean.compoundTitle}</h4>
+              <span style="font-size: 7.5px; font-weight: bold; color: #047857; background-color: #ECFDF5; padding: 1px 6px; border-radius: 4px;">
+                ${nameNumData.dobCompatibility.ratingLabel}
+              </span>
+            </div>
+            <p style="font-size: 8.5px; color: #374151; margin: 0; line-height: 1.4;">
+              ${nameNumData.chaldean.compoundInterpretationHi}
+            </p>
+          </div>
+
+          <!-- Letter Breakdown & First Letter Analysis -->
+          <div class="pdf-row" style="margin-bottom: 8px;">
+            <!-- First Letter Card -->
+            <div class="pdf-col-1-2">
+              <div class="pdf-card" style="height: 100%; margin-bottom: 0; padding: 8px 12px;">
+                <h4 class="pdf-card-title">आद्य अक्षर प्रभाव (First Letter: '${nameNumData.firstLetter.letter}')</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 8.5px; line-height: 1.5;">
+                  <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="color: #6B7280;">Planetary Ruler:</td>
+                    <td style="font-weight: bold; text-align: right; color: #B45309;">${nameNumData.firstLetter.planet} (${nameNumData.firstLetter.element})</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="color: #6B7280;">Personality Impact:</td>
+                    <td style="font-weight: 500; text-align: right; color: #1F2937; font-size: 8px;">${nameNumData.firstLetter.personalityInfluenceHi.substring(0, 65)}...</td>
+                  </tr>
+                  <tr>
+                    <td style="color: #6B7280;">Career Tone:</td>
+                    <td style="font-weight: 500; text-align: right; color: #1E40AF; font-size: 8px;">${nameNumData.firstLetter.careerInfluenceHi.substring(0, 65)}...</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+            <!-- Vowels & Consonants Breakdown -->
+            <div class="pdf-col-1-2">
+              <div class="pdf-card" style="height: 100%; margin-bottom: 0; padding: 8px 12px;">
+                <h4 class="pdf-card-title">Vowels & Consonants Dynamic</h4>
+                <div style="font-size: 8px; line-height: 1.35; display: flex; flex-direction: column; gap: 4px;">
+                  <div><strong style="color: #BE185D;">Heart / Soul (Vowels #${nameNumData.vowels.chaldeanRoot}):</strong> ${nameNumData.vowels.heartSoulMeaningHi.substring(0, 75)}...</div>
+                  <div><strong style="color: #047857;">Personality (Consonants #${nameNumData.consonants.chaldeanRoot}):</strong> ${nameNumData.consonants.personalityMeaningHi.substring(0, 75)}...</div>
+                  <div><strong style="color: #6B21A8;">Habit Number (#${nameNumData.habit.number}):</strong> ${nameNumData.habit.habitMeaningHi.substring(0, 65)}...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compatibility & Spelling Correction -->
+          <div class="pdf-card" style="margin-bottom: 8px; padding: 8px 12px;">
+            <h4 class="pdf-card-title">Name + DOB & Mobile Harmony (सामंजस्य एवं वर्तनी परामर्श)</h4>
+            <div style="display: flex; gap: 10px; font-size: 8.5px; line-height: 1.35;">
+              <div style="flex: 1;">
+                <strong style="color: #B45309; display: block; margin-bottom: 2px;">DOB Harmony:</strong>
+                <span style="color: #4B5563;">${nameNumData.dobCompatibility.comprehensiveReasonWhyHi}</span>
+              </div>
+              <div style="flex: 1; border-left: 1px solid #E5E7EB; padding-left: 10px;">
+                <strong style="color: #047857; display: block; margin-bottom: 2px;">Spelling Guidance:</strong>
+                <span style="color: #4B5563;">${nameNumData.recommendations.suggestedAdjustments[0]?.benefitsDescriptionHi || 'वर्तमान वर्तनी शुभ एवं संतुलित ऊर्जा प्रदान कर रही है।'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Auspicious Elements & Mandatory Disclaimer -->
+          <div class="pdf-card" style="margin-bottom: 0; padding: 8px 12px; background-color: #FAF5EE; border: 1px dashed #D97706;">
+            <div style="display: flex; justify-content: space-between; font-size: 8px; color: #92400E; margin-bottom: 4px;">
+              <span><strong>Lucky Numbers:</strong> ${nameNumData.chaldean.luckyInfo.luckyNumbers.join(', ')}</span>
+              <span><strong>Lucky Colours:</strong> ${nameNumData.chaldean.luckyInfo.luckyColours.slice(0, 3).join(', ')}</span>
+              <span><strong>Supportive Days:</strong> ${nameNumData.chaldean.luckyInfo.supportiveDays.slice(0, 2).join(', ')}</span>
+            </div>
+            <div style="font-size: 7.5px; color: #78350F; font-style: italic; border-top: 1px dashed #FDE68A; padding-top: 3px;">
+              <strong>Disclaimer:</strong> "${nameNumData.recommendations.disclaimer}" Traditional numerology ke according yeh combination zyada supportive mana ja sakta hai.
+            </div>
+          </div>
+          
+          <div class="pdf-footer">
+            <span>Prepared Specially For: ${details.name}</span>
+            <span>Rajeev Astrological Methods</span>
+          </div>
+        </div>
+
+        <!-- PAGE 8: SHIFTING PERSONAL YEARS FORECAST TABLE (2026 - 2030) -->
+        <div class="pdf-page">
+          <div class="pdf-header">
+            <span class="pdf-header-title">VIII. Shifting Personal Years Forecast Table</span>
+            <span class="pdf-header-tag">${reportId} • Page 8</span>
           </div>
           
           <div class="pdf-card" style="padding: 14px;">
@@ -906,11 +1144,11 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
           </div>
         </div>
         
-        <!-- PAGE 7: ASTROLOGICAL REMEDIES & LAL KITAB ADVICE -->
+        <!-- PAGE 9: ASTROLOGICAL REMEDIES & LAL KITAB ADVICE -->
         <div class="pdf-page">
           <div class="pdf-header">
-            <span class="pdf-header-title">VII. Astrological Remedies & Lal Kitab Advice</span>
-            <span class="pdf-header-tag">${reportId} • Page 7</span>
+            <span class="pdf-header-title">IX. Astrological Remedies & Lal Kitab Advice</span>
+            <span class="pdf-header-tag">${reportId} • Page 9</span>
           </div>
           
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 10px;">
@@ -979,10 +1217,10 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
           </div>
         </div>
         
-        <!-- PAGE 8+: DETAILED COSMIC READING -->
+        <!-- PAGE 10+: DETAILED COSMIC READING -->
         <div class="pdf-flow-page">
           <div class="pdf-header">
-            <span class="pdf-header-title">VIII. Synthesized Conductor & Predictive Insights</span>
+            <span class="pdf-header-title">X. Synthesized Conductor & Predictive Insights</span>
             <span class="pdf-header-tag">${reportId} • AI Analysis</span>
           </div>
           
@@ -1000,10 +1238,10 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
           </div>
         </div>
 
-        <!-- PAGE 9: LEO AI ADVISOR STRATEGIC MONTHLY FOCUS -->
+        <!-- PAGE 11: LEO AI ADVISOR STRATEGIC MONTHLY FOCUS -->
         <div class="pdf-page" style="page-break-before: always; break-before: page;">
           <div class="pdf-header">
-            <span class="pdf-header-title">IX. Leo AI Advisor Monthly Guidance Matrix</span>
+            <span class="pdf-header-title">XI. Leo AI Advisor Monthly Guidance Matrix</span>
             <span class="pdf-header-tag">${reportId} • Action Plan</span>
           </div>
           
@@ -1198,156 +1436,200 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
   };
 
   return (
-    <div id="report-generator-panel" className="space-y-8 animate-in fade-in duration-500 text-left">
+    <div id="report-generator-panel" className="space-y-6 animate-in fade-in duration-500 text-left">
       
-      {!reportText ? (
-        <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm text-center space-y-6 max-w-2xl mx-auto py-12">
-          <div className="w-16 h-16 rounded-full bg-[#D97706]/10 border border-[#D97706]/20 text-[#D97706] flex items-center justify-center text-3xl mx-auto shadow-md">
-            📜
-          </div>
-          <div className="space-y-2">
-            <h3 className="font-playfair text-xl font-bold text-[#1F2937] tracking-wider">Vedic Astrology & AI Conductor Report</h3>
-            <p className="text-[#6B7280] text-sm max-w-md mx-auto leading-relaxed font-sans">
-              Consolidate your numerological readings into a single comprehensive Indian Numerology report. This synthesis aligns certified planetary calculations with advanced artificial intelligence (Gemini AI) for precise Driver and Conductor insights.
-            </p>
-          </div>
-
-          {errorMessage && (
-            <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-xs text-left max-w-lg mx-auto font-sans">
-              ⚠️ {errorMessage}
-            </div>
-          )}
-
-          <div className="pt-4">
-            <button
-              onClick={handleGenerateReport}
-              disabled={loading}
-              className={`w-full md:w-auto bg-[#D97706] hover:bg-[#B45309] disabled:opacity-50 text-white font-bold px-8 py-3.5 rounded-2xl transition-all duration-300 text-xs tracking-widest uppercase cursor-pointer ${
-                loading ? 'animate-pulse' : ''
-              }`}
-            >
-              {loading ? 'Analyzing Celestial Paths...' : 'Generate AI Astrological Report'}
-            </button>
-          </div>
+      {/* Report Format Switcher */}
+      <div className="flex items-center justify-between bg-white p-2 rounded-2xl border border-[#E5E7EB] shadow-xs">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setReportMode('MASTER_DOSSIER')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              reportMode === 'MASTER_DOSSIER'
+                ? 'bg-[#D97706] text-white shadow-xs'
+                : 'bg-[#FAF5EE] text-[#78350F] hover:bg-[#F2E8DC]'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>LeoFamily 31-Section Master Report</span>
+          </button>
+          <button
+            onClick={() => setReportMode('AI_NARRATIVE')}
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              reportMode === 'AI_NARRATIVE'
+                ? 'bg-[#D97706] text-white shadow-xs'
+                : 'bg-[#FAF5EE] text-[#78350F] hover:bg-[#F2E8DC]'
+            }`}
+          >
+            <Cpu className="w-4 h-4" />
+            <span>AI Narrative Synthesis</span>
+          </button>
         </div>
+
+        <span className="hidden sm:inline-block text-[11px] text-[#6B7280] font-mono pr-2">
+          Single Source of Truth: generateCompleteNumerologyProfile
+        </span>
+      </div>
+
+      {reportMode === 'MASTER_DOSSIER' ? (
+        <MasterReportUnified
+          profile={effectiveProfile}
+          personalDetails={personalDetails}
+          dobData={dobData}
+          nameData={nameData}
+          mobileData={mobileData}
+          remedies={remedies}
+        />
       ) : (
-        <div className="space-y-6 animate-in slide-in-from-bottom-6 duration-700">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Your Personalized Indian Numerology Report</h3>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setReportText(null)}
-                className="bg-[#F2E8DC] hover:bg-[#E5D7C6] text-[#D97706] font-semibold px-5 py-2.5 rounded-xl text-xs transition duration-300 cursor-pointer border border-[#D97706]/20 font-sans"
-              >
-                Reset / Restart
-              </button>
-              <button
-                onClick={handlePrint}
-                className="bg-[#F2E8DC] hover:bg-[#E5D7C6] text-[#D97706] font-semibold px-5 py-2.5 rounded-xl text-xs transition duration-300 cursor-pointer border border-[#D97706]/20 font-sans"
-              >
-                Print Report
-              </button>
-              <button
-                onClick={handleDownloadPDF}
-                disabled={pdfLoading}
-                className="bg-[#D97706] hover:bg-[#B45309] disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl text-xs tracking-wider uppercase transition duration-300 cursor-pointer shadow-sm font-sans flex items-center gap-2"
-              >
-                {pdfLoading ? (
-                  <>
-                    <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Generating PDF...
-                  </>
-                ) : (
-                  'Download Premium PDF'
-                )}
-              </button>
+        <>
+          {!reportText ? (
+            <div className="glass-panel p-8 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm text-center space-y-6 max-w-2xl mx-auto py-12">
+              <div className="w-16 h-16 rounded-full bg-[#D97706]/10 border border-[#D97706]/20 text-[#D97706] flex items-center justify-center text-3xl mx-auto shadow-md">
+                📜
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-playfair text-xl font-bold text-[#1F2937] tracking-wider">Vedic Astrology & AI Conductor Report</h3>
+                <p className="text-[#6B7280] text-sm max-w-md mx-auto leading-relaxed font-sans">
+                  Consolidate your numerological readings into an AI narrative summary aligned with certified planetary calculations.
+                </p>
+              </div>
+
+              {errorMessage && (
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-xs text-left max-w-lg mx-auto font-sans">
+                  ⚠️ {errorMessage}
+                </div>
+              )}
+
+              <div className="pt-4">
+                <button
+                  onClick={handleGenerateReport}
+                  disabled={loading}
+                  className={`w-full md:w-auto bg-[#D97706] hover:bg-[#B45309] disabled:opacity-50 text-white font-bold px-8 py-3.5 rounded-2xl transition-all duration-300 text-xs tracking-widest uppercase cursor-pointer ${
+                    loading ? 'animate-pulse' : ''
+                  }`}
+                >
+                  {loading ? 'Analyzing Celestial Paths...' : 'Generate AI Astrological Report'}
+                </button>
+              </div>
             </div>
-          </div>
-
-          <div id="ai-report-body" className="glass-panel p-8 md:p-12 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm text-slate-700 text-sm leading-relaxed prose max-w-none text-left space-y-6">
-            <ReactMarkdown>{reportText}</ReactMarkdown>
-          </div>
-
-          {/* Leo AI Advisor Section */}
-          {advisorActions && (
-            <div className="glass-panel p-6 md:p-8 rounded-[35px] bg-gradient-to-br from-amber-50/40 via-white to-amber-50/10 border border-[#E5E7EB] shadow-sm text-left space-y-6 mt-8 animate-in fade-in duration-500">
-              <div className="flex items-center gap-3 border-b border-amber-200/50 pb-4">
-                <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 text-[#D97706] flex items-center justify-center text-xl shadow-sm">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-playfair text-lg font-bold text-[#1F2937]">Leo AI Advisor Guidance</h3>
-                  <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-widest font-bold block">Actionable Strategic Focus</span>
-                </div>
-              </div>
-
-              <p className="text-[#4B5563] text-xs leading-relaxed font-sans">
-                Based on your complete numerology profile, here are the 3 most important things to focus on this month. This turns your celestial map into concrete, daily, and weekly actions to drive tangible success.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                {/* Career Focus */}
-                <div className="bg-white border border-[#FEF3C7] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-[#B45309]">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                        <Briefcase className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] font-mono uppercase font-black tracking-wider">Career Focus</span>
-                    </div>
-                    <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.career.title}</h4>
-                    <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.career.description}</p>
-                  </div>
-                  <div className="bg-[#FEF3C7]/60 p-3.5 rounded-2xl text-[11px] text-[#B45309] font-medium leading-relaxed font-sans">
-                    <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-amber-800">Transit Remedy:</strong>
-                    {advisorActions.career.remedy}
-                  </div>
-                </div>
-
-                {/* Relationship Focus */}
-                <div className="bg-white border border-[#FCE7F3] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-[#BE185D]">
-                      <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
-                        <Heart className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] font-mono uppercase font-black tracking-wider">Relationship Focus</span>
-                    </div>
-                    <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.relationship.title}</h4>
-                    <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.relationship.description}</p>
-                  </div>
-                  <div className="bg-[#FCE7F3]/60 p-3.5 rounded-2xl text-[11px] text-[#BE185D] font-medium leading-relaxed font-sans">
-                    <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-pink-800">Transit Remedy:</strong>
-                    {advisorActions.relationship.remedy}
-                  </div>
-                </div>
-
-                {/* Health Focus */}
-                <div className="bg-white border border-[#D1FAE5] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-[#047857]">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                        <Activity className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] font-mono uppercase font-black tracking-wider">Wellness Focus</span>
-                    </div>
-                    <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.health.title}</h4>
-                    <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.health.description}</p>
-                  </div>
-                  <div className="bg-[#D1FAE5]/60 p-3.5 rounded-2xl text-[11px] text-[#047857] font-medium leading-relaxed font-sans">
-                    <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-emerald-800">Transit Remedy:</strong>
-                    {advisorActions.health.remedy}
-                  </div>
+          ) : (
+            <div className="space-y-6 animate-in slide-in-from-bottom-6 duration-700">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Your Personalized AI Narrative Report</h3>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setReportText(null)}
+                    className="bg-[#F2E8DC] hover:bg-[#E5D7C6] text-[#D97706] font-semibold px-5 py-2.5 rounded-xl text-xs transition duration-300 cursor-pointer border border-[#D97706]/20 font-sans"
+                  >
+                    Reset / Restart
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="bg-[#F2E8DC] hover:bg-[#E5D7C6] text-[#D97706] font-semibold px-5 py-2.5 rounded-xl text-xs transition duration-300 cursor-pointer border border-[#D97706]/20 font-sans"
+                  >
+                    Print Report
+                  </button>
+                  <button
+                    onClick={handleDownloadPDF}
+                    disabled={pdfLoading}
+                    className="bg-[#D97706] hover:bg-[#B45309] disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl text-xs tracking-wider uppercase transition duration-300 cursor-pointer shadow-sm font-sans flex items-center gap-2"
+                  >
+                    {pdfLoading ? (
+                      <>
+                        <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Generating PDF...
+                      </>
+                    ) : (
+                      'Download Premium PDF'
+                    )}
+                  </button>
                 </div>
               </div>
+
+              <div id="ai-report-body" className="glass-panel p-8 md:p-12 rounded-[40px] bg-white border-[#E5E7EB] shadow-sm text-slate-700 text-sm leading-relaxed prose max-w-none text-left space-y-6">
+                <ReactMarkdown>{reportText}</ReactMarkdown>
+              </div>
+
+              {/* Leo AI Advisor Section */}
+              {advisorActions && (
+                <div className="glass-panel p-6 md:p-8 rounded-[35px] bg-gradient-to-br from-amber-50/40 via-white to-amber-50/10 border border-[#E5E7EB] shadow-sm text-left space-y-6 mt-8 animate-in fade-in duration-500">
+                  <div className="flex items-center gap-3 border-b border-amber-200/50 pb-4">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 text-[#D97706] flex items-center justify-center text-xl shadow-sm">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-playfair text-lg font-bold text-[#1F2937]">Leo AI Advisor Guidance</h3>
+                      <span className="text-[10px] font-mono text-[#D97706] uppercase tracking-widest font-bold block">Actionable Strategic Focus</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[#4B5563] text-xs leading-relaxed font-sans">
+                    Based on your complete numerology profile, here are the 3 most important things to focus on this month.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                    {/* Career Focus */}
+                    <div className="bg-white border border-[#FEF3C7] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[#B45309]">
+                          <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                            <Briefcase className="w-4 h-4" />
+                          </div>
+                          <span className="text-[10px] font-mono uppercase font-black tracking-wider">Career Focus</span>
+                        </div>
+                        <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.career.title}</h4>
+                        <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.career.description}</p>
+                      </div>
+                      <div className="bg-[#FEF3C7]/60 p-3.5 rounded-2xl text-[11px] text-[#B45309] font-medium leading-relaxed font-sans">
+                        <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-amber-800">Transit Remedy:</strong>
+                        {advisorActions.career.remedy}
+                      </div>
+                    </div>
+
+                    {/* Relationship Focus */}
+                    <div className="bg-white border border-[#FCE7F3] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[#BE185D]">
+                          <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                            <Heart className="w-4 h-4" />
+                          </div>
+                          <span className="text-[10px] font-mono uppercase font-black tracking-wider">Relationship Focus</span>
+                        </div>
+                        <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.relationship.title}</h4>
+                        <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.relationship.description}</p>
+                      </div>
+                      <div className="bg-[#FCE7F3]/60 p-3.5 rounded-2xl text-[11px] text-[#BE185D] font-medium leading-relaxed font-sans">
+                        <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-pink-800">Transit Remedy:</strong>
+                        {advisorActions.relationship.remedy}
+                      </div>
+                    </div>
+
+                    {/* Health Focus */}
+                    <div className="bg-white border border-[#D1FAE5] rounded-3xl p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition duration-300">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[#047857]">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                            <Activity className="w-4 h-4" />
+                          </div>
+                          <span className="text-[10px] font-mono uppercase font-black tracking-wider">Wellness Focus</span>
+                        </div>
+                        <h4 className="font-playfair text-sm font-bold text-[#1F2937]">{advisorActions.health.title}</h4>
+                        <p className="text-xs text-[#4B5563] leading-relaxed font-sans">{advisorActions.health.description}</p>
+                      </div>
+                      <div className="bg-[#D1FAE5]/60 p-3.5 rounded-2xl text-[11px] text-[#047857] font-medium leading-relaxed font-sans">
+                        <strong className="font-mono text-[9px] uppercase font-black tracking-wider block mb-1 text-emerald-800">Transit Remedy:</strong>
+                        {advisorActions.health.remedy}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
-
     </div>
   );
 };

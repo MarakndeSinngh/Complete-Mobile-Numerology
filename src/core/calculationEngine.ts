@@ -15,6 +15,7 @@ import { calculateMulankBhagyankRelationship } from './bhagyankEngine';
 import { analyzeMobileNumerology } from './mobileNumerologyEngine';
 import { analyzeNumeroVastu } from './vastuEngine';
 import { analyzeMedicalNumerology } from './medicalNumerologyEngine';
+import { analyzeComprehensiveName } from './nameNumerologyEngine';
 import { generateDomainInterpretations } from './interpretationEngine';
 import { calculateRemedies } from './recommendationEngine';
 import { generateExplanations } from './explanationEngine';
@@ -37,6 +38,7 @@ import { analyzeKarmicPatterns } from './karmicEngine';
 import { calculateKuaNumber } from './kuaEngine';
 import { buildVedicGrid } from './vedicGridEngine';
 import { generate90DayActionPlan } from './actionPlanEngine';
+import { analyzeVehicleNumerologyPro } from './vehicleEngine';
 
 // Global cache for calculated profiles
 const profileCache = new Map<string, CompleteNumerologyProfile>();
@@ -51,7 +53,9 @@ export interface CompleteProfileInput {
   houseNumber?: string;
   businessName?: string;
   facingDirection?: string;
-  entranceNumber?: string;
+  flatNumber?: string;
+  buildingNumber?: string;
+  floorNumber?: string | number;
 }
 
 export function generateCompleteNumerologyProfile(input: CompleteProfileInput): CompleteNumerologyProfile {
@@ -110,16 +114,31 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
   // 6. Dedicated specialized engines
   const vastu = analyzeNumeroVastu({
     dob,
+    mulank,
+    bhagyank,
     gender,
     houseNumber,
     entranceNumber,
     facingDirection,
+    flatNumber: input.flatNumber,
+    buildingNumber: input.buildingNumber,
+    floor: input.floorNumber,
     mobileNumber: mobile,
-    vehicleNumber
+    vehicleNumber,
+    missingNumbers: rawMissingNumbers
   });
 
   const medical = analyzeMedicalNumerology(dob, name);
-  const mobileAnalysis = mobile ? analyzeMobileNumerology(mobile, mulank, bhagyank) : undefined;
+  const mobileAnalysis = mobile ? analyzeMobileNumerology(mobile, mulank, bhagyank, enhancedGridResult.enhancedGridPresence, dobDigits) : undefined;
+  const nameNumerology = analyzeComprehensiveName({
+    name,
+    dob,
+    mulank,
+    bhagyank,
+    mobile,
+    birthGrid,
+    enhancedGrid: enhancedGridResult.enhancedGridPresence
+  });
   const interpretations = generateDomainInterpretations(mulank, bhagyank, synthesis, enhancedGridResult);
 
   // 7. Profile structural fields
@@ -158,7 +177,7 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     moneyBlockages: masterReport.wealthPsychology.spendingBehaviour,
     financialRemedies: masterReport.wealthPsychology.riskTakingBehaviour,
     businessMindset: masterReport.wealthPsychology.moneyMindset,
-    businessSuitability: 'Aligned for commercial investments in supportive sectors.'
+    businessSuitability: 'अनुकूल क्षेत्रों में व्यापारिक और रणनीतिक निवेश के लिए उपयुक्त।'
   };
 
   const health = {
@@ -168,8 +187,8 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     stressScore: medical.scores.stressScore,
     energyScore: medical.scores.energyScore || 75,
     dietaryAdvice: medical.dietRecommendations.recommendedFoods.slice(0, 3).join(', '),
-    organStrengths: medical.healthStrengths.join('; ') || 'Balanced organ vitality reserves.',
-    chakraVibrations: 'Manipura and Anahata energy centers resonate at primary frequencies.'
+    organStrengths: medical.healthStrengths.join('; ') || 'संतुलित शारीरिक और जैविक ऊर्जा संचय।',
+    chakraVibrations: 'मणिपुर और अनाहत चक्र मुख्य ऊर्जा केंद्रों के रूप में सक्रिय।'
   };
 
   const relationship = {
@@ -220,6 +239,14 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     weakPlanes
   });
 
+  const vehicleAnalysis = vehicleNumber ? analyzeVehicleNumerologyPro({
+    registrationNumber: vehicleNumber,
+    ownerDob: dob,
+    ownerName: name,
+    mobileNumber: mobile,
+    gender
+  }) : undefined;
+
   const premiumModules = {
     vehicle: vehicleNumber ? analyzeVehicleNumerology(vehicleNumber, mulank) : null,
     house: houseNumber ? analyzeHouseNumerology(houseNumber) : null,
@@ -258,7 +285,11 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     },
     vastu,
     medical,
+    nameNumerology,
+    nameAnalysis: nameNumerology,
+    vedicDasha: medical.vedicDashaAnalysis,
     mobileAnalysis,
+    vehicleAnalysis,
     interpretations,
     remedies,
     consultation,

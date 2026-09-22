@@ -25,12 +25,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [9, 5, 1],
     type: 'STRENGTH',
     condition: 'ALL_PRESENT',
-    meaning: 'Formed when 9 (Mars), 5 (Mercury), and 1 (Sun) are all present in the grid. Endows unrelenting determination, persistence, and refusal to surrender.',
-    strength: 'Iron willpower, unstoppable momentum, ability to bounce back from crushing failure.',
-    shadow: 'Can become overly stubborn, impatient with slower collaborators, or unyielding.',
-    careerImpact: 'Natural CEO, competitive entrepreneur, crisis turnaround leader, and pioneer.',
-    relationshipImpact: 'Protective and dedicated; expects equal commitment and mutual respect.',
-    recommendation: 'Channel intensity into constructive milestones; practice active listening.'
+    meaning: 'जब लो शू ग्रिड में 9 (मंगल), 5 (बुध) और 1 (सूर्य) तीनों अंक उपस्थित होते हैं, तब यह बाण बनता है। यह अटूट संकल्प, धैर्य और कभी हार न मानने की अद्भुत शक्ति प्रदान करता है।',
+    strength: 'लौह इच्छाशक्ति, निरंतर आगे बढ़ने का हौसला, गंभीर असफलताओं से भी तुरंत उबरने की क्षमता।',
+    shadow: 'कभी-कभी अत्यधिक जिद्दी होना, धीमी गति से काम करने वालों पर खीझना और लचीलेपन की कमी।',
+    careerImpact: 'स्वाभाविक सीईओ, प्रतिस्पर्धी उद्यमी, संकटमोचक लीडर और किसी भी क्षेत्र में नई राह बनाने वाले पथप्रदर्शक।',
+    relationshipImpact: 'सुरक्षात्मक और निष्ठावान साथी; रिश्ते में बराबर के समर्पण और परस्पर सम्मान की अपेक्षा रखते हैं।',
+    recommendation: 'अपनी तीव्र ऊर्जा को सार्थक रचनात्मक लक्ष्यों में लगाएं और दूसरों की राय भी ध्यान से सुनें।'
   },
   {
     id: 'ARROW_INTELLECT',
@@ -39,12 +39,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [4, 9, 2],
     type: 'STRENGTH',
     condition: 'ALL_PRESENT',
-    meaning: 'Formed when 4 (Rahu), 9 (Mars), and 2 (Moon) are all present in the grid. Bestows exceptional memory, analytical brilliance, and deep intellectual retention.',
-    strength: 'Photographic or strong associative memory, sharp reasoning, quick mental calculations.',
-    shadow: 'Can lead to mental burnout, over-analyzing simple situations, or intellectual arrogance.',
-    careerImpact: 'Flourishes in scientific research, legal drafting, complex systems engineering, and academia.',
-    relationshipImpact: 'Requires deep intellectual companionship and stimulating dialogue.',
-    recommendation: 'Take digital detox breaks to avoid cognitive exhaustion.'
+    meaning: 'जब ग्रिड में 4 (राहु), 9 (मंगल) और 2 (चन्द्र) तीनों अंक मौजूद हों, तब यह बाण सक्रिय होता है। यह विलक्षण स्मरण शक्ति, कुशाग्र विश्लेषणात्मक मेधा और बौद्धिक समझ देता है।',
+    strength: 'शानदार याददाश्त, तीव्र तार्किक क्षमता और जटिल विषयों को पलक झपकते ही समझ लेने का हुनर।',
+    shadow: 'अत्यधिक सोचने से मानसिक तनाव, सरल बातों का भी गहरा विश्लेषण करना और बौद्धिक अहंकार।',
+    careerImpact: 'वैज्ञानिक अनुसंधान, कानूनी दस्तावेज, सॉफ्टवेयर व जटिल सिस्टम डिजाइन और उच्च शिक्षा में विशिष्ट स्थान।',
+    relationshipImpact: 'गहरे बौद्धिक तालमेल और ज्ञानवर्धक बातचीत करने वाले जीवनसाथी की चाह रखते हैं।',
+    recommendation: 'मानसिक शांति के लिए स्क्रीन और डिजिटल गैजेट्स से समय-समय पर ब्रेक लें और ध्यान करें।'
   },
   {
     id: 'ARROW_PLANNING',
@@ -53,12 +53,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [4, 3, 8],
     type: 'STRENGTH',
     condition: 'ALL_PRESENT',
-    meaning: 'Formed when 4 (Rahu), 3 (Jupiter), and 8 (Saturn) are all present in the grid. Gives magnificent long-range vision, patience, and systemic foresight.',
-    strength: 'Architectural planning, procedural discipline, ability to foresee risks years in advance.',
-    shadow: 'Risk of procrastination due to waiting for ideal blueprint conditions.',
-    careerImpact: 'Urban planner, strategic consultant, institutional architect, and policy director.',
-    relationshipImpact: 'Builds secure, multi-generational family structures.',
-    recommendation: 'Balance elaborate planning with immediate daily action steps.'
+    meaning: 'जब ग्रिड में 4 (राहु), 3 (गुरु) और 8 (शनि) तीनों उपस्थित हों, तब यह योजना बाण निर्मित होता है। यह अद्भुत दूरदर्शिता, व्यवस्थित दृष्टिकोण और संगठनात्मक समझ देता है।',
+    strength: 'दूरगामी योजना निर्माण, कार्यप्रणाली में अनुशासन और वर्षों पहले संभावित जोखिमों को भांप लेने की कला।',
+    shadow: 'परफेक्ट प्लान के इंतजार में काम शुरू करने में अत्यधिक देरी (procrastination) का जोखिम।',
+    careerImpact: 'मास्टर प्लानर, रणनीतिक सलाहकार, संस्थागत आर्किटेक्ट और नीति निर्देशक के रूप में सफल।',
+    relationshipImpact: 'सुरक्षित, व्यवस्थित और पारिवारिक भविष्य को मजबूत बनाने वाले रिश्ते पसंद करते हैं।',
+    recommendation: 'विस्तृत प्लानिंग के साथ-साथ तुरंत छोटे-छोटे जमीनी कदम उठाने का अभ्यास करें।'
   },
   {
     id: 'ARROW_PRACTICALITY',
@@ -67,12 +67,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [8, 1, 6],
     type: 'STRENGTH',
     condition: 'ALL_PRESENT',
-    meaning: 'Formed when 8 (Saturn), 1 (Sun), and 6 (Venus) are all present in the grid. Endows practical execution, grounded business sense, and material mastery.',
-    strength: 'Grounded common sense, relentless work ethic, excellent resource management.',
-    shadow: 'May dismiss abstract, philosophical, or spiritual dimensions if not immediately tangible.',
-    careerImpact: 'Real estate tycoon, manufacturing head, CFO, and large corporate builder.',
-    relationshipImpact: 'Deeply reliable provider who expresses love through tangible acts and security.',
-    recommendation: 'Infuse practical routines with spiritual reflection and family warmth.'
+    meaning: 'जब ग्रिड में 8 (शनि), 1 (सूर्य) और 6 (शुक्र) तीनों अंक मौजूद हों, तब व्यावहारिकता बाण बनता है। यह ठोस क्रियान्वयन, व्यावहारिक व्यापारिक समझ और भौतिक सफलता देता है।',
+    strength: 'जमीनी समझदारी, अथक कार्य नैतिकता और संसाधनों का बेहतरीन प्रबंधन।',
+    shadow: 'काल्पनिक या आध्यात्मिक बातों को जल्दी नकार देना यदि उनसे तुरंत ठोस लाभ न दिखे।',
+    careerImpact: 'रियल एस्टेट टाइकून, मैन्युफैक्चरिंग प्रमुख, सीएफओ (CFO) और बड़े उद्योगपति।',
+    relationshipImpact: 'बेहद भरोसेमंद जीवनसाथी जो परिवार को सुरक्षा और सभी सुख-सुविधाएं देकर अपना प्यार जताते हैं।',
+    recommendation: 'दैनिक दिनचर्या में परिवार के साथ समय और आध्यात्मिक चिंतन को भी स्थान दें।'
   },
   {
     id: 'ARROW_EMOTIONAL_BALANCE',
@@ -81,12 +81,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [3, 5, 7],
     type: 'STRENGTH',
     condition: 'ALL_PRESENT',
-    meaning: 'Formed when 3 (Jupiter), 5 (Mercury), and 7 (Ketu) are all present in the grid. Imparts emotional poise, intuitive wisdom, and profound heart equilibrium.',
-    strength: 'Natural healing touch, calm composure during emotional storms, compassionate advisory.',
-    shadow: 'Can feel burdened by the emotional baggage of friends or colleagues.',
-    careerImpact: 'Psychologist, therapist, spiritual mentor, mediator, and human rights advocate.',
-    relationshipImpact: 'Creates deep soul-level emotional bonds with partner and children.',
-    recommendation: 'Maintain healthy energetic boundaries to preserve personal vitality.'
+    meaning: 'जब ग्रिड में 3 (गुरु), 5 (बुध) और 7 (केतु) तीनों अंक उपस्थित हों, तब यह बाण बनता है। यह आंतरिक शांति, गहरा अंतर्ज्ञान और हृदय का सुंदर संतुलन प्रदान करता है।',
+    strength: 'प्राकृतिक हीलिंग स्पर्श, मुश्किल समय में भी शांत व संतुलित रहना और संवेदनशील सलाहकारी क्षमता।',
+    shadow: 'दोस्तों या सहकर्मियों के भावनात्मक तनाव को अपने ऊपर ले लेना और खुद थक जाना।',
+    careerImpact: 'मनोवैज्ञानिक, हीलर, आध्यात्मिक मार्गदर्शक, मध्यस्थ (mediator) और समाज सेवक।',
+    relationshipImpact: 'जीवनसाथी और बच्चों के साथ आत्मिक स्तर का गहरा और अटूट भावनात्मक रिश्ता बनाते हैं।',
+    recommendation: 'अपनी ऊर्जा को सुरक्षित रखने के लिए स्पष्ट भावनात्मक सीमाएं (healthy boundaries) बनाएं।'
   },
   {
     id: 'ARROW_SPIRITUALITY',
@@ -95,12 +95,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [3, 5, 7], // Traditional spiritual axis in classical Indian numerology
     type: 'STRENGTH',
     condition: 'ALL_PRESENT',
-    meaning: 'Formed when the spiritual axis is energized. Indicates philosophical detachment, love for divine truth, and awakening beyond mundane illusions.',
-    strength: 'Inner peace, profound intuition, reverence for cosmic dharma.',
-    shadow: 'Risk of world-weariness or neglect of practical financial obligations.',
-    careerImpact: 'Spiritual teacher, philosopher, holistic healer, and humanitarian author.',
-    relationshipImpact: 'Values purity and truthfulness above social superficialities.',
-    recommendation: 'Ground spiritual insights into practical acts of charitable service.'
+    meaning: 'जब ग्रिड की मध्य आध्यात्मिक धुरी जागृत होती है, तब यह बाण बनता है। यह सांसारिक मोह से परे आत्म-ज्ञान, सत्य की खोज और आध्यात्मिक चेतना का प्रतीक है।',
+    strength: 'आंतरिक शांति, गहरा अंतर्ज्ञान और नैतिक व धर्म के मार्ग पर चलने की निष्ठा।',
+    shadow: 'सांसारिक जिम्मेदारियों या वित्तीय मामलों से कभी-कभी विरक्ति का भाव आना।',
+    careerImpact: 'आध्यात्मिक गुरु, दार्शनिक, समग्र स्वास्थ्य विशेषज्ञ (holistic healer) और प्रेरक लेखक।',
+    relationshipImpact: 'दिखावे से दूर, सच्चे और निष्कपट रिश्तों को सर्वोपरि मानते हैं।',
+    recommendation: 'आध्यात्मिक ज्ञान को व्यावहारिक समाज सेवा और कर्मयोग के माध्यम से अभिव्यक्त करें।'
   },
   {
     id: 'ARROW_ACTIVITY',
@@ -109,12 +109,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [2, 7, 6],
     type: 'STRENGTH',
     condition: 'ALL_PRESENT',
-    meaning: 'Formed when 2 (Moon), 7 (Ketu), and 6 (Venus) are all present in the grid. Endows spontaneous action, physical stamina, athletic grace, and artistic expression.',
-    strength: 'Quick physical reflexes, charismatic performance, continuous energetic drive.',
-    shadow: 'Impatience with slow meetings; acting before complete deliberation.',
-    careerImpact: 'Competitive sports, stage acting, luxury PR, event choreography, and emergency response.',
-    relationshipImpact: 'Playful, exciting, and romantic partner who keeps romance fresh.',
-    recommendation: 'Incorporate calming seated meditation to balance physical restlessness.'
+    meaning: 'जब ग्रिड में 2 (चन्द्र), 7 (केतु) और 6 (शुक्र) तीनों अंक उपस्थित हों, तब यह बाण बनता है। यह त्वरित क्रियान्वयन, शारीरिक स्फूर्ति, कलात्मक रुचि और ऊर्जावान स्वभाव देता है।',
+    strength: 'तेज रिफ्लेक्स, प्रभावशाली व्यक्तित्व, ऊर्जा से भरपूर कार्यशैली और कलात्मक प्रस्तुति।',
+    shadow: 'धीमी प्रक्रियाओं में अधीरता और बिना पूरा विचार किए तुरंत कदम उठा लेना।',
+    careerImpact: 'प्रतिस्पर्धी खेल, अभिनय व थियेटर, लक्जरी पीआर, इवेंट मैनेजमेंट और इमरजेंसी रिस्पांस।',
+    relationshipImpact: 'रोमांटिक, खुशमिजाज और रिश्तों में उत्साह व नई ताजगी भरने वाले साथी।',
+    recommendation: 'शारीरिक चंचलता को संतुलित करने के लिए प्रतिदिन शांत बैठकर 10 मिनट ध्यान करें।'
   },
 
   // Arrows of Challenge (Absence / Missing)
@@ -125,12 +125,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [4, 5, 6],
     type: 'WEAKNESS',
     condition: 'ALL_ABSENT',
-    meaning: 'Occurs when all middle diagonal numbers (4-5-6) are absent. Life presents repeated unexpected delays and feeling that rewards arrive after disproportionate struggle.',
-    strength: 'Builds profound inner resilience and character under adversity.',
-    shadow: 'Chronic feelings of frustration, dissatisfaction with current progress.',
-    careerImpact: 'Requires deliberate perseverance to avoid abandoning careers midway.',
-    relationshipImpact: 'Must avoid projecting work frustrations onto personal family members.',
-    recommendation: 'Activate Mercury (5) or Venus (6) through green and white remedies; worship Lord Ganesha.'
+    meaning: 'जब ग्रिड में मध्य विकर्ण के सभी अंक (4-5-6) अनुपस्थित हों, तब यह योग बनता है। जीवन में अप्रत्याशित देरी और ऐसा महसूस होना कि मेहनत के अनुपात में परिणाम देर से मिलते हैं।',
+    strength: 'कठिनाइयों के बीच भी अद्भुत आंतरिक धैर्य और मजबूत चरित्र का निर्माण।',
+    shadow: 'प्रगति से असंतोष, बार-बार निराशा महसूस होना और जल्दी मन खिन्न होना।',
+    careerImpact: 'करियर को बीच में न छोड़कर निरंतर लगे रहने की दृढ़ता की आवश्यकता होती है।',
+    relationshipImpact: 'कार्यस्थल के तनाव या निराशा को परिवार के सदस्यों पर न उतारें।',
+    recommendation: 'हरे व सफेद रंगों के प्रयोग से बुध (5) या शुक्र (6) को बल दें और भगवान श्री गणेश की आराधना करें।'
   },
   {
     id: 'ARROW_WEAK_WILL',
@@ -139,12 +139,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [9, 5, 1],
     type: 'WEAKNESS',
     condition: 'ALL_ABSENT',
-    meaning: 'Occurs when the entire vertical central column (9-5-1) is absent. Points to difficulty with self-assertion, perseverance, and follow-through.',
-    strength: 'Gentle, accommodating nature that avoids unnecessary friction.',
-    shadow: 'Easily persuaded by others; giving up when facing initial resistance.',
-    careerImpact: 'Best suited in structured roles with clear oversight rather than solitary entrepreneurial risk.',
-    relationshipImpact: 'Needs an encouraging partner who nurtures their self-belief.',
-    recommendation: 'Engage in martial arts or competitive exercise; chant Surya mantra daily at dawn.'
+    meaning: 'जब ग्रिड का मध्य ऊर्ध्वाधर स्तंभ (9-5-1) पूर्णतः अनुपस्थित हो। इससे अपनी बात दृढ़ता से रखने, संकल्प पूरा करने और अंत तक टिके रहने में कठिनाई आ सकती है।',
+    strength: 'सौम्य और मिलनसार स्वभाव जो अनावश्यक टकराव से बचता है।',
+    shadow: 'दूसरों की बातों में जल्दी आ जाना और प्रारंभिक रुकावट आने पर प्रयास छोड़ देना।',
+    careerImpact: 'अकेले भारी जोखिम भरे व्यापार की जगह स्पष्ट दिशा-निर्देश वाले व्यवस्थित पदों में बेहतर कार्य।',
+    relationshipImpact: 'ऐसे जीवनसाथी की आवश्यकता जो इनके आत्मविश्वास को लगातार प्रोत्साहित करे।',
+    recommendation: 'नियमित व्यायाम या योग अपनाएं और प्रातःकाल उगते सूर्य को जल अर्पित कर गायत्री मंत्र का जाप करें।'
   },
   {
     id: 'ARROW_ISOLATION',
@@ -153,12 +153,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [3, 5, 7],
     type: 'WEAKNESS',
     condition: 'ALL_ABSENT',
-    meaning: 'Occurs when the central horizontal emotional plane (3-5-7) is completely missing. Indicates feelings of emotional misunderstanding or difficulty expressing inner feelings.',
-    strength: 'Self-sufficient and emotionally self-contained.',
-    shadow: 'Risk of loneliness, withholding affection, or feeling emotionally detached.',
-    careerImpact: 'Excels in solitary analytical roles but may feel excluded from office politics.',
-    relationshipImpact: 'Requires conscious effort to verbally validate partner and express warmth.',
-    recommendation: 'Keep indoor flowering plants; engage in community social service.'
+    meaning: 'जब ग्रिड की मध्य भावनात्मक रेखा (3-5-7) पूरी तरह अनुपस्थित हो। इससे अपनी आंतरिक भावनाओं को व्यक्त करने में संकोच या दूसरों द्वारा गलत समझे जाने का अहसास हो सकता है।',
+    strength: 'आत्मनिर्भर और अपने में मस्त रहने की क्षमता।',
+    shadow: 'अकेलापन, मन की बात न कह पाना या भावनात्मक रूप से अलग-थलग महसूस करना।',
+    careerImpact: 'स्वतंत्र विश्लेषणात्मक कार्यों में कुशल, लेकिन टीम की आंतरिक राजनीति से असहज महसूस कर सकते हैं।',
+    relationshipImpact: 'जीवनसाथी के प्रति अपने प्यार और भावनाओं को शब्दों में व्यक्त करने का सचेत प्रयास करें।',
+    recommendation: 'घर में सुंदर फूलों वाले पौधे लगाएं और सामाजिक व पारिवारिक आयोजनों में सक्रिय भाग लें।'
   },
   {
     id: 'ARROW_IMPATIENCE',
@@ -167,12 +167,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [2, 7, 6],
     type: 'WEAKNESS',
     condition: 'ALL_ABSENT',
-    meaning: 'Occurs when the action column (2-7-6) is completely absent. Manifests as hesitation to take prompt physical action or restlessness when tasks take time.',
-    strength: 'Deeply reflective and cautious before acting.',
-    shadow: 'Missed spontaneous opportunities due to over-contemplation.',
-    careerImpact: 'Need clear accountability deadlines to ensure timely project delivery.',
-    relationshipImpact: 'May delay initiating difficult but necessary relationship conversations.',
-    recommendation: 'Set a 5-second countdown rule for immediate daily decisions; wear silver ring.'
+    meaning: 'जब ग्रिड में कर्म स्तंभ (2-7-6) पूरी तरह अनुपस्थित हो। इससे तुरंत ठोस कदम उठाने में हिचकिचाहट या काम में समय लगने पर बेचैनी की स्थिति बन सकती है।',
+    strength: 'कोई भी कदम उठाने से पहले गहराई से सोचना और सतर्क रहना।',
+    shadow: 'अत्यधिक सोचने के कारण अच्छे अवसरों को हाथ से जाने देना।',
+    careerImpact: 'प्रोजेक्ट्स को समय पर पूरा करने के लिए स्पष्ट डेडलाइन और रिमाइंडर का सहारा लें।',
+    relationshipImpact: 'रिश्तों में जरूरी बातचीत को टालने के बजाय समय रहते संवाद स्थापित करें।',
+    recommendation: 'दैनिक कार्यों के लिए 5-सेकंड रूल (तुरंत निर्णय लेने का अभ्यास) अपनाएं और चांदी का छल्ला पहनें।'
   },
   {
     id: 'ARROW_CONFUSION',
@@ -181,12 +181,12 @@ export const MASTER_ARROWS: ArrowDefinition[] = [
     digits: [4, 9, 2],
     type: 'WEAKNESS',
     condition: 'ALL_ABSENT',
-    meaning: 'Occurs when the top mental plane (4-9-2) is completely missing. Indicates an area requiring conscious development in structured memory, logic, and strategic planning.',
-    strength: 'Intuitive, heart-led decision making rather than cold cerebral calculation.',
-    shadow: 'Absent-mindedness with details; difficulty memorizing abstract theoretical data.',
-    careerImpact: 'Thrives in creative, experiential, and relational roles; keep checklists for administrative tasks.',
-    relationshipImpact: 'Loving and emotionally warm, though may forget dates or minor logistics.',
-    recommendation: 'Maintain a physical written planner; consume soaked almonds daily; chant Saraswati mantra.'
+    meaning: 'जब ग्रिड का शीर्ष मानसिक तल (4-9-2) पूरी तरह गायब हो। यह तार्किक विश्लेषण, याददाश्त और रणनीतिक योजना में सचेत विकास की आवश्यकता को दर्शाता है।',
+    strength: 'ठोस तर्कों के बजाय सहज भावनात्मक समझ और दिल से निर्णय लेने की कला।',
+    shadow: 'छोटी-छोटी बातों को भूल जाना और जटिल सिद्धांतों को याद रखने में परेशानी।',
+    careerImpact: 'रचनात्मक, व्यावहारिक और जन-केंद्रित कार्यों में सफल; प्रशासनिक कार्यों के लिए चेकलिस्ट का उपयोग करें।',
+    relationshipImpact: 'स्नेही और दिल के साफ, यद्यपि तारीखें या छोटी व्यवस्थाएं कभी-कभी भूल सकते हैं।',
+    recommendation: 'दैनिक डायरी या प्लानर में नोट्स लिखें, प्रतिदिन भीगे हुए बादाम खाएं और ॐ ऐं सरस्वत्यै नमः का जप करें।'
   }
 ];
 
