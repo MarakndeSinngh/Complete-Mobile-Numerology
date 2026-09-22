@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   Car, Home, Briefcase, FileText, UserPlus, TrendingUp, Calendar, ChevronRight, Sparkles, Award, ShieldAlert, CheckCircle, RefreshCw, Star, ArrowRight, Info, Eye, Clock, User, Heart, Compass, Activity,
-  Camera, Upload, X, Check, AlertTriangle, Trash2, FileImage, Shield
+  Camera, Upload, X, Check, AlertTriangle, Trash2, FileImage, Shield, Baby
 } from 'lucide-react';
 import { 
   analyzeVehicleNumerology, 
@@ -25,6 +25,9 @@ import DateInput from './DateInput';
 import { formatDateIndian } from '../utils/dateUtils';
 import { VehicleNumerologyDashboard } from './VehicleNumerologyDashboard';
 import { BusinessNumerologyDashboard } from './BusinessNumerologyDashboard';
+import { ChildLuckyNamesDashboard } from './ChildLuckyNamesDashboard';
+import { LuckyDatesDashboard } from './LuckyDatesDashboard';
+import { LuckyDatesFinder } from './LuckyDatesFinder';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 15 },
@@ -784,7 +787,7 @@ export default function PremiumConsultations() {
             { id: 'HOUSE', label: 'Pro House / Flat Vastu', icon: Home },
             { id: 'BUSINESS', label: 'Pro Business Name Suite', icon: Briefcase },
             { id: 'SIGNATURE', label: 'Signature Style Diagnostics', icon: FileText },
-            { id: 'CHILD', label: 'Child Auspicious Names', icon: UserPlus },
+            { id: 'CHILD', label: 'Child Lucky Names Pro', icon: Baby },
             { id: 'LUCKY_DATES', label: 'Auspicious Dates Finder', icon: Calendar },
             { id: 'MEDICAL', label: 'Medical Numerology Scanner', icon: Activity },
             { id: 'VAASTU', label: 'Numero Vaastu Pro', icon: Compass },
@@ -1537,196 +1540,14 @@ export default function PremiumConsultations() {
         {/* CHILD MODULE */}
         {activeModule === 'CHILD' && (
           <motion.div variants={cardVariants} initial="hidden" animate="visible" className="space-y-6">
-            <div className="border-b border-[#F2E8DC] pb-4">
-              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">Auspicious Baby Starting Names Finder</h3>
-              <p className="text-xs text-slate-500 font-sans">Generate highly supportive starting name alphabets based on birth drivers, learning styles, and future planetary setups.</p>
-            </div>
-
-            <form onSubmit={handleChildSubmit} className="flex gap-3">
-              <div className="flex-1 space-y-1">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Select Baby's Date of Birth</label>
-                <DateInput
-                  id="baby-dob-input"
-                  required
-                  value={childDob}
-                  onChange={setChildDob}
-                  className="py-3 text-sm font-sans"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white px-6 py-3 rounded-xl font-mono text-xs uppercase tracking-widest font-bold cursor-pointer self-end h-[46px] transition-all"
-              >
-                Scan DOB
-              </button>
-            </form>
-
-            {childResult && (
-              <div className="p-6 md:p-8 bg-white border rounded-3xl space-y-5 animate-in fade-in duration-500 leading-relaxed font-sans text-xs">
-                
-                <span className="text-[9px] font-mono bg-indigo-50 text-[#1E3A8A] font-extrabold px-3 py-1 rounded-full uppercase">Computed: Driver {childResult.birthDriver} | Conductor {childResult.birthConductor}</span>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
-                    <strong className="text-emerald-800 text-xs flex items-center gap-1"><Award className="w-4 h-4" /> Recommended Alphabets:</strong>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {childResult.startingAlphabets.map((a, idx) => (
-                        <span key={idx} className="bg-white border text-emerald-700 px-2.5 py-1 rounded-lg text-xs font-bold font-mono shadow-sm">{a}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-100">
-                    <strong className="text-rose-800 text-xs flex items-center gap-1"><ShieldAlert className="w-4 h-4" /> Cautionary Alphabets (Avoid):</strong>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {childResult.cautionaryAlphabets.map((a, idx) => (
-                        <span key={idx} className="bg-white border text-rose-700 px-2.5 py-1 rounded-lg text-xs font-bold font-mono shadow-sm">{a}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-slate-50 border rounded-2xl space-y-3 leading-relaxed">
-                  <p><strong>Destined Career Path:</strong> {childResult.careerPrecedence}</p>
-                  <p><strong>Learning Style:</strong> {childResult.learningStyle}</p>
-                  <p><strong>Educational Strengths:</strong> {childResult.educationStrength}</p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div>
-                    <strong className="text-slate-800 text-xs">Creativity Level:</strong>
-                    <p className="text-slate-500 mt-1 leading-relaxed">{childResult.creativity}</p>
-                  </div>
-                  <div>
-                    <strong className="text-slate-800 text-xs">Communication Tone:</strong>
-                    <p className="text-slate-500 mt-1 leading-relaxed">{childResult.communication}</p>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4 text-xs space-y-2">
-                  <p className="font-bold text-[#D97706] uppercase font-mono">Parenting Vastu Guidance:</p>
-                  <p className="text-slate-650 leading-relaxed">{childResult.parentingGuidance}</p>
-                </div>
-
-                <div className="p-3 bg-amber-50/20 rounded-xl border text-slate-650">
-                  <p className="font-bold text-amber-900">Recommended Activities:</p>
-                  <p className="text-slate-500 mt-0.5">{childResult.luckyActivities.join(', ')}</p>
-                </div>
-
-                {/* Expandable Why */}
-                <div className="border-t pt-2">
-                  <button
-                    onClick={() => setShowChildWhy(!showChildWhy)}
-                    className="flex items-center gap-1 text-[11px] font-bold text-[#1E3A8A] hover:underline cursor-pointer"
-                  >
-                    <Info className="w-3.5 h-3.5" /> Explain baby spelling calculation
-                  </button>
-                  {showChildWhy && (
-                    <div className="mt-2 p-3 bg-slate-50 rounded-xl border text-[11px] text-slate-500 space-y-1">
-                      <p><strong>Chaldean Vibration:</strong> The recommended alphabets generate letters matching friendly, high-energy planets (like Jupiter for wisdom or Mercury for business) while keeping away from extreme Saturn opposition (8) or sudden delays.</p>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            )}
+            <ChildLuckyNamesDashboard />
           </motion.div>
         )}
 
         {/* LUCKY DATES MODULE */}
         {activeModule === 'LUCKY_DATES' && (
           <motion.div variants={cardVariants} initial="hidden" animate="visible" className="space-y-6">
-            <div className="border-b border-[#F2E8DC] pb-4">
-              <h3 className="font-playfair text-xl font-bold text-[#1E3A8A]">Auspicious Pro Dates Suite</h3>
-              <p className="text-xs text-slate-500 font-sans">Find target-specific friendly dates for Business, Marriage, Travel, and property deals matching your birth numbers.</p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Driver Number</label>
-                <select
-                  value={luckyDatesDriver}
-                  onChange={(e) => setLuckyDatesDriver(parseInt(e.target.value, 10))}
-                  className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>Driver {n}</option>)}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Conductor Number</label>
-                <select
-                  value={luckyDatesConductor}
-                  onChange={(e) => setLuckyDatesConductor(parseInt(e.target.value, 10))}
-                  className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>Conductor {n}</option>)}
-                </select>
-              </div>
-              <button
-                onClick={handleLuckyDatesTrigger}
-                className="col-span-1 sm:col-span-2 w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white py-3.5 rounded-xl font-mono text-xs uppercase tracking-widest font-bold cursor-pointer transition-all"
-              >
-                Find Target Specific Dates
-              </button>
-            </div>
-
-            {luckySuiteResult && (
-              <div className="p-6 md:p-8 bg-white border rounded-3xl space-y-6 animate-in fade-in duration-500 leading-relaxed font-sans text-xs">
-                
-                <h4 className="font-playfair text-sm uppercase font-mono text-[#D97706] tracking-wider font-bold">Auspicious Dates Breakdown Analysis</h4>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  
-                  <div className="p-3 bg-emerald-50/30 rounded-xl border border-emerald-100">
-                    <span className="font-bold text-slate-750 font-mono text-[11px] uppercase text-emerald-800">Best Business Launch Dates</span>
-                    <p className="text-sm font-bold text-slate-800 mt-1 font-mono">{luckySuiteResult.businessDates.map(d=>`${d}th`).join(', ')}</p>
-                  </div>
-
-                  <div className="p-3 bg-red-50/20 rounded-xl border border-rose-100">
-                    <span className="font-bold text-slate-750 font-mono text-[11px] uppercase text-[#D97706]">Auspicious Marriage Dates</span>
-                    <p className="text-sm font-bold text-slate-800 mt-1 font-mono">{luckySuiteResult.marriageDates.map(d=>`${d}th`).join(', ')}</p>
-                  </div>
-
-                  <div className="p-3 bg-blue-50/20 rounded-xl border border-blue-100">
-                    <span className="font-bold text-slate-750 font-mono text-[11px] uppercase text-blue-700">Best Travel Venture Dates</span>
-                    <p className="text-sm font-bold text-slate-800 mt-1 font-mono">{luckySuiteResult.travelDates.map(d=>`${d}th`).join(', ')}</p>
-                  </div>
-
-                  <div className="p-3 bg-amber-50/20 rounded-xl border border-amber-150">
-                    <span className="font-bold text-slate-755 font-mono text-[11px] uppercase text-amber-800">Financial Investments Dates</span>
-                    <p className="text-sm font-bold text-slate-800 mt-1 font-mono">{luckySuiteResult.investmentDates.map(d=>`${d}th`).join(', ')}</p>
-                  </div>
-
-                  <div className="p-3 bg-slate-50 rounded-xl border">
-                    <span className="font-bold text-slate-750 font-mono text-[11px] uppercase">Property Registration Dates</span>
-                    <p className="text-sm font-bold text-slate-800 mt-1 font-mono">{luckySuiteResult.propertyDates.map(d=>`${d}th`).join(', ')}</p>
-                  </div>
-
-                  <div className="p-3 bg-indigo-50/30 rounded-xl border border-indigo-100">
-                    <span className="font-bold text-slate-750 font-mono text-[11px] uppercase text-indigo-700">Exams & Job Interviews Dates</span>
-                    <p className="text-sm font-bold text-slate-800 mt-1 font-mono">{luckySuiteResult.interviewDates.map(d=>`${d}th`).join(', ')}</p>
-                  </div>
-
-                </div>
-
-                <p className="text-[11px] text-slate-500 italic pt-2">These dates represent peak matching parameters of Driver {luckyDatesDriver} and Conductor {luckyDatesConductor}. They bypass the hostile Saturn and Rahu numbers to prevent blocks during launch periods.</p>
-
-                {/* Expandable Why */}
-                <div className="border-t pt-2">
-                  <button
-                    onClick={() => setShowDatesWhy(!showDatesWhy)}
-                    className="flex items-center gap-1 text-[11px] font-bold text-[#1E3A8A] hover:underline cursor-pointer"
-                  >
-                    <Info className="w-3.5 h-3.5" /> Explain dates selection logic
-                  </button>
-                  {showDatesWhy && (
-                    <div className="mt-2 p-3 bg-slate-50 rounded-xl border text-[11px] text-slate-500 space-y-1">
-                      <p><strong>Friendly Reductions:</strong> Each date is filtered mathematically so that its reduced root number matches your friendly planetary rulers (e.g. 1, 3, 5, 6) while strictly weeding out obstructive or inimical totals to guarantee maximum smooth transit protection.</p>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            )}
+            <LuckyDatesFinder />
           </motion.div>
         )}
 

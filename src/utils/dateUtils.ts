@@ -37,6 +37,21 @@ export interface ParsedDate {
   day: number;
   month: number;
   year: number;
+  isValid?: boolean;
+  digits?: number[];
+}
+
+/**
+ * Extracts individual digits from day, month, year
+ */
+function extractDateDigits(day: number, month: number, year: number): number[] {
+  const str = `${day}${month}${year}`;
+  const digits: number[] = [];
+  for (let i = 0; i < str.length; i++) {
+    const n = parseInt(str[i], 10);
+    if (!isNaN(n)) digits.push(n);
+  }
+  return digits;
 }
 
 /**
@@ -55,7 +70,7 @@ export function parseIndianDate(input: string | undefined | null): ParsedDate | 
     const month = parseInt(parts[1], 10);
     const day = parseInt(parts[2], 10);
     if (isValidDateComponents(day, month, year)) {
-      return { day, month, year };
+      return { day, month, year, isValid: true, digits: extractDateDigits(day, month, year) };
     }
     return null;
   }
@@ -67,7 +82,7 @@ export function parseIndianDate(input: string | undefined | null): ParsedDate | 
     const month = parseInt(parts[1], 10);
     const year = parseInt(parts[2], 10);
     if (isValidDateComponents(day, month, year)) {
-      return { day, month, year };
+      return { day, month, year, isValid: true, digits: extractDateDigits(day, month, year) };
     }
     return null;
   }
@@ -79,19 +94,30 @@ export function parseIndianDate(input: string | undefined | null): ParsedDate | 
     const month = parseInt(trimmed.substring(2, 4), 10);
     const year = parseInt(trimmed.substring(4, 8), 10);
     if (isValidDateComponents(day, month, year)) {
-      return { day, month, year };
+      return { day, month, year, isValid: true, digits: extractDateDigits(day, month, year) };
     }
     // Check YYYYMMDD fallback if year is at start
     const yFallback = parseInt(trimmed.substring(0, 4), 10);
     const mFallback = parseInt(trimmed.substring(4, 6), 10);
     const dFallback = parseInt(trimmed.substring(6, 8), 10);
     if (isValidDateComponents(dFallback, mFallback, yFallback)) {
-      return { day: dFallback, month: mFallback, year: yFallback };
+      return { day: dFallback, month: mFallback, year: yFallback, isValid: true, digits: extractDateDigits(dFallback, mFallback, yFallback) };
     }
     return null;
   }
 
   return null;
+}
+
+/**
+ * Parses any date string and guarantees a non-null ParsedDate object with fallback.
+ */
+export function parseStandardDate(input: string | undefined | null): ParsedDate {
+  const parsed = parseIndianDate(input);
+  if (!parsed) {
+    return { day: 1, month: 1, year: 1980, isValid: false, digits: [1, 9, 8, 0] };
+  }
+  return parsed;
 }
 
 /**

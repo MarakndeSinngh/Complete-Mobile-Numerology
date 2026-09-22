@@ -5,6 +5,7 @@ import { CompleteNumerologyProfile } from '../core/types';
 import { MANDATORY_WELLNESS_DISCLAIMER } from '../core/methodology';
 import { Sparkles, Shield, AlertTriangle, CheckCircle, Compass, Award, Star, Activity, Info, Heart, TrendingUp } from 'lucide-react';
 import PlanetaryTransitTracker from './PlanetaryTransitTracker';
+import MonthlyPlanetaryTrendChart from './MonthlyPlanetaryTrendChart';
 
 interface AstroDashboardProps {
   dobData: DOBAnalysis;
@@ -129,6 +130,15 @@ const AstroDashboard: React.FC<AstroDashboardProps> = ({ dobData, nameData, mobi
         driverNumber={dobData.birthNumber}
         conductorNumber={dobData.lifePathNumber}
         name={name}
+      />
+
+      {/* Monthly Planetary Trend Line / Transit Waves Visualization */}
+      <MonthlyPlanetaryTrendChart
+        driverNumber={dobData.birthNumber}
+        conductorNumber={dobData.lifePathNumber}
+        personalYear={dobData.personalYear}
+        userName={name}
+        year={new Date().getFullYear()}
       />
 
       {/* Grids Layout */}

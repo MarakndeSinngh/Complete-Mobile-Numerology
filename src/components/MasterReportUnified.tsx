@@ -27,7 +27,8 @@ import {
   Check,
   TrendingUp,
   Star,
-  Car
+  Car,
+  Baby
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -85,11 +86,12 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
   const currentYear = new Date().getFullYear();
   const personalYearVal = dobData?.personalYear || 5;
 
-  // Saved Signature, Vehicle, Business & Marriage Audit state from localStorage
+  // Saved Signature, Vehicle, Business, Marriage & Child Audit state from localStorage
   const [savedSigAudit, setSavedSigAudit] = useState<any>(null);
   const [savedVehicleAudit, setSavedVehicleAudit] = useState<any>(null);
   const [savedBusinessAudit, setSavedBusinessAudit] = useState<any>(null);
   const [savedMarriageAudit, setSavedMarriageAudit] = useState<any>(null);
+  const [savedChildReport, setSavedChildReport] = useState<any>(null);
 
   React.useEffect(() => {
     try {
@@ -127,7 +129,27 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     } catch (e) {
       console.error("Error loading saved marriage audit:", e);
     }
+
+    try {
+      const storedChild = localStorage.getItem('leofamily_child_lucky_names_report');
+      if (storedChild) {
+        setSavedChildReport(JSON.parse(storedChild));
+      }
+    } catch (e) {
+      console.error("Error loading saved child report:", e);
+    }
+
+    try {
+      const storedDates = localStorage.getItem('leofamily_lucky_dates_finder_report');
+      if (storedDates) {
+        setSavedLuckyDatesReport(JSON.parse(storedDates));
+      }
+    } catch (e) {
+      console.error("Error loading saved lucky dates report:", e);
+    }
   }, []);
+
+  const [savedLuckyDatesReport, setSavedLuckyDatesReport] = useState<any>(null);
 
   // Quick navigation menu items
   const navItems = [
@@ -146,6 +168,8 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     { id: 'sec-29b', label: '29B. Vehicle Numerology Pro', icon: <Car className="w-3.5 h-3.5" /> },
     { id: 'sec-29c', label: '29C. Business Numerology Pro', icon: <Briefcase className="w-3.5 h-3.5" /> },
     { id: 'sec-29d', label: '29D. Marriage Synastry Pro', icon: <Heart className="w-3.5 h-3.5" /> },
+    { id: 'sec-29e', label: '29E. Child Lucky Names Pro', icon: <Baby className="w-3.5 h-3.5" /> },
+    { id: 'sec-29f', label: '29F. Lucky Dates Finder Pro', icon: <Calendar className="w-3.5 h-3.5" /> },
     { id: 'sec-30', label: '30. Consolidated Remedies & 90-Day Plan', icon: <Shield className="w-3.5 h-3.5" /> },
     { id: 'sec-31', label: '31. Final Consultation Summary', icon: <Target className="w-3.5 h-3.5" /> }
   ];
@@ -1332,6 +1356,230 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           {/* Disclaimer */}
           <div className="p-3.5 bg-slate-100 rounded-2xl border border-slate-300 text-[10px] text-slate-600 leading-relaxed">
             <strong>वैवाहिक अस्वीकरण:</strong> अंकशास्त्रीय सामंजस्य विश्लेषण केवल दोनों व्यक्तियों के स्वभाव, मानसिक तालमेल और ऊर्जा संतुलन को समझने का साधन है। सच्चा दांपत्य सुख परस्पर निष्ठा, निरंतर संवाद और प्रेम पर निर्भर करता है।
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 29E. LEOFAMILY CHILD LUCKY NAMES PRO (PHASE 11) */}
+        {/* ========================================================================= */}
+        <section id="sec-29e" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+          <div className="border-b border-[#F3F4F6] pb-3 flex justify-between items-center">
+            <div>
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Section 29E (Phase 11 Pro Module)</span>
+              <h3 className="font-playfair text-xl font-bold text-[#1F2937]">
+                LeoFamily Child Lucky Names Pro (शुभ शिशु नामाक्षर एवं वैदिक नाम चयन)
+              </h3>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono bg-amber-50 text-amber-800 font-bold px-3 py-1 rounded-full border border-amber-200">
+                16-Point Vedic Child Dossier
+              </span>
+            </div>
+          </div>
+
+          {/* Child Core Snapshot */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+              <span className="text-[9px] font-mono uppercase text-slate-500 font-bold block">शिशु का नाम (Child)</span>
+              <span className="font-bold text-slate-900 block truncate">
+                {savedChildReport?.report?.childInfo?.name || personalDetails?.fullName || 'Child Aarav'}
+              </span>
+              <span className="text-[10px] text-slate-600 block">
+                DOB: {savedChildReport?.report?.childInfo?.standardDob || '15/05/2024'}
+              </span>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+              <span className="text-[9px] font-mono uppercase text-slate-500 font-bold block">मूलांक (Driver)</span>
+              <span className="font-bold text-[#1E3A8A] text-lg block font-mono">
+                #{savedChildReport?.report?.childInfo?.mulank || coreNumbers.mulank}
+              </span>
+              <span className="text-[10px] text-slate-600 block">
+                {savedChildReport?.report?.childInfo?.mulankGrahaHi || 'सूर्य'}
+              </span>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+              <span className="text-[9px] font-mono uppercase text-slate-500 font-bold block">भाग्यांक (Conductor)</span>
+              <span className="font-bold text-amber-700 text-lg block font-mono">
+                #{savedChildReport?.report?.childInfo?.bhagyank || coreNumbers.bhagyank}
+              </span>
+              <span className="text-[10px] text-slate-600 block">
+                {savedChildReport?.report?.childInfo?.bhagyankGrahaHi || 'बृहस्पति'}
+              </span>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+              <span className="text-[9px] font-mono uppercase text-slate-500 font-bold block">शुभ नामाक्षर (Letters)</span>
+              <span className="font-bold text-emerald-700 block font-mono">
+                {savedChildReport?.report?.wisdomLetters?.highlySupportive?.slice(0, 4).map((l: any) => l.letter).join(', ') || 'A, J, S, R'}
+              </span>
+              <span className="text-[10px] text-slate-600 block">
+                अत्यंत अनुकूल
+              </span>
+            </div>
+          </div>
+
+          {/* Wisdom Starting Letters Summary */}
+          <div className="p-5 bg-[#FAF5EE] rounded-3xl border border-[#FDE68A] space-y-3 text-xs">
+            <span className="text-[9px] font-mono text-[#92400E] uppercase font-bold block">
+              Wisdom Starting Alphabets & Elemental Resonance (शुभ नामाक्षर विश्लेषण)
+            </span>
+            <p className="text-[#78350F] text-[11px] leading-relaxed">
+              {savedChildReport?.report?.wisdomLetters?.highlySupportive?.length > 0
+                ? `मूलांक ${savedChildReport?.report?.childInfo?.mulank} एवं भाग्यांक ${savedChildReport?.report?.childInfo?.bhagyank} के अनुसार शिशु के लिए ${savedChildReport?.report?.wisdomLetters?.highlySupportive?.map((l: any) => `'${l.letter}'`).join(', ')} नामाक्षर विशेष रूप से ऊर्जावान एवं जीवन में निरंतर प्रगति के सहायक हैं।`
+                : 'शिशु की जन्म कुंडली एवं लो शू ग्रिड के अनुसार प्रथम नामाक्षर का चयन मूल ग्रह की मित्रता और अनुपस्थित अंकों के संतुलन को ध्यान में रखकर किया गया है।'}
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {savedChildReport?.report?.wisdomLetters?.highlySupportive?.map((item: any, idx: number) => (
+                <span key={idx} className="bg-white border border-amber-300 text-amber-900 font-bold px-2.5 py-1 rounded-xl text-[10px] shadow-xs">
+                  {item.letter} (Chaldean {item.chaldeanValue} • {item.planetHi})
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Child Candidate Comparison / Highlights */}
+          {savedChildReport?.report?.candidateAnalyses && savedChildReport.report.candidateAnalyses.length > 0 && (
+            <div className="space-y-3 text-xs">
+              <strong className="text-slate-800 block font-bold">प्रस्तावित नामों का संक्षिप्त मूल्यांकन:</strong>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {savedChildReport.report.candidateAnalyses.map((cand: any, cIdx: number) => (
+                  <div key={cIdx} className="p-4 bg-slate-50 border rounded-2xl space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-slate-800 text-sm">{cand.name}</span>
+                      <span className="font-mono text-[10px] font-bold bg-white px-2 py-0.5 rounded border text-[#1E3A8A]">
+                        Compound {cand.chaldeanCompound} → {cand.chaldeanRoot}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 font-sans">
+                      {cand.compoundData?.title} • {cand.dobCompatibility?.statusHi} ({cand.dobCompatibility?.score}/100)
+                    </p>
+                    <p className="text-[10px] text-slate-500 border-t pt-1">
+                      <strong>विकास शैली:</strong> {cand.developmentThemes?.learningStyleHi}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Parenting & Study Room Advice */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+              <strong className="text-slate-900 block font-bold">सकारात्मक अभिभावक दृष्टिकोण (Parenting Guidance):</strong>
+              <p className="text-slate-600 text-[11px] leading-relaxed">
+                {savedChildReport?.report?.parentGuidelines?.rulesHi?.[0] || 'शिशु की स्वाभाविक सीखने की गति का सम्मान करें। प्रोत्साहन, स्नेह और स्पष्ट दिनचर्या से आत्मविश्वास मजबूत होता है।'}
+              </p>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+              <strong className="text-slate-900 block font-bold">अध्ययन मेज एवं कक्ष वास्तु:</strong>
+              <p className="text-slate-600 text-[11px] leading-relaxed">
+                अध्ययन करते समय शिशु का मुख उत्तर (North) या पूर्व (East) दिशा में रखें। अध्ययन मेज पर हल्का पीला या हल्का हरा रंग एकाग्रता बढ़ाता है।
+              </p>
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="p-3.5 bg-slate-100 rounded-2xl border border-slate-300 text-[10px] text-slate-600 leading-relaxed">
+            <strong>शिशु नाम परामर्श अस्वीकरण:</strong> अंकशास्त्रीय नाम चयन केवल ग्रहीय तरंगों और अक्षरीय सामंजस्य को संतुलित करने का पारंपरिक मार्गदर्शन है। यह किसी भी व्यक्ति के भविष्य की निश्चित गारंटी नहीं देता है। सही संस्कार, शिक्षा और वातावरण ही जीवन की वास्तविक पूंजी हैं।
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* 29F. LEOFAMILY LUCKY DATES FINDER PRO */}
+        {/* ========================================================================= */}
+        <section id="sec-29f" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+          <div className="border-b border-[#F3F4F6] pb-3 flex justify-between items-center">
+            <div>
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Section 29F • Phase 12 Pro</span>
+              <h3 className="font-playfair text-xl font-bold text-[#1F2937]">
+                LeoFamily Lucky Dates Finder Pro (शुभ मुहूर्त व अनुकूल तिथि चयन)
+              </h3>
+            </div>
+            <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full font-semibold">
+              {savedLuckyDatesReport ? savedLuckyDatesReport.purposeHi : 'व्यावसायिक व महत्वपूर्ण कार्य'}
+            </span>
+          </div>
+
+          <p className="text-xs text-[#4B5563] leading-relaxed">
+            मूलांक #{coreNumbers.mulank} ({coreNumbers.mulankGraha}), भाग्यांक #{coreNumbers.bhagyank} ({coreNumbers.bhagyankGraha}), व्यक्तिगत वर्ष (Personal Year #{personalYearVal}) और वार-अधिष्ठाता ग्रहों के सामंजस्य से चयनित सर्वाधिक अनुकूल तिथियां।
+          </p>
+
+          {/* Quick Snapshot Metrics */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-center">
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+              <span className="text-[9px] font-mono uppercase text-slate-500 font-bold block">कार्य उद्देश्य</span>
+              <strong className="text-slate-800 font-bold block mt-0.5">{savedLuckyDatesReport?.purposeHi || 'व्यापार व महत्वपूर्ण शुरुआत'}</strong>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+              <span className="text-[9px] font-mono uppercase text-slate-500 font-bold block">सक्रिय Personal Year</span>
+              <strong className="text-indigo-700 font-mono font-bold block mt-0.5">#{personalYearVal}</strong>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+              <span className="text-[9px] font-mono uppercase text-slate-500 font-bold block">स्कैन की गई अवधि</span>
+              <strong className="text-slate-800 font-mono font-bold block mt-0.5">{savedLuckyDatesReport?.dateRangeSummary || 'मासिक चक्र'}</strong>
+            </div>
+            <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200">
+              <span className="text-[9px] font-mono uppercase text-amber-800 font-bold block">शीर्ष अनुशंसित</span>
+              <strong className="text-amber-900 font-bold block mt-0.5">{savedLuckyDatesReport?.topSupportiveDates?.length || 4} तिथियां अनुकूल</strong>
+            </div>
+          </div>
+
+          {/* Top Auspicious Dates Spotlight */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-[#D97706]" /> शीर्ष अनुकूल तिथियां (Top Auspicious Dates):
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              {(savedLuckyDatesReport?.topSupportiveDates || [
+                { dateFormatted: '05/10/2026', weekdayHi: 'सोमवार', weekdayLord: 'चन्द्र देव', dateNumber: 5, rootNumber: 6, personalDay: 1, whyThisDateHi: 'मूलांक व Personal Year के साथ पूर्ण सामंजस्य।' },
+                { dateFormatted: '14/10/2026', weekdayHi: 'बुधवार', weekdayLord: 'बुध देव', dateNumber: 5, rootNumber: 6, personalDay: 1, whyThisDateHi: 'व्यापारिक विस्तार व सौदे के लिए फलदायी।' },
+                { dateFormatted: '23/10/2026', weekdayHi: 'शुक्रवार', weekdayLord: 'शुक्र देव', dateNumber: 5, rootNumber: 6, personalDay: 1, whyThisDateHi: 'नवीन शुरुआत और सौहार्दपूर्ण ऊर्जा।' },
+                { dateFormatted: '27/10/2026', weekdayHi: 'मंगलवार', weekdayLord: 'मंगल देव', dateNumber: 9, rootNumber: 1, personalDay: 5, whyThisDateHi: 'उत्साहवर्धक व गतिशीलता प्रदान करने वाला दिवस।' }
+              ]).map((d: any, idx: number) => (
+                <div key={idx} className="p-3.5 bg-[#FAF5EE] rounded-2xl border border-[#FDE68A] space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="font-playfair font-bold text-[#1E3A8A] text-sm">{d.dateFormatted}</span>
+                    <span className="text-[9px] font-mono font-bold bg-white text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded-full">
+                      Supportive
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-600 flex justify-between">
+                    <span>{d.weekdayHi} ({d.weekdayLord})</span>
+                    <span>Day #{d.dateNumber}</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 pt-1 border-t border-amber-200/60 leading-tight">
+                    {d.whyThisDateHi}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Transit Matching Grid & Muhurta Guidelines */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+              <strong className="text-slate-900 block font-bold">गोचर व समयावधि विश्लेषण (Transit Synthesis):</strong>
+              <ul className="list-disc list-inside text-[11px] text-slate-600 space-y-1 leading-relaxed">
+                <li>मूलांक #{coreNumbers.mulank} के साथ सकारात्मक मित्र ग्रहीय रश्मियों का चयन।</li>
+                <li>Personal Year #{personalYearVal} की दिशा और ऊर्जा का समग्र समर्थन।</li>
+                <li>राहुकाल व प्रतिकूल नक्षत्र वेध से दूरी बनाए रखने की सलाह।</li>
+              </ul>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+              <strong className="text-slate-900 block font-bold">पारंपरिक मुहूर्त व व्यवहारिक परामर्श:</strong>
+              <p className="text-slate-600 text-[11px] leading-relaxed">
+                {savedLuckyDatesReport?.finalSelectionNotesHi || 'शुभ तिथियों पर कार्य का शुभारंभ दिन के प्रथम पहर (अभिजीत मुहूर्त) में करें। प्रशासनिक नियमों, परिवार की सहमति और व्यावहारिक तैयारी को सदैव प्राथमिकता दें।'}
+              </p>
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="p-3.5 bg-slate-100 rounded-2xl border border-slate-300 text-[10px] text-slate-600 leading-relaxed">
+            <strong>शुभ तिथि चयन अस्वीकरण:</strong> अंकशास्त्रीय तिथि चयन केवल प्राकृतिक ऊर्जा और ग्रहीय सामंजस्य को अनुकूल बनाने का पारंपरिक माध्यम है। यह किसी भी कार्य की निश्चित सफलता या चमत्कारिक फल की गारंटी नहीं देता है। वास्तविक परिणाम आपकी निष्ठा, तैयारी और कर्म पर निर्भर करता है।
           </div>
         </section>
 

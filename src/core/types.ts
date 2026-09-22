@@ -9,6 +9,8 @@ import { ComprehensiveInterpretationReport } from './interpretationEngine';
 import { ComprehensiveNameAnalysis } from './nameNumerologyEngine';
 import { VehicleNumerologyReport } from './vehicleEngine';
 import { BusinessNumerologyReport } from './businessEngine';
+import { ChildLuckyNamesReport } from './childNumerologyEngine';
+import { LuckyDatesFinderReport } from './luckyDatesEngine';
 
 export interface LoshuGridDigit {
   count: number;
@@ -186,6 +188,8 @@ export interface CompleteNumerologyProfile {
   mobileAnalysis?: UnifiedMobileAnalysis;
   vehicleAnalysis?: VehicleNumerologyReport;
   businessAnalysis?: BusinessNumerologyReport;
+  childLuckyNames?: ChildLuckyNamesReport;
+  luckyDateAnalysis?: LuckyDatesFinderReport;
   interpretations: ComprehensiveInterpretationReport;
   remedies: RemedyDetails;
   consultation: any;

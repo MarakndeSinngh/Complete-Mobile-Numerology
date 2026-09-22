@@ -11,7 +11,7 @@ import {
   MANDATORY_MEDICAL_WELLNESS_DISCLAIMER
 } from './methodology/medicalDefinitions';
 import { reduceToSingleDigit } from './numerologyEngine';
-import { parseIndianDate } from './dateUtils';
+import { parseIndianDate, parseStandardDate } from './dateUtils';
 
 export interface VedicMahadashaStep {
   cycleIndex: number;

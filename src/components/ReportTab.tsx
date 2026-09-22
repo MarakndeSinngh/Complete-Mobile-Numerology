@@ -7,7 +7,7 @@ import { analyzeComprehensiveName } from '../core/nameNumerologyEngine';
 import { generateCompleteNumerologyProfile } from '../core/calculationEngine';
 import { CompleteNumerologyProfile } from '../core/types';
 import { MasterReportUnified } from './MasterReportUnified';
-import { Sparkles, Briefcase, Heart, Activity, FileText, Cpu } from 'lucide-react';
+import { Sparkles, Briefcase, Heart, Activity, FileText, Cpu, Printer, Download } from 'lucide-react';
 import { generateLeoAdvisorActions } from '../services/leoAdvisorEngine';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -347,6 +347,47 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
     };
   };
 
+  const generateFallbackVedicNarrative = (
+    details: PersonalDetails,
+    dob: DOBAnalysis,
+    name: NameAnalysis,
+    mobile: MobileAnalysis,
+    analysis: LoshuAnalysisResult
+  ) => {
+    return `
+### १. समग्र वैदिक अंक चक्र एवं व्यक्तित्व स्पंदन (Core Planetary Profile)
+वैदिक अंकशास्त्र के अनुसार, **${details.name}** का मूलांक **${dob.birthNumber}** (${dob.planet}) तथा भाग्यांक **${dob.lifePathNumber}** (${dob.rulingPlanet}) है।
+मूलांक आपकी आंतरिक प्रेरणा और दैनिक स्वभाव का संचालन करता है, जबकि भाग्यांक आपके जीवन के परम उद्देश्य और प्रारब्ध का पथ प्रशस्त करता है।
+
+- **मूलांक (#${dob.birthNumber}):** ${dob.planet} से संचालित होने के कारण स्वाभाविक नेतृत्व क्षमता, बौद्धिक स्पष्टता एवं अनुशासन प्रमुख गुण हैं।
+- **भाग्यांक (#${dob.lifePathNumber}):** ${dob.rulingPlanet} का प्रभाव जीवन में स्थायित्व, दूरदर्शिता एवं सामाजिक प्रतिष्ठा प्रदान करता है।
+- **संयुक्त प्रभाव:** मूलांक और भाग्यांक का यह समन्वय कर्म और भाग्य के मध्य सामंजस्य स्थापित करता है।
+
+---
+
+### २. लो शू चक्र एवं ऊर्जा धरातल (Lo Shu Magic Matrix & Cosmic Planes)
+३x३ लो शू ग्रिड आपके जीवन के प्रमुख धरातलों (Planes) और ऊर्जा संचरण को प्रदर्शित करता है:
+- **विचार धरातल (Thought Plane - 4, 3, 8):** योजनाओं के निर्माण और कूटनीतिक दूरदर्शिता को दर्शाता है।
+- **इच्छाशक्ति धरातल (Will Plane - 9, 5, 1):** दृढ़ संकल्प, कर्मठता और बाधाओं से लड़ने का सामर्थ्य देता है।
+- **क्रियात्मक धरातल (Action Plane - 2, 7, 6):** योजनाओं को धरातल पर क्रियान्वित करने की गति निर्धारित करता है।
+- **ऊर्जा संतुलन:** ग्रिड में उपस्थित अंक स्वाभाविक प्रतिभा को दर्शाते हैं। अनुपस्थित अंकों के संतुलन हेतु निर्धारित वास्तु एवं लाल किताब उपाय सहायक सिद्ध होंगे।
+
+---
+
+### ३. नाम एवं मोबाइल अंक ज्योतिष संरेखण (Name & Digital Resonance)
+- **चाल्डियन नामांक योग:** आपके नाम का चाल्डियन योग आपके मूलांक/भाग्यांक के साथ सुसंगत ऊर्जा संचरण करता है।
+- **मोबाइल आवृत्ति:** मोबाइल संख्या के अंतिम अंकों का योग आपके कार्यक्षेत्र में अवसरों को आकर्षित करने हेतु शुभ ऊर्जा प्रदान करता है।
+
+---
+
+### ४. वैदिक परामर्श एवं दैनिक नियम (Vedic Guidance & Daily Regimen)
+१. प्रतिदिन प्रातः सूर्य देव को तांबे के पात्र से जल अर्पित करें।
+२. अपने अनुकूल रंगों एवं रत्नों का सचेत उपयोग करें।
+३. घर के ईशान कोण (North-East) में स्वच्छ जल या स्फटिक पिरामिड स्थापित करें।
+४. महत्वपूर्ण व्यावसायिक एवं व्यक्तिगत निर्णयों को अपने शुभ दिवसों और अनुकूल होरा में ही क्रियान्वित करें।
+    `.trim();
+  };
+
   const generateFullBrandedReportHTML = (
     details: PersonalDetails,
     dob: DOBAnalysis,
@@ -356,7 +397,8 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
     reportId: string,
     currentDateStr: string,
     analysis: LoshuAnalysisResult,
-    advisorActions: any
+    advisorActions: any,
+    customReportText?: string | null
   ) => {
     const parsed = parseIndianDate(details.dob);
     const bMonth = parsed ? parsed.month : 1;
@@ -1225,7 +1267,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
           </div>
           
           <div style="font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.6; color: #374151;">
-            ${formatMarkdownForPrint(reportText || '')}
+            ${formatMarkdownForPrint(customReportText || reportText || generateFallbackVedicNarrative(details, dob, name, mobile, analysis))}
           </div>
           
           <div style="margin-top: 30px; border-top: 1px dashed #D97706; padding-top: 15px; text-align: center; font-size: 10px; color: #D97706; font-family: 'Playfair Display', serif; font-style: italic; page-break-inside: avoid; break-inside: avoid;">
@@ -1300,8 +1342,6 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
   };
 
   const handlePrint = () => {
-    if (!reportText) return;
-    
     const analysis = computeLoshuAnalysis(
       personalDetails.dob,
       personalDetails.name,
@@ -1309,9 +1349,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
     );
 
     const computedAdvisorActions = generateLeoAdvisorActions(dobData, nameData, mobileData);
-
     const currentDateStr = formatDateIndian(new Date());
-
     const reportId = `LEO-COSMIC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
     let printRoot = document.getElementById('report-print-root');
@@ -1331,7 +1369,8 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       reportId,
       currentDateStr,
       analysis,
-      computedAdvisorActions
+      computedAdvisorActions,
+      reportText
     );
 
     document.body.classList.add('print-custom-report');
@@ -1341,11 +1380,10 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       document.body.classList.remove('print-custom-report');
     };
     window.addEventListener('afterprint', cleanup, { once: true });
-    setTimeout(cleanup, 800);
+    setTimeout(cleanup, 1200);
   };
 
   const handleDownloadPDF = async () => {
-    if (!reportText) return;
     setPdfLoading(true);
     try {
       const analysis = computeLoshuAnalysis(
@@ -1355,9 +1393,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       );
 
       const computedAdvisorActions = generateLeoAdvisorActions(dobData, nameData, mobileData);
-
       const currentDateStr = formatDateIndian(new Date());
-
       const reportId = `LEO-COSMIC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
       const tempContainer = document.createElement('div');
@@ -1377,7 +1413,8 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
         reportId,
         currentDateStr,
         analysis,
-        computedAdvisorActions
+        computedAdvisorActions,
+        reportText
       );
       
       tempContainer.innerHTML = htmlContent;
@@ -1429,7 +1466,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       document.body.removeChild(tempContainer);
     } catch (err) {
       console.error('PDF Generation Failed:', err);
-      alert('Failed to generate high-fidelity PDF. Please try again.');
+      alert('Failed to generate high-fidelity PDF. Please try again or use the "Print to PDF" feature.');
     } finally {
       setPdfLoading(false);
     }
@@ -1438,9 +1475,9 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
   return (
     <div id="report-generator-panel" className="space-y-6 animate-in fade-in duration-500 text-left">
       
-      {/* Report Format Switcher */}
-      <div className="flex items-center justify-between bg-white p-2 rounded-2xl border border-[#E5E7EB] shadow-xs">
-        <div className="flex gap-2">
+      {/* Report Format Switcher & Print Controls */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white p-2.5 rounded-2xl border border-[#E5E7EB] shadow-xs gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setReportMode('MASTER_DOSSIER')}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -1465,9 +1502,16 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
           </button>
         </div>
 
-        <span className="hidden sm:inline-block text-[11px] text-[#6B7280] font-mono pr-2">
-          Single Source of Truth: generateCompleteNumerologyProfile
-        </span>
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          <button
+            onClick={handlePrint}
+            title="Print or Save as PDF using browser print dialog"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#FAF5EE] hover:bg-[#F2E8DC] text-[#78350F] border border-[#FDE68A] shadow-2xs transition-all cursor-pointer"
+          >
+            <Printer className="w-4 h-4 text-[#D97706]" />
+            <span>Print to PDF (Formal Vedic Dossier)</span>
+          </button>
+        </div>
       </div>
 
       {reportMode === 'MASTER_DOSSIER' ? (
@@ -1524,9 +1568,10 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
                   </button>
                   <button
                     onClick={handlePrint}
-                    className="bg-[#F2E8DC] hover:bg-[#E5D7C6] text-[#D97706] font-semibold px-5 py-2.5 rounded-xl text-xs transition duration-300 cursor-pointer border border-[#D97706]/20 font-sans"
+                    className="bg-[#FAF5EE] hover:bg-[#F2E8DC] text-[#78350F] font-semibold px-5 py-2.5 rounded-xl text-xs transition duration-300 cursor-pointer border border-[#FDE68A] font-sans inline-flex items-center gap-2"
                   >
-                    Print Report
+                    <Printer className="w-3.5 h-3.5 text-[#D97706]" />
+                    <span>Print to PDF</span>
                   </button>
                   <button
                     onClick={handleDownloadPDF}
