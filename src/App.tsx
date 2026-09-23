@@ -20,6 +20,9 @@ import MarriageCompatibility from './components/MarriageCompatibility';
 import PremiumConsultations from './components/PremiumConsultations';
 import AIConsultationPortal from './components/AIConsultationPortal';
 import NameNumerologyDashboard from './components/NameNumerologyDashboard';
+import { NumeroVastuDashboard } from './components/NumeroVastuDashboard';
+import { VehicleNumerologyDashboard } from './components/VehicleNumerologyDashboard';
+import ErrorBoundary from './components/ErrorBoundary';
 import { MasterReportUnified } from './components/MasterReportUnified';
 import { MasterNavigation, NavPortalId } from './components/MasterNavigation';
 import { QuickProfileHeader } from './components/QuickProfileHeader';
@@ -427,6 +430,7 @@ const App: React.FC = () => {
         )}
 
         {/* PORTAL ROUTER */}
+        <ErrorBoundary fallbackTitle="अनुभाग लोड करने में समस्या">
         {currentPortal === 'HOME' ? (
           <MasterDashboardHub
             personalDetails={personalDetails}
@@ -509,8 +513,24 @@ const App: React.FC = () => {
           )
         ) : currentPortal === 'MARRIAGE_COMPATIBILITY' ? (
           <MarriageCompatibility />
+        ) : currentPortal === 'PREMIUM_VAASTU' ? (
+          <NumeroVastuDashboard
+            profile={effectiveProfile}
+            dob={personalDetails?.dob || '1984-11-23'}
+            name={personalDetails?.name || 'Raajeev Singh Chauhann'}
+            gender={(personalDetails?.gender as any) || 'MALE'}
+          />
+        ) : currentPortal === 'PREMIUM_VEHICLE' ? (
+          <VehicleNumerologyDashboard
+            initialDob={personalDetails?.dob ? formatDateIndian(personalDetails.dob) : '23/11/1984'}
+            initialName={personalDetails?.name || 'Raajeev Singh Chauhann'}
+            initialMobile={personalDetails?.mobile || '9930117696'}
+            initialGender={(personalDetails?.gender as any) || 'MALE'}
+          />
+        ) : currentPortal === 'PREMIUM_HOUSE' ? (
+          <PremiumConsultations initialModule="HOUSE" />
         ) : isPremiumSubModule ? (
-          <PremiumConsultations />
+          <PremiumConsultations initialModule={currentPortal.replace('PREMIUM_', '') as any} />
         ) : currentPortal === 'AI_CONSULTATION' ? (
           <AIConsultationPortal
             initialProfile={personalDetails}
@@ -658,6 +678,7 @@ const App: React.FC = () => {
             </div>
           )
         ) : null}
+        </ErrorBoundary>
 
       </main>
 

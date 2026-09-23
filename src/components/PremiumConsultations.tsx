@@ -34,8 +34,18 @@ const cardVariants = {
   visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } }
 };
 
-export default function PremiumConsultations() {
-  const [activeModule, setActiveModule] = useState<'VEHICLE' | 'HOUSE' | 'BUSINESS' | 'SIGNATURE' | 'CHILD' | 'LUCKY_DATES' | 'MEDICAL' | 'VAASTU' | 'DASHA'>('VEHICLE');
+export interface PremiumConsultationsProps {
+  initialModule?: 'VEHICLE' | 'HOUSE' | 'BUSINESS' | 'SIGNATURE' | 'CHILD' | 'LUCKY_DATES' | 'MEDICAL' | 'VAASTU' | 'DASHA';
+}
+
+export default function PremiumConsultations({ initialModule = 'VEHICLE' }: PremiumConsultationsProps = {}) {
+  const [activeModule, setActiveModule] = useState<'VEHICLE' | 'HOUSE' | 'BUSINESS' | 'SIGNATURE' | 'CHILD' | 'LUCKY_DATES' | 'MEDICAL' | 'VAASTU' | 'DASHA'>(initialModule);
+
+  React.useEffect(() => {
+    if (initialModule) {
+      setActiveModule(initialModule);
+    }
+  }, [initialModule]);
 
   React.useEffect(() => {
     const handleSwitch = (e: Event) => {
