@@ -63,8 +63,7 @@ export type NumeroVaastuResult = NumeroVaastuReport;
 
 
 export function calculateKuaNumber(year: number, gender: 'MALE' | 'FEMALE' | 'OTHER' = 'MALE'): number {
-  const lastTwo = year % 100;
-  let sum = lastTwo.toString().split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
+  let sum = Math.abs(year).toString().split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
   while (sum > 9) {
     sum = sum.toString().split('').reduce((acc, d) => acc + parseInt(d, 10), 0);
   }

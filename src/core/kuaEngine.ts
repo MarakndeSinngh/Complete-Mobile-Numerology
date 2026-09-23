@@ -37,8 +37,8 @@ export interface KuaProfile {
 }
 
 export function calculateKuaNumber(birthYear: number, gender: 'MALE' | 'FEMALE' | 'OTHER'): KuaProfile {
-  // Sum digits of birth year to single digit
-  const yearSum = String(birthYear)
+  // Sum all 4 digits of birth year to single digit
+  const yearSum = String(Math.abs(birthYear))
     .split('')
     .reduce((acc, digit) => acc + parseInt(digit, 10), 0);
 
@@ -53,10 +53,10 @@ export function calculateKuaNumber(birthYear: number, gender: 'MALE' | 'FEMALE' 
   const isPost2000 = birthYear >= 2000;
 
   if (gender === 'FEMALE') {
-    kua = isPost2000 ? reducedYear + 6 : reducedYear + 5;
+    kua = isPost2000 ? reducedYear + 6 : reducedYear + 4;
   } else {
     // MALE or OTHER default
-    kua = isPost2000 ? 9 - reducedYear : 10 - reducedYear;
+    kua = isPost2000 ? 9 - reducedYear : 11 - reducedYear;
   }
 
   while (kua > 9) {
