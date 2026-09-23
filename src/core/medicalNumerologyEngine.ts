@@ -94,5 +94,5 @@ export function analyzeMedicalNumerology(dob: string, name?: string): MedicalNum
   };
 }
 
-export { MANDATORY_MEDICAL_WELLNESS_DISCLAIMER as MEDICAL_NUMEROLOGY_DISCLAIMER };
+export { MANDATORY_MEDICAL_WELLNESS_DISCLAIMER };
 

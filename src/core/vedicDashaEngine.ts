@@ -104,6 +104,7 @@ export interface CompleteVedicDashaAndMedicalAnalysis {
   currentAntardasha: VedicAntardashaInfo;
   dashaCompatibility: DashaCompatibilityResult;
   planetaryBodyPartAndDiseases: typeof PLANET_BODY_PARTS_DISEASES[1];
+  planetaryBodyParts?: typeof PLANET_BODY_PARTS_DISEASES[1];
   remediesDietPlan: typeof REMEDIES_DIET_PLANS[1];
   vedicRemedies: typeof VEDIC_REMEDIES_MAP[1];
   mandatoryDisclaimer: string;
@@ -507,6 +508,7 @@ export function analyzeVedicMedicalNumerology(
     currentAntardasha,
     dashaCompatibility,
     planetaryBodyPartAndDiseases,
+    planetaryBodyParts: planetaryBodyPartAndDiseases,
     remediesDietPlan,
     vedicRemedies,
     mandatoryDisclaimer: MANDATORY_MEDICAL_WELLNESS_DISCLAIMER,

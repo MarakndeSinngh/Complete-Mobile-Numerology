@@ -84,7 +84,7 @@ const PLANETARY_REPETITION_MEANINGS: Record<number, Record<number, string>> = {
   }
 };
 
-const itemVariants = {
+const itemVariants: any = {
   hidden: { opacity: 0, y: 15 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } }
 };
@@ -148,10 +148,10 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
         dob: initialProfile.dob,
         name: initialProfile.name,
         mobile: mobileNumber,
-        gender: initialProfile.gender || 'MALE'
+        gender: (initialProfile.gender as 'MALE' | 'FEMALE' | 'OTHER') || 'MALE'
       });
       setCompleteProfile(profile);
-      const master = computeLoshuMasterReport(initialProfile.dob, initialProfile.name, initialProfile.gender || 'MALE', mobileNumber);
+      const master = computeLoshuMasterReport(initialProfile.dob, initialProfile.name, (initialProfile.gender as 'MALE' | 'FEMALE') || 'MALE', mobileNumber);
       setMasterReport(master);
     }
   }, [initialProfile]);
@@ -161,7 +161,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
     if (!dob) return;
     
     const finalName = name.trim() || 'Fate seeker';
-    const analysis = computeLoshuAnalysis(dob, finalName, gender);
+    const analysis = computeLoshuAnalysis(dob, finalName, gender as 'MALE' | 'FEMALE');
     setAnalysisResult(analysis);
 
     // Consume from the unified Core Engine
@@ -169,10 +169,10 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
       dob,
       name: finalName,
       mobile: mobileNumber,
-      gender
+      gender: gender as 'MALE' | 'FEMALE'
     });
     setCompleteProfile(profile);
-    const master = computeLoshuMasterReport(dob, finalName, gender, mobileNumber);
+    const master = computeLoshuMasterReport(dob, finalName, gender as 'MALE' | 'FEMALE', mobileNumber);
     setMasterReport(master);
     
     // Save to history list
@@ -198,7 +198,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
   const handleLoadHistoryItem = (item: { name: string; dob: string }) => {
     setName(item.name);
     setDob(item.dob);
-    const analysis = computeLoshuAnalysis(item.dob, item.name, gender);
+    const analysis = computeLoshuAnalysis(item.dob, item.name, gender as 'MALE' | 'FEMALE');
     setAnalysisResult(analysis);
     
     // Consume from the unified Core Engine
@@ -206,9 +206,9 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
       dob: item.dob,
       name: item.name,
       mobile: mobileNumber,
-      gender
+      gender: gender as 'MALE' | 'FEMALE'
     });
-    const master = computeLoshuMasterReport(item.dob, item.name, gender, mobileNumber);
+    const master = computeLoshuMasterReport(item.dob, item.name, gender as 'MALE' | 'FEMALE', mobileNumber);
     setMasterReport(master);
 
     setPartnerResult(null);
@@ -2190,21 +2190,12 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  {analysisResult.luckyDetails.reremedies ? (
-                    analysisResult.luckyDetails.reremedies.map((rem, idx) => (
-                      <div key={idx} className="p-4 bg-[#FDFCF7] border border-[#E5E7EB] rounded-2xl flex gap-3 text-left">
-                        <Check className="w-5 h-5 text-[#D97706] flex-shrink-0 mt-0.5" />
-                        <span className="text-xs text-slate-700 font-semibold leading-relaxed select-all">{rem}</span>
-                      </div>
-                    ))
-                  ) : (
-                    analysisResult.luckyDetails.remedies.map((rem, idx) => (
-                      <div key={idx} className="p-4 bg-[#FDFCF7] border border-[#E5E7EB] rounded-2xl flex gap-3 text-left">
-                        <Check className="w-5 h-5 text-[#D97706] flex-shrink-0 mt-0.5" />
-                        <span className="text-xs text-slate-700 font-semibold leading-relaxed select-all">{rem}</span>
-                      </div>
-                    ))
-                  )}
+                  {analysisResult.luckyDetails.remedies.map((rem, idx) => (
+                    <div key={idx} className="p-4 bg-[#FDFCF7] border border-[#E5E7EB] rounded-2xl flex gap-3 text-left">
+                      <Check className="w-5 h-5 text-[#D97706] flex-shrink-0 mt-0.5" />
+                      <span className="text-xs text-slate-700 font-semibold leading-relaxed select-all">{rem}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 

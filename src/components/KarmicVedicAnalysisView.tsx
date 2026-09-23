@@ -527,9 +527,9 @@ export const KarmicVedicAnalysisView: React.FC<KarmicVedicAnalysisViewProps> = (
       <section id="sec-numero-vastu-kua-module">
         <NumeroVastuDashboard
           profile={profile}
-          dob={profile.dob}
+          dob={profile.identity.dob}
           name={profile.identity.fullName}
-          gender={profile.gender as 'MALE' | 'FEMALE'}
+          gender={(profile.identity.gender as 'MALE' | 'FEMALE') || 'MALE'}
         />
       </section>
 

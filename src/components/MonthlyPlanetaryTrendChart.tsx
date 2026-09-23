@@ -303,7 +303,7 @@ export const MonthlyPlanetaryTrendChart: React.FC<MonthlyPlanetaryTrendChartProp
             margin={{ top: 10, right: 15, left: -15, bottom: 0 }}
             onClick={(state) => {
               if (state && state.activeTooltipIndex !== undefined) {
-                setSelectedMonth(state.activeTooltipIndex + 1);
+                setSelectedMonth(Number(state.activeTooltipIndex) + 1);
               }
             }}
           >

@@ -25,7 +25,7 @@ const AstroDashboard: React.FC<AstroDashboardProps> = ({ dobData, nameData, mobi
     if (profile?.enhancedGrid) {
       return profile.enhancedGrid;
     }
-    const bg = buildBirthGrid(dobData.dob || '1990-01-01');
+    const bg = buildBirthGrid((dobData as any).dob || fullProfile?.identity?.dob || '1990-01-01');
     const eg = buildEnhancedGrid(bg, dobData.birthNumber, dobData.lifePathNumber);
     return eg.flatGrid;
   }, [profile, dobData]);

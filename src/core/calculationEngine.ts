@@ -51,6 +51,7 @@ export interface CompleteProfileInput {
   marriageDob?: string;
   vehicleNumber?: string;
   houseNumber?: string;
+  entranceNumber?: string;
   businessName?: string;
   facingDirection?: string;
   flatNumber?: string;
@@ -129,7 +130,7 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
   });
 
   const medical = analyzeMedicalNumerology(dob, name);
-  const mobileAnalysis = mobile ? analyzeMobileNumerology(mobile, mulank, bhagyank, enhancedGridResult.enhancedGridPresence, dobDigits) : undefined;
+  const mobileAnalysis = mobile ? analyzeMobileNumerology(mobile, mulank, bhagyank, enhancedGridResult.effectivePresentDigits, dobDigits) : undefined;
   const nameNumerology = analyzeComprehensiveName({
     name,
     dob,
@@ -137,7 +138,7 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     bhagyank,
     mobile,
     birthGrid,
-    enhancedGrid: enhancedGridResult.enhancedGridPresence
+    enhancedGrid: enhancedGridResult.effectivePresentDigits
   });
   const interpretations = generateDomainInterpretations(mulank, bhagyank, synthesis, enhancedGridResult);
 
@@ -229,6 +230,9 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
 
   const karmic = analyzeKarmicPatterns(parsedDay, parsedDay, compoundDOBSum);
   const kua = calculateKuaNumber(parsedYear, gender);
+  if (vastu && typeof vastu === 'object') {
+    (vastu as any).kua = kua;
+  }
   const vedicGrid = buildVedicGrid(dobDigits);
   const combination81 = getCombination81(mulank, bhagyank);
   const actionPlan90Day = generate90DayActionPlan({
@@ -294,7 +298,7 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     remedies,
     consultation,
     explanation,
-    annualForecast: masterReport.reasons,
+    annualForecast: (masterReport as any)?.reasons || (masterReport as any)?.annualForecast || [],
     compatibility,
     pdfData: null,
     combination81,
@@ -315,7 +319,7 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
     bhagyank,
     birthGrid,
     enhancedGrid: flatEnhancedGrid,
-    mobile: mobileAnalysis || masterReport.mobileAnalysis,
+    mobile: mobileAnalysis || (masterReport as any)?.mobileAnalysis,
     planes,
     arrows,
     missingNumbers: rawMissingNumbers,

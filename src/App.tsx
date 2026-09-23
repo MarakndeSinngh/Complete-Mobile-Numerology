@@ -461,7 +461,7 @@ const App: React.FC = () => {
             />
           </div>
         ) : currentPortal === 'CORE_LOSHU' ? (
-          <CompleteLoshuGridAnalysis initialProfile={personalDetails} />
+          <CompleteLoshuGridAnalysis initialProfile={personalDetails ? { name: personalDetails.name, dob: personalDetails.dob, gender: personalDetails.gender || 'MALE' } : null} />
         ) : currentPortal === 'CORE_DASHBOARD' ? (
           dobData && nameData && mobileData && remedies && personalDetails ? (
             <AstroDashboard

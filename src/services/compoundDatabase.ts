@@ -24,6 +24,9 @@ export interface CompoundInterpretation {
   prediction: string;
 }
 
+export type CompoundData = CompoundInterpretation;
+
+
 const PRIMARY_COMPOUNDS: Record<number, Partial<CompoundInterpretation>> = {
   10: {
     title: 'The Wheel of Fortune (भाग्य चक्र)',

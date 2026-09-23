@@ -9,6 +9,8 @@ export interface HealthScores {
   immunityScore: number;
   mentalWellnessScore: number;
   overallVibration: string;
+  stressLevel?: number;
+  sleepQuality?: number;
   reasoning: {
     health: string;
     digestive: string;
@@ -36,6 +38,7 @@ export interface MedicalReport {
   weakBodySystems: string[];
   healthStrengths: string[];
   scores: HealthScores;
+  disclaimer?: string;
   dietRecommendations: {
     recommendedFoods: string[];
     foodsToAvoid: string[];
@@ -51,8 +54,12 @@ export interface MedicalReport {
     lifestyleSuggestions: string[];
     morningRoutine: string;
     sleepRecommendations: string;
+    sleepHygieneTip?: string;
   };
 }
+
+export type MedicalNumerologyResult = MedicalReport;
+
 
 // Weights map: [vata, pitta, kapha]
 const DIGIT_DOSHA_WEIGHTS: Record<number, [number, number, number]> = {

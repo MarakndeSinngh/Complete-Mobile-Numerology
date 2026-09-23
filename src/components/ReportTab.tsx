@@ -407,7 +407,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
 
     const dosha = getDoshaData(analysis.mulank);
     
-    const missingNums = analysis.missingNumbers ? analysis.missingNumbers.map(n => n.number) : [];
+    const missingNums = analysis.missingNumbers ? analysis.missingNumbers.map((n: any) => n.number || n.digit) : [];
     const vastuData = analyzeNumeroVastu({
       dob: details.dob,
       gender: details.gender || 'MALE',
@@ -1085,7 +1085,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
                 <div style="font-size: 8px; line-height: 1.35; display: flex; flex-direction: column; gap: 4px;">
                   <div><strong style="color: #BE185D;">Heart / Soul (Vowels #${nameNumData.vowels.chaldeanRoot}):</strong> ${nameNumData.vowels.heartSoulMeaningHi.substring(0, 75)}...</div>
                   <div><strong style="color: #047857;">Personality (Consonants #${nameNumData.consonants.chaldeanRoot}):</strong> ${nameNumData.consonants.personalityMeaningHi.substring(0, 75)}...</div>
-                  <div><strong style="color: #6B21A8;">Habit Number (#${nameNumData.habit.number}):</strong> ${nameNumData.habit.habitMeaningHi.substring(0, 65)}...</div>
+                  <div><strong style="color: #6B21A8;">Habit Number (#${nameNumData.habit.number}):</strong> ${((nameNumData.habit as any).habitMeaningHi || (nameNumData.habit as any).meaningHi || '').substring(0, 65)}...</div>
                 </div>
               </div>
             </div>

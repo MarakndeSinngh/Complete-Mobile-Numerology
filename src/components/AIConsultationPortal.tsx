@@ -4,7 +4,7 @@ import {
   Sparkles, User, Calendar, TrendingUp, Heart, Shield, Award, Phone, Compass, 
   HelpCircle, Send, FileText, Lock, CreditCard, MessageCircle, CheckCircle, 
   AlertTriangle, Bookmark, ArrowRight, Share2, Printer, Activity, CheckSquare, 
-  ChevronRight, RefreshCw, Star, Info, ShoppingBag, Clock, Plus, Trash2, Eye
+  ChevronRight, RefreshCw, Star, Info, ShoppingBag, Clock, Plus, Trash2, Eye, Briefcase
 } from 'lucide-react';
 import { getScoreExplanations, ScoreExplanation } from '../services/explanationEngine';
 import { generateLeoConsultation, LeoConsultationReport, ProbabilityMetric, GrowthIndexItem } from '../services/LeoConsultationEngine';
@@ -1120,7 +1120,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
 
                 {/* Probability meters */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {Object.entries(reportData.probabilities).map(([key, item]) => (
+                  {Object.entries(reportData.probabilities).map(([key, item]: [string, any]) => (
                     <div 
                       key={key} 
                       onClick={() => setSelectedProbExplain(key)}
@@ -1420,7 +1420,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
 
                 {/* Vertical timeline steps */}
                 <div className="space-y-6 relative border-l border-amber-600/20 ml-4 pl-6">
-                  {Object.entries(reportData.timeline).map(([key, phase], idx) => (
+                  {Object.entries(reportData.timeline).map(([key, phase]: [string, any], idx) => (
                     <div key={key} className="relative space-y-2">
                       {/* Timeline dot */}
                       <span className="absolute -left-[31px] top-1.5 w-4.5 h-4.5 rounded-full bg-[#D97706] border-2 border-white flex items-center justify-center text-[8px] text-white font-bold">

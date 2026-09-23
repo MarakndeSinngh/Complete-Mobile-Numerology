@@ -607,3 +607,5 @@ export function analyzeMobileNumerology(
     sourcesUsed
   };
 }
+
+export const analyzeMobileNumber = analyzeMobileNumerology;

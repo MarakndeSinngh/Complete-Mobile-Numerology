@@ -1062,8 +1062,16 @@ export function analyzeComprehensiveName(input: {
     compoundTitle: compoundDetails.title,
     compoundInterpretationHi: compoundDetails.meaning,
     rootInterpretationHi: `रूट अंक ${fullChaldean.root} का आधिपत्य ${compoundDetails.ruler} के पास है।`,
-    careerSuggestions,
-    relationshipStyle,
+    careerSuggestions: {
+      domainHi: careerSuggestions.domain,
+      favorableRoles: careerSuggestions.roles,
+      traditionalFrameworkNote: careerSuggestions.note
+    },
+    relationshipStyle: {
+      communicationToneHi: relationshipStyle.comm,
+      emotionalExpressivenessHi: relationshipStyle.emo,
+      socialBehaviourHi: relationshipStyle.social
+    },
     luckyInfo
   };
 

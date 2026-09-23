@@ -1,7 +1,7 @@
 import { SOURCES } from './sourceRegistry';
+import { MANDATORY_MEDICAL_WELLNESS_DISCLAIMER } from './wellnessDefinitions';
 
-export const MANDATORY_MEDICAL_WELLNESS_DISCLAIMER =
-  'यह केवल Traditional Numerology Wellness Interpretation है। यह medical diagnosis, medical treatment या professional healthcare का विकल्प नहीं है। किसी भी शारीरिक या चिकित्सीय समस्या के लिए हमेशा योग्य डॉक्टर (Medical Doctor) से परामर्श लें।';
+export { MANDATORY_MEDICAL_WELLNESS_DISCLAIMER };
 
 export interface DayLordInfo {
   dayNameEn: string;

@@ -6,12 +6,16 @@ export interface VaastuDirectionDetails {
   degreeRange: string;
   element: string;
   dynamicInfluence: string;
+  description?: string;
 }
 
 export interface NumeroVaastuReport {
   kuaNumber: number;
   groupType: 'EAST_GROUP' | 'WEST_GROUP';
   groupDescription: string;
+  rulingElement?: string;
+  remedies?: any;
+  loShuVaastuRemedies?: any;
   directions: {
     success: VaastuDirectionDetails;
     health: VaastuDirectionDetails;
@@ -54,6 +58,9 @@ export interface NumeroVaastuReport {
     }[];
   };
 }
+
+export type NumeroVaastuResult = NumeroVaastuReport;
+
 
 export function calculateKuaNumber(year: number, gender: 'MALE' | 'FEMALE' | 'OTHER' = 'MALE'): number {
   const lastTwo = year % 100;

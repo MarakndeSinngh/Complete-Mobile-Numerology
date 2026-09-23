@@ -25,11 +25,11 @@ export const NumeroVastuDashboard: React.FC<NumeroVastuDashboardProps> = ({
   const [facingDir, setFacingDir] = useState<string>('North');
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'FUSION' | 'KUA' | 'PROPERTY' | 'WORKSPACE' | 'REMEDIES'>('OVERVIEW');
 
-  const effectiveDOB = profile?.dob || dob;
-  const effectiveGender = (profile?.gender as 'MALE' | 'FEMALE') || gender;
-  const mulank = profile?.mulank || 1;
-  const bhagyank = profile?.bhagyank || 1;
-  const missingNumbers = profile?.missingNumbers || [];
+  const effectiveDOB = profile?.identity?.dob || (profile as any)?.dob || dob;
+  const effectiveGender = (profile?.identity?.gender as 'MALE' | 'FEMALE') || ((profile as any)?.gender as 'MALE' | 'FEMALE') || gender;
+  const mulank = profile?.coreNumbers?.mulank || profile?.driver || (profile as any)?.mulank || 1;
+  const bhagyank = profile?.coreNumbers?.bhagyank || profile?.bhagyank || (profile as any)?.bhagyank || 1;
+  const missingNumbers = profile?.loshu?.missingNumbers ? profile.loshu.missingNumbers.map((m: any) => m.digit || m.number || m) : (profile?.missingNumbers || []);
 
   // Compute live Vastu Analysis
   const vastuData: UnifiedVastuAnalysis = useMemo(() => {

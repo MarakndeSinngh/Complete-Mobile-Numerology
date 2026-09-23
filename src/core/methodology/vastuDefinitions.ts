@@ -5,7 +5,7 @@ export interface VastuDirectionZone {
   direction: string;
   hindiName: string;
   rulingPlanet: string;
-  element: 'Water' | 'Air' | 'Fire' | 'Earth' | 'Space' | 'Metal' | 'Wood';
+  element: 'Water' | 'Air' | 'Fire' | 'Earth' | 'Space' | 'Metal' | 'Wood' | string;
   loShuDigit: number;
   lifeDomain: string;
   favorableActivities: string[];

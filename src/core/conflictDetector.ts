@@ -160,10 +160,10 @@ export function runMethodologyAudit(): ConflictReport {
   checks++;
   for (let d = 1; d <= 9; d++) {
     const pos = VEDIC_GRID_POSITIONS[d];
-    if (!pos || pos.row < 1 || pos.row > 3 || pos.col < 1 || pos.col > 3) {
+    if (!pos || !pos.graha || !pos.direction) {
       conflicts.push({
         system: 'VEDIC_GRID',
-        description: `Vedic Grid position for digit ${d} is invalid or out of bounds.`,
+        description: `Vedic Grid position for digit ${d} is invalid or missing definition.`,
         severity: 'CRITICAL'
       });
     }

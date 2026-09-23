@@ -30,3 +30,4 @@ export * from './vehicleEngine';
 export * from './businessEngine';
 export * from './synastryEngine';
 export * from './calculationEngine';
+export * from './expertConsultationEngine';

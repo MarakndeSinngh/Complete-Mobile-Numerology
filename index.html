@@ -89,36 +89,67 @@
         /* PRINT STYLES */
         @media print {
             @page {
-                size: A4;
-                margin: 0 !important;
+                size: A4 portrait;
+                margin: 10mm 8mm 12mm 8mm !important;
             }
             body, html {
-                background: #F8F4EF !important;
+                background: #FFFFFF !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 color: #1F2937 !important;
+                font-size: 11pt !important;
+                line-height: 1.5 !important;
             }
-            body.print-custom-report #root {
+            .no-print,
+            button,
+            nav,
+            header:not(.print-header),
+            .sticky,
+            .fixed,
+            #navbar-container,
+            .quick-jump-nav {
                 display: none !important;
             }
-            body.print-custom-report #report-print-root {
-                display: block !important;
-                visibility: visible !important;
-                width: 210mm !important;
-                height: auto !important;
+            #master-report-container,
+            .master-report-dossier {
+                width: 100% !important;
+                max-width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                background: #FFFFFF !important;
+                box-shadow: none !important;
+                border: none !important;
             }
-            .page-break {
-                page-break-after: always !important;
-                break-after: page !important;
-                height: 297mm !important;
-                width: 210mm !important;
-                position: relative !important;
-                overflow: hidden !important;
-                box-sizing: border-box !important;
+            .page-break,
+            .print-page-break {
+                page-break-before: always !important;
+                break-before: page !important;
+            }
+            .print-avoid-break,
+            .break-inside-avoid,
+            table,
+            .grid,
+            .rounded-2xl,
+            .rounded-3xl,
+            .border {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+            .print-running-header {
+                display: flex !important;
+                position: relative;
+                top: 0;
+            }
+            .print-running-footer {
+                display: flex !important;
+                position: relative;
+                bottom: 0;
             }
         }
     </style>

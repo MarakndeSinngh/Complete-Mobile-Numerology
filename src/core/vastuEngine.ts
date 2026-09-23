@@ -837,7 +837,13 @@ export function analyzeNumeroVastu(inputs: VastuInputs): UnifiedVastuAnalysis {
       buildingNumber: buildingAnalysis,
       floorNumber: floorAnalysis,
       mainEntrance: entranceAnalysis,
-      facingDirection: facingAnalysis
+      facingDirection: facingAnalysis ? {
+        direction: facingAnalysis.direction,
+        isFavorableWithKua: facingAnalysis.isFavorable,
+        statusLabelHindi: facingAnalysis.statusLabelHindi,
+        explanationHindi: facingAnalysis.explanationHindi,
+        remedyHindi: facingAnalysis.remedyHindi
+      } : undefined
     },
     layer5_traditionalRemedies: {
       homeRemedies: [

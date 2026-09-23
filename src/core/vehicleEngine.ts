@@ -345,8 +345,8 @@ export function analyzeVehicleNumerologyPro(input: VehicleAnalysisInput): Vehicl
 
   // 4. Owner DOB Parsing & Core Numbers
   const parsedOwnerDob = parseIndianDate(input.ownerDob);
-  const mulank = parsedOwnerDob ? calculateMulank(parsedOwnerDob.day) : 1;
-  const bhagyank = parsedOwnerDob ? calculateBhagyank(parsedOwnerDob.day, parsedOwnerDob.month, parsedOwnerDob.year) : 1;
+  const mulank = calculateMulank(input.ownerDob);
+  const bhagyank = calculateBhagyank(input.ownerDob);
   const mulankLord = PLANET_NAMES_HI[mulank] || `Planet ${mulank}`;
   const bhagyankLord = PLANET_NAMES_HI[bhagyank] || `Planet ${bhagyank}`;
 

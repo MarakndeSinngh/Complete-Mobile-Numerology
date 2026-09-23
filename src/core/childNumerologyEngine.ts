@@ -1,8 +1,9 @@
 import { reduceToDigit, sumDigits, calculateMulank, calculateBhagyank } from './numerologyEngine';
 import { buildBirthGrid } from './loshuEngine';
 import { buildEnhancedGrid, EnhancedLoshuGridResult } from './enhancedLoshuEngine';
-import { calculatePlanes, PlaneAnalysis } from './planeEngine';
-import { calculateArrows, ArrowAnalysis } from './arrowEngine';
+import { calculatePlanes } from './planeEngine';
+import { calculateArrows } from './arrowEngine';
+import { PlaneAnalysis, ArrowAnalysis } from './types';
 import { CHALDEAN_LETTER_VALUES, calculateChaldeanNameSum } from './chaldeanEngine';
 import { getCompoundDetails, CompoundData } from '../services/compoundDatabase';
 import { parseIndianDate, formatDateForDisplay } from '../utils/dateUtils';
@@ -684,9 +685,9 @@ export function analyzeChildLuckyNamesPro(input: ChildProfileInput): ChildLuckyN
 
   // Build Grids
   const birthGrid = buildBirthGrid(dobStr);
-  const enhancedGrid = buildEnhancedGrid(dobStr);
-  const planes = calculatePlanes(birthGrid, enhancedGrid);
-  const arrows = calculateArrows(birthGrid);
+  const enhancedGrid = buildEnhancedGrid(birthGrid, mulank, bhagyank);
+  const planes = calculatePlanes(enhancedGrid.flatGrid, birthGrid, mulank, bhagyank);
+  const arrows = calculateArrows(enhancedGrid.flatGrid);
 
   // Missing numbers in birth grid
   const missingNumbers: number[] = [];

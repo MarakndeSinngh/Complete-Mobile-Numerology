@@ -23,6 +23,12 @@ export interface DOBAnalysis {
   missingNumbers: number[];
   karmicDebtNumbers: number[];
   karmicLessons: number[];
+  luckyNumbers?: number[];
+  planet?: string;
+  rulingPlanet?: string;
+  birthPlanet?: string;
+  lifePathPlanet?: string;
+  kuaNumber?: number;
 }
 
 export interface NameAnalysis {
@@ -33,6 +39,8 @@ export interface NameAnalysis {
   expressionNumber: number;
   soulUrgeNumber: number;
   personalityNumber: number;
+  chaldeanTotal?: number;
+  fullName?: string;
   traits: {
     positive: string[];
     negative: string[];
@@ -45,6 +53,8 @@ export interface MobileAnalysis {
   modifiedNumber: string; // Zeros replaced with previous
   compoundTotal: number;
   reducedTotal: number;
+  singleDigit?: number;
+  planetaryInfluence?: string;
   rating: 'EXCELLENT' | 'GOOD' | 'AVOID' | 'CAN GO' | 'OK';
   score: number;
   positionsAudit: { position: number; heading: string; digit: number; description: string }[];
@@ -65,6 +75,7 @@ export interface CompatibilityReport {
 export interface remediesAdvice {
   colors: string[];
   gemstones: string[];
+  gemstone?: string;
   nameCorrection: string;
   mobileEndings: string[];
   signatureAdvice: string;

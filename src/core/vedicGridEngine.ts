@@ -33,7 +33,7 @@ export interface VedicGridAnalysis {
   synthesis: string;
 }
 
-const VEDIC_GRID_POSITIONS: Record<number, { graha: string; direction: string; domain: string }> = {
+export const VEDIC_GRID_POSITIONS: Record<number, { graha: string; direction: string; domain: string }> = {
   3: { graha: 'बृहस्पति (Jupiter)', direction: 'उत्तर-पूर्व (ईशान)', domain: 'ज्ञान, विवेक एवं मार्गदर्शन' },
   1: { graha: 'सूर्य (Sun)', direction: 'पूर्व (East)', domain: 'नेतृत्व, प्राण ऊर्जा एवं आत्म-सम्मान' },
   9: { graha: 'मंगल (Mars)', direction: 'दक्षिण (South)', domain: 'पराक्रम, साहस एवं क्रियान्वयन' },

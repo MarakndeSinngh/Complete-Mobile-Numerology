@@ -14,7 +14,7 @@ import { PLANET_DEFINITIONS } from './methodology/planetMappings';
 import { MASTER_PLANES } from './methodology/planeDefinitions';
 import { MASTER_ARROWS } from './methodology/arrowDefinitions';
 import { getCombination81 } from './methodology/combinationDefinitions';
-import { MOBILE_COMPOUND_DATABASE, SPECIAL_PURPOSE_COMBINATIONS, MOBILE_POSITIONS } from './methodology/mobileDefinitions';
+import { MOBILE_COMPOUND_DATABASE, SPECIAL_PIN_COMBINATIONS, MOBILE_POSITIONS } from './methodology/mobileDefinitions';
 import { PAIR_MEANINGS } from '../services/pairMeanings';
 import { VASTU_ZONES } from './methodology/vastuDefinitions';
 import { WELLNESS_DEFINITIONS } from './methodology/wellnessDefinitions';
@@ -166,15 +166,15 @@ export function searchKnowledgeBase(type: 'number' | 'pair' | 'compound' | 'plan
     }
 
     case 'special_purpose': {
-      const comb = SPECIAL_PURPOSE_COMBINATIONS.find(c => c.name.toLowerCase().includes(strKey.toLowerCase()) || c.category.toLowerCase() === strKey.toLowerCase());
+      const comb = (SPECIAL_PIN_COMBINATIONS as any[]).find(c => (c.name || '').toLowerCase().includes(strKey.toLowerCase()) || (c.category || '').toLowerCase() === strKey.toLowerCase());
       if (comb) {
         return {
           queryType: 'SPECIAL_PURPOSE_COMBINATION',
           key: strKey,
           found: true,
-          title: `${comb.name} (${comb.category})`,
+          title: `${comb.name} (${comb.category || 'Special'})`,
           structuredData: comb,
-          interpretation: comb.traditionalMeaning,
+          interpretation: comb.traditionalMeaning || comb.description || '',
           source: 'LeoFamily Special Purpose Combinations'
         };
       }

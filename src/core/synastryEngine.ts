@@ -201,8 +201,8 @@ function extractProfile(input: SynastryPersonInput, defaultGender: 'MALE' | 'FEM
   const repeated = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(d => (birthGrid[d] || 0) > 1);
   
   const planesResult = calculatePlanes(enhancedResult.flatGrid, birthGrid, mulank, bhagyank);
-  const planes = planesResult.filter(p => p.status === 'COMPLETE').map(p => p.title);
-  const arrowsResult = calculateArrows(enhancedResult.flatGrid, birthGrid);
+  const planes = planesResult.filter(p => p.status === 'COMPLETE' || p.status === 'FULL').map(p => p.title);
+  const arrowsResult = calculateArrows(enhancedResult.flatGrid);
   const arrows = arrowsResult.filter(a => a.isActive).map(a => a.name);
 
   return {
@@ -218,7 +218,7 @@ function extractProfile(input: SynastryPersonInput, defaultGender: 'MALE' | 'FEM
     birthGrid,
     enhancedGrid: enhancedResult.flatGrid,
     missingNumbers: missing,
-    repeatedNumbers: repeated,
+    repeatedNumbers: repeated.map(d => ({ digit: d, count: birthGrid[d] || 2 })),
     activePlanes: planes,
     activeArrows: arrows,
     mobileNumber: input.mobile

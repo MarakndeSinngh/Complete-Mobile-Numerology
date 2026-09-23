@@ -131,6 +131,7 @@ export interface RemedyDetails {
 }
 
 export interface ScoreCard {
+  [key: string]: number;
   mentalStrength: number;
   emotionalStrength: number;
   practicalStrength: number;
