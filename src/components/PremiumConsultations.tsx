@@ -730,6 +730,7 @@ export default function PremiumConsultations({ initialModule = 'VEHICLE' }: Prem
       }
 
       setSigAuditResult(result);
+      setSigError(null);
       try {
         localStorage.setItem('leofamily_saved_signature_audit', JSON.stringify({
           auditResult: result,

@@ -208,7 +208,7 @@ Please lay out the report with the following exact chapters in professional, ric
 `;
 
       const aiResponse = await client.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.8-flash",
         contents: prompt,
         config: {
           systemInstruction: `You are an elite, compassionate astro-numerologist with 25 years of consulting experience in traditional Indian Vedic & Mobile Numerology.
@@ -370,7 +370,7 @@ Write with premium consulting mastery strictly following traditional Vedic Hindi
 `;
 
       const aiResponse = await client.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.8-flash",
         contents: prompt,
         config: {
           systemInstruction: `You are an elite, compassionate astro-numerologist with 25 years of consulting experience in traditional Indian Vedic, Chaldean & Loshu Grid Numerology.
@@ -788,7 +788,7 @@ Return data in the EXACT JSON format matching the schema properties:
       };
 
       const aiResponse = await client.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-3.8-flash",
         contents: contents,
         config: {
           systemInstruction: "You are an elite, highly experienced Astro-Numerologist and Vastu Handwriting Specialist. You deliver comprehensive, non-generic, deep-dive signature analyses and audits that look like premium masterclass dossiers.",
@@ -803,7 +803,17 @@ Return data in the EXACT JSON format matching the schema properties:
         throw new Error("Empty response received from Gemini.");
       }
 
-      const parsedResult = JSON.parse(responseText);
+      let cleanText = responseText.trim();
+      if (cleanText.startsWith("```json")) {
+        cleanText = cleanText.slice(7);
+      } else if (cleanText.startsWith("```")) {
+        cleanText = cleanText.slice(3);
+      }
+      if (cleanText.endsWith("```")) {
+        cleanText = cleanText.slice(0, -3);
+      }
+
+      const parsedResult = JSON.parse(cleanText.trim());
       res.json(parsedResult);
     } catch (err: any) {
       console.error("AI Signature Audit Gemini server error: ", err);
