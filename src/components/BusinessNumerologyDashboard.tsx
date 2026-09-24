@@ -35,6 +35,7 @@ import {
   BusinessIndustryType,
   BusinessCompatibilityStatus
 } from '../core/businessEngine';
+import DateInput from './DateInput';
 import { formatDateForDisplay, parseIndianDate } from '../utils/dateUtils';
 import { useLanguage } from '../i18n';
 import { getProfileIsolationKey } from '../core';
@@ -279,15 +280,13 @@ export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardPr
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
-              Owner DOB (DD/MM/YYYY)
-            </label>
-            <input
-              type="text"
+            <DateInput
+              id="business-owner-dob"
+              label="Owner DOB (DD/MM/YYYY)"
               value={ownerDob}
-              onChange={(e) => setOwnerDob(e.target.value)}
-              placeholder="DD/MM/YYYY"
-              className="w-full bg-[#FDFCF7] border border-[#E5E7EB] py-2.5 px-3.5 rounded-xl text-sm font-sans focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
+              outputFormat="indian"
+              onChange={(val) => setOwnerDob(val)}
+              className="py-2 px-3 text-xs bg-[#FDFCF7] rounded-xl"
             />
           </div>
 
@@ -342,15 +341,13 @@ export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardPr
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">
-                  Partner DOB (DD/MM/YYYY)
-                </label>
-                <input
-                  type="text"
+                <DateInput
+                  id="business-partner-dob"
+                  label="Partner DOB (DD/MM/YYYY)"
                   value={partnerDob}
-                  onChange={(e) => setPartnerDob(e.target.value)}
-                  placeholder="DD/MM/YYYY"
-                  className="w-full bg-white border border-[#E5E7EB] py-2.5 px-3.5 rounded-xl text-sm font-sans focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
+                  outputFormat="indian"
+                  onChange={(val) => setPartnerDob(val)}
+                  className="py-2 px-3 text-xs bg-white rounded-xl"
                 />
               </div>
             </div>

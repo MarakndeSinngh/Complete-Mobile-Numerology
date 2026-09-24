@@ -33,6 +33,7 @@ import {
   PURPOSE_DEFINITIONS,
   WEEKDAY_MAP
 } from '../core/luckyDatesEngine';
+import DateInput from './DateInput';
 import { formatDateIndian, parseIndianDate, normalizeIndianDate } from '../utils/dateUtils';
 import { calculateMulank, calculateBhagyank } from '../core/numerologyEngine';
 
@@ -206,15 +207,13 @@ export const LuckyDatesDashboard: React.FC<LuckyDatesDashboardProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           {/* DOB Input */}
           <div className="space-y-1.5">
-            <label className="font-mono text-[10px] uppercase font-bold text-slate-600 block">
-              जन्मतिथि (Date of Birth) *
-            </label>
-            <input
-              type="text"
+            <DateInput
+              id="lucky-dates-dob"
+              label="जन्मतिथि (Date of Birth) *"
               value={dob}
-              onChange={(e) => setDob(e.target.value)}
-              placeholder="DD/MM/YYYY"
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm focus:bg-white focus:border-[#D97706] outline-none"
+              outputFormat="indian"
+              onChange={(val) => setDob(val)}
+              className="py-2.5 text-xs font-mono"
             />
             <span className="text-[10px] text-slate-400 block font-mono">
               Driver: #{calculateMulank(dob)} • Conductor: #{calculateBhagyank(dob)}

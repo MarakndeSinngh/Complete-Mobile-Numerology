@@ -27,6 +27,7 @@ import {
   VehicleAnalysisInput,
   CompatibilityStatus
 } from '../core/vehicleEngine';
+import DateInput from './DateInput';
 import { formatDateForDisplay, parseIndianDate } from '../utils/dateUtils';
 import { useLanguage } from '../i18n';
 import { getProfileIsolationKey } from '../core';
@@ -272,15 +273,13 @@ export const VehicleNumerologyDashboard: React.FC<VehicleNumerologyDashboardProp
 
           {/* Owner DOB */}
           <div className="space-y-1.5">
-            <label className="font-bold text-[#374151] flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-amber-600" /> Owner DOB (DD/MM/YYYY) *
-            </label>
-            <input
-              type="text"
+            <DateInput
+              id="vehicle-owner-dob"
+              label="Owner DOB (DD/MM/YYYY) *"
               value={ownerDob}
-              onChange={(e) => setOwnerDob(e.target.value)}
-              placeholder="DD/MM/YYYY"
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 font-mono"
+              outputFormat="indian"
+              onChange={(val) => setOwnerDob(val)}
+              className="py-2.5 px-3 text-xs"
               required
             />
           </div>
@@ -331,25 +330,27 @@ export const VehicleNumerologyDashboard: React.FC<VehicleNumerologyDashboardProp
 
           {/* Purchase Date (Optional) */}
           <div className="space-y-1.5">
-            <label className="font-bold text-[#374151]">Purchase Date (DD/MM/YYYY)</label>
-            <input
-              type="text"
+            <DateInput
+              id="vehicle-purchase-date"
+              label="Purchase Date (DD/MM/YYYY)"
               value={purchaseDate}
-              onChange={(e) => setPurchaseDate(e.target.value)}
+              outputFormat="indian"
+              onChange={(val) => setPurchaseDate(val)}
+              className="py-2.5 px-3 text-xs"
               placeholder="Optional DD/MM/YYYY"
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 font-mono"
             />
           </div>
 
           {/* Registration Date (Optional) */}
           <div className="space-y-1.5">
-            <label className="font-bold text-[#374151]">Registration Date (DD/MM/YYYY)</label>
-            <input
-              type="text"
+            <DateInput
+              id="vehicle-reg-date"
+              label="Registration Date (DD/MM/YYYY)"
               value={registrationDate}
-              onChange={(e) => setRegistrationDate(e.target.value)}
+              outputFormat="indian"
+              onChange={(val) => setRegistrationDate(val)}
+              className="py-2.5 px-3 text-xs"
               placeholder="Optional DD/MM/YYYY"
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 font-mono"
             />
           </div>
         </form>

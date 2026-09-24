@@ -41,6 +41,15 @@ export interface ParsedDate {
   digits?: number[];
 }
 
+export interface DetailedDateValidation {
+  isValid: boolean;
+  isComplete: boolean;
+  error?: string;
+  parsed?: ParsedDate;
+  isoDate?: string;
+  displayDate?: string;
+}
+
 /**
  * Extracts individual digits from day, month, year
  */
@@ -52,6 +61,172 @@ function extractDateDigits(day: number, month: number, year: number): number[] {
     if (!isNaN(n)) digits.push(n);
   }
   return digits;
+}
+
+/**
+ * Universal Smart Date Formatter
+ * 
+ * Progressively formats digit inputs:
+ * "0" -> "0"
+ * "05" -> "05"
+ * "050" -> "05/0"
+ * "0508" -> "05/08"
+ * "05081" -> "05/08/1"
+ * "050819" -> "05/08/19"
+ * "0508198" -> "05/08/198"
+ * "05081983" -> "05/08/1983"
+ * 
+ * Also handles pasted dates with '-', '.', or ISO 'YYYY-MM-DD'.
+ */
+export function formatSmartDateInput(rawValue: string, prevValue: string = ''): string {
+  if (!rawValue) return '';
+  const trimmed = rawValue.trim();
+  if (!trimmed) return '';
+
+  // Case 1: Pasted ISO date YYYY-MM-DD
+  if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(trimmed)) {
+    const parts = trimmed.split(/[-/]/);
+    const y = parts[0].padStart(4, '0');
+    const m = parts[1].padStart(2, '0');
+    const d = parts[2].padStart(2, '0');
+    return `${d}/${m}/${y}`;
+  }
+
+  // Case 2: Pasted separated date with - or . (e.g. 05-08-1983 or 05.08.1983 or 5-8-1983)
+  if (/^\d{1,2}[-.]\d{1,2}[-.]\d{2,4}$/.test(trimmed)) {
+    const parts = trimmed.split(/[-.]/);
+    const d = parts[0].padStart(2, '0');
+    const m = parts[1].padStart(2, '0');
+    let y = parts[2];
+    if (y.length === 2) {
+      y = parseInt(y, 10) > 40 ? `19${y}` : `20${y}`;
+    }
+    return `${d}/${m}/${y}`;
+  }
+
+  // Check if user is deleting
+  const isDeleting = prevValue.length > rawValue.length;
+
+  // Preserve trailing slashes if explicitly typed forward
+  if (!isDeleting) {
+    if (/^\d{2}\/$/.test(trimmed)) {
+      return trimmed;
+    }
+    if (/^\d{2}\/\d{2}\/$/.test(trimmed)) {
+      return trimmed;
+    }
+  }
+
+  // Extract digits only (up to 8 digits for DDMMYYYY)
+  const digits = trimmed.replace(/\D/g, '').slice(0, 8);
+  if (digits.length === 0) return '';
+
+  // 1-2 digits: "0", "05"
+  if (digits.length <= 2) {
+    if (!isDeleting && (trimmed.endsWith('/') || trimmed.endsWith('-') || trimmed.endsWith('.'))) {
+      return `${digits.padStart(2, '0')}/`;
+    }
+    return digits;
+  }
+
+  // 3-4 digits: "05/0", "05/08"
+  if (digits.length <= 4) {
+    const dd = digits.slice(0, 2);
+    const mm = digits.slice(2);
+    if (!isDeleting && mm.length === 2 && (trimmed.endsWith('/') || trimmed.endsWith('-') || trimmed.endsWith('.'))) {
+      return `${dd}/${mm}/`;
+    }
+    return `${dd}/${mm}`;
+  }
+
+  // 5-8 digits: "05/08/1", "05/08/19", "05/08/198", "05/08/1983"
+  const dd = digits.slice(0, 2);
+  const mm = digits.slice(2, 4);
+  const yyyy = digits.slice(4);
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+/**
+ * Detailed validation for Indian date format with accurate error diagnostics.
+ */
+export function validateIndianDateDetails(
+  input: string | undefined | null,
+  required: boolean = false
+): DetailedDateValidation {
+  if (!input || !input.trim()) {
+    if (required) {
+      return { isValid: false, isComplete: false, error: 'Date of Birth is required' };
+    }
+    return { isValid: true, isComplete: false };
+  }
+
+  const trimmed = input.trim();
+  const digits = trimmed.replace(/\D/g, '');
+
+  if (digits.length < 8 && !/^\d{1,2}[-/.]\d{1,2}[-/.]\d{4}$/.test(trimmed) && !/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(trimmed)) {
+    return { isValid: false, isComplete: false, error: 'Please enter a complete date (DD/MM/YYYY)' };
+  }
+
+  let day: number | null = null;
+  let month: number | null = null;
+  let year: number | null = null;
+
+  if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(trimmed)) {
+    const parts = trimmed.split(/[-/]/);
+    year = parseInt(parts[0], 10);
+    month = parseInt(parts[1], 10);
+    day = parseInt(parts[2], 10);
+  } else if (/^\d{1,2}[-/.]\d{1,2}[-/.]\d{4}$/.test(trimmed)) {
+    const parts = trimmed.split(/[-/.]/);
+    day = parseInt(parts[0], 10);
+    month = parseInt(parts[1], 10);
+    year = parseInt(parts[2], 10);
+  } else if (/^\d{8}$/.test(trimmed)) {
+    day = parseInt(trimmed.substring(0, 2), 10);
+    month = parseInt(trimmed.substring(2, 4), 10);
+    year = parseInt(trimmed.substring(4, 8), 10);
+  } else if (digits.length === 8) {
+    day = parseInt(digits.substring(0, 2), 10);
+    month = parseInt(digits.substring(2, 4), 10);
+    year = parseInt(digits.substring(4, 8), 10);
+  }
+
+  if (day === null || month === null || year === null || isNaN(day) || isNaN(month) || isNaN(year)) {
+    return { isValid: false, isComplete: false, error: 'Invalid date format. Use DD/MM/YYYY (e.g. 05/08/1983)' };
+  }
+
+  if (month < 1 || month > 12) {
+    return { isValid: false, isComplete: true, error: `Invalid month: ${month} (must be 01–12)` };
+  }
+
+  if (year < 1850 || year > 2150) {
+    return { isValid: false, isComplete: true, error: 'Year must be between 1850 and 2150' };
+  }
+
+  const maxDays = getDaysInMonth(month, year);
+  if (day < 1 || day > maxDays) {
+    if (month === 2) {
+      if (isLeapYear(year)) {
+        return { isValid: false, isComplete: true, error: `February ${year} (Leap Year) has only 29 days` };
+      } else {
+        return { isValid: false, isComplete: true, error: `February ${year} has only 28 days (${year} is not a leap year)` };
+      }
+    }
+    const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return { isValid: false, isComplete: true, error: `${monthNames[month] || `Month ${month}`} has maximum ${maxDays} days` };
+  }
+
+  const dd = String(day).padStart(2, '0');
+  const mm = String(month).padStart(2, '0');
+  const yyyy = String(year).padStart(4, '0');
+
+  return {
+    isValid: true,
+    isComplete: true,
+    parsed: { day, month, year, isValid: true, digits: extractDateDigits(day, month, year) },
+    isoDate: `${yyyy}-${mm}-${dd}`,
+    displayDate: `${dd}/${mm}/${yyyy}`,
+  };
 }
 
 /**

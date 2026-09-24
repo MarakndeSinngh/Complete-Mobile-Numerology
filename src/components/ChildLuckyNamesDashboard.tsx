@@ -38,6 +38,7 @@ import {
   CURATED_BABY_NAMES_LIBRARY,
   BabyNameDictionaryItem
 } from '../core/childNumerologyEngine';
+import DateInput from './DateInput';
 import { formatDateForDisplay, parseIndianDate } from '../utils/dateUtils';
 import { useLanguage } from '../i18n';
 import { getProfileIsolationKey } from '../core';
@@ -237,12 +238,13 @@ export const ChildLuckyNamesDashboard: React.FC<ChildLuckyNamesDashboardProps> =
 
           {/* DOB Input */}
           <div className="space-y-1">
-            <label className="text-[10px] font-mono text-slate-500 uppercase font-bold">जन्मतिथि (Date of Birth)</label>
-            <input
-              type="date"
+            <DateInput
+              id="child-dob-input"
+              label="जन्मतिथि (Date of Birth)"
               value={dob}
-              onChange={(e) => setDob(e.target.value)}
-              className="w-full bg-[#FDFCF7] border border-[#E5E7EB] py-2.5 px-3.5 rounded-xl text-xs font-sans focus:outline-none focus:ring-1 focus:ring-[#1E3A8A]"
+              outputFormat="iso"
+              onChange={(val) => setDob(val)}
+              className="py-2 px-3 text-xs bg-[#FDFCF7] rounded-xl"
             />
           </div>
 
