@@ -791,15 +791,15 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                   </div>
                 </div>
 
-                {/* ASK LEO AI INTERACTIVE INTERACTION BLOCK (Phase 7) */}
+                {/* LEOFAMILY CONSULTATION ASSISTANT INTERACTIVE INTERACTION BLOCK */}
                 <div className="bg-[#1E3A8A] rounded-[40px] p-6 md:p-8 text-white space-y-6 shadow-md print:hidden">
                   <div className="flex items-center gap-3">
                     <div className="bg-amber-500/20 p-2 rounded-xl text-amber-400">
                       <MessageCircle className="w-6 h-6 animate-pulse" />
                     </div>
                     <div>
-                      <h3 className="font-playfair text-xl font-bold">Ask Leo AI Consciousness</h3>
-                      <span className="text-[10px] text-slate-300 font-mono tracking-widest uppercase">Direct interactive follow-up</span>
+                      <h3 className="font-playfair text-xl font-bold">LeoFamily Vedic Guidance</h3>
+                      <span className="text-[10px] text-slate-300 font-mono tracking-widest uppercase">Direct interactive astrological follow-up</span>
                     </div>
                   </div>
 

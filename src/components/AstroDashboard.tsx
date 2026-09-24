@@ -6,6 +6,8 @@ import { MANDATORY_WELLNESS_DISCLAIMER } from '../core/methodology';
 import { Sparkles, Shield, AlertTriangle, CheckCircle, Compass, Award, Star, Activity, Info, Heart, TrendingUp } from 'lucide-react';
 import PlanetaryTransitTracker from './PlanetaryTransitTracker';
 import MonthlyPlanetaryTrendChart from './MonthlyPlanetaryTrendChart';
+import { useLanguage } from '../i18n';
+import { getLocalized81Yoga } from '../i18n/dynamicContent';
 
 interface AstroDashboardProps {
   dobData: DOBAnalysis;
@@ -18,7 +20,11 @@ interface AstroDashboardProps {
 }
 
 const AstroDashboard: React.FC<AstroDashboardProps> = ({ dobData, nameData, mobileData, remedies, name, profile, completeProfile }) => {
+  const { language } = useLanguage();
   const fullProfile = (completeProfile || profile) as CompleteNumerologyProfile | null;
+  const yoga81 = fullProfile?.coreNumbers?.mulank && fullProfile?.coreNumbers?.bhagyank
+    ? getLocalized81Yoga(fullProfile.coreNumbers.mulank, fullProfile.coreNumbers.bhagyank, language)
+    : null;
 
   // Use centralized profile or compute via standard core engines
   const effectiveGrid: Record<number, number> = React.useMemo(() => {
@@ -95,7 +101,7 @@ const AstroDashboard: React.FC<AstroDashboardProps> = ({ dobData, nameData, mobi
                 81 Yoga Code: {fullProfile.combination81.code}
               </span>
               <span className="text-xs font-bold text-[#1F2937]">
-                {fullProfile.combination81.titleHi} ({fullProfile.combination81.titleEn})
+                {yoga81 ? yoga81.title : `${fullProfile.combination81.titleHi} (${fullProfile.combination81.titleEn})`}
               </span>
             </div>
             <p className="text-xs text-[#6B7280]">

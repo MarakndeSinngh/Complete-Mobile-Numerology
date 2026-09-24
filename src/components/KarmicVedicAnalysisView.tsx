@@ -3,6 +3,8 @@ import { CompleteNumerologyProfile } from '../core/types';
 import { MANDATORY_WELLNESS_DISCLAIMER } from '../core/methodology';
 import { MedicalVedicDashaPanel } from './MedicalVedicDashaPanel';
 import { NumeroVastuDashboard } from './NumeroVastuDashboard';
+import { useLanguage } from '../i18n';
+import { getLocalized81Yoga } from '../i18n/dynamicContent';
 import { 
   Sparkles, Award, Shield, AlertTriangle, CheckCircle, Compass, 
   Heart, TrendingUp, BookOpen, Layers, Activity, Calendar, Clock, 
@@ -14,7 +16,11 @@ interface KarmicVedicAnalysisViewProps {
 }
 
 export const KarmicVedicAnalysisView: React.FC<KarmicVedicAnalysisViewProps> = ({ profile }) => {
+  const { language } = useLanguage();
   const { combination81, karmic, kua, vedicGrid, actionPlan90Day, medical, coreNumbers, identity } = profile;
+  const yoga81 = coreNumbers?.mulank && coreNumbers?.bhagyank
+    ? getLocalized81Yoga(coreNumbers.mulank, coreNumbers.bhagyank, language)
+    : null;
 
   return (
     <div id="karmic-vedic-dashboard" className="space-y-12 animate-in fade-in duration-500 text-left">
@@ -78,7 +84,7 @@ export const KarmicVedicAnalysisView: React.FC<KarmicVedicAnalysisViewProps> = (
                 <Award className="w-4 h-4" /> 81 Indian Numerology Combinations Matrix
               </div>
               <h4 className="font-playfair text-2xl md:text-3xl font-bold text-[#1F2937]">
-                {combination81.titleHi}
+                {yoga81 ? yoga81.title : combination81.titleHi}
               </h4>
               <p className="text-xs text-[#6B7280] font-sans">
                 {combination81.titleEn} • Code [{combination81.code}] • Nature: {combination81.nature}
@@ -99,7 +105,7 @@ export const KarmicVedicAnalysisView: React.FC<KarmicVedicAnalysisViewProps> = (
                 <span>Cosmic Strengths & Potential (सकारात्मक ऊर्जा)</span>
               </div>
               <p className="text-xs text-emerald-900 leading-relaxed font-sans">
-                {combination81.positive}
+                {yoga81 ? yoga81.positiveMeaning : combination81.positive}
               </p>
             </div>
 

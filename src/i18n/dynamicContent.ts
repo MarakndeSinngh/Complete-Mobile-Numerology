@@ -1065,17 +1065,375 @@ export function buildLocalizedExpertDossier(
         : lang === 'gu'
         ? `મહિનાનો પ્રભાવ અંક #${pm} (${pmPlanet}) દ્વારા સંચાલિત છે. યોજનાબદ્ધ કાર્ય કરો.`
         : `माह का प्रभाव अंक #${pm} (${pmPlanet}) द्वारा संचालित है। योजनाबद्ध ढंग से कार्य करें।`,
-      career: lang === 'en' ? 'Keep priorities aligned with structured teamwork.' : 'सहयोगियों के साथ सामंजस्य बनाकर कार्य करें।',
-      finance: lang === 'en' ? 'Maintain balanced cashflow and budget control.' : 'वित्तीय संतुलन बनाए रखें और अनावश्यक व्यय से बचें।',
-      relationship: lang === 'en' ? 'Foster empathetic dialogue with family.' : 'पारस्परिक समझ और सकारात्मक संवाद का अभ्यास करें।',
-      caution: lang === 'en' ? 'Avoid impulsive hasty decisions.' : 'जल्दबाजी या भावुकता में निर्णय न लें।',
-      action: lang === 'en' ? 'Practice daily discipline and morning grounding.' : 'दैनिक अनुशासन और कार्यों की पूर्व-तैयारी रखें।'
+      career: lang === 'en' ? 'Keep priorities aligned with structured teamwork.' : lang === 'mr' ? 'सहकाऱ्यांशी समन्वय ठेवून काम करा.' : lang === 'bn' ? 'সহকর্মীদের সাথে সমন্বয় রেখে কাজ করুন।' : lang === 'gu' ? 'સહયોગીઓ સાથે તાલમેલ રાખીને કામ કરો.' : 'सहयोगियों के साथ सामंजस्य बनाकर कार्य करें।',
+      finance: lang === 'en' ? 'Maintain balanced cashflow and budget control.' : lang === 'mr' ? 'आर्थिक संतुलन राखा आणि अनावश्यक खर्च टाळा.' : lang === 'bn' ? 'আর্থিক ভারসাম্য বজায় রাখুন ও অপব্যয় এড়িয়ে চলুন।' : lang === 'gu' ? 'નાણાકીય સંતુલન જાળવો અને બિનજરૂરી ખર્ચ ટાળો.' : 'वित्तीय संतुलन बनाए रखें और अनावश्यक व्यय से बचें।',
+      relationship: lang === 'en' ? 'Foster empathetic dialogue with family.' : lang === 'mr' ? 'परस्पर समंजसपणा आणि सकारात्मक संवाद ठेवा.' : lang === 'bn' ? 'পারস্পরিক বোঝাপড়া ও ইতিবাচক সংলাপ বজায় রাখুন।' : lang === 'gu' ? 'પરસ્પર સમજણ અને સકારાત્મક સંવાદ રાખો.' : 'पारस्परिक समझ और सकारात्मक संवाद का अभ्यास करें।',
+      caution: lang === 'en' ? 'Avoid impulsive hasty decisions.' : lang === 'mr' ? 'घाईगडबडीत किंवा भावनेच्या भरात निर्णय घेऊ नका.' : lang === 'bn' ? 'তাড়াহুড়ো বা আবেগে কোনো সিদ্ধান্ত নেবেন না।' : lang === 'gu' ? 'ઉતાવળમાં કે લાગણીવશ થઈને નિર્ણયો ન લો.' : 'जल्दबाजी या भावुकता में निर्णय न लें।',
+      action: lang === 'en' ? 'Practice daily discipline and morning grounding.' : lang === 'mr' ? 'दैनंदिन शिस्त आणि कामांचे पूर्व-नियोजन करा.' : lang === 'bn' ? 'দৈনন্দিন শৃঙ্খলা ও কাজের পূর্ব-পরিকল্পনা বজায় রাখুন।' : lang === 'gu' ? 'દૈનિક શિસ્ત અને કાર્યોનું પૂર્વ આયોજન કરો.' : 'दैनिक अनुशासन और कार्यों की पूर्व-तैयारी रखें।'
     };
   });
 
+  // Localized Tithi Ank
+  const tithiNature = lang === 'en'
+    ? `Root Frequency #${day} combines the vibrational essence of ${p1} and destiny lessons.`
+    : lang === 'mr'
+    ? `जन्म तारीख #${day} ही ${p1} ची वैश्विक ऊर्जा आणि कर्म-दिशा यांचे शुभ प्रकटीकरण आहे.`
+    : lang === 'bn'
+    ? `জন্ম তারিখ #${day} হলো ${p1} এর মহাজাগতিক শক্তি ও কর্ম-পথের শুভ প্রকাশ।`
+    : lang === 'gu'
+    ? `જન્મ તારીખ #${day} એ ${p1} ની વૈશ્વિક ઉર્જા અને કર્મ-દિશાનું શુભ પ્રગટીકરણ છે.`
+    : `जन्म तारीख #${day} आपके व्यक्तित्व में ${p1} की ऊर्जा और स्वाभाविक गुणों का संचार करती है।`;
+
+  const numericalFrequency = lang === 'en'
+    ? `Vibrational synergy: Day #${day} reduces to Root #${mulank} (${p1}), governing your initial spark and cognitive approach.`
+    : lang === 'mr'
+    ? `कंपन समन्वय: तारीख #${day} चे मूलांक #${mulank} (${p1}) मध्ये रूपांतर होते, जे तुमचा स्वभाव आणि निर्णयक्षमता दर्शवते.`
+    : lang === 'bn'
+    ? `কম্পন সমন্বয়: তারিখ #${day} থেকে মূলাঙ্ক #${mulank} (${p1}) তৈরি হয়, যা আপনার স্বভাব ও বুদ্ধিমত্তা প্রকাশ করে।`
+    : lang === 'gu'
+    ? `કંપન સમન્વય: તારીખ #${day} નું મૂળાંક #${mulank} (${p1}) માં રૂપાંતર થાય છે, જે તમારા સ્વભાવ અને નિર્ણયોને સંચાલિત કરે છે.`
+    : `कंपन समन्वय: तारीख #${day} का मूलांक #${mulank} (${p1}) में रूपांतरण होता है, जो आपकी प्रारंभिक विचार शैली और निर्णयों को दिशा देता है।`;
+
+  // Localized Unique About You
+  const uniqueAboutYou = {
+    cosmicSignature: lang === 'en'
+      ? `Dynamic synthesis of Mulank #${mulank} initiative and Bhagyank #${bhagyank} analytical vision.`
+      : lang === 'mr'
+      ? `मूलांक #${mulank} चा पुढाकार आणि भाग्यांक #${bhagyank} चा दूरदर्शी दृष्टिकोन यांचा सुरेख संगम.`
+      : lang === 'bn'
+      ? `মূলাঙ্ক #${mulank} এর উদ্যোগ এবং ভাগ্যাঙ্ক #${bhagyank} এর দূরদর্শী দৃষ্টিভঙ্গির চমৎকার মিলন।`
+      : lang === 'gu'
+      ? `મૂળાંક #${mulank} નો પુરાતત્વ ઉત્સાહ અને ભાગ્યાંક #${bhagyank} નો દીર્ઘદ્રષ્ટા દૃષ્ટિકોણ.`
+      : `मूलांक #${mulank} की अग्रणी ऊर्जा और भाग्यांक #${bhagyank} के शोधपरक दृष्टिकोण का अद्वितीय संगम।`,
+    hiddenGift: lang === 'en'
+      ? `Natural aptitude for strategic discernment, innovative problem-solving, and impactful communication.`
+      : lang === 'mr'
+      ? `रणनीतिक समज, नाविन्यपूर्ण समस्या निवारण आणि प्रभावी संवाद साधण्याची उपजत देणगी.`
+      : lang === 'bn'
+      ? `কৌশলগত অন্তর্দৃষ্টি, উদ্ভাবনী সমস্যা সমাধান এবং শক্তিশালী যোগাযোগের সহজাত ক্ষমতা।`
+      : lang === 'gu'
+      ? `રણનીતિક સમજ, નવીન સમસ્યા નિવારણ અને પ્રભાવશાળી સંવાદની કુદરતી ક્ષમતા.`
+      : `रणनीतिक अंतर्दृष्टि, नए समाधान खोजने की क्षमता और प्रभावशाली परामर्श कौशल।`,
+    distinctiveAura: lang === 'en'
+      ? `Magnetic intellectual aura radiating confidence, balance, and composed resilience.`
+      : lang === 'mr'
+      ? `आत्मविश्वास, संतुलन आणि संयम पसरवणारे प्रभावी व्यक्तिमत्त्व.`
+      : lang === 'bn'
+      ? `আত্মবিশ্বাস, ভারসাম্য এবং সংযম বিকিরণকারী আকর্ষণীয় ব্যক্তিত্ব।`
+      : lang === 'gu'
+      ? `આત્મવિશ્વાસ, સંતુલન અને સંયમ પ્રસારિત કરતું આકર્ષક વ્યક્તિત્વ.`
+      : `आत्मविश्वास, संतुलन और संयम से युक्त एक विशिष्ट व विश्वसनीय आभा-मंडल।`
+  };
+
+  // Localized Life Challenges
+  const lifeChallenges = [
+    {
+      name: lang === 'en' ? 'First Life Challenge' : lang === 'mr' ? 'पहिले जीवन आव्हान' : lang === 'bn' ? 'প্রথম জীবন চ্যালেঞ্জ' : lang === 'gu' ? 'પ્રથમ જીવન પડકાર' : 'प्रथम जीवन चुनौती',
+      value: Math.abs(rDay - rMonth),
+      planet: p1,
+      area: lang === 'en' ? 'Self-assertion vs Patience' : lang === 'mr' ? 'आत्मविश्वास आणि संयम' : lang === 'bn' ? 'আত্মবিশ্বাস ও ধৈর্য' : lang === 'gu' ? 'આત્મવિશ્વાસ અને ધીરજ' : 'आत्म-अभिव्यक्ति एवं संयम',
+      lesson: lang === 'en' ? 'Cultivate deliberate patience before taking massive leaps.' : lang === 'mr' ? 'मोठे निर्णय घेताना संयम बाळगणे शिका.' : lang === 'bn' ? 'বড় পদক্ষেপ নেওয়ার আগে ধৈর্য অভ্যাস করুন।' : lang === 'gu' ? 'મોટા નિર્ણયો લેતા પહેલા ધીરજ રાખવી શીખો.' : 'बड़े निर्णय लेते समय धैर्य और दूरदर्शिता का अभ्यास करें।',
+      remedy: mulankInfo.remedy
+    },
+    {
+      name: lang === 'en' ? 'Main Karmic Challenge' : lang === 'mr' ? 'मुख्य कार्मिक आव्हान' : lang === 'bn' ? 'প্রধান কার্মিক চ্যালেঞ্জ' : lang === 'gu' ? 'મુખ્ય કાર્મિક પડકાર' : 'मुख्य कार्मिक चुनौती',
+      value: Math.abs(rDay - rYear),
+      planet: p2,
+      area: lang === 'en' ? 'Long-term Focus & Discipline' : lang === 'mr' ? 'दीर्घकालीन एकाग्रता आणि शिस्त' : lang === 'bn' ? 'দীর্ঘমেয়াদী লক্ষ্য ও শৃঙ্খলা' : lang === 'gu' ? 'દીર્ઘકાલીન એકાગ્રતા અને શિસ્ત' : 'दीर्घकालिक लक्ष्य एवं अनुशासन',
+      lesson: lang === 'en' ? 'Maintain consistency even during plateau phases of life.' : lang === 'mr' ? 'जीवनाच्या चढ-उतारात कामात सातत्य ठेवा.' : lang === 'bn' ? 'জীবনের প্রতিটি পর্যায়ে কর্মে ধারাবাহিকতা রাখুন।' : lang === 'gu' ? 'જીવનના દરેક તબક્કે કાર્યમાં સાતત્ય રાખો.' : 'कठिन परिस्थितियों में भी अपने मूल सिद्धांतों पर अडिग रहें।',
+      remedy: bhagyankInfo.remedy
+    }
+  ];
+
+  // Localized Characteristics Profile
+  const characteristicsProfile = {
+    thinkingStyle: lang === 'en'
+      ? `Analytical, intuitive, and future-focused with structured logic.`
+      : lang === 'mr'
+      ? `तार्किक, अंतर्ज्ञानी आणि भविष्याभिमुख विचारपद्धती.`
+      : lang === 'bn'
+      ? `যৌক্তিক, স্বজ্ঞাত এবং দূরদর্শী চিন্তাভাবনা।`
+      : lang === 'gu'
+      ? `તાર્કિક, અંતર્જ્ઞાની અને ભવિષ્યલક્ષી વિચારશૈલી.`
+      : `तार्किक, अंतर्ज्ञानी और भविष्योन्मुखी विचार शैली।`,
+    emotionalResponse: lang === 'en'
+      ? `Composed, empathetic, yet values personal space and dignified boundaries.`
+      : lang === 'mr'
+      ? `संयमी, संवेदनशील आणि वैयक्तिक स्वातंत्र्याला महत्त्व देणारा स्वभाव.`
+      : lang === 'bn'
+      ? `সংযমী, সহানুভূতিশীল এবং ব্যক্তিগত মর্যাদাকে গুরুত্ব দেওয়ার মানসিকতা।`
+      : lang === 'gu'
+      ? `સંયમી, સંવેદનશીલ અને વ્યક્તિગત મર્યાદાઓને માન આપતો સ્વભાવ.`
+      : `संयमित, संवेदनशील और गरिमापूर्ण सीमाएं बनाए रखने वाला स्वभाव।`,
+    workHabit: lang === 'en'
+      ? `Methodical, self-directed, and motivated by tangible excellence.`
+      : lang === 'mr'
+      ? `पद्धतशीर, स्वयं-प्रेरित आणि उत्कृष्टतेला प्राधान्य देणारी कार्यशैली.`
+      : lang === 'bn'
+      ? `পদ্ধতিগত, স্ব-প্রণোদিত এবং শ্রেষ্ঠত্ব অর্জনে বিশ্বাসী কর্মপদ্ধতি।`
+      : lang === 'gu'
+      ? `પદ્ધતિસર, સ્વ-પ્રેરિત અને ઉત્કૃષ્ટતાને પ્રાથમિકતા આપતી કાર્યશૈલી.`
+      : `व्यवस्थित, स्व-प्रेरित और गुणवत्ता को प्राथमिकता देने वाली कार्यशैली।`,
+    socialConduct: lang === 'en'
+      ? `Courteous, selective in friendships, highly respected in intellectual circles.`
+      : lang === 'mr'
+      ? `सभ्य, निवडक मित्रमंडळी आणि विद्वान वर्गात आदरणीय.`
+      : lang === 'bn'
+      ? `ভদ্র, বাছাই করা বন্ধুত্ব এবং গুণী সমাজে সমাদৃত।`
+      : lang === 'gu'
+      ? `નમ્ર, પસંદગીના મિત્રો અને બૌદ્ધિક વર્તુળોમાં આદરણીય.`
+      : `सभ्य, प्रबुद्ध मित्रों की संगति पसंद करने वाला और सामाजिक रूप से सम्मानित।`,
+    leadershipTrait: lang === 'en'
+      ? `Visionary leadership through mentorship, strategic planning, and meritocracy.`
+      : lang === 'mr'
+      ? `मार्गदर्शन, रणनीतिक नियोजन आणि गुणवत्तेच्या आधारे नेतृत्व.`
+      : lang === 'bn'
+      ? `পরামর্শদান, কৌশলগত পরিকল্পনা এবং যোগ্যতার ভিত্তিতে নেতৃত্ব।`
+      : lang === 'gu'
+      ? `માર્ગદર્શન, રણનીતિક આયોજન અને યોગ્યતાના આધારે નેતૃત્વ.`
+      : `मार्गदर्शन, स्पष्ट रणनीति और योग्यता पर आधारित दूरदर्शी नेतृत्व।`
+  };
+
+  // Localized Education Analysis
+  const educationAnalysis = {
+    learningStyle: lang === 'en'
+      ? 'Conceptual comprehension combined with practical execution and deep inquiry.'
+      : lang === 'mr'
+      ? 'संकल्पनात्मक समज आणि प्रत्यक्ष अनुभूतीवर आधारित अध्ययन.'
+      : lang === 'bn'
+      ? 'ধারণাগত বোঝাপড়া এবং বাস্তব প্রয়োগের মাধ্যমে শেখা।'
+      : lang === 'gu'
+      ? 'સંકલ્પનાત્મક સમજ અને પ્રાયોગિક અનુભવ આધારિત અધ્યયન.'
+      : 'अवधारणात्मक समझ और व्यावहारिक अनुप्रयोग पर आधारित अध्ययन शैली।',
+    studyDirection: lang === 'en' ? 'North / North-East' : lang === 'mr' ? 'उत्तर / ईशान्य' : lang === 'bn' ? 'উত্তর / উত্তর-পূর্ব' : lang === 'gu' ? 'ઉત્તર / ઈશાન' : 'उत्तर / ईशान दिशा',
+    academicStrengths: lang === 'en'
+      ? ['Strategic Analysis', 'Communication', 'Research & Logic', 'System Architecture']
+      : lang === 'mr'
+      ? ['रणनीतिक विश्लेषण', 'प्रभावी संवाद', 'संशोधन व तर्क', 'प्रणाली रचना']
+      : lang === 'bn'
+      ? ['কৌশলগত বিশ্লেষণ', 'যোগাযোগ দক্ষতা', 'গবেষণা ও যুক্তি', 'সিস্টেম ডিজাইন']
+      : lang === 'gu'
+      ? ['રણનીતિક વિશ્લેષણ', 'સંચાર કૌશલ્ય', 'સંશોધન અને તર્ક', 'સિસ્ટમ ડિઝાઇન']
+      : ['रणनीतिक विश्लेषण', 'संवाद कौशल', 'शोध व तर्क', 'सिस्टम आर्किटेक्चर'],
+    suitableDisciplines: lang === 'en'
+      ? ['Management & Strategy', 'Commerce & Finance', 'Technology & Systems', 'Consulting & Advisory']
+      : lang === 'mr'
+      ? ['व्यवस्थापन व धोरण', 'वाणिज्य व वित्त', 'तंत्रज्ञान', 'सल्लागार व मार्गदर्शन']
+      : lang === 'bn'
+      ? ['ব্যবস্থাপনা ও কৌশল', 'বাণিজ্য ও অর্থায়ন', 'প্রযুক্তি', 'পরামর্শদান']
+      : lang === 'gu'
+      ? ['મેનેજમેન્ટ અને રણનીતિ', 'વાણિજ્ય અને નાણાં', 'ટેકનોલોજી', 'કન્સલ્ટન્સી']
+      : ['प्रबंधन एवं रणनीति', 'वाणिज्य व वित्त', 'सूचना प्रौद्योगिकी', 'परामर्श व मार्गदर्शन']
+  };
+
+  // Localized Career Deep Dive
+  const careerDeepDive = {
+    primaryAvenues: lang === 'en'
+      ? ['Executive Management & Strategic Advisory', 'Technology & Systems Architecture', 'Commercial Enterprises & Consulting', 'Research, Analytics & Policy Planning']
+      : lang === 'mr'
+      ? ['कार्यकारी व्यवस्थापन आणि धोरणात्मक सल्ला', 'माहिती तंत्रज्ञान आणि प्रणाली रचना', 'व्यापार, वाणिज्य आणि कन्सल्टिंग', 'संशोधन आणि विश्लेषणात्मक नियोजन']
+      : lang === 'bn'
+      ? ['কার্যনির্বাহী ব্যবস্থাপনা ও কৌশলগত পরামর্শ', 'তথ্য প্রযুক্তি ও সিস্টেম আর্কিটেকচার', 'ব্যবসা, বাণিজ্য ও পরামর্শদান', 'গবেষণা ও বিশ্লেষণমূলক পরিকল্পনা']
+      : lang === 'gu'
+      ? ['કાર્યકારી મેનેજમેન્ટ અને રણનીતિક સલાહ', 'માહિતી તકનીકી અને સિસ્ટમ આર્કિટેક્ચર', 'વેપાર, વાણિજ્ય અને કન્સલ્ટિંગ', 'સંશોધન અને વિશ્લેષણાત્મક આયોજન']
+      : ['कार्यकारी प्रबंधन एवं रणनीतिक सलाहकार', 'सूचना प्रौद्योगिकी एवं सिस्टम आर्किटेक्चर', 'व्यापार, वाणिज्य एवं कंसल्टिंग', 'शोध, विश्लेषण एवं नीति निर्माण'],
+    entrepreneurialFit: lang === 'en' ? 'Very High (Visionary Builder)' : lang === 'mr' ? 'अत्यंत अनुकूल (दूरदर्शी उद्योजक)' : lang === 'bn' ? 'অত্যন্ত উচ্চ (দূরদর্শী উদ্যোক্তা)' : lang === 'gu' ? 'અત્યંત અનુકૂળ (દીર્ઘદ્રષ્ટા ઉદ્યોગસાહસિક)' : 'अत्यंत अनुकूल (स्वतंत्र व दूरदर्शी उद्यमी)',
+    workplaceRole: lang === 'en' ? 'Strategic Leader / Chief Architect / Specialist Mentor' : lang === 'mr' ? 'धोरणात्मक नेता / मुख्य रचनाकार / मार्गदर्शक' : lang === 'bn' ? 'কৌশলগত নেতা / প্রধান পরিকল্পনাকারী / উপদেষ্টা' : lang === 'gu' ? 'રણનીતિક નેતા / મુખ્ય આર્કિટેક્ટ / માર્ગદર્શક' : 'रणनीतिक मार्गदर्शक / मुख्य वास्तुकार / वरिष्ठ सलाहकार',
+    successStrategy: lang === 'en' ? 'Lead through clear processes, delegate operational routine, and protect focus time.' : lang === 'mr' ? 'स्पष्ट कार्यप्रणालीने नेतृत्व करा आणि आपल्या वेळेचे योग्य नियोजन करा.' : lang === 'bn' ? 'স্পষ্ট কর্মপদ্ধতির মাধ্যমে নেতৃত্ব দিন এবং নিজের সময়কে সুরক্ষিত রাখুন।' : lang === 'gu' ? 'સ્પષ્ટ કાર્યપદ્ધતિ દ્વારા નેતૃત્વ કરો અને તમારા સમયનું આયોજન કરો.' : 'स्पष्ट कार्ययोजना बनाएं, दैनिक कार्यों का सही विभाजन करें और मुख्य रणनीतिक लक्ष्यों पर अडिग रहें।'
+  };
+
+  // Localized Finance Behaviour
+  const financeBehaviour = {
+    wealthAccumulationPattern: lang === 'en'
+      ? 'Steady compounding through structured investments and calculated entrepreneurial moves.'
+      : lang === 'mr'
+      ? 'पद्धतशीर गुंतवणूक आणि नियोजित पावलांद्वारे संपत्तीत सातत्यपूर्ण वाढ.'
+      : lang === 'bn'
+      ? 'পদ্ধতিগত বিনিয়োগ এবং সুপরিকল্পিত পদক্ষেপের মাধ্যমে স্থিতিশীল সম্পদ বৃদ্ধি।'
+      : lang === 'gu'
+      ? 'પદ્ધતિસરના રોકાણ અને આયોજિત પગલાં દ્વારા સંપત્તિમાં વૃદ્ધિ.'
+      : 'अनुशासित निवेश, संतुलित जोखिम और सतत योजना से पूंजी संचय।',
+    investmentSuitability: lang === 'en'
+      ? 'Diversified portfolio: balanced mix of index assets, tangible property, and growth equity.'
+      : lang === 'mr'
+      ? 'विविध क्षेत्रांत गुंतवणूक: जमीन, सुरक्षित फंड आणि व्यवसाय विस्तार.'
+      : lang === 'bn'
+      ? 'বৈচিত্র্যময় পোর্টফোলিও: স্থাবর সম্পত্তি, নিরাপদ তহবিল এবং ব্যবসা সম্প্রসারণ।'
+      : lang === 'gu'
+      ? 'વિવિધ ક્ષેત્રોમાં રોકાણ: જમીન-મિલકત, સુરક્ષિત ફંડ અને વ્યવસાય વૃદ્ધિ.'
+      : 'विविधीकृत पोर्टफोलियो: रियल एस्टेट, सुरक्षित फंड्स और संतुलित विकास योजनाएं।',
+    financialCaution: lang === 'en'
+      ? 'Avoid emotionally driven quick-return schemes; maintain minimum 6 months liquidity buffer.'
+      : lang === 'mr'
+      ? 'घाईघाईत झटपट नफ्याच्या योजनांपासून सावध राहा; किमान ६ महिन्यांचा आपत्कालीन निधी ठेवा.'
+      : lang === 'bn'
+      ? 'দ্রুত লাভের প্রলোভনে ঝুঁকিপূর্ণ বিনিয়োগ এড়িয়ে চলুন; সর্বদা তরল তহবিল বজায় রাখুন।'
+      : lang === 'gu'
+      ? 'ઝડપી નફાની લાલચથી બચો; હંમેશા સુરક્ષિત ફંડ અનામત રાખો.'
+      : 'अति-उत्साह या सुनी-सुनाई बातों पर त्वरित निवेश से बचें; आकस्मिक निधि हमेशा सुरक्षित रखें।'
+  };
+
+  // Localized Relationship & Family Dynamics
+  const relationshipFamilyDynamics = {
+    relationshipPattern: lang === 'en'
+      ? 'Deep loyalty, respectful intellectual bonding, and mutual growth mindset.'
+      : lang === 'mr'
+      ? 'खोल निष्ठा, परस्पर आदर आणि बौद्धिक संवाद.'
+      : lang === 'bn'
+      ? 'গভীর আনুগত্য, পারস্পরিক শ্রদ্ধা এবং বৌদ্ধিক বোঝাপড়া।'
+      : lang === 'gu'
+      ? 'ગાઢ નિષ્ઠા, પરસ્પર આદર અને બૌદ્ધિક જોડાણ.'
+      : 'गहरी निष्ठा, सम्मानजनक बौद्धिक संवाद और सहयोग की भावना।',
+    familyRole: lang === 'en'
+      ? 'Pillar of stability, trusted decision-maker, and protector of family heritage.'
+      : lang === 'mr'
+      ? 'कुटुंबाचा आधारस्तंभ, विश्वासाचे केंद्र आणि मार्गदर्शक.'
+      : lang === 'bn'
+      ? 'পরিবারের মূল ভিত্তি, নির্ভরযোগ্য সিদ্ধান্ত গ্রহণকারী ও অভিভাবক।'
+      : lang === 'gu'
+      ? 'પરિવારનો આધારસ્તંભ, વિશ્વાસુ નિર્ણયકર્તા અને માર્ગદર્શક.'
+      : 'परिवार का मजबूत स्तंभ, विश्वसनीय सलाहकार और संरक्षक।',
+    harmonyKey: lang === 'en'
+      ? 'Open, active listening and setting aside work-related stress during domestic hours.'
+      : lang === 'mr'
+      ? 'शांतपणे ऐकून घेणे आणि कौटुंबिक वेळेत कामाचा तणाव बाजूला ठेवणे.'
+      : lang === 'bn'
+      ? 'ধৈর্য সহকারে কথা শোনা এবং পারিবারিক সময়ে কাজের চাপ দূরে রাখা।'
+      : lang === 'gu'
+      ? 'શાંતિપૂર્વક સાંભળવું અને પારિવારિક સમયમાં કામના તણાવથી દૂર રહેવું.'
+      : 'नियमित संवाद, दूसरों के दृष्टिकोण का सम्मान और पारिवारिक समय में कार्य का तनाव न लाना।'
+  };
+
+  // Localized NumeroVastu
+  const numeroVastuInterpretation = {
+    loShuZoneHarmony: lang === 'en'
+      ? `North (${getPlanetName(1, lang)}) and East (${getPlanetName(3, lang)}) sectors bring maximum vitality and mental clarity.`
+      : lang === 'mr'
+      ? `उत्तर (${getPlanetName(1, lang)}) आणि पूर्व (${getPlanetName(3, lang)}) दिशा तुमच्यासाठी मानसिक स्पष्टता आणि समृद्धी आणतात.`
+      : lang === 'bn'
+      ? `উত্তর (${getPlanetName(1, lang)}) এবং পূর্ব (${getPlanetName(3, lang)}) দিক আপনার জন্য মানসিক স্বচ্ছতা ও সমৃদ্ধি প্রদান করে।`
+      : lang === 'gu'
+      ? `ઉત્તર (${getPlanetName(1, lang)}) અને પૂર્વ (${getPlanetName(3, lang)}) દિશાઓ તમારા માટે માનસિક સ્પષ્ટતા અને સમૃદ્ધિ લાવે છે.`
+      : `उत्तर (${getPlanetName(1, lang)}) एवं पूर्व (${getPlanetName(3, lang)}) क्षेत्र ऊर्जा प्रवाह व मानसिक स्पष्टता के लिए सर्वोत्तम हैं।`,
+    residenceEntranceDynamics: lang === 'en'
+      ? 'East or North-East entrances enhance positive vibrational resonance for your core numbers.'
+      : lang === 'mr'
+      ? 'पूर्व किंवा ईशान्य प्रवेशद्वार तुमच्या मूलांक आणि भाग्यांकासाठी अत्यंत शुभ ऊर्जा निर्माण करते.'
+      : lang === 'bn'
+      ? 'পূর্ব বা উত্তর-পূর্ব প্রবেশদ্বার আপনার মূল সংখ্যার জন্য অত্যন্ত অনুকূল।'
+      : lang === 'gu'
+      ? 'પૂર્વ કે ઈશાન પ્રવેશદ્વાર તમારા અંકો સાથે સુમેળભરી સકારાત્મક ઉર્જા આપે છે.'
+      : 'पूर्व अथवा ईशान मुखी प्रवेश द्वार आपके मूलांक व भाग्यांक के साथ सर्वोत्तम सामंजस्य बनाता है।',
+    suggestedVastuRemedies: lang === 'en'
+      ? [
+          'Keep the North-East zone clutter-free and place a copper/brass bowl with fresh water.',
+          'Position your primary workstation facing East or North for peak concentration.',
+          'Introduce subtle indoor greenery (money plant/tulsi) in the North or East quadrant.'
+        ]
+      : lang === 'mr'
+      ? [
+          'ईशान्य कोपरा स्वच्छ ठेवा आणि तिथे तांब्याच्या पात्रात स्वच्छ पाणी ठेवा.',
+          'अभ्यास किंवा कामाची जागा पूर्व किंवा उत्तर दिशेकडे तोंड करून ठेवा.',
+          'उत्तर किंवा पूर्व दिशेला हिरवे रोप (तुळस) लावा.'
+        ]
+      : lang === 'bn'
+      ? [
+          'উত্তর-পূর্ব কোণ পরিষ্কার রাখুন এবং সেখানে তামার পাত্রে জল রাখুন।',
+          'কাজের টেবিল পূর্ব বা উত্তরমুখী করে বসুন।',
+          'উত্তর বা পূর্ব অংশে তুলসী বা সবুজ গাছপালা রাখুন।'
+        ]
+      : lang === 'gu'
+      ? [
+          'ઈશાન ખૂણો હંમેશા સ્વચ્છ રાખો અને ત્યાં તાંબાના પાત્રમાં પાણી રાખો.',
+          'કામ કરવાની બેઠક પૂર્વ કે ઉત્તર દિશા તરફ મુખ રાખીને ગોઠવો.',
+          'ઉત્તર અથવા પૂર્વ દિશામાં તુલસી કે હરિયાળી રાખો.'
+        ]
+      : [
+          'ईशान कोण को हमेशा स्वच्छ, हल्का व पवित्र रखें; वहां तांबे के पात्र में जल रखें।',
+          'कार्यस्थल पर बैठते समय मुख पूर्व या उत्तर दिशा की ओर रखना सर्वोत्तम है।',
+          'उत्तर या पूर्व क्षेत्र में तुलसी या मनी प्लांट रखकर प्राकृतिक ऊर्जा का संचार करें।'
+        ]
+  };
+
+  // Localized Life Changing Windows
+  const lifeChangingWindows = [
+    {
+      window: `${year + 28} - ${year + 32}`,
+      catalyst: 'Surge Cycle',
+      theme: lang === 'en' ? 'Professional Rise & Foundational Milestone' : lang === 'mr' ? 'व्यावसायिक प्रगती आणि पायाभरणी' : lang === 'bn' ? 'পেশাগত অগ্রগতি ও ভিত্তি স্থাপন' : lang === 'gu' ? 'વ્યાવસાયિક પ્રગતિ અને પાયો' : 'व्यावसायिक उत्थान एवं आधारशिला निर्माण',
+      advice: lang === 'en' ? 'Period of consolidating reputation and establishing long-term authority.' : lang === 'mr' ? 'प्रतिष्ठा आणि दीर्घकालीन अधिकार मजबूत करण्याचा काळ.' : lang === 'bn' ? 'সম্মান ও দীর্ঘমেয়াদী প্রতিষ্ঠা অর্জনের সময়।' : lang === 'gu' ? 'પ્રતિષ્ઠા અને દીર્ઘકાલીન અધિકાર મજબૂત કરવાનો સમય.' : 'प्रतिष्ठा और सामाजिक पहचान को सुदृढ़ करने का महत्वपूर्ण समय।'
+    },
+    {
+      window: `${year + 40} - ${year + 45}`,
+      catalyst: 'Transformation',
+      theme: lang === 'en' ? 'Mastery, Expansion & Strategic Expansion' : lang === 'mr' ? 'अनुभव, विस्तार आणि रणनीतिक यश' : lang === 'bn' ? 'অভিজ্ঞতা, বিস্তার ও কৌশলগত সাফল্য' : lang === 'gu' ? 'અનુભવ, વિસ્તરણ અને રણનીતિક સફળતા' : 'अनुभव, विस्तार एवं रणनीतिक सफलता',
+      advice: lang === 'en' ? 'Golden window to lead major initiatives, advisory roles, and financial maturity.' : lang === 'mr' ? 'मोठ्या योजनांचे नेतृत्व आणि आर्थिक स्थैर्याचा सुवर्णकाळ.' : lang === 'bn' ? 'বড় উদ্যোগের নেতৃত্ব ও আর্থিক স্থায়িত্বের সুবর্ণ সুযোগ।' : lang === 'gu' ? 'મોટી યોજનાઓનું નેતૃત્વ અને નાણાકીય સ્થિરતાનો સુવર્ણ સમય.' : 'प्रमुख योजनाओं के नेतृत्व और वित्तीय स्थिरता का श्रेष्ठ कालखंड।'
+    }
+  ];
+
+  // Localized Life Pinnacles
+  const lifePinnacles = [
+    {
+      name: lang === 'en' ? 'Pinnacle 1 (Foundation)' : lang === 'mr' ? 'शिखर १ (पायाभरणी)' : lang === 'bn' ? 'শিখর ১ (ভিত্তি)' : lang === 'gu' ? 'શિખર ૧ (પાયો)' : 'प्रथम शिखर (आधार)',
+      pinnacleNumber: ((rDay + rMonth - 1) % 9) + 1,
+      ageSpan: `0 – ${36 - mulank}`,
+      planet: p1,
+      theme: lang === 'en' ? 'Identity formation and core skill acquisition.' : lang === 'mr' ? 'व्यक्तिमत्त्व विकास आणि कौशल्य प्राप्ती.' : lang === 'bn' ? 'ব্যক্তিত্ব গঠন ও মৌলিক দক্ষতা অর্জন।' : lang === 'gu' ? 'વ્યક્તિત્વ નિર્માણ અને કૌશલ્ય પ્રાપ્તિ.' : 'व्यक्तित्व निर्माण और बुनियादी कौशलों का विकास।',
+      guidance: lang === 'en' ? 'Build discipline and intellectual versatility.' : lang === 'mr' ? 'शिस्त आणि ज्ञान समृद्ध करा.' : lang === 'bn' ? 'শৃঙ্খলা ও জ্ঞান বৃদ্ধি করুন।' : lang === 'gu' ? 'શિસ્ત અને જ્ઞાન સમૃદ્ધ કરો.' : 'अनुशासन और ज्ञान संचय पर ध्यान दें।'
+    },
+    {
+      name: lang === 'en' ? 'Pinnacle 2 (Production)' : lang === 'mr' ? 'शिखर २ (उत्पादन)' : lang === 'bn' ? 'শিখর ২ (कर्म)' : lang === 'gu' ? 'શિખર ૨ (ઉત્પાદન)' : 'द्वितीय शिखर (उत्थान)',
+      pinnacleNumber: ((rDay + rYear - 1) % 9) + 1,
+      ageSpan: `${36 - mulank + 1} – ${36 - mulank + 9}`,
+      planet: p2,
+      theme: lang === 'en' ? 'Career building, family expansion, and social impact.' : lang === 'mr' ? 'कारकीर्द उभारणी, कौटुंबिक विस्तार आणि सामाजिक प्रभाव.' : lang === 'bn' ? 'কর্মজীবন গঠন, পারিবারিক বিস্তার ও সামাজিক প্রভাব।' : lang === 'gu' ? 'કારકિર્દી નિર્માણ, પારિવારિક વિકાસ અને સામાજિક પ્રભાવ.' : 'करियर निर्माण, पारिवारिक विस्तार और सामाजिक प्रभाव।',
+      guidance: lang === 'en' ? 'Focus on excellence, commercial acumen, and networking.' : lang === 'mr' ? 'उत्कृष्ट कामगिरी आणि नेटवर्किंगवर भर द्या.' : lang === 'bn' ? 'কাজে শ্রেষ্ঠত্ব এবং নেটওয়ার্কিং বাড়ান।' : lang === 'gu' ? 'ઉત્કૃષ્ટ કામગીરી અને નેટવર્કિંગ પર ભાર મૂકો.' : 'कार्य में कुशलता और संपर्कों का सही उपयोग करें।'
+    }
+  ];
+
+  // Localized Lifestyle Suggestions
+  const lifestyleSuggestions = {
+    dailyRoutine: lang === 'en'
+      ? 'Early sunrise alignment; begin mornings with 10 minutes of silent meditation and goal charting.'
+      : lang === 'mr'
+      ? 'सूर्योदयापूर्वी उठा; सकाळी १० मिनिटे शांत ध्यान आणि दिवसाचे नियोजन करा.'
+      : lang === 'bn'
+      ? 'সূর্যোদয়ের সাথে দিন শুরু করুন; সকালে ১০ মিনিট নীরব ধ্যান ও দিনের পরিকল্পনা করুন।'
+      : lang === 'gu'
+      ? 'સૂર્યોદય સમયે જાગો; સવારે ૧૦ મિનિટ શાંત ધ્યાન અને દિવસનું આયોજન કરો.'
+      : 'प्रातःकाल सूर्योदय के समय उठें; 10 मिनट मौन ध्यान एवं दैनिक प्राथमिकताओं की सूची बनाएं।',
+    dietaryGuideline: lang === 'en'
+      ? 'Fresh, sattvic nourishment rich in seasonal fruits, soaked almonds, and adequate hydration.'
+      : lang === 'mr'
+      ? 'ताजे, सात्त्विक अन्न, फळे, भिजवलेले बदाम आणि पुरेसे पाणी प्या.'
+      : lang === 'bn'
+      ? 'তাজা, সাত্ত্বিক খাবার, ঋতুভিত্তিক ফল, ভেজানো বাদাম এবং পর্যাপ্ত জল পান।'
+      : lang === 'gu'
+      ? 'તાજો, સાત્ત્વિક આહાર, મોસમી ફળો, પલાળેલી બદામ અને પૂરતું પાણી પીવો.'
+      : 'ताजा व सात्विक आहार, मौसमी फल, भीगे हुए बादाम और प्रचुर मात्रा में जल का सेवन करें।',
+    mindfulnessPractice: lang === 'en'
+      ? 'Deep breathing (Pranayama) and conscious gratitude journaling at dusk.'
+      : lang === 'mr'
+      ? 'प्राणायाम आणि संध्याकाळी मनःशांतीसाठी कृतज्ञता व्यक्त करा.'
+      : lang === 'bn'
+      ? 'প্রাণায়াম এবং সন্ধ্যায় মনঃশান্তির জন্য কৃতজ্ঞতা প্রকাশ করুন।'
+      : lang === 'gu'
+      ? 'પ્રાણાયામ અને સાંજે મનની શાંતિ માટે કૃતજ્ઞતા વ્યક્ત કરો.'
+      : 'नियमित प्राणायाम (अनुलोम-विलोम) एवं सायंकाल 5 मिनट आत्म-अवलोकन व शांति अभ्यास।',
+    favorableTiming: lang === 'en'
+      ? 'Morning hours (07:00 AM – 11:00 AM) are optimal for decisive meetings and high-leverage tasks.'
+      : lang === 'mr'
+      ? 'सकाळची वेळ (०७:०० ते ११:००) महत्त्वाच्या बैठका आणि कामांसाठी सर्वोत्तम आहे.'
+      : lang === 'bn'
+      ? 'সকালের সময় (সকাল ০৭:০০ – ১১:০০) গুরুত্বপূর্ণ মিটিং ও সিদ্ধান্তের জন্য সবচেয়ে উপযুক্ত।'
+      : lang === 'gu'
+      ? 'સવારનો સમય (૦૭:૦૦ થી ૧૧:૦૦) મહત્વપૂર્ણ નિર્ણયો અને બેઠકો માટે ઉત્તમ છે.'
+      : 'प्रातः 07:00 से 11:00 बजे का समय महत्वपूर्ण बैठकों और मुख्य निर्णयों के लिए सर्वाधिक फलदायी है।'
+  };
+
   return {
     consultantSnapshot: {
-      title: lang === 'en' ? 'LeoFamily Expert Dossier Snapshot' : 'लियोफैमिली विशेषज्ञ परामर्श सारांश',
+      title: lang === 'en' ? 'LeoFamily Expert Dossier Snapshot' : lang === 'mr' ? 'लियोफॅमिली तज्ज्ञ सल्लागार सारांश' : lang === 'bn' ? 'লিওফ্যামিলি বিশেষজ্ঞ পরামর্শ সারাংশ' : lang === 'gu' ? 'લિયોફેમિલી નિષ્ણાત પરામર્શ સારાંશ' : 'लियोफैमिली विशेषज्ञ परामर्श सारांश',
       coreVerdict: lang === 'en'
         ? `The blueprint of ${profile.identity.fullName || 'the seeker'} combines Mulank #${mulank} (${p1}) dynamic vitality with Bhagyank #${bhagyank} (${p2}) analytical depth, creating a powerful life matrix.`
         : lang === 'mr'
@@ -1089,6 +1447,22 @@ export function buildLocalizedExpertDossier(
       bestAvenue: yoga81.careerMeaning,
       strategicCaution: yoga81.challengeMeaning
     },
+    tithiAnkAnalysis: {
+      birthDate: day,
+      compoundTitle: `${day}`,
+      tithiNature,
+      numericalFrequency
+    },
+    uniqueAboutYou,
+    lifeChallenges,
+    characteristicsProfile,
+    educationAnalysis,
+    careerDeepDive,
+    financeBehaviour,
+    relationshipFamilyDynamics,
+    numeroVastuInterpretation,
+    lifeChangingWindows,
+    lifePinnacles,
     grahDrishti: {
       driverPlanet: p1,
       conductorPlanet: p2,
@@ -1097,6 +1471,7 @@ export function buildLocalizedExpertDossier(
     },
     personalYearNarrative: pyNarrative,
     monthlyDashaForecast: monthlyForecast,
+    lifestyleSuggestions,
     balancingRemedies: {
       primaryYantra: lang === 'en' ? `Shri ${p1.split(' ')[0]} Yantra or Kuber Yantra in the auspicious sector.` : `श्री ${p1.split(' ')[0]} यंत्र अथवा कुबेर यंत्र को शुभ दिशा में स्थापित करें।`,
       sacredMantra: mulankInfo.mantra,

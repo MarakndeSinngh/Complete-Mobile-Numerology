@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './src/App';
 import { LanguageProvider } from './src/i18n';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -12,8 +13,10 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <LanguageProvider>
-      <App />
-    </LanguageProvider>
+    <ErrorBoundary fallbackTitle="LeoFamily Application Initialization">
+      <LanguageProvider>
+        <App />
+      </LanguageProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

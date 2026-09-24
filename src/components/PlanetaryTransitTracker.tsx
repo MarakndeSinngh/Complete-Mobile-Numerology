@@ -6,6 +6,7 @@ import {
   CURRENT_RAHU_TRANSIT,
   AspectPolarity
 } from '../services/planetaryTransitEngine';
+import { useLanguage } from '../i18n';
 import { 
   Compass, 
   Sparkles, 
@@ -38,6 +39,7 @@ export const PlanetaryTransitTracker: React.FC<PlanetaryTransitTrackerProps> = (
   conductorNumber,
   name
 }) => {
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<SubTab>('SUMMARY');
   const [simulatedDriver, setSimulatedDriver] = useState<number>(driverNumber);
   const [simulatedConductor, setSimulatedConductor] = useState<number>(conductorNumber);
@@ -452,28 +454,28 @@ export const PlanetaryTransitTracker: React.FC<PlanetaryTransitTrackerProps> = (
                     शनि गोचर दृष्टि ➔ मूलांक #{simulatedDriver}
                   </span>
                   <h4 className="font-playfair font-bold text-lg text-[#1F2937]">
-                    {transitData.driverAspect.saturnAspect.titleHi}
+                    {language === 'en' ? transitData.driverAspect.saturnAspect.title : transitData.driverAspect.saturnAspect.titleHi}
                   </h4>
                   <span className="text-xs font-mono text-[#D97706]">
-                    {transitData.driverAspect.saturnAspect.drishtiTypeHi}
+                    {language === 'en' ? transitData.driverAspect.saturnAspect.drishtiType : transitData.driverAspect.saturnAspect.drishtiTypeHi}
                   </span>
                 </div>
                 {getPolarityBadge(transitData.driverAspect.saturnAspect.polarity)}
               </div>
 
               <p className="text-xs text-[#4B5563] leading-relaxed">
-                {transitData.driverAspect.saturnAspect.impactDescriptionHi}
+                {language === 'en' ? transitData.driverAspect.saturnAspect.impactDescription : transitData.driverAspect.saturnAspect.impactDescriptionHi}
               </p>
 
               <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
                 <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 text-emerald-900">
-                  <strong>अवसर (Opportunity):</strong> {transitData.driverAspect.saturnAspect.opportunity}
+                  <strong>{language === 'en' ? 'Opportunity:' : 'अवसर (Opportunity):'}</strong> {transitData.driverAspect.saturnAspect.opportunity}
                 </div>
                 <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-amber-900">
-                  <strong>सावधानी (Caution):</strong> {transitData.driverAspect.saturnAspect.caution}
+                  <strong>{language === 'en' ? 'Caution:' : 'सावधानी (Caution):'}</strong> {transitData.driverAspect.saturnAspect.caution}
                 </div>
                 <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/60 text-indigo-900">
-                  <strong>अनुशंसित उपाय (Remedy):</strong> {transitData.driverAspect.saturnAspect.remedy}
+                  <strong>{language === 'en' ? 'Remedy:' : 'अनुशंसित उपाय (Remedy):'}</strong> {transitData.driverAspect.saturnAspect.remedy}
                 </div>
               </div>
             </div>
@@ -486,31 +488,31 @@ export const PlanetaryTransitTracker: React.FC<PlanetaryTransitTrackerProps> = (
               <div className="flex justify-between items-start">
                 <div className="space-y-0.5">
                   <span className="text-[10px] font-mono uppercase text-slate-500 font-bold block">
-                    राहु गोचर दृष्टि ➔ मूलांक #{simulatedDriver}
+                    {language === 'en' ? `Rahu Transit Aspect ➔ Mulank #${simulatedDriver}` : `राहु गोचर दृष्टि ➔ मूलांक #${simulatedDriver}`}
                   </span>
                   <h4 className="font-playfair font-bold text-lg text-[#1F2937]">
-                    {transitData.driverAspect.rahuAspect.titleHi}
+                    {language === 'en' ? transitData.driverAspect.rahuAspect.title : transitData.driverAspect.rahuAspect.titleHi}
                   </h4>
                   <span className="text-xs font-mono text-indigo-700">
-                    {transitData.driverAspect.rahuAspect.drishtiTypeHi}
+                    {language === 'en' ? transitData.driverAspect.rahuAspect.drishtiType : transitData.driverAspect.rahuAspect.drishtiTypeHi}
                   </span>
                 </div>
                 {getPolarityBadge(transitData.driverAspect.rahuAspect.polarity)}
               </div>
 
               <p className="text-xs text-[#4B5563] leading-relaxed">
-                {transitData.driverAspect.rahuAspect.impactDescriptionHi}
+                {language === 'en' ? transitData.driverAspect.rahuAspect.impactDescription : transitData.driverAspect.rahuAspect.impactDescriptionHi}
               </p>
 
               <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
                 <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 text-emerald-900">
-                  <strong>अवसर (Opportunity):</strong> {transitData.driverAspect.rahuAspect.opportunity}
+                  <strong>{language === 'en' ? 'Opportunity:' : 'अवसर (Opportunity):'}</strong> {transitData.driverAspect.rahuAspect.opportunity}
                 </div>
                 <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-amber-900">
-                  <strong>सावधानी (Caution):</strong> {transitData.driverAspect.rahuAspect.caution}
+                  <strong>{language === 'en' ? 'Caution:' : 'सावधानी (Caution):'}</strong> {transitData.driverAspect.rahuAspect.caution}
                 </div>
                 <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/60 text-indigo-900">
-                  <strong>अनुशंसित उपाय (Remedy):</strong> {transitData.driverAspect.rahuAspect.remedy}
+                  <strong>{language === 'en' ? 'Remedy:' : 'अनुशंसित उपाय (Remedy):'}</strong> {transitData.driverAspect.rahuAspect.remedy}
                 </div>
               </div>
             </div>
@@ -524,7 +526,7 @@ export const PlanetaryTransitTracker: React.FC<PlanetaryTransitTrackerProps> = (
         <div id="panel-transit-conductor" className="space-y-6 animate-in fade-in duration-300">
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-200 text-xs text-amber-950 flex items-center justify-between">
             <div>
-              <strong className="font-bold">भाग्यांक (Conductor Number) #{simulatedConductor}:</strong> यह आपकी नियति, जीवन के परम उद्देश्य, करियर दिशा और 35 वर्ष के पश्चात के प्रभाव को संचालित करता है।
+              <strong className="font-bold">{language === 'en' ? `Conductor Number #${simulatedConductor}:` : `भाग्यांक (Conductor Number) #${simulatedConductor}:`}</strong> {language === 'en' ? 'Governs destiny, career trajectory and post-35 impact.' : 'यह आपकी नियति, जीवन के परम उद्देश्य, करियर दिशा और 35 वर्ष के पश्चात के प्रभाव को संचालित करता है।'}
             </div>
             <span className="font-mono font-bold bg-[#D97706] text-white px-2.5 py-0.5 rounded-full text-[10px]">
               Ruling: {transitData.conductorAspect.targetPlanet}
@@ -541,31 +543,31 @@ export const PlanetaryTransitTracker: React.FC<PlanetaryTransitTrackerProps> = (
               <div className="flex justify-between items-start">
                 <div className="space-y-0.5">
                   <span className="text-[10px] font-mono uppercase text-slate-500 font-bold block">
-                    शनि गोचर दृष्टि ➔ भाग्यांक #{simulatedConductor}
+                    {language === 'en' ? `Saturn Transit Aspect ➔ Bhagyank #${simulatedConductor}` : `शनि गोचर दृष्टि ➔ भाग्यांक #${simulatedConductor}`}
                   </span>
                   <h4 className="font-playfair font-bold text-lg text-[#1F2937]">
-                    {transitData.conductorAspect.saturnAspect.titleHi}
+                    {language === 'en' ? transitData.conductorAspect.saturnAspect.title : transitData.conductorAspect.saturnAspect.titleHi}
                   </h4>
                   <span className="text-xs font-mono text-[#D97706]">
-                    {transitData.conductorAspect.saturnAspect.drishtiTypeHi}
+                    {language === 'en' ? transitData.conductorAspect.saturnAspect.drishtiType : transitData.conductorAspect.saturnAspect.drishtiTypeHi}
                   </span>
                 </div>
                 {getPolarityBadge(transitData.conductorAspect.saturnAspect.polarity)}
               </div>
 
               <p className="text-xs text-[#4B5563] leading-relaxed">
-                {transitData.conductorAspect.saturnAspect.impactDescriptionHi}
+                {language === 'en' ? transitData.conductorAspect.saturnAspect.impactDescription : transitData.conductorAspect.saturnAspect.impactDescriptionHi}
               </p>
 
               <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
                 <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 text-emerald-900">
-                  <strong>अवसर (Opportunity):</strong> {transitData.conductorAspect.saturnAspect.opportunity}
+                  <strong>{language === 'en' ? 'Opportunity:' : 'अवसर (Opportunity):'}</strong> {transitData.conductorAspect.saturnAspect.opportunity}
                 </div>
                 <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-amber-900">
-                  <strong>सावधानी (Caution):</strong> {transitData.conductorAspect.saturnAspect.caution}
+                  <strong>{language === 'en' ? 'Caution:' : 'सावधानी (Caution):'}</strong> {transitData.conductorAspect.saturnAspect.caution}
                 </div>
                 <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/60 text-indigo-900">
-                  <strong>अनुशंसित उपाय (Remedy):</strong> {transitData.conductorAspect.saturnAspect.remedy}
+                  <strong>{language === 'en' ? 'Remedy:' : 'अनुशंसित उपाय (Remedy):'}</strong> {transitData.conductorAspect.saturnAspect.remedy}
                 </div>
               </div>
             </div>
@@ -578,20 +580,20 @@ export const PlanetaryTransitTracker: React.FC<PlanetaryTransitTrackerProps> = (
               <div className="flex justify-between items-start">
                 <div className="space-y-0.5">
                   <span className="text-[10px] font-mono uppercase text-slate-500 font-bold block">
-                    राहु गोचर दृष्टि ➔ भाग्यांक #{simulatedConductor}
+                    {language === 'en' ? `Rahu Transit Aspect ➔ Bhagyank #${simulatedConductor}` : `राहु गोचर दृष्टि ➔ भाग्यांक #${simulatedConductor}`}
                   </span>
                   <h4 className="font-playfair font-bold text-lg text-[#1F2937]">
-                    {transitData.conductorAspect.rahuAspect.titleHi}
+                    {language === 'en' ? transitData.conductorAspect.rahuAspect.title : transitData.conductorAspect.rahuAspect.titleHi}
                   </h4>
                   <span className="text-xs font-mono text-indigo-700">
-                    {transitData.conductorAspect.rahuAspect.drishtiTypeHi}
+                    {language === 'en' ? transitData.conductorAspect.rahuAspect.drishtiType : transitData.conductorAspect.rahuAspect.drishtiTypeHi}
                   </span>
                 </div>
                 {getPolarityBadge(transitData.conductorAspect.rahuAspect.polarity)}
               </div>
 
               <p className="text-xs text-[#4B5563] leading-relaxed">
-                {transitData.conductorAspect.rahuAspect.impactDescriptionHi}
+                {language === 'en' ? transitData.conductorAspect.rahuAspect.impactDescription : transitData.conductorAspect.rahuAspect.impactDescriptionHi}
               </p>
 
               <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">

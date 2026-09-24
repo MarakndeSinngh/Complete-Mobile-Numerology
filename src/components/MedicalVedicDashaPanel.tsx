@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { CompleteNumerologyProfile } from '../core/types';
+import { useLanguage } from '../i18n';
+import { getPlanetName, getLocalizedNumberMeaning } from '../i18n/dynamicContent';
 import {
   HeartPulse,
   Sparkles,
@@ -25,6 +27,7 @@ interface MedicalVedicDashaPanelProps {
 }
 
 export const MedicalVedicDashaPanel: React.FC<MedicalVedicDashaPanelProps> = ({ profile }) => {
+  const { language } = useLanguage();
   const [showFullTimeline, setShowFullTimeline] = useState(false);
   const { medical, coreNumbers, identity } = profile;
   const dashaData = medical.vedicDashaAnalysis;
@@ -416,7 +419,7 @@ export const MedicalVedicDashaPanel: React.FC<MedicalVedicDashaPanelProps> = ({ 
 
             <div className="space-y-1">
               <h5 className="text-2xl font-bold font-mono text-slate-900">
-                अंक #{currentMahadasha.lordNumber} • {currentMahadasha.planetHi}
+                अंक #{currentMahadasha.lordNumber} • {getPlanetName(currentMahadasha.lordNumber, language)}
               </h5>
               <p className="text-xs font-mono text-emerald-800 font-semibold">
                 सक्रिय काल: {currentMahadasha.startDate} से {currentMahadasha.endDate} (आयु {currentMahadasha.ageStart} - {currentMahadasha.ageEnd} वर्ष)
@@ -424,7 +427,15 @@ export const MedicalVedicDashaPanel: React.FC<MedicalVedicDashaPanelProps> = ({ 
             </div>
 
             <p className="text-xs text-slate-800 leading-relaxed font-sans bg-white/80 p-3 rounded-xl border border-emerald-200/80">
-              {currentMahadasha.themeHi}
+              {language === 'en'
+                ? `Mahadasha of Lord #${currentMahadasha.lordNumber} (${getPlanetName(currentMahadasha.lordNumber, language)}): Focus on balanced vital energies, organ vitality, and planetary harmony.`
+                : language === 'mr'
+                ? `महादशा स्वामी अंक #${currentMahadasha.lordNumber} (${getPlanetName(currentMahadasha.lordNumber, language)}): शारीरिक ऊर्जा, अवयवांचे आरोग्य आणि संतुलित जीवनशैलीवर लक्ष केंद्रित करा.`
+                : language === 'bn'
+                ? `মহাদশা অধিপতি সংখ্যা #${currentMahadasha.lordNumber} (${getPlanetName(currentMahadasha.lordNumber, language)}): শারীরিক জীবনীশক্তি এবং গ্রহের ভারসাম্য বজায় রাখার ওপর জোর দিন।`
+                : language === 'gu'
+                ? `મહાદશા સ્વામી અંક #${currentMahadasha.lordNumber} (${getPlanetName(currentMahadasha.lordNumber, language)}): શારીરિક ઉર્જા અને સંતુલિત જીવનશૈલી પર ધ્યાન કેન્દ્રિત કરો.`
+                : currentMahadasha.themeHi}
             </p>
 
             <div className="text-[11px] font-mono text-emerald-900">
