@@ -3,6 +3,7 @@ import { useLanguage } from '../i18n';
 import { CompleteNumerologyProfile } from '../core/types';
 import { calculateKuaNumber, KuaProfile } from '../core/kuaEngine';
 import { deriveExpertConsultationDossier, ExpertConsultationDossier } from '../core/expertConsultationEngine';
+import { buildLocalizedExpertDossier, getPlanetName, getLocalizedNumberMeaning, getLocalized81Yoga, getLocalizedPlane } from '../i18n/dynamicContent';
 import { parseIndianDate } from '../utils/dateUtils';
 import { formatLocalizedDate, getProfileIsolationKey } from '../utils/localeUtils';
 import { PersonalDetails, DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdvice } from '../types';
@@ -127,6 +128,10 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
   const expertDossier: ExpertConsultationDossier = React.useMemo(() => {
     return deriveExpertConsultationDossier(profile);
   }, [profile]);
+
+  const localizedDossier = React.useMemo(() => {
+    return buildLocalizedExpertDossier(profile, language);
+  }, [profile, language]);
 
   // Saved Signature, Vehicle, Business, Marriage & Child Audit state from localStorage
   const [savedSigAudit, setSavedSigAudit] = useState<any>(null);
@@ -524,28 +529,28 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="p-3.5 bg-white/90 rounded-xl border border-amber-200 space-y-1">
                   <strong className="text-[#92400E] block font-bold text-[10px] uppercase">1. प्रमुख ऊर्जा (Dominant Energy):</strong>
-                  <p className="text-[#4B5563] text-xs leading-relaxed">{expertDossier.consultantSnapshot.dominantEnergyHi}</p>
+                  <p className="text-[#4B5563] text-xs leading-relaxed">{localizedDossier.consultantSnapshot.dominantEnergy || expertDossier.consultantSnapshot.dominantEnergyHi}</p>
                 </div>
                 <div className="p-3.5 bg-white/90 rounded-xl border border-amber-200 space-y-1">
                   <strong className="text-[#92400E] block font-bold text-[10px] uppercase">2. मूल जीवन विषय (Core Life Theme):</strong>
-                  <p className="text-[#4B5563] text-xs leading-relaxed">{expertDossier.consultantSnapshot.coreVerdictHi}</p>
+                  <p className="text-[#4B5563] text-xs leading-relaxed">{localizedDossier.consultantSnapshot.coreVerdict || expertDossier.consultantSnapshot.coreVerdictHi}</p>
                 </div>
                 <div className="p-3.5 bg-white/90 rounded-xl border border-amber-200 space-y-1">
                   <strong className="text-[#92400E] block font-bold text-[10px] uppercase">3. मुख्य सामर्थ्य (Key Strengths):</strong>
                   <p className="text-[#4B5563] text-xs leading-relaxed">
-                    {interpretations.career.strengths.slice(0, 3).join(', ') || 'बौद्धिक स्पष्टता, कूटनीतिक संवाद, रणनीतिक प्रबंधन एवं त्वरित निर्णय क्षमता'}
+                    {interpretations.career.strengths.slice(0, 3).join(', ') || localizedDossier.consultantSnapshot.bestAvenue || 'बौद्धिक स्पष्टता, कूटनीतिक संवाद, रणनीतिक प्रबंधन एवं त्वरित निर्णय क्षमता'}
                   </p>
                 </div>
                 <div className="p-3.5 bg-white/90 rounded-xl border border-amber-200 space-y-1">
                   <strong className="text-[#92400E] block font-bold text-[10px] uppercase">4. मुख्य चुनौतियाँ व सावधानी (Key Challenges):</strong>
-                  <p className="text-[#4B5563] text-xs leading-relaxed">{expertDossier.consultantSnapshot.strategicCautionHi}</p>
+                  <p className="text-[#4B5563] text-xs leading-relaxed">{localizedDossier.consultantSnapshot.strategicCaution || expertDossier.consultantSnapshot.strategicCautionHi}</p>
                 </div>
               </div>
 
               <div className="p-3.5 bg-amber-100/70 rounded-xl border border-amber-300 text-xs text-[#78350F] flex items-start gap-2.5">
                 <Target className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong>वर्तमान रणनीतिक ध्यान (Current Focus):</strong> {expertDossier.expertSummary.timeCycleGuidance || 'व्यक्तिगत वर्ष एवं महादशा के अनुसार नए अवसरों की योजना बनाएं और निरंतर कर्म पर एकाग्र रहें।'}
+                  <strong>वर्तमान रणनीतिक ध्यान (Current Focus):</strong> {localizedDossier.expertSummary.timeCycleGuidance || expertDossier.expertSummary.timeCycleGuidance || 'व्यक्तिगत वर्ष एवं महादशा के अनुसार नए अवसरों की योजना बनाएं और निरंतर कर्म पर एकाग्र रहें।'}
                 </div>
               </div>
             </div>
@@ -589,20 +594,20 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               </span>
             </div>
             <p className="text-xs text-[#78350F] leading-relaxed font-medium">
-              {expertDossier.consultantSnapshot.coreVerdictHi}
+              {localizedDossier.consultantSnapshot.coreVerdict || expertDossier.consultantSnapshot.coreVerdictHi}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-[11px]">
               <div className="p-2.5 bg-white/80 rounded-xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold text-[10px] uppercase">प्रमुख ऊर्जा (Dominant Energy):</strong>
-                <span className="text-[#4B5563]">{expertDossier.consultantSnapshot.dominantEnergyHi}</span>
+                <span className="text-[#4B5563]">{localizedDossier.consultantSnapshot.dominantEnergy || expertDossier.consultantSnapshot.dominantEnergyHi}</span>
               </div>
               <div className="p-2.5 bg-white/80 rounded-xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold text-[10px] uppercase">सर्वोत्तम क्षेत्र (Best Avenues):</strong>
-                <span className="text-[#4B5563]">{expertDossier.consultantSnapshot.bestAvenueHi}</span>
+                <span className="text-[#4B5563]">{localizedDossier.consultantSnapshot.bestAvenue || expertDossier.consultantSnapshot.bestAvenueHi}</span>
               </div>
               <div className="p-2.5 bg-white/80 rounded-xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold text-[10px] uppercase">रणनीतिक सावधानी (Strategic Caution):</strong>
-                <span className="text-[#4B5563]">{expertDossier.consultantSnapshot.strategicCautionHi}</span>
+                <span className="text-[#4B5563]">{localizedDossier.consultantSnapshot.strategicCaution || expertDossier.consultantSnapshot.strategicCautionHi}</span>
               </div>
             </div>
           </div>
@@ -1384,44 +1389,44 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200 pb-2">
               <span className="font-playfair font-bold text-sm text-[#92400E] flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-[#D97706]" />
-                19. व्यक्तिगत वर्ष {expertDossier.personalYearNarrative.year} (Personal Year #{expertDossier.personalYearNarrative.personalYear})
+                19. व्यक्तिगत वर्ष {localizedDossier.personalYearNarrative.year} (Personal Year #{localizedDossier.personalYearNarrative.personalYear})
               </span>
               <span className="text-[10px] font-mono font-bold bg-[#D97706] text-white px-2.5 py-0.5 rounded-full w-fit">
-                {expertDossier.personalYearNarrative.theme}
+                {localizedDossier.personalYearNarrative.theme}
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-[11px]">
               <div className="p-2.5 bg-white rounded-xl border border-amber-200">
                 <strong className="text-[#92400E] block text-[10px] uppercase">करियर (Career):</strong>
-                <p className="text-[#4B5563]">{expertDossier.personalYearNarrative.career}</p>
+                <p className="text-[#4B5563]">{localizedDossier.personalYearNarrative.career}</p>
               </div>
               <div className="p-2.5 bg-white rounded-xl border border-amber-200">
                 <strong className="text-[#92400E] block text-[10px] uppercase">वित्त (Finance):</strong>
-                <p className="text-[#4B5563]">{expertDossier.personalYearNarrative.finance}</p>
+                <p className="text-[#4B5563]">{localizedDossier.personalYearNarrative.finance}</p>
               </div>
               <div className="p-2.5 bg-white rounded-xl border border-amber-200">
                 <strong className="text-[#92400E] block text-[10px] uppercase">संबंध (Relationships):</strong>
-                <p className="text-[#4B5563]">{expertDossier.personalYearNarrative.relationships}</p>
+                <p className="text-[#4B5563]">{localizedDossier.personalYearNarrative.relationships}</p>
               </div>
               <div className="p-2.5 bg-white rounded-xl border border-amber-200">
                 <strong className="text-[#92400E] block text-[10px] uppercase">यात्रा (Travel):</strong>
-                <p className="text-[#4B5563]">{expertDossier.personalYearNarrative.travel}</p>
+                <p className="text-[#4B5563]">{localizedDossier.personalYearNarrative.travel}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] pt-1">
               <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
                 <strong className="text-emerald-900 block text-[10px] uppercase">अवसर (Opportunities):</strong>
-                <p className="text-emerald-800">{expertDossier.personalYearNarrative.opportunities}</p>
+                <p className="text-emerald-800">{localizedDossier.personalYearNarrative.opportunities}</p>
               </div>
               <div className="p-2.5 bg-rose-50 rounded-xl border border-rose-200">
                 <strong className="text-rose-900 block text-[10px] uppercase">सावधानी (Caution):</strong>
-                <p className="text-rose-800">{expertDossier.personalYearNarrative.caution}</p>
+                <p className="text-rose-800">{localizedDossier.personalYearNarrative.caution}</p>
               </div>
               <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-200">
                 <strong className="text-blue-900 block text-[10px] uppercase">मुख्य फोकस (Focus):</strong>
-                <p className="text-blue-800">{expertDossier.personalYearNarrative.recommendedFocus}</p>
+                <p className="text-blue-800">{localizedDossier.personalYearNarrative.recommendedFocus}</p>
               </div>
             </div>
           </div>
@@ -1433,10 +1438,10 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               20. मासिक दशा-योग भविष्यफल (Monthly Dasha-Yog Forecast)
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-              {expertDossier.monthlyDashaForecast.map((m, idx) => (
+              {localizedDossier.monthlyDashaForecast.map((m, idx) => (
                 <div key={idx} className="p-4 bg-white rounded-2xl border border-amber-200/80 space-y-2 shadow-xs">
                   <div className="flex justify-between items-center border-b border-amber-100 pb-1.5">
-                    <span className="font-playfair font-bold text-xs text-[#92400E]">{m.monthNameHi || m.monthNameEn}</span>
+                    <span className="font-playfair font-bold text-xs text-[#92400E]">{m.monthNameActive || m.monthNameHi || m.monthNameEn}</span>
                     <span className="text-[9px] font-mono bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-bold">
                       PY #{m.py} • PM #{m.pm}
                     </span>
@@ -2225,29 +2230,29 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
               <div className="p-3.5 bg-white rounded-2xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold mb-1">प्रधान यंत्र (Primary Yantra):</strong>
-                <p className="text-[#4B5563] text-[11px]">{expertDossier.balancingRemedies.primaryYantraHi}</p>
+                <p className="text-[#4B5563] text-[11px]">{localizedDossier.balancingRemedies.primaryYantra || expertDossier.balancingRemedies.primaryYantraHi}</p>
               </div>
               <div className="p-3.5 bg-white rounded-2xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold mb-1">ग्रह मंत्र जप (Sacred Mantra):</strong>
-                <p className="text-[#4B5563] text-[11px]">{expertDossier.balancingRemedies.sacredMantraHi}</p>
+                <p className="text-[#4B5563] text-[11px]">{localizedDossier.balancingRemedies.sacredMantra || expertDossier.balancingRemedies.sacredMantraHi}</p>
               </div>
               <div className="p-3.5 bg-white rounded-2xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold mb-1">रंग व परिधान (Color Harmony):</strong>
                 <p className="text-[#4B5563] text-[11px]">
-                  शुभ रंग: {expertDossier.balancingRemedies.luckyColorsHi.join(', ')}
+                  शुभ रंग: {localizedDossier.balancingRemedies.luckyColors.join(', ') || expertDossier.balancingRemedies.luckyColorsHi.join(', ')}
                 </p>
               </div>
               <div className="p-3.5 bg-white rounded-2xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold mb-1">क्रिस्टल / रत्न (Crystal Therapy):</strong>
-                <p className="text-[#4B5563] text-[11px]">{expertDossier.balancingRemedies.crystalRecommendationHi}</p>
+                <p className="text-[#4B5563] text-[11px]">{localizedDossier.balancingRemedies.crystalRecommendation || expertDossier.balancingRemedies.crystalRecommendationHi}</p>
               </div>
               <div className="p-3.5 bg-white rounded-2xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold mb-1">सजीव ग्रह सेवा व दान (Planetary Charity):</strong>
-                <p className="text-[#4B5563] text-[11px]">{expertDossier.balancingRemedies.planetaryCharityHi}</p>
+                <p className="text-[#4B5563] text-[11px]">{localizedDossier.balancingRemedies.planetaryCharity || expertDossier.balancingRemedies.planetaryCharityHi}</p>
               </div>
               <div className="p-3.5 bg-white rounded-2xl border border-amber-200">
                 <strong className="text-[#92400E] block font-bold mb-1">हस्ताक्षर सुधार (Signature Alignment):</strong>
-                <p className="text-[#4B5563] text-[11px]">{expertDossier.balancingRemedies.signatureRecommendationHi}</p>
+                <p className="text-[#4B5563] text-[11px]">{localizedDossier.balancingRemedies.signatureRecommendation || expertDossier.balancingRemedies.signatureRecommendationHi}</p>
               </div>
             </div>
           </div>
@@ -2307,7 +2312,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div>
                 <strong className="text-amber-300 block mb-0.5 font-bold">1. सबसे मजबूत गुण (Strongest Quality):</strong>
                 <p className="text-blue-100 text-[11px] leading-relaxed">
-                  {expertDossier.expertSummary.strongestTrait}
+                  {localizedDossier.expertSummary.strongestTrait || expertDossier.expertSummary.strongestTrait}
                 </p>
               </div>
             </div>
@@ -2317,7 +2322,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div>
                 <strong className="text-amber-300 block mb-0.5 font-bold">2. प्रमुख विकास क्षेत्र (Key Development Area):</strong>
                 <p className="text-blue-100 text-[11px] leading-relaxed">
-                  {expertDossier.expertSummary.developmentArea}
+                  {localizedDossier.expertSummary.developmentArea || expertDossier.expertSummary.developmentArea}
                 </p>
               </div>
             </div>
@@ -2327,7 +2332,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div>
                 <strong className="text-amber-300 block mb-0.5 font-bold">3. करियर की दिशा (Career Direction):</strong>
                 <p className="text-blue-100 text-[11px] leading-relaxed">
-                  {expertDossier.expertSummary.careerDirection}
+                  {localizedDossier.expertSummary.careerDirection || expertDossier.expertSummary.careerDirection}
                 </p>
               </div>
             </div>
@@ -2337,7 +2342,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div>
                 <strong className="text-amber-300 block mb-0.5 font-bold">4. संबंध एवं परिवार (Relationship Harmony):</strong>
                 <p className="text-blue-100 text-[11px] leading-relaxed">
-                  {expertDossier.expertSummary.relationshipGuidance}
+                  {localizedDossier.expertSummary.relationshipGuidance || expertDossier.expertSummary.relationshipGuidance}
                 </p>
               </div>
             </div>
@@ -2347,7 +2352,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div>
                 <strong className="text-amber-300 block mb-0.5 font-bold">5. मुख्य पारंपरिक उपाय (Primary Remedy):</strong>
                 <p className="text-blue-100 text-[11px] leading-relaxed">
-                  {expertDossier.expertSummary.primaryRemedy}
+                  {localizedDossier.expertSummary.primaryRemedy || expertDossier.expertSummary.primaryRemedy}
                 </p>
               </div>
             </div>
@@ -2357,7 +2362,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div>
                 <strong className="text-amber-300 block mb-0.5 font-bold">6. वर्तमान कालखंड संदेश (Time-Cycle Guidance):</strong>
                 <p className="text-blue-100 text-[11px] leading-relaxed">
-                  {expertDossier.expertSummary.timeCycleGuidance}
+                  {localizedDossier.expertSummary.timeCycleGuidance || expertDossier.expertSummary.timeCycleGuidance}
                 </p>
               </div>
             </div>
@@ -2367,7 +2372,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div>
                 <strong className="text-amber-300 block mb-0.5 font-bold">7. ज्योतिषाचार्य / अंकशास्त्री अंतिम संदेश (Master's Word):</strong>
                 <p className="text-blue-100 text-[11px] leading-relaxed">
-                  {expertDossier.expertSummary.masterAdvice}
+                  {localizedDossier.expertSummary.masterAdvice || expertDossier.expertSummary.masterAdvice}
                 </p>
               </div>
             </div>
