@@ -20,6 +20,8 @@ import { MANDATORY_WELLNESS_DISCLAIMER } from '../core/methodology';
 import { KarmicVedicAnalysisView } from './KarmicVedicAnalysisView';
 import { DateInput } from './DateInput';
 import { formatDateIndian } from '../utils/dateUtils';
+import { formatLocalizedDateTime } from '../utils/localeUtils';
+import { useLanguage } from '../i18n';
 import { 
   Calendar, User, Compass, HelpCircle, Sparkles, RefreshCw, Star, 
   Trash2, Heart, Shield, BookOpen, Layers, Award, FileText, Download, 
@@ -94,6 +96,7 @@ interface CompleteLoshuGridAnalysisProps {
 }
 
 export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps> = ({ initialProfile }) => {
+  const { language } = useLanguage();
   // Main states
   const [name, setName] = useState('');
   const [dob, setDob] = useState('');
@@ -180,7 +183,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
       id: Date.now().toString(),
       name: finalName,
       dob,
-      date: new Date().toLocaleDateString('en-IN', { hour: '2-digit', minute: '2-digit' })
+      date: formatLocalizedDateTime(new Date(), language)
     };
     
     const updatedHistory = [newHistoryItem, ...history.filter(h => h.dob !== dob)].slice(0, 8);

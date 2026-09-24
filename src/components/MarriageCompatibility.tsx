@@ -9,6 +9,9 @@ import {
 } from 'lucide-react';
 import DateInput from './DateInput';
 import { generateSynastryReport, MarriageCompatibilityReport, SynastryPersonInput } from '../core/synastryEngine';
+import { useLanguage } from '../i18n';
+import { formatLocalizedDate } from '../utils/localeUtils';
+import { getProfileIsolationKey } from '../core';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -38,6 +41,7 @@ interface SavedHistoryItem {
 }
 
 export default function MarriageCompatibility() {
+  const { language } = useLanguage();
   // Input states
   const [p1Name, setP1Name] = useState('रोहित शर्मा (Rohit)');
   const [p1Dob, setP1Dob] = useState('1992-05-14');
@@ -75,7 +79,14 @@ export default function MarriageCompatibility() {
       { name: p2Name, dob: p2Dob, mobile: p2Mobile, gender: p2Gender }
     );
     setReport(initialReport);
-    localStorage.setItem('leofamily_saved_synastry_audit', JSON.stringify({ report: initialReport, timestamp: new Date().toISOString() }));
+    try {
+      const p1Key = getProfileIsolationKey({ name: p1Name, dob: p1Dob, gender: p1Gender });
+      const payload = JSON.stringify({ report: initialReport, timestamp: new Date().toISOString() });
+      localStorage.setItem(`leofamily_saved_synastry_audit_${p1Key}`, payload);
+      localStorage.setItem('leofamily_saved_synastry_audit', payload);
+    } catch (e) {
+      console.error('Failed to save initial synastry audit:', e);
+    }
   }, []);
 
   const saveToHistory = (item: SavedHistoryItem) => {
@@ -118,7 +129,14 @@ export default function MarriageCompatibility() {
       setIsComputing(false);
 
       // Save for Master Report integration
-      localStorage.setItem('leofamily_saved_synastry_audit', JSON.stringify({ report: generated, timestamp: new Date().toISOString() }));
+      try {
+        const p1Key = getProfileIsolationKey({ name: partner1Input.name, dob: partner1Input.dob, gender: partner1Input.gender });
+        const payload = JSON.stringify({ report: generated, timestamp: new Date().toISOString() });
+        localStorage.setItem(`leofamily_saved_synastry_audit_${p1Key}`, payload);
+        localStorage.setItem('leofamily_saved_synastry_audit', payload);
+      } catch (e) {
+        console.error('Failed to save synastry audit:', e);
+      }
 
       if (!customItem) {
         saveToHistory({
@@ -410,7 +428,7 @@ export default function MarriageCompatibility() {
             <h1 className="font-playfair text-3xl font-extrabold text-[#111827]">LeoFamily Occult Sciences</h1>
             <p className="font-mono text-xs uppercase tracking-widest text-slate-500">वैवाहिक सामंजस्य एवं सिनैस्ट्री ऑडिट रिपोर्ट (7-Layer Analysis)</p>
             <div className="pt-2 flex justify-between text-[10px] font-mono text-slate-600">
-              <span>दिनांक: {report.calculatedAt}</span>
+              <span>दिनांक: {formatLocalizedDate(report.calculatedAt, language)}</span>
               <span>Ref ID: {report.id}</span>
             </div>
           </div>

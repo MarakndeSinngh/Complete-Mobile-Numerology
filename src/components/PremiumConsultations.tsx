@@ -28,6 +28,8 @@ import { BusinessNumerologyDashboard } from './BusinessNumerologyDashboard';
 import { ChildLuckyNamesDashboard } from './ChildLuckyNamesDashboard';
 import { LuckyDatesDashboard } from './LuckyDatesDashboard';
 import { LuckyDatesFinder } from './LuckyDatesFinder';
+import { useLanguage } from '../i18n';
+import { getProfileIsolationKey } from '../core';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 15 },
@@ -732,14 +734,17 @@ export default function PremiumConsultations({ initialModule = 'VEHICLE' }: Prem
       setSigAuditResult(result);
       setSigError(null);
       try {
-        localStorage.setItem('leofamily_saved_signature_audit', JSON.stringify({
+        const profileKey = getProfileIsolationKey({ name: sigName, dob: sigDob });
+        const payload = JSON.stringify({
           auditResult: result,
           image: sigImage || null,
           fileName: sigFileName || null,
           name: sigName,
           dob: sigDob,
           timestamp: new Date().toISOString()
-        }));
+        });
+        localStorage.setItem(`leofamily_saved_signature_audit_${profileKey}`, payload);
+        localStorage.setItem('leofamily_saved_signature_audit', payload);
       } catch (saveErr) {
         console.error("Failed to save signature audit to localStorage:", saveErr);
       }
@@ -753,14 +758,17 @@ export default function PremiumConsultations({ initialModule = 'VEHICLE' }: Prem
       setSigAuditResult(fallbackResult);
       handleSignatureTrigger(signatureStyle || 'RISING_UNDERLINE');
       try {
-        localStorage.setItem('leofamily_saved_signature_audit', JSON.stringify({
+        const profileKey = getProfileIsolationKey({ name: sigName, dob: sigDob });
+        const payload = JSON.stringify({
           auditResult: fallbackResult,
           image: sigImage || null,
           fileName: sigFileName || null,
           name: sigName,
           dob: sigDob,
           timestamp: new Date().toISOString()
-        }));
+        });
+        localStorage.setItem(`leofamily_saved_signature_audit_${profileKey}`, payload);
+        localStorage.setItem('leofamily_saved_signature_audit', payload);
       } catch (saveErr) {
         console.error("Failed to save fallback signature audit:", saveErr);
       }

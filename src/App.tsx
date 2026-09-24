@@ -144,6 +144,26 @@ const App: React.FC = () => {
   // Virtual URL & Hash Router for Professional SEO Pages & Dynamic Metadata/JSON-LD Injector
   const [currentSEOPath, setCurrentSEOPath] = useState<string>('home');
 
+  const PORTAL_ROUTE_MAP: Record<NavPortalId, string> = {
+    HOME: 'home',
+    CORE_LOSHU: 'loshu-grid',
+    CORE_DASHBOARD: 'core-dashboard',
+    MOBILE_NUMEROLOGY: 'mobile-numerology',
+    NAME_NUMEROLOGY: 'name-numerology',
+    MARRIAGE_COMPATIBILITY: 'marriage-compatibility',
+    PREMIUM_VEHICLE: 'vehicle-numerology',
+    PREMIUM_HOUSE: 'house-numerology',
+    PREMIUM_BUSINESS: 'business-numerology',
+    PREMIUM_SIGNATURE: 'signature-numerology',
+    PREMIUM_CHILD: 'child-numerology',
+    PREMIUM_LUCKY_DATES: 'lucky-date-finder',
+    PREMIUM_MEDICAL: 'medical-numerology',
+    PREMIUM_VAASTU: 'vaastu-numerology',
+    PREMIUM_DASHA: 'dasha-numerology',
+    AI_CONSULTATION: 'consultation-hub',
+    MASTER_REPORT: 'master-report',
+  };
+
   useEffect(() => {
     const handleRouteSync = () => {
       const hash = window.location.hash.substring(1) || '';
@@ -152,7 +172,6 @@ const App: React.FC = () => {
 
       let title = "Leo Family Numerology - Premium Indian Numerology Portal";
       let description = "Vedic Numerology & Chaldean Frequencies. Explore hidden planetary yogas, material blockages, and cosmic alignments curated by Rajiv Singh Chauhann.";
-      let schemaMarkup: any = null;
 
       if (path.includes('mobile-numerology')) {
         setCurrentPortal('MOBILE_NUMEROLOGY');
@@ -166,6 +185,10 @@ const App: React.FC = () => {
         setCurrentPortal('CORE_LOSHU');
         title = "Master Lo Shu Grid Kundali - traditional 3x3 Vedic Birth Grid";
         description = "Generate your 3x3 Lo Shu birth grid, missing numbers remedies, and personalized arrows.";
+      } else if (path.includes('core-dashboard')) {
+        setCurrentPortal('CORE_DASHBOARD');
+        title = "Core Vedic Combinations & 81 Combos Matrix";
+        description = "Driver and Conductor synergy and 81 Vedic combinations.";
       } else if (path.includes('marriage-compatibility')) {
         setCurrentPortal('MARRIAGE_COMPATIBILITY');
         title = "Vedic Marriage Compatibility - Driver Conductor Synastry v3.0";
@@ -223,6 +246,8 @@ const App: React.FC = () => {
         setCurrentPortal('AI_CONSULTATION');
         title = "LeoFamily Consultation Hub - Vedic Guidance & Counsel";
         description = "Ask questions, get remedial advice, and explore planetary insights.";
+      } else if (path === 'home' || path === '') {
+        setCurrentPortal('HOME');
       }
 
       // Update head dynamically
@@ -235,14 +260,21 @@ const App: React.FC = () => {
 
     handleRouteSync();
     window.addEventListener('hashchange', handleRouteSync);
+    window.addEventListener('popstate', handleRouteSync);
     return () => {
       window.removeEventListener('hashchange', handleRouteSync);
+      window.removeEventListener('popstate', handleRouteSync);
     };
   }, []);
 
   const handlePortalNavigation = (portalId: NavPortalId) => {
     setCurrentPortal(portalId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const route = PORTAL_ROUTE_MAP[portalId] || 'home';
+    if (window.location.hash !== `#${route}`) {
+      window.history.pushState(null, '', `#${route}`);
+    }
 
     // Handle premium sub-modules switching
     if (portalId === 'PREMIUM_VEHICLE') {

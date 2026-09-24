@@ -31,3 +31,4 @@ export * from './businessEngine';
 export * from './synastryEngine';
 export * from './calculationEngine';
 export * from './expertConsultationEngine';
+export { getProfileIsolationKey, formatIndianDOB, formatLocalizedDate, formatLocalizedTime, formatLocalizedDateTime } from '../utils/localeUtils';

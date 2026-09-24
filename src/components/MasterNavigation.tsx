@@ -34,6 +34,7 @@ export interface NavCategory {
   items: {
     portalId: NavPortalId;
     i18nKey: string;
+    descI18nKey?: string;
     titleHi: string;
     titleEn: string;
     descHi: string;
@@ -54,6 +55,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'CORE_LOSHU',
         i18nKey: 'nav.coreLoshu',
+        descI18nKey: 'nav.coreLoshuDesc',
         titleHi: 'लो शू ग्रिड व 8 योग',
         titleEn: 'Lo Shu Grid & Planes',
         descHi: '3x3 वैदिक जन्म चक्र एवं 8 सफलता योग',
@@ -64,6 +66,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'CORE_DASHBOARD',
         i18nKey: 'nav.coreDashboard',
+        descI18nKey: 'nav.coreDashboardDesc',
         titleHi: 'मूलांक, भाग्यांक व 81 युति',
         titleEn: 'Mulank, Bhagyank & 81 Combos',
         descHi: 'ड्राइवर व कंडक्टर संख्या तथा ग्रहीय तालमेल',
@@ -73,6 +76,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_DASHA',
         i18nKey: 'nav.dashaNumerology',
+        descI18nKey: 'nav.dashaNumerologyDesc',
         titleHi: 'महादशा, अंतर्दशा व वर्ष फल',
         titleEn: 'Mahadasha & Personal Year',
         descHi: 'सक्रिय ग्रह कालखंड एवं 9 वर्षीय चक्र',
@@ -91,6 +95,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'MOBILE_NUMEROLOGY',
         i18nKey: 'nav.mobileScanner',
+        descI18nKey: 'nav.mobileScannerDesc',
         titleHi: 'मोबाइल अंकशास्त्र स्कैनर',
         titleEn: 'Mobile Scanner Pro',
         descHi: '10-अंकीय फोन नंबर की चालडीयन व ग्रहीय तरंगे',
@@ -101,6 +106,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'NAME_NUMEROLOGY',
         i18nKey: 'nav.nameNumerology',
+        descI18nKey: 'nav.nameNumerologyDesc',
         titleHi: 'नाम अंकशास्त्र व स्पेलिंग शुद्धि',
         titleEn: 'Name Numerology Suite',
         descHi: 'चालडीयन व पाइथागोरियन नाम संशोधन',
@@ -110,6 +116,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_SIGNATURE',
         i18nKey: 'nav.signatureAudit',
+        descI18nKey: 'nav.signatureAuditDesc',
         titleHi: 'हस्ताक्षर विश्लेषण प्रो',
         titleEn: 'Signature Audit Pro',
         descHi: 'धन रक्षक ढाल व प्रोग्रेसिव स्ट्रोक्स',
@@ -119,6 +126,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_MEDICAL',
         i18nKey: 'nav.medicalNumerology',
+        descI18nKey: 'nav.medicalNumerologyDesc',
         titleHi: 'मेडिकल न्यूमरोलॉजी (स्वास्थ्य योग)',
         titleEn: 'Medical Health Vulnerabilities',
         descHi: 'जन्म कुंडली आधारित शारीरिक व मानसिक संवेदनशीलता',
@@ -137,6 +145,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_VAASTU',
         i18nKey: 'nav.numeroVastu',
+        descI18nKey: 'nav.numeroVastuDesc',
         titleHi: 'न्यूमरो वास्तु एवं 16 दिशाएं',
         titleEn: 'Numero Vastu & Directions',
         descHi: 'दिशा तत्व, कुआ अंक एवं मुख्य द्वार संतुलन',
@@ -146,6 +155,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_VEHICLE',
         i18nKey: 'nav.vehicleNumerology',
+        descI18nKey: 'nav.vehicleNumerologyDesc',
         titleHi: 'वाहन अंकशास्त्र प्रो',
         titleEn: 'Vehicle Numerology Pro',
         descHi: 'नंबर प्लेट कंपन, सुरक्षा व दुर्घटना जोखिम',
@@ -155,6 +165,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_HOUSE',
         i18nKey: 'nav.houseNumerology',
+        descI18nKey: 'nav.houseNumerologyDesc',
         titleHi: 'मकान व फ्लैट अंकशास्त्र',
         titleEn: 'House & Flat Numerology',
         descHi: 'आवासीय भवन ऊर्जा व पारिवारिक सुख-शांति',
@@ -173,6 +184,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_BUSINESS',
         i18nKey: 'nav.businessNumerology',
+        descI18nKey: 'nav.businessNumerologyDesc',
         titleHi: 'व्यापारिक व ब्रांड अंकशास्त्र',
         titleEn: 'Business & Corporate Pro',
         descHi: 'कंपनी नाम, पार्टनरशिप सामंजस्य व लोगो रंग',
@@ -182,6 +194,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_LUCKY_DATES',
         i18nKey: 'nav.luckyDatesFinder',
+        descI18nKey: 'nav.luckyDatesFinderDesc',
         titleHi: 'शुभ तिथियां व मुहूर्त खोजक',
         titleEn: 'Lucky Dates Finder Pro',
         descHi: 'व्यापार, यात्रा, विवाह व निवेश हेतु शुभ तिथियां',
@@ -192,6 +205,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'PREMIUM_CHILD',
         i18nKey: 'nav.childLuckyNames',
+        descI18nKey: 'nav.childLuckyNamesDesc',
         titleHi: 'नवजात शिशु शुभ नामाक्षर',
         titleEn: 'Child Lucky Names Pro',
         descHi: 'ग्रह अनुकूल शुभ प्रथम अक्षर व नाम सुझाव',
@@ -210,6 +224,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       {
         portalId: 'MARRIAGE_COMPATIBILITY',
         i18nKey: 'nav.marriageCompatibility',
+        descI18nKey: 'nav.marriageCompatibilityDesc',
         titleHi: 'विवाह गुण मिलान व 7-लेयर सिनैस्ट्री',
         titleEn: 'Marriage Compatibility Pro',
         descHi: 'मूलांक, भाग्यांक व लो शू ग्रिड आधारित दांपत्य मिलान',
@@ -230,7 +245,7 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
   currentPortalId,
   onSelectPortal,
 }) => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -253,11 +268,14 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
   const allTools = NAV_CATEGORIES.flatMap(cat => cat.items);
   const filteredTools = searchQuery.trim() === '' ? [] : allTools.filter(item => {
     const titleLoc = t(item.i18nKey);
+    const descLoc = item.descI18nKey ? t(item.descI18nKey) : item.descHi;
     return (
       titleLoc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      descLoc.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.titleHi.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.titleEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.descHi.toLowerCase().includes(searchQuery.toLowerCase())
+      item.descHi.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.descEn.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 
@@ -292,7 +310,7 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
           {NAV_CATEGORIES.map((category) => {
             const isCategoryActive = category.items.some(item => item.portalId === currentPortalId);
             const isOpen = openDropdown === category.id;
-            const catTitle = t(category.i18nKey) || (language === 'en' ? category.titleEn : category.titleHi);
+            const catTitle = t(category.i18nKey);
 
             return (
               <div key={category.id} className="relative">
@@ -318,8 +336,8 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
                       {catTitle}
                     </div>
                     {category.items.map((item) => {
-                      const itemTitle = t(item.i18nKey) || (language === 'en' ? item.titleEn : item.titleHi);
-                      const itemDesc = language === 'en' ? item.descEn : item.descHi;
+                      const itemTitle = t(item.i18nKey);
+                      const itemDesc = item.descI18nKey ? t(item.descI18nKey) : item.descHi;
                       return (
                         <button
                           key={item.portalId}
@@ -418,22 +436,26 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
           {searchQuery.trim() !== '' && (
             <div className="mt-2 max-h-60 overflow-y-auto space-y-1 divide-y divide-gray-50">
               {filteredTools.length > 0 ? (
-                filteredTools.map((tool) => (
-                  <button
-                    key={tool.portalId}
-                    onClick={() => handlePortalSelect(tool.portalId)}
-                    className="w-full text-left p-2 hover:bg-amber-50/60 rounded-lg flex items-center justify-between text-xs transition cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      {tool.icon}
-                      <div>
-                        <span className="font-bold text-gray-800 block">{t(tool.i18nKey) || tool.titleHi}</span>
-                        <span className="text-[10px] text-gray-500">{language === 'en' ? tool.descEn : tool.descHi}</span>
+                filteredTools.map((tool) => {
+                  const titleLoc = t(tool.i18nKey);
+                  const descLoc = tool.descI18nKey ? t(tool.descI18nKey) : tool.descHi;
+                  return (
+                    <button
+                      key={tool.portalId}
+                      onClick={() => handlePortalSelect(tool.portalId)}
+                      className="w-full text-left p-2 hover:bg-amber-50/60 rounded-lg flex items-center justify-between text-xs transition cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        {tool.icon}
+                        <div>
+                          <span className="font-bold text-gray-800 block">{titleLoc}</span>
+                          <span className="text-[10px] text-gray-500">{descLoc}</span>
+                        </div>
                       </div>
-                    </div>
-                    <span className="text-[10px] font-mono text-[#D97706] font-bold">{t('common.explore')} →</span>
-                  </button>
-                ))
+                      <span className="text-[10px] font-mono text-[#D97706] font-bold">{t('common.explore')} →</span>
+                    </button>
+                  );
+                })
               ) : (
                 <div className="p-4 text-center text-xs text-gray-500">
                   {t('common.error')}
@@ -469,7 +491,7 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
             <div key={category.id} className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#D97706] uppercase tracking-wider">
                 {category.icon}
-                <span>{t(category.i18nKey) || (language === 'en' ? category.titleEn : category.titleHi)}</span>
+                <span>{t(category.i18nKey)}</span>
               </div>
               <div className="grid grid-cols-1 gap-1 pl-2">
                 {category.items.map((item) => (
@@ -484,7 +506,7 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
                   >
                     <div className="flex items-center gap-2">
                       {item.icon}
-                      <span>{t(item.i18nKey) || (language === 'en' ? item.titleEn : item.titleHi)}</span>
+                      <span>{t(item.i18nKey)}</span>
                     </div>
                     {item.badge && (
                       <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">

@@ -245,7 +245,9 @@ export const MasterDashboardHub: React.FC<MasterDashboardHubProps> = ({
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-gray-500 block truncate">{language === 'en' ? item.descEn : item.descHi}</span>
+                          <span className="text-[10px] text-gray-500 block truncate">
+                            {(item.descI18nKey && t(item.descI18nKey)) || (language === 'en' ? item.descEn : item.descHi)}
+                          </span>
                         </div>
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#D97706] group-hover:translate-x-0.5 transition" />

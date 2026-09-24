@@ -29,25 +29,40 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const STORAGE_KEY = 'leo_selected_language';
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<SupportedLanguage>('hi');
-
-  // Load language preference from localStorage on mount
-  useEffect(() => {
+  const [language, setLanguageState] = useState<SupportedLanguage>(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY) as SupportedLanguage | null;
-      if (stored && ['hi', 'en', 'mr', 'bn', 'gu'].includes(stored)) {
-        setLanguageState(stored);
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const stored = localStorage.getItem(STORAGE_KEY) as SupportedLanguage | null;
+        if (stored && ['hi', 'en', 'mr', 'bn', 'gu'].includes(stored)) {
+          return stored;
+        }
       }
     } catch (e) {
       console.warn("Could not retrieve language from storage", e);
     }
-  }, []);
+    return 'hi';
+  });
+
+  // Always sync document.documentElement.lang with active language
+  useEffect(() => {
+    try {
+      if (typeof document !== 'undefined') {
+        document.documentElement.lang = language;
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [language]);
 
   const setLanguage = (lang: SupportedLanguage) => {
     setLanguageState(lang);
     try {
-      localStorage.setItem(STORAGE_KEY, lang);
-      document.documentElement.lang = lang;
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(STORAGE_KEY, lang);
+      }
+      if (typeof document !== 'undefined') {
+        document.documentElement.lang = lang;
+      }
     } catch (e) {
       console.warn("Could not save language to storage", e);
     }
@@ -57,10 +72,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return SUPPORTED_LANGUAGES.find(l => l.code === language) || SUPPORTED_LANGUAGES[0];
   }, [language]);
 
-  // Nested property lookup with fallback hierarchy: selected -> hi -> en
+  // Nested property lookup with fallback hierarchy: selected -> en (last resort) -> hi
   const t = useMemo(() => {
     return (path: string, params?: Record<string, string | number>): string => {
       const getVal = (dictObj: any, keyPath: string): string | undefined => {
+        if (!dictObj || typeof dictObj !== 'object') return undefined;
         const parts = keyPath.split('.');
         let curr = dictObj;
         for (const p of parts) {
@@ -76,19 +92,24 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const selectedDict = DICTIONARIES[language] || DICTIONARIES.hi;
       let text = getVal(selectedDict, path);
 
-      // Fallback to canonical Hindi
-      if (!text && language !== 'hi') {
-        text = getVal(DICTIONARIES.hi, path);
-      }
-
-      // Last resort fallback to English
+      // Last resort fallback to English dictionary
       if (!text && language !== 'en') {
         text = getVal(DICTIONARIES.en, path);
       }
 
-      // If still missing, return the path
+      // If still missing and language was English, check canonical Hindi
+      if (!text && language === 'en') {
+        text = getVal(DICTIONARIES.hi, path);
+      }
+
+      // If completely missing across dictionaries, log warning in dev
       if (!text) {
-        return path;
+        if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+          console.warn(`[i18n] Missing translation key: "${path}" for language: "${language}"`);
+        }
+        // Return clean human readable key fragment rather than crashing or showing ugly raw code
+        const fallbackText = path.split('.').pop() || path;
+        return fallbackText;
       }
 
       // Parameter interpolation for templates like {number}, {name}, etc.

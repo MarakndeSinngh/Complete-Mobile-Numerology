@@ -39,6 +39,8 @@ import {
   BabyNameDictionaryItem
 } from '../core/childNumerologyEngine';
 import { formatDateForDisplay, parseIndianDate } from '../utils/dateUtils';
+import { useLanguage } from '../i18n';
+import { getProfileIsolationKey } from '../core';
 
 interface ChildLuckyNamesDashboardProps {
   initialDob?: string;
@@ -53,6 +55,7 @@ export const ChildLuckyNamesDashboard: React.FC<ChildLuckyNamesDashboardProps> =
   initialGender = 'BOY' as any,
   onSyncToMasterReport
 }) => {
+  const { t, language } = useLanguage();
   const [dob, setDob] = useState<string>(initialDob || '2024-05-15');
   const [childName, setChildName] = useState<string>(initialName || 'Aarav');
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | 'OTHER'>((initialGender as any) || 'BOY');
@@ -93,12 +96,15 @@ export const ChildLuckyNamesDashboard: React.FC<ChildLuckyNamesDashboardProps> =
       const result = analyzeChildLuckyNamesPro(input);
       setReport(result);
 
-      // Save to localStorage
+      // Save to localStorage with profile isolation
       try {
-        localStorage.setItem('leofamily_child_lucky_names_report', JSON.stringify({
+        const profileKey = getProfileIsolationKey({ name: childName, dob, gender });
+        const payload = JSON.stringify({
           report: result,
           updatedAt: new Date().toISOString()
-        }));
+        });
+        localStorage.setItem(`leofamily_child_lucky_names_report_${profileKey}`, payload);
+        localStorage.setItem('leofamily_child_lucky_names_report', payload);
       } catch (err) {
         console.error('Failed to cache child lucky names report:', err);
       }

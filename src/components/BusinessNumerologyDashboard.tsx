@@ -36,6 +36,8 @@ import {
   BusinessCompatibilityStatus
 } from '../core/businessEngine';
 import { formatDateForDisplay, parseIndianDate } from '../utils/dateUtils';
+import { useLanguage } from '../i18n';
+import { getProfileIsolationKey } from '../core';
 
 interface BusinessNumerologyDashboardProps {
   initialDob?: string;
@@ -70,6 +72,8 @@ export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardPr
   initialGender = 'FEMALE',
   onSyncToMasterReport
 }) => {
+  const { t, language } = useLanguage();
+
   // Input Form States
   const [businessName, setBusinessName] = useState('Leo Occult Enterprises');
   const [brandName, setBrandName] = useState('LeoFamily');
@@ -121,12 +125,19 @@ export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardPr
     const res = analyzeBusinessNumerologyPro(input);
     setReport(res);
 
-    // Save to localStorage for Master Report synchronization
+    // Save to localStorage with profile isolation key for Master Report synchronization
     try {
-      localStorage.setItem('leofamily_saved_business_audit', JSON.stringify({
+      const profileKey = getProfileIsolationKey({
+        name: ownerName || initialName,
+        dob: ownerDob || initialDob,
+        gender: ownerGender
+      });
+      const payload = JSON.stringify({
         report: res,
         timestamp: new Date().toISOString()
-      }));
+      });
+      localStorage.setItem(`leofamily_saved_business_audit_${profileKey}`, payload);
+      localStorage.setItem('leofamily_saved_business_audit', payload);
     } catch (e) {
       console.error('Failed to save business audit to localStorage:', e);
     }
@@ -139,10 +150,17 @@ export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardPr
   const handleManualSync = () => {
     if (!report) return;
     try {
-      localStorage.setItem('leofamily_saved_business_audit', JSON.stringify({
+      const profileKey = getProfileIsolationKey({
+        name: ownerName || initialName,
+        dob: ownerDob || initialDob,
+        gender: ownerGender
+      });
+      const payload = JSON.stringify({
         report,
         timestamp: new Date().toISOString()
-      }));
+      });
+      localStorage.setItem(`leofamily_saved_business_audit_${profileKey}`, payload);
+      localStorage.setItem('leofamily_saved_business_audit', payload);
       if (onSyncToMasterReport) {
         onSyncToMasterReport(report);
       }

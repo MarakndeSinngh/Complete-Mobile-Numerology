@@ -4,6 +4,7 @@ import { CompleteNumerologyProfile } from '../core/types';
 import { calculateKuaNumber, KuaProfile } from '../core/kuaEngine';
 import { deriveExpertConsultationDossier, ExpertConsultationDossier } from '../core/expertConsultationEngine';
 import { parseIndianDate } from '../utils/dateUtils';
+import { formatLocalizedDate, getProfileIsolationKey } from '../utils/localeUtils';
 import { PersonalDetails, DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdvice } from '../types';
 import {
   Sparkles,
@@ -73,7 +74,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
   };
 
   const formattedDOB = formatToIndianDate(personalDetails?.dob || profile?.identity?.dob || '05/08/1983');
-  const formattedReportDate = new Date().toLocaleDateString('en-GB');
+  const formattedReportDate = formatLocalizedDate(new Date(), language);
 
   // Extract core entities from unified profile
   const {
@@ -135,60 +136,94 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
   const [savedChildReport, setSavedChildReport] = useState<any>(null);
 
   React.useEffect(() => {
+    const currentKey = getProfileIsolationKey({
+      name: personalDetails?.name || profile?.identity?.fullName || '',
+      dob: personalDetails?.dob || profile?.identity?.dob || '',
+      mobile: personalDetails?.mobile || profile?.identity?.mobile || ''
+    });
+
+    const isMatch = (item: any) => {
+      if (!item) return false;
+      if (item.profileKey && item.profileKey === currentKey) return true;
+      if (item.name && item.name === (personalDetails?.name || profile?.identity?.fullName)) return true;
+      if (item.report?.ownerName && item.report?.ownerName === (personalDetails?.name || profile?.identity?.fullName)) return true;
+      if (item.report?.personA?.name && item.report?.personA?.name === (personalDetails?.name || profile?.identity?.fullName)) return true;
+      if (item.report?.childInfo?.parentName && item.report?.childInfo?.parentName === (personalDetails?.name || profile?.identity?.fullName)) return true;
+      return false;
+    };
+
     try {
-      const stored = localStorage.getItem('leofamily_saved_signature_audit');
+      const stored = localStorage.getItem(`leofamily_saved_signature_audit_${currentKey}`) || localStorage.getItem('leofamily_saved_signature_audit');
       if (stored) {
-        setSavedSigAudit(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setSavedSigAudit(isMatch(parsed) ? parsed : null);
+      } else {
+        setSavedSigAudit(null);
       }
     } catch (e) {
       console.error("Error loading saved signature audit:", e);
     }
 
     try {
-      const storedVeh = localStorage.getItem('leofamily_saved_vehicle_audit');
+      const storedVeh = localStorage.getItem(`leofamily_saved_vehicle_audit_${currentKey}`) || localStorage.getItem('leofamily_saved_vehicle_audit');
       if (storedVeh) {
-        setSavedVehicleAudit(JSON.parse(storedVeh));
+        const parsed = JSON.parse(storedVeh);
+        setSavedVehicleAudit(isMatch(parsed) ? parsed : null);
+      } else {
+        setSavedVehicleAudit(null);
       }
     } catch (e) {
       console.error("Error loading saved vehicle audit:", e);
     }
 
     try {
-      const storedBus = localStorage.getItem('leofamily_saved_business_audit');
+      const storedBus = localStorage.getItem(`leofamily_saved_business_audit_${currentKey}`) || localStorage.getItem('leofamily_saved_business_audit');
       if (storedBus) {
-        setSavedBusinessAudit(JSON.parse(storedBus));
+        const parsed = JSON.parse(storedBus);
+        setSavedBusinessAudit(isMatch(parsed) ? parsed : null);
+      } else {
+        setSavedBusinessAudit(null);
       }
     } catch (e) {
       console.error("Error loading saved business audit:", e);
     }
 
     try {
-      const storedSyn = localStorage.getItem('leofamily_saved_synastry_audit');
+      const storedSyn = localStorage.getItem(`leofamily_saved_synastry_audit_${currentKey}`) || localStorage.getItem('leofamily_saved_synastry_audit');
       if (storedSyn) {
-        setSavedMarriageAudit(JSON.parse(storedSyn));
+        const parsed = JSON.parse(storedSyn);
+        setSavedMarriageAudit(isMatch(parsed) ? parsed : null);
+      } else {
+        setSavedMarriageAudit(null);
       }
     } catch (e) {
       console.error("Error loading saved marriage audit:", e);
     }
 
     try {
-      const storedChild = localStorage.getItem('leofamily_child_lucky_names_report');
+      const storedChild = localStorage.getItem(`leofamily_child_lucky_names_report_${currentKey}`) || localStorage.getItem('leofamily_child_lucky_names_report');
       if (storedChild) {
-        setSavedChildReport(JSON.parse(storedChild));
+        const parsed = JSON.parse(storedChild);
+        setSavedChildReport(isMatch(parsed) ? parsed : null);
+      } else {
+        setSavedChildReport(null);
       }
     } catch (e) {
       console.error("Error loading saved child report:", e);
     }
 
     try {
-      const storedDates = localStorage.getItem('leofamily_lucky_dates_finder_report');
+      const storedDates = localStorage.getItem(`leofamily_lucky_dates_finder_report_${currentKey}`) || localStorage.getItem('leofamily_lucky_dates_finder_report');
       if (storedDates) {
-        setSavedLuckyDatesReport(JSON.parse(storedDates));
+        const parsed = JSON.parse(storedDates);
+        setSavedLuckyDatesReport(isMatch(parsed) ? parsed : null);
+      } else {
+        setSavedLuckyDatesReport(null);
       }
     } catch (e) {
       console.error("Error loading saved lucky dates report:", e);
     }
-  }, []);
+  }, [profile, personalDetails]);
 
   const [savedLuckyDatesReport, setSavedLuckyDatesReport] = useState<any>(null);
 
@@ -1650,10 +1685,10 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-1">
               <span className="text-[9px] font-mono uppercase text-amber-800 font-bold block">Vehicle Number</span>
               <span className="font-mono text-base font-extrabold text-slate-900 block">
-                {savedVehicleAudit?.report?.originalRegistration || profile.vehicleAnalysis?.originalRegistration || 'DL 01 AB 1234'}
+                {savedVehicleAudit?.report?.originalRegistration || profile.vehicleAnalysis?.originalRegistration || 'उपलब्ध नहीं (Not Configured)'}
               </span>
               <span className="text-[10px] text-slate-600">
-                प्रकार: {savedVehicleAudit?.report?.vehicleType || profile.vehicleAnalysis?.vehicleType || 'Car'}
+                प्रकार: {savedVehicleAudit?.report?.vehicleType || profile.vehicleAnalysis?.vehicleType || 'सामान्य वाहन'}
               </span>
             </div>
 

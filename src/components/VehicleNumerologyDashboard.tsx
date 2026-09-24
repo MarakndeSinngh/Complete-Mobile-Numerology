@@ -28,6 +28,8 @@ import {
   CompatibilityStatus
 } from '../core/vehicleEngine';
 import { formatDateForDisplay, parseIndianDate } from '../utils/dateUtils';
+import { useLanguage } from '../i18n';
+import { getProfileIsolationKey } from '../core';
 
 interface VehicleNumerologyDashboardProps {
   initialDob?: string;
@@ -44,6 +46,8 @@ export const VehicleNumerologyDashboard: React.FC<VehicleNumerologyDashboardProp
   initialGender = 'FEMALE',
   onSyncToMasterReport
 }) => {
+  const { t, language } = useLanguage();
+
   // Input Form States
   const [regNumber, setRegNumber] = useState('DL 01 AB 1234');
   const [vehicleNickname, setVehicleNickname] = useState('Honda City');
@@ -86,12 +90,19 @@ export const VehicleNumerologyDashboard: React.FC<VehicleNumerologyDashboardProp
     const res = analyzeVehicleNumerologyPro(input);
     setReport(res);
 
-    // Save to localStorage for Master Report synchronization
+    // Save to localStorage with profile isolation key for Master Report synchronization
     try {
-      localStorage.setItem('leofamily_saved_vehicle_audit', JSON.stringify({
+      const profileKey = getProfileIsolationKey({
+        name: ownerName || initialName,
+        dob: ownerDob || initialDob,
+        gender
+      });
+      const payload = JSON.stringify({
         report: res,
         timestamp: new Date().toISOString()
-      }));
+      });
+      localStorage.setItem(`leofamily_saved_vehicle_audit_${profileKey}`, payload);
+      localStorage.setItem('leofamily_saved_vehicle_audit', payload);
     } catch (e) {
       console.error('Failed to save vehicle audit to localStorage:', e);
     }
@@ -104,10 +115,17 @@ export const VehicleNumerologyDashboard: React.FC<VehicleNumerologyDashboardProp
   const handleSyncClick = () => {
     if (!report) return;
     try {
-      localStorage.setItem('leofamily_saved_vehicle_audit', JSON.stringify({
+      const profileKey = getProfileIsolationKey({
+        name: ownerName || initialName,
+        dob: ownerDob || initialDob,
+        gender
+      });
+      const payload = JSON.stringify({
         report,
         timestamp: new Date().toISOString()
-      }));
+      });
+      localStorage.setItem(`leofamily_saved_vehicle_audit_${profileKey}`, payload);
+      localStorage.setItem('leofamily_saved_vehicle_audit', payload);
       setSyncedNotification(true);
       setTimeout(() => setSyncedNotification(false), 3000);
       if (onSyncToMasterReport) {
