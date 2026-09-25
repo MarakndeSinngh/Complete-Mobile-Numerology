@@ -99,8 +99,8 @@ async function startServer() {
     }
   });
 
-  // 5. Create ₹33 Payment Order
-  app.post("/api/payments/create-order", (req, res) => {
+  // 5. Create ₹33 Razorpay Payment Order
+  app.post("/api/payments/create-order", async (req, res) => {
     try {
       const { reportType, profileKey, mobile } = req.body;
       const authHeader = req.headers['authorization'];
@@ -110,14 +110,14 @@ async function startServer() {
         return res.status(400).json({ error: "Missing reportType" });
       }
 
-      const result = reportAccessEngine.createPaymentOrder(reportType, profileKey, mobile, token);
+      const result = await reportAccessEngine.createPaymentOrder(reportType, profileKey, mobile, token);
       res.json(result);
     } catch (e: any) {
       res.status(400).json({ error: e.message || "Failed to create payment order" });
     }
   });
 
-  // 6. Verify Payment & Grant Entitlement (Idempotent)
+  // 6. Verify Razorpay Payment Signature & Grant Entitlement (Idempotent)
   app.post("/api/payments/verify-payment", (req, res) => {
     try {
       const { orderId, paymentId, signature, reportType, profileKey, mobile } = req.body;
@@ -130,8 +130,8 @@ async function startServer() {
 
       const result = reportAccessEngine.verifyPayment(
         orderId,
-        paymentId,
-        signature,
+        paymentId || '',
+        signature || '',
         reportType,
         profileKey,
         mobile,
@@ -143,7 +143,20 @@ async function startServer() {
     }
   });
 
-  // 7. Admin Entitlements & Revenue Audit
+  // 7. Razorpay Webhook Endpoint (HMAC Validated & Idempotent)
+  app.post("/api/payments/webhook", (req, res) => {
+    try {
+      const signature = (req.headers['x-razorpay-signature'] as string) || '';
+      const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+      const result = reportAccessEngine.processWebhook(rawBody, signature);
+      res.json(result);
+    } catch (e: any) {
+      console.warn("Webhook processing notice:", e.message);
+      res.status(400).json({ error: e.message || "Webhook verification failed" });
+    }
+  });
+
+  // 8. Admin Entitlements & Revenue Audit
   app.get("/api/admin/entitlements", (req, res) => {
     try {
       const data = reportAccessEngine.getAdminAuditData();

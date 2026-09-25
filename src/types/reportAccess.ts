@@ -279,4 +279,179 @@ export interface PaymentOrderResponse {
   reportType: CanonicalReportType;
   profileKey: string;
   mobile: string;
+  receipt?: string;
 }
+
+export interface StoredPaymentRecord {
+  internalUserId: string;
+  profileKey: string;
+  reportType: CanonicalReportType;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  amount: number;
+  currency: string;
+  paymentStatus: 'CREATED' | 'AUTHORIZED' | 'CAPTURED' | 'PAID' | 'FAILED';
+  webhookEventId?: string;
+  createdAt: string;
+}
+
+export interface PaymentWebhookPayload {
+  entity: string;
+  account_id: string;
+  event: string;
+  contains: string[];
+  payload: {
+    payment?: {
+      entity: {
+        id: string;
+        order_id: string;
+        amount: number;
+        currency: string;
+        status: string;
+        notes?: Record<string, any>;
+        contact?: string;
+        email?: string;
+      };
+    };
+    order?: {
+      entity: {
+        id: string;
+        amount: number;
+        currency: string;
+        status: string;
+        notes?: Record<string, any>;
+      };
+    };
+  };
+  created_at: number;
+}
+
+export interface PaymentI18nEntry {
+  pay33: string;
+  paymentRequired: string;
+  paymentProcessing: string;
+  paymentSuccessful: string;
+  paymentFailed: string;
+  paymentCancelled: string;
+  reportUnlocked: string;
+  retryPayment: string;
+  firstReportFree: string;
+  firstReportComplimentary: string;
+  claimFreeReport: string;
+  selectPaymentMethod: string;
+  upiOption: string;
+  cardOption: string;
+  netbankingOption: string;
+  verifyMobileTitle: string;
+  enterOtpTitle: string;
+  changeMobile: string;
+  secureTransactionNote: string;
+}
+
+export const PAYMENT_I18N: Record<string, PaymentI18nEntry> = {
+  hi: {
+    pay33: '₹33 का भुगतान करें एवं रिपोर्ट खोलें',
+    paymentRequired: 'भुगतान आवश्यक है (₹33)',
+    paymentProcessing: 'सुरक्षित भुगतान सत्यापन जारी है...',
+    paymentSuccessful: 'भुगतान सफल रहा! रिपोर्ट अनलॉक हो गई',
+    paymentFailed: 'भुगतान विफल रहा। कृपया पुनः प्रयास करें।',
+    paymentCancelled: 'भुगतान रद्द कर दिया गया।',
+    reportUnlocked: 'रिपोर्ट सफलतापूर्वक अनलॉक हो गई!',
+    retryPayment: 'पुनः भुगतान का प्रयास करें',
+    firstReportFree: 'आपकी पहली रिपोर्ट 100% मुफ़्त है!',
+    firstReportComplimentary: 'प्रथम परामर्श निःशुल्क उपहार',
+    claimFreeReport: 'निःशुल्क रिपोर्ट अनलॉक करें',
+    selectPaymentMethod: 'भुगतान माध्यम चुनें (UPI / Cards / NetBanking)',
+    upiOption: 'UPI / GPay / PhonePe / Paytm',
+    cardOption: 'डेबिट / क्रेडिट कार्ड',
+    netbankingOption: 'नेट बैंकिंग',
+    verifyMobileTitle: 'मोबाइल नंबर सत्यापन',
+    enterOtpTitle: '6-अंकों का OTP दर्ज करें',
+    changeMobile: 'नंबर बदलें',
+    secureTransactionNote: '🔒 256-बिट SSL सुरक्षित रेज़रपे भुगतान • वैदिक गोपनीयता गारंटी',
+  },
+  en: {
+    pay33: 'Pay ₹33 & Unlock Report',
+    paymentRequired: 'Payment Required (₹33)',
+    paymentProcessing: 'Verifying Secure Razorpay Payment...',
+    paymentSuccessful: 'Payment Successful! Report Unlocked',
+    paymentFailed: 'Payment Failed. Please try again.',
+    paymentCancelled: 'Payment Cancelled by user.',
+    reportUnlocked: 'Report Access Granted Successfully!',
+    retryPayment: 'Retry Payment',
+    firstReportFree: 'Your First Report is 100% FREE!',
+    firstReportComplimentary: 'Complimentary Welcome Gift',
+    claimFreeReport: 'Unlock Free Report Now',
+    selectPaymentMethod: 'Select Payment Mode (UPI / Cards / NetBanking)',
+    upiOption: 'UPI / GPay / PhonePe / Paytm',
+    cardOption: 'Debit / Credit Cards',
+    netbankingOption: 'Net Banking',
+    verifyMobileTitle: 'Mobile Number Verification',
+    enterOtpTitle: 'Enter 6-Digit OTP',
+    changeMobile: 'Change Number',
+    secureTransactionNote: '🔒 256-Bit SSL Encrypted Razorpay Checkout • 100% Vedic Privacy',
+  },
+  mr: {
+    pay33: '₹33 भरा आणि अहवाल उघडा',
+    paymentRequired: 'पेमेंट आवश्यक आहे (₹33)',
+    paymentProcessing: 'सुरक्षित पेमेंट पडताळणी सुरू आहे...',
+    paymentSuccessful: 'पेमेंट यशस्वी! अहवाल अनलॉक झाला',
+    paymentFailed: 'पेमेंट अयशस्वी झाले. कृपया पुन्हा प्रयत्न करा.',
+    paymentCancelled: 'पेमेंट रद्द केले गेले.',
+    reportUnlocked: 'अहवाल यशस्वीरित्या अनलॉक झाला!',
+    retryPayment: 'पुन्हा प्रयत्न करा',
+    firstReportFree: 'तुमचा पहिला अहवाल 100% विनामूल्य आहे!',
+    firstReportComplimentary: 'पहिले मोफत स्वागत भेट',
+    claimFreeReport: 'मोफत अहवाल अनलॉक करा',
+    selectPaymentMethod: 'पेमेंट पद्धत निवडा (UPI / कार्ड्स / नेटबँकिंग)',
+    upiOption: 'UPI / GPay / PhonePe',
+    cardOption: 'डेबिट / क्रेडिट कार्ड',
+    netbankingOption: 'नेट बँकिंग',
+    verifyMobileTitle: 'मोबाईल नंबर पडताळणी',
+    enterOtpTitle: '6-अंकी OTP प्रविष्ट करा',
+    changeMobile: 'नंबर बदला',
+    secureTransactionNote: '🔒 256-बिट सुरक्षित Razorpay पेमेंट • गोपनीयता हमी',
+  },
+  bn: {
+    pay33: '₹৩৩ প্রদান করুন এবং রিপোর্ট খুলুন',
+    paymentRequired: 'পেমেন্ট আবশ্যক (₹৩৩)',
+    paymentProcessing: 'নিরাপদ পেমেন্ট যাচাইকরণ চলছে...',
+    paymentSuccessful: 'পেমেন্ট সফল! রিপোর্ট আনলক হয়েছে',
+    paymentFailed: 'পেমেন্ট ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+    paymentCancelled: 'পেমেন্ট বাতিল করা হয়েছে।',
+    reportUnlocked: 'রিপোর্ট সফলভাবে আনলক হয়েছে!',
+    retryPayment: 'পুনরায় চেষ্টা করুন',
+    firstReportFree: 'আপনার প্রথম রিপোর্ট ১০০% বিনামূল্যে!',
+    firstReportComplimentary: 'প্রথম পরামর্শ প্রশংসাসূচক উপহার',
+    claimFreeReport: 'বিনামূল্যে রিপোর্ট আনলক করুন',
+    selectPaymentMethod: 'পেমেন্ট মাধ্যম বেছে নিন (UPI / কার্ড / নেটব্যাঙ্কিং)',
+    upiOption: 'UPI / GPay / PhonePe',
+    cardOption: 'ডেবিট / ক্রেডিট কার্ড',
+    netbankingOption: 'নেট ব্যাঙ্কিং',
+    verifyMobileTitle: 'মোবাইল নম্বর যাচাইকরণ',
+    enterOtpTitle: '৬-সংখ্যার OTP লিখুন',
+    changeMobile: 'নম্বর পরিবর্তন',
+    secureTransactionNote: '🔒 ২৫৬-বিট এনক্রিপ্ট করা Razorpay পেমেন্ট • বৈদিক গোপনীয়তা',
+  },
+  gu: {
+    pay33: '₹33 ચૂકવો અને રિપોર્ટ ખોલો',
+    paymentRequired: 'ચૂકવણી જરૂરી છે (₹33)',
+    paymentProcessing: 'સુરક્ષિત ચૂકવણી ચકાસણી ચાલુ છે...',
+    paymentSuccessful: 'ચૂકવણી સફળ! રિપોર્ટ અનલૉક થયો',
+    paymentFailed: 'ચૂકવણી નિષ્ફળ ગઈ. કૃપા કરીને ફરી પ્રયાસ કરો.',
+    paymentCancelled: 'ચૂકવણી રદ કરવામાં આવી.',
+    reportUnlocked: 'રિપોર્ટ સફળતાપૂર્વક અનલૉક થયો!',
+    retryPayment: 'ફરી પ્રયાસ કરો',
+    firstReportFree: 'તમારો પ્રથમ રિપોર્ટ 100% મફત છે!',
+    firstReportComplimentary: 'પ્રથમ પરામર્શ મફત ભેટ',
+    claimFreeReport: 'મફત રિપોર્ટ અનલૉક કરો',
+    selectPaymentMethod: 'ચૂકવણી પદ્ધતિ પસંદ કરો (UPI / કાર્ડ / નેટબેંકિંગ)',
+    upiOption: 'UPI / GPay / PhonePe',
+    cardOption: 'ડેબિટ / ક્રેડિટ કાર્ડ',
+    netbankingOption: 'નેટ બેંકિંગ',
+    verifyMobileTitle: 'મોબાઇલ નંબર ચકાસણી',
+    enterOtpTitle: '6-અંકનો OTP દાખલ કરો',
+    changeMobile: 'નંબર બદલો',
+    secureTransactionNote: '🔒 256-બીટ સુરક્ષિત Razorpay ચુકવણી • ગોપનીયતા ગેરંટી',
+  },
+};

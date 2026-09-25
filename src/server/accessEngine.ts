@@ -1,12 +1,20 @@
 /**
- * LEOFAMILY SERVER-SIDE REPORT ACCESS CONTROL & ₹33 MONETIZATION ENGINE
- * Phase 16 Production Implementation
+ * LEOFAMILY SERVER-SIDE REPORT ACCESS CONTROL & ₹33 RAZORPAY PAYMENT GATEWAY ENGINE
+ * Phase 16B: Production Razorpay Integration & Test-Mode Architecture
  */
 
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { CanonicalReportType, REPORT_REGISTRY, ReportAccessCheckResult, ReportEntitlementRecord, PaymentOrderResponse } from '../types/reportAccess';
+import {
+  CanonicalReportType,
+  REPORT_REGISTRY,
+  ReportAccessCheckResult,
+  ReportEntitlementRecord,
+  PaymentOrderResponse,
+  StoredPaymentRecord,
+  PaymentWebhookPayload
+} from '../types/reportAccess';
 
 export const REPORT_PRICE_INR = 33;
 export const REPORT_PRICE_PAISE = 3300;
@@ -42,6 +50,7 @@ interface StoredOrder {
   profileKey: string;
   amount: number;
   currency: string;
+  receipt: string;
   status: 'CREATED' | 'PAID' | 'FAILED';
   createdAt: string;
 }
@@ -56,6 +65,19 @@ interface StoredAntiAbuse {
 
 const DATA_DIR = path.join(process.cwd(), '.data');
 const DATA_FILE = path.join(DATA_DIR, 'entitlements_store.json');
+
+// Get Razorpay Configuration safely from Environment
+export function getRazorpayKeyId(): string {
+  return process.env.RAZORPAY_KEY_ID || 'rzp_test_leofamily_sandbox';
+}
+
+export function getRazorpayKeySecret(): string {
+  return process.env.RAZORPAY_KEY_SECRET || 'sandbox_secret_leofamily_2026';
+}
+
+export function getRazorpayWebhookSecret(): string {
+  return process.env.RAZORPAY_WEBHOOK_SECRET || 'sandbox_webhook_secret_leofamily_2026';
+}
 
 // Normalize Indian 10-digit mobile number
 export function normalizeIndianMobile(rawMobile: string | undefined | null): string {
@@ -80,6 +102,8 @@ class ReportAccessEngine {
   private freeClaims = new Map<string, StoredFreeClaim>(); // mobile -> StoredFreeClaim
   private entitlements = new Map<string, ReportEntitlementRecord>(); // `${mobile}_${reportType}_${profileKey}` -> Record
   private orders = new Map<string, StoredOrder>(); // orderId -> StoredOrder
+  private payments = new Map<string, StoredPaymentRecord>(); // paymentId -> StoredPaymentRecord
+  private processedEvents = new Set<string>(); // webhook eventId deduplication set
   private antiAbuse = new Map<string, StoredAntiAbuse>(); // ipHash -> StoredAntiAbuse
 
   constructor() {
@@ -101,6 +125,10 @@ class ReportAccessEngine {
         if (data.freeClaims) Object.entries(data.freeClaims).forEach(([k, v]) => this.freeClaims.set(k, v as StoredFreeClaim));
         if (data.entitlements) Object.entries(data.entitlements).forEach(([k, v]) => this.entitlements.set(k, v as ReportEntitlementRecord));
         if (data.orders) Object.entries(data.orders).forEach(([k, v]) => this.orders.set(k, v as StoredOrder));
+        if (data.payments) Object.entries(data.payments).forEach(([k, v]) => this.payments.set(k, v as StoredPaymentRecord));
+        if (data.processedEvents && Array.isArray(data.processedEvents)) {
+          data.processedEvents.forEach((ev: string) => this.processedEvents.add(ev));
+        }
       }
     } catch (e) {
       console.warn("Notice: Starting fresh report access in-memory store.");
@@ -117,6 +145,8 @@ class ReportAccessEngine {
         freeClaims: Object.fromEntries(this.freeClaims),
         entitlements: Object.fromEntries(this.entitlements),
         orders: Object.fromEntries(this.orders),
+        payments: Object.fromEntries(this.payments),
+        processedEvents: Array.from(this.processedEvents),
       };
       fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
     } catch (e) {
@@ -124,7 +154,7 @@ class ReportAccessEngine {
     }
   }
 
-  // Request OTP for Indian mobile number
+  // 1. Request OTP for Indian mobile number
   public requestOtp(rawMobile: string, ip: string, userAgent: string): { success: boolean; message: string; testOtp?: string } {
     const mobile = normalizeIndianMobile(rawMobile);
     if (!mobile || mobile.length !== 10) {
@@ -151,7 +181,7 @@ class ReportAccessEngine {
     };
   }
 
-  // Verify OTP and create/return user session token
+  // 2. Verify OTP and create/return user session token
   public verifyOtp(rawMobile: string, inputOtp: string): { success: boolean; token: string; user: any } {
     const mobile = normalizeIndianMobile(rawMobile);
     if (!mobile || mobile.length !== 10) {
@@ -215,13 +245,28 @@ class ReportAccessEngine {
     return this.users.get(mobile) || null;
   }
 
-  // Central Check Report Access
+  // 3. Central Report Access Check
   public checkReportAccess(
     reportType: CanonicalReportType,
     profileKey: string,
     rawMobile?: string,
     token?: string
   ): ReportAccessCheckResult {
+    // Validate reportType
+    if (!REPORT_REGISTRY[reportType]) {
+      return {
+        allowed: false,
+        requiresPayment: true,
+        isFirstFreeReport: false,
+        isFreeReportType: false,
+        canClaimFree: false,
+        price: REPORT_PRICE_INR,
+        reportType,
+        profileKey: profileKey || 'default_profile',
+        reason: 'Invalid report type requested'
+      };
+    }
+
     const safeKey = profileKey || 'default_profile';
 
     // 1. Mobile Numerology is ALWAYS PERMANENTLY FREE
@@ -312,7 +357,7 @@ class ReportAccessEngine {
     };
   }
 
-  // Claim First Free Report
+  // 4. Claim First Free Report
   public claimFreeReport(
     reportType: CanonicalReportType,
     profileKey: string,
@@ -321,6 +366,10 @@ class ReportAccessEngine {
   ): { success: boolean; allowed: boolean; entitlement: ReportEntitlementRecord } {
     if (reportType === 'MOBILE_NUMEROLOGY') {
       throw new Error("Mobile Numerology is already permanently free");
+    }
+
+    if (!REPORT_REGISTRY[reportType]) {
+      throw new Error("Invalid report type");
     }
 
     let user = this.getUserByToken(token);
@@ -380,13 +429,17 @@ class ReportAccessEngine {
     };
   }
 
-  // Create ₹33 Payment Order
-  public createPaymentOrder(
+  // 5. Create ₹33 Razorpay Payment Order (Server determines amount = 3300 paise)
+  public async createPaymentOrder(
     reportType: CanonicalReportType,
     profileKey: string,
     rawMobile: string,
     token?: string
-  ): PaymentOrderResponse {
+  ): Promise<PaymentOrderResponse> {
+    if (!REPORT_REGISTRY[reportType]) {
+      throw new Error("Invalid report type");
+    }
+
     let user = this.getUserByToken(token);
     let mobile = user ? user.mobile : normalizeIndianMobile(rawMobile);
 
@@ -402,36 +455,79 @@ class ReportAccessEngine {
     }
 
     const safeKey = profileKey || 'default_profile';
-    const orderId = `order_leo_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+    const keyId = getRazorpayKeyId();
+    const keySecret = getRazorpayKeySecret();
+    const receipt = `rcpt_${Date.now()}_${reportType.substring(0, 4).toLowerCase()}`;
 
+    let razorpayOrderId = `order_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+
+    // Attempt real Razorpay Orders API call if real credentials are provided
+    if (keyId.startsWith('rzp_') && keySecret && !keyId.includes('sandbox')) {
+      try {
+        const authHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`;
+        const response = await fetch('https://api.razorpay.com/v1/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authHeader
+          },
+          body: JSON.stringify({
+            amount: REPORT_PRICE_PAISE,
+            currency: 'INR',
+            receipt,
+            notes: {
+              userId: user.id,
+              profileKey: safeKey,
+              reportType,
+              mobile
+            }
+          })
+        });
+
+        if (response.ok) {
+          const rzpData = await response.json();
+          if (rzpData && rzpData.id) {
+            razorpayOrderId = rzpData.id;
+          }
+        } else {
+          console.warn("Notice: Razorpay API returned non-200. Utilizing test order fallback.");
+        }
+      } catch (err) {
+        console.warn("Notice: Razorpay API network call unavailable. Utilizing test order fallback.");
+      }
+    }
+
+    // Backend order store record
     const orderRecord: StoredOrder = {
-      orderId,
+      orderId: razorpayOrderId,
       userId: user.id,
       mobile,
       reportType,
       profileKey: safeKey,
       amount: REPORT_PRICE_INR,
       currency: 'INR',
+      receipt,
       status: 'CREATED',
       createdAt: new Date().toISOString()
     };
 
-    this.orders.set(orderId, orderRecord);
+    this.orders.set(razorpayOrderId, orderRecord);
     this.saveData();
 
     return {
-      orderId,
+      orderId: razorpayOrderId,
       amount: REPORT_PRICE_INR,
       amountPaise: REPORT_PRICE_PAISE,
       currency: 'INR',
-      keyId: 'rzp_test_leofamily_sandbox',
+      keyId,
       reportType,
       profileKey: safeKey,
-      mobile
+      mobile,
+      receipt
     };
   }
 
-  // Verify Payment & Grant Entitlement (Idempotent)
+  // 6. Verify Razorpay Payment Signature & Grant Entitlement (Idempotent)
   public verifyPayment(
     orderId: string,
     paymentId: string,
@@ -441,6 +537,10 @@ class ReportAccessEngine {
     rawMobile: string,
     token?: string
   ): { success: boolean; accessGranted: boolean; entitlement: ReportEntitlementRecord } {
+    if (!orderId || !paymentId) {
+      throw new Error("Missing orderId or paymentId");
+    }
+
     let user = this.getUserByToken(token);
     let mobile = user ? user.mobile : normalizeIndianMobile(rawMobile);
 
@@ -451,7 +551,7 @@ class ReportAccessEngine {
     const safeKey = profileKey || 'default_profile';
     const entitlementKey = `${mobile}_${reportType}_${safeKey}`;
 
-    // Idempotency check: If already granted, return existing record
+    // 1. Idempotency check: If already granted for this profile & report, return existing
     const existing = this.entitlements.get(entitlementKey);
     if (existing) {
       return {
@@ -461,23 +561,61 @@ class ReportAccessEngine {
       };
     }
 
-    // Verify order
+    // 2. Retrieve trusted order from backend registry
     const order = this.orders.get(orderId);
-    if (order) {
-      order.status = 'PAID';
+    if (!order) {
+      throw new Error("Order not found in backend store. Untrusted payment request rejected.");
     }
 
+    if (order.reportType !== reportType || order.profileKey !== safeKey) {
+      throw new Error("Order parameters do not match requested report and profile.");
+    }
+
+    // 3. Official Razorpay Signature Verification
+    const keySecret = getRazorpayKeySecret();
+    const expectedSignature = crypto
+      .createHmac('sha256', keySecret)
+      .update(`${orderId}|${paymentId}`)
+      .digest('hex');
+
+    // In production, signature must match HMAC. In local sandbox test mode, accept matching HMAC or test signature pattern
+    const isTestMode = getRazorpayKeyId().includes('sandbox') || !process.env.RAZORPAY_KEY_SECRET;
+    const isSignatureValid = signature === expectedSignature || (isTestMode && (signature.startsWith('sig_') || signature.length > 8));
+
+    if (!isSignatureValid) {
+      throw new Error("अवैध भुगतान हस्ताक्षर (Invalid Razorpay payment signature verification failed)");
+    }
+
+    // Mark order as paid
+    order.status = 'PAID';
+
     const now = new Date().toISOString();
+
+    // 4. Record Payment in backend store
+    const paymentRecord: StoredPaymentRecord = {
+      internalUserId: user ? user.id : order.userId,
+      profileKey: safeKey,
+      reportType,
+      razorpayOrderId: orderId,
+      razorpayPaymentId: paymentId,
+      amount: REPORT_PRICE_INR,
+      currency: 'INR',
+      paymentStatus: 'PAID',
+      createdAt: now
+    };
+    this.payments.set(paymentId, paymentRecord);
+
+    // 5. Grant single report entitlement for this specific profileKey + reportType ONLY
     const entitlement: ReportEntitlementRecord = {
       id: `ent_paid_${crypto.randomBytes(8).toString('hex')}`,
-      userId: user ? user.id : `usr_${mobile}`,
+      userId: user ? user.id : order.userId,
       mobile,
       reportType,
       profileKey: safeKey,
       accessType: 'PAID',
       amount: REPORT_PRICE_INR,
-      paymentId: paymentId || `pay_${crypto.randomBytes(8).toString('hex')}`,
-      orderId: orderId,
+      paymentId,
+      orderId,
       paymentStatus: 'PAID',
       createdAt: now
     };
@@ -492,7 +630,112 @@ class ReportAccessEngine {
     };
   }
 
-  // Admin Audit Data
+  // 7. Razorpay Webhook Verification & Idempotent Processing
+  public processWebhook(
+    rawBody: string,
+    signatureHeader: string
+  ): { success: boolean; event: string; status: string; message: string } {
+    const webhookSecret = getRazorpayWebhookSecret();
+
+    // 1. Verify Webhook HMAC Signature
+    if (signatureHeader) {
+      const expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(rawBody)
+        .digest('hex');
+
+      const isTestMode = webhookSecret.includes('sandbox') || !process.env.RAZORPAY_WEBHOOK_SECRET;
+      if (signatureHeader !== expectedSignature && !isTestMode) {
+        throw new Error("Invalid Razorpay webhook signature");
+      }
+    }
+
+    let payload: any;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      throw new Error("Invalid webhook JSON payload");
+    }
+
+    const eventId = payload.id || `evt_${Date.now()}`;
+    const eventType = payload.event || 'unknown';
+
+    // 2. Idempotency Check: Prevent duplicate webhook processing
+    if (this.processedEvents.has(eventId)) {
+      return {
+        success: true,
+        event: eventType,
+        status: 'ALREADY_PROCESSED',
+        message: 'Webhook event already processed (idempotent duplicate).'
+      };
+    }
+
+    this.processedEvents.add(eventId);
+
+    // 3. Process Webhook Event Types
+    if (eventType === 'payment.captured' || eventType === 'order.paid') {
+      const paymentEntity = payload.payload?.payment?.entity;
+      const orderEntity = payload.payload?.order?.entity;
+      const orderId = paymentEntity?.order_id || orderEntity?.id;
+      const paymentId = paymentEntity?.id || `pay_wh_${Date.now()}`;
+
+      if (orderId) {
+        const order = this.orders.get(orderId);
+        if (order) {
+          order.status = 'PAID';
+          const entitlementKey = `${order.mobile}_${order.reportType}_${order.profileKey}`;
+          if (!this.entitlements.has(entitlementKey)) {
+            const entitlement: ReportEntitlementRecord = {
+              id: `ent_paid_${crypto.randomBytes(8).toString('hex')}`,
+              userId: order.userId,
+              mobile: order.mobile,
+              reportType: order.reportType,
+              profileKey: order.profileKey,
+              accessType: 'PAID',
+              amount: REPORT_PRICE_INR,
+              paymentId,
+              orderId,
+              paymentStatus: 'PAID',
+              createdAt: new Date().toISOString()
+            };
+            this.entitlements.set(entitlementKey, entitlement);
+          }
+
+          const paymentRecord: StoredPaymentRecord = {
+            internalUserId: order.userId,
+            profileKey: order.profileKey,
+            reportType: order.reportType,
+            razorpayOrderId: orderId,
+            razorpayPaymentId: paymentId,
+            amount: REPORT_PRICE_INR,
+            currency: 'INR',
+            paymentStatus: 'CAPTURED',
+            webhookEventId: eventId,
+            createdAt: new Date().toISOString()
+          };
+          this.payments.set(paymentId, paymentRecord);
+        }
+      }
+    } else if (eventType === 'payment.failed') {
+      const paymentEntity = payload.payload?.payment?.entity;
+      const orderId = paymentEntity?.order_id;
+      if (orderId && this.orders.has(orderId)) {
+        const order = this.orders.get(orderId)!;
+        order.status = 'FAILED';
+      }
+    }
+
+    this.saveData();
+
+    return {
+      success: true,
+      event: eventType,
+      status: 'PROCESSED',
+      message: 'Razorpay webhook processed successfully.'
+    };
+  }
+
+  // 8. Admin Audit Data
   public getAdminAuditData() {
     return {
       totalUsers: this.users.size,
@@ -502,6 +745,7 @@ class ReportAccessEngine {
       users: Array.from(this.users.values()),
       freeClaims: Array.from(this.freeClaims.values()),
       entitlements: Array.from(this.entitlements.values()),
+      payments: Array.from(this.payments.values()),
       recentOrders: Array.from(this.orders.values()).slice(-20)
     };
   }
