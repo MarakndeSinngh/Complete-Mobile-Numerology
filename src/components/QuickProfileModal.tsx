@@ -4,6 +4,7 @@ import { X, User, Calendar, Phone, Sparkles, RefreshCw, CheckCircle2 } from 'luc
 import { PersonalDetails } from '../types';
 import DateInput from './DateInput';
 import { useLanguage } from '../i18n';
+import { BrandLogo } from './BrandLogo';
 
 interface QuickProfileModalProps {
   isOpen: boolean;
@@ -84,9 +85,7 @@ export const QuickProfileModal: React.FC<QuickProfileModalProps> = ({
 
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#D97706]/10 border border-[#D97706]/20 flex items-center justify-center text-[#D97706]">
-              <Sparkles className="w-6 h-6" />
-            </div>
+            <BrandLogo size="md" />
             <div>
               <h3 className="text-xl font-bold font-playfair text-[#1F2937]">
                 {t('profile.editProfileTitle')}

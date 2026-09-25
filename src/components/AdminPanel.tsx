@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PersonalDetails } from '../types';
 import DateInput from './DateInput';
+import { BrandLogo } from './BrandLogo';
 import { 
   Compass, User, Calendar, Award, Activity, Heart, Sparkles, 
   AlertTriangle, Check, FileText, Layers, Info, RefreshCw, 
@@ -381,11 +382,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ personalDetails }) => {
       
       {/* Upper Mode Selection Control */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-3xl border border-[#E5E7EB] shadow-sm gap-4">
-        <div className="space-y-1">
-          <h3 className="font-playfair text-xl font-bold text-[#1F2937] tracking-wider flex items-center gap-2">
-            <SlidersHorizontal className="w-5 h-5 text-[#D97706]" /> LeoFamily Grand Systems Hub
-          </h3>
-          <p className="text-[#6B7280] text-[11px]">Compare independent Vedic, Chaldean, Pythagorean, and Lo Shu Grid systems side-by-side.</p>
+        <div className="flex items-center gap-3">
+          <BrandLogo size="md" />
+          <div className="space-y-0.5">
+            <h3 className="font-playfair text-xl font-bold text-[#1F2937] tracking-wider flex items-center gap-2">
+              LeoFamily Grand Systems Hub
+            </h3>
+            <p className="text-[#6B7280] text-[11px]">Compare independent Vedic, Chaldean, Pythagorean, and Lo Shu Grid systems side-by-side.</p>
+          </div>
         </div>
 
         <div className="flex bg-[#F8F4EF] p-1 rounded-2xl border border-[#E5E7EB] w-full sm:w-auto">

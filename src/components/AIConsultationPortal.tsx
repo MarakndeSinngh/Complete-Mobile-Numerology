@@ -16,6 +16,7 @@ import { generateCompleteNumerologyProfile } from '../core';
 import { generateLeoAdvisorActions } from '../services/leoAdvisorEngine';
 import DateInput from './DateInput';
 import { formatDateIndian } from '../utils/dateUtils';
+import { BrandLogo } from './BrandLogo';
 
 const PLANETS_DB: Record<number, { name: string; icon: string; description: string }> = {
   1: { name: "Sun (Surya) ☀️", icon: "☀️", description: "Leadership, Ambition, Conscious Will" },
@@ -365,8 +366,8 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
       {/* ONBOARDING FLOW IF NO ACTIVE PROFILE */}
       {!activeProfile ? (
         <div className="max-w-xl mx-auto bg-white border border-[#E5E7EB] rounded-[40px] p-8 md:p-10 shadow-md text-center space-y-6">
-          <div className="w-16 h-16 rounded-full bg-[#D97706]/10 border border-[#D97706]/20 text-[#D97706] flex items-center justify-center text-3xl mx-auto">
-            🕉️
+          <div className="flex justify-center">
+            <BrandLogo size="lg" />
           </div>
           <div className="space-y-2">
             <h3 className="font-playfair text-2xl font-black text-[#1F2937]">Create Natal Consultation Profile</h3>

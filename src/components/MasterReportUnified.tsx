@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { BrandLogo } from './BrandLogo';
 
 interface MasterReportUnifiedProps {
   profile: CompleteNumerologyProfile;
@@ -404,8 +405,8 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           <div className="relative z-10 space-y-7">
             {/* Header / Brand Crest */}
             <div className="text-center space-y-3 border-b-2 border-amber-200/80 pb-6">
-              <div className="inline-flex items-center justify-center p-3 bg-gradient-to-br from-amber-500 to-amber-700 text-white rounded-2xl shadow-sm mb-1">
-                <Sparkles className="w-8 h-8" />
+              <div className="inline-flex items-center justify-center p-2 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-3xl shadow-sm mb-1">
+                <BrandLogo size="xl" />
               </div>
               <div>
                 <span className="text-[11px] font-mono font-bold tracking-[0.25em] text-[#B45309] uppercase block">

@@ -5,6 +5,7 @@ import {
   ChevronDown, Search, Menu, X, Star, Layers, CheckCircle2, Award, Globe
 } from 'lucide-react';
 import { useLanguage, LanguageSelector } from '../i18n';
+import { BrandLogo } from './BrandLogo';
 
 export type NavPortalId = 
   | 'HOME'
@@ -469,8 +470,8 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden mt-2 bg-white rounded-3xl shadow-2xl border border-[#E5E7EB] p-4 max-h-[80vh] overflow-y-auto space-y-4 animate-in fade-in slide-in-from-top-3 duration-200">
-          <div className="flex items-center justify-between border-b pb-2">
-            <span className="font-bold text-sm text-gray-800">{t('common.allTools')}</span>
+          <div className="flex items-center justify-between border-b pb-2.5">
+            <BrandLogo size="sm" showText={true} />
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="p-1 text-gray-400 hover:text-gray-700"

@@ -31,6 +31,7 @@ import { MasterDashboardHub } from './components/MasterDashboardHub';
 import DateInput from './components/DateInput';
 import { formatDateIndian } from './utils/dateUtils';
 import { useLanguage, LanguageSelector } from './i18n';
+import { BrandLogo } from './components/BrandLogo';
 
 type ViewTab = 'DASHBOARD' | 'MOBILE' | 'NAME' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
 
@@ -374,9 +375,7 @@ const App: React.FC = () => {
             onClick={() => handlePortalNavigation('HOME')}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="bg-[#D97706]/10 group-hover:bg-[#D97706]/20 p-2.5 rounded-2xl border border-[#D97706]/20 transition">
-              <span className="text-2xl text-[#D97706]">⚜️</span>
-            </div>
+            <BrandLogo size="md" />
             <div className="text-left">
               <div className="flex items-center gap-2">
                 <h1 className="font-playfair text-lg md:text-xl font-bold tracking-wide text-[#1F2937] group-hover:text-[#D97706] transition">
@@ -575,6 +574,9 @@ const App: React.FC = () => {
               {/* Mobile Scanner Hero */}
               <div className="rounded-[36px] px-6 py-12 md:py-16 lg:px-12 text-center text-[#1F2937] relative overflow-hidden bg-gradient-to-br from-[#FDFCF7] via-[#F9F6EE] to-[#F2EADA] border border-[#D97706]/15 shadow-lg">
                 <div className="max-w-4xl mx-auto space-y-8 relative z-10">
+                  <div className="flex justify-center mb-2">
+                    <BrandLogo size="lg" />
+                  </div>
                   <div className="inline-flex items-center gap-2 bg-[#D97706]/10 px-4 py-1.5 rounded-full border border-[#D97706]/20 text-xs font-bold uppercase tracking-wider text-[#D97706]">
                     <Phone className="w-4 h-4" /> चालडीयन एवं वैदिक मोबाइल अंकशास्त्र
                   </div>

@@ -11,6 +11,7 @@ import { CompleteNumerologyProfile } from '../core/types';
 import { NavPortalId, NAV_CATEGORIES } from './MasterNavigation';
 import { formatDateIndian } from '../utils/dateUtils';
 import { useLanguage } from '../i18n';
+import { BrandLogo } from './BrandLogo';
 
 interface MasterDashboardHubProps {
   personalDetails: PersonalDetails | null;
@@ -53,8 +54,11 @@ export const MasterDashboardHub: React.FC<MasterDashboardHubProps> = ({
         </div>
 
         <div className="relative z-10 max-w-4xl space-y-6">
-          <div className="inline-flex items-center gap-2 bg-[#D97706]/10 px-4 py-1.5 rounded-full border border-[#D97706]/20 text-[#D97706] text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-4 h-4" /> {t('common.tagline')}
+          <div className="flex items-center gap-3">
+            <BrandLogo size="lg" />
+            <div className="inline-flex items-center gap-2 bg-[#D97706]/10 px-4 py-1.5 rounded-full border border-[#D97706]/20 text-[#D97706] text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-4 h-4" /> {t('common.tagline')}
+            </div>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-playfair text-[#1F2937] leading-[1.2]">

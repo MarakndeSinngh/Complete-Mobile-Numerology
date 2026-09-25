@@ -19,6 +19,7 @@ import { CompleteNumerologyProfile } from '../core/types';
 import { MANDATORY_WELLNESS_DISCLAIMER } from '../core/methodology';
 import { KarmicVedicAnalysisView } from './KarmicVedicAnalysisView';
 import { DateInput } from './DateInput';
+import { BrandLogo } from './BrandLogo';
 import { formatDateIndian } from '../utils/dateUtils';
 import { formatLocalizedDateTime } from '../utils/localeUtils';
 import { useLanguage } from '../i18n';
@@ -331,8 +332,11 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
         </div>
         
         <div className="space-y-2 relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 bg-[#D97706]/10 text-[#D97706] px-3.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest font-bold border border-[#D97706]/20">
-            <Compass className="w-3.5 h-3.5 animate-spin-slow" /> सम्पूर्ण Lo Shu Magic Grid विश्लेषण
+          <div className="flex items-center gap-2.5">
+            <BrandLogo size="sm" />
+            <div className="inline-flex items-center gap-1.5 bg-[#D97706]/10 text-[#D97706] px-3.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest font-bold border border-[#D97706]/20">
+              <Compass className="w-3.5 h-3.5 animate-spin-slow" /> सम्पूर्ण Lo Shu Magic Grid विश्लेषण
+            </div>
           </div>
           <h2 className="font-cinzel text-3xl md:text-4xl font-extrabold text-[#1F2937] tracking-wider uppercase leading-tight">
             Complete Lo Shu Grid विश्लेषण एवं सिद्ध उपाय
