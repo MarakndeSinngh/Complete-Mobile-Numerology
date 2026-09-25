@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { analyzeDateOfBirth, analyzeNameSystems, analyzeMobileNumber, generateRemedies } from './services/numerologyEngine';
 import { PersonalDetails, DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdvice } from './types';
-import { generateCompleteNumerologyProfile, NumerologyProfile } from './core';
+import { generateCompleteNumerologyProfile, NumerologyProfile, getProfileIsolationKey } from './core';
 import { 
   Phone, User, Calendar, Compass, Star, FileText, Sparkles, Shield, 
   TrendingUp, Heart, BookOpen, Layers, HelpCircle, RefreshCw, 
@@ -24,6 +24,7 @@ import { NumeroVastuDashboard } from './components/NumeroVastuDashboard';
 import { VehicleNumerologyDashboard } from './components/VehicleNumerologyDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
 import { MasterReportUnified } from './components/MasterReportUnified';
+import { ReportAccessGate } from './components/ReportAccessGate';
 import { MasterNavigation, NavPortalId } from './components/MasterNavigation';
 import { QuickProfileHeader } from './components/QuickProfileHeader';
 import { QuickProfileModal } from './components/QuickProfileModal';
@@ -332,6 +333,7 @@ const App: React.FC = () => {
 
   // Safe reference to active complete profile
   const effectiveProfile: NumerologyProfile | null = numerologyProfile;
+  const activeProfileKey = getProfileIsolationKey(personalDetails);
 
   const isPremiumSubModule = [
     'PREMIUM_VEHICLE', 'PREMIUM_HOUSE', 'PREMIUM_BUSINESS', 
@@ -460,14 +462,21 @@ const App: React.FC = () => {
         ) : currentPortal === 'MASTER_REPORT' ? (
           <div className="space-y-6">
             {effectiveProfile && personalDetails ? (
-              <MasterReportUnified
-                profile={effectiveProfile}
-                personalDetails={personalDetails}
-                dobData={dobData || undefined}
-                nameData={nameData || undefined}
-                mobileData={mobileData || undefined}
-                remedies={remedies || undefined}
-              />
+              <ReportAccessGate
+                reportType="MASTER_REPORT"
+                profileKey={activeProfileKey}
+                profileName={personalDetails.name}
+                mobile={personalDetails.mobile}
+              >
+                <MasterReportUnified
+                  profile={effectiveProfile}
+                  personalDetails={personalDetails}
+                  dobData={dobData || undefined}
+                  nameData={nameData || undefined}
+                  mobileData={mobileData || undefined}
+                  remedies={remedies || undefined}
+                />
+              </ReportAccessGate>
             ) : (
               <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-4 max-w-xl mx-auto my-8 shadow-xs">
                 <Award className="w-12 h-12 text-[#D97706] mx-auto" />
@@ -485,17 +494,31 @@ const App: React.FC = () => {
             )}
           </div>
         ) : currentPortal === 'CORE_LOSHU' ? (
-          <CompleteLoshuGridAnalysis initialProfile={personalDetails ? { name: personalDetails.name, dob: personalDetails.dob, gender: personalDetails.gender || 'MALE' } : null} />
+          <ReportAccessGate
+            reportType="LOSHU"
+            profileKey={activeProfileKey}
+            profileName={personalDetails?.name}
+            mobile={personalDetails?.mobile}
+          >
+            <CompleteLoshuGridAnalysis initialProfile={personalDetails ? { name: personalDetails.name, dob: personalDetails.dob, gender: personalDetails.gender || 'MALE' } : null} />
+          </ReportAccessGate>
         ) : currentPortal === 'CORE_DASHBOARD' ? (
           dobData && nameData && mobileData && remedies && personalDetails && effectiveProfile ? (
-            <AstroDashboard
-              dobData={dobData}
-              nameData={nameData}
-              mobileData={mobileData}
-              remedies={remedies}
-              name={personalDetails.name}
-              profile={effectiveProfile}
-            />
+            <ReportAccessGate
+              reportType="MASTER_REPORT"
+              profileKey={activeProfileKey}
+              profileName={personalDetails.name}
+              mobile={personalDetails.mobile}
+            >
+              <AstroDashboard
+                dobData={dobData}
+                nameData={nameData}
+                mobileData={mobileData}
+                remedies={remedies}
+                name={personalDetails.name}
+                profile={effectiveProfile}
+              />
+            </ReportAccessGate>
           ) : (
             <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-4 max-w-xl mx-auto my-8 shadow-xs">
               <Compass className="w-12 h-12 text-[#D97706] mx-auto" />
@@ -513,13 +536,20 @@ const App: React.FC = () => {
           )
         ) : currentPortal === 'NAME_NUMEROLOGY' ? (
           effectiveProfile?.nameNumerology && dobData && personalDetails ? (
-            <NameNumerologyDashboard
-              nameAnalysis={effectiveProfile.nameNumerology}
-              mulank={dobData.birthNumber}
-              bhagyank={dobData.lifePathNumber}
-              mobile={personalDetails.mobile || ''}
-              dob={personalDetails.dob}
-            />
+            <ReportAccessGate
+              reportType="NAME_NUMEROLOGY"
+              profileKey={activeProfileKey}
+              profileName={personalDetails.name}
+              mobile={personalDetails.mobile}
+            >
+              <NameNumerologyDashboard
+                nameAnalysis={effectiveProfile.nameNumerology}
+                mulank={dobData.birthNumber}
+                bhagyank={dobData.lifePathNumber}
+                mobile={personalDetails.mobile || ''}
+                dob={personalDetails.dob}
+              />
+            </ReportAccessGate>
           ) : (
             <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-4 max-w-xl mx-auto my-8 shadow-xs">
               <User className="w-12 h-12 text-[#D97706] mx-auto" />
@@ -536,25 +566,68 @@ const App: React.FC = () => {
             </div>
           )
         ) : currentPortal === 'MARRIAGE_COMPATIBILITY' ? (
-          <MarriageCompatibility />
+          <ReportAccessGate
+            reportType="MARRIAGE"
+            profileKey={activeProfileKey}
+            profileName={personalDetails?.name}
+            mobile={personalDetails?.mobile}
+          >
+            <MarriageCompatibility />
+          </ReportAccessGate>
         ) : currentPortal === 'PREMIUM_VAASTU' ? (
-          <NumeroVastuDashboard
-            profile={effectiveProfile}
-            dob={personalDetails?.dob || ''}
-            name={personalDetails?.name || ''}
-            gender={(personalDetails?.gender as any) || 'MALE'}
-          />
+          <ReportAccessGate
+            reportType="VASTU"
+            profileKey={activeProfileKey}
+            profileName={personalDetails?.name}
+            mobile={personalDetails?.mobile}
+          >
+            <NumeroVastuDashboard
+              profile={effectiveProfile}
+              dob={personalDetails?.dob || ''}
+              name={personalDetails?.name || ''}
+              gender={(personalDetails?.gender as any) || 'MALE'}
+            />
+          </ReportAccessGate>
         ) : currentPortal === 'PREMIUM_VEHICLE' ? (
-          <VehicleNumerologyDashboard
-            initialDob={personalDetails?.dob ? formatDateIndian(personalDetails.dob) : ''}
-            initialName={personalDetails?.name || ''}
-            initialMobile={personalDetails?.mobile || ''}
-            initialGender={(personalDetails?.gender as any) || 'MALE'}
-          />
+          <ReportAccessGate
+            reportType="VEHICLE"
+            profileKey={activeProfileKey}
+            profileName={personalDetails?.name}
+            mobile={personalDetails?.mobile}
+          >
+            <VehicleNumerologyDashboard
+              initialDob={personalDetails?.dob ? formatDateIndian(personalDetails.dob) : ''}
+              initialName={personalDetails?.name || ''}
+              initialMobile={personalDetails?.mobile || ''}
+              initialGender={(personalDetails?.gender as any) || 'MALE'}
+            />
+          </ReportAccessGate>
         ) : currentPortal === 'PREMIUM_HOUSE' ? (
-          <PremiumConsultations initialModule="HOUSE" />
+          <ReportAccessGate
+            reportType="HOUSE_FLAT"
+            profileKey={activeProfileKey}
+            profileName={personalDetails?.name}
+            mobile={personalDetails?.mobile}
+          >
+            <PremiumConsultations initialModule="HOUSE" />
+          </ReportAccessGate>
         ) : isPremiumSubModule ? (
-          <PremiumConsultations initialModule={currentPortal.replace('PREMIUM_', '') as any} />
+          <ReportAccessGate
+            reportType={
+              currentPortal === 'PREMIUM_BUSINESS' ? 'BUSINESS' :
+              currentPortal === 'PREMIUM_SIGNATURE' ? 'SIGNATURE_AUDIT' :
+              currentPortal === 'PREMIUM_CHILD' ? 'CHILD_NAMES' :
+              currentPortal === 'PREMIUM_LUCKY_DATES' ? 'LUCKY_DATES' :
+              currentPortal === 'PREMIUM_MEDICAL' ? 'MEDICAL_NUMEROLOGY' :
+              currentPortal === 'PREMIUM_DASHA' ? 'DASHA' :
+              'MASTER_REPORT'
+            }
+            profileKey={activeProfileKey}
+            profileName={personalDetails?.name}
+            mobile={personalDetails?.mobile}
+          >
+            <PremiumConsultations initialModule={currentPortal.replace('PREMIUM_', '') as any} />
+          </ReportAccessGate>
         ) : currentPortal === 'AI_CONSULTATION' ? (
           <AIConsultationPortal
             initialProfile={personalDetails}
