@@ -8,7 +8,6 @@ interface QuickProfileHeaderProps {
   personalDetails: PersonalDetails | null;
   dobData: DOBAnalysis | null;
   onEditProfile: () => void;
-  onLoadDemo: () => void;
   onResetProfile: () => void;
 }
 
@@ -16,7 +15,6 @@ export const QuickProfileHeader: React.FC<QuickProfileHeaderProps> = ({
   personalDetails,
   dobData,
   onEditProfile,
-  onLoadDemo,
   onResetProfile,
 }) => {
   const { t } = useLanguage();
@@ -141,12 +139,6 @@ export const QuickProfileHeader: React.FC<QuickProfileHeaderProps> = ({
               className="bg-[#D97706] hover:bg-[#B45309] text-white px-4 py-2 rounded-xl font-bold transition shadow-xs flex items-center gap-1.5 text-xs cursor-pointer"
             >
               <User className="w-3.5 h-3.5" /> {t('profile.editProfileTitle')}
-            </button>
-            <button
-              onClick={onLoadDemo}
-              className="bg-[#F2E8DC] hover:bg-[#E5D7C6] text-[#D97706] px-3.5 py-2 rounded-xl font-bold transition border border-[#D97706]/20 flex items-center gap-1.5 text-xs cursor-pointer"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> {t('common.loadDemo')}
             </button>
           </div>
         </div>

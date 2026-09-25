@@ -43,14 +43,14 @@ interface SavedHistoryItem {
 export default function MarriageCompatibility() {
   const { language } = useLanguage();
   // Input states
-  const [p1Name, setP1Name] = useState('रोहित शर्मा (Rohit)');
-  const [p1Dob, setP1Dob] = useState('1992-05-14');
-  const [p1Mobile, setP1Mobile] = useState('9876543210');
+  const [p1Name, setP1Name] = useState('');
+  const [p1Dob, setP1Dob] = useState('');
+  const [p1Mobile, setP1Mobile] = useState('');
   const [p1Gender, setP1Gender] = useState<'MALE' | 'FEMALE'>('MALE');
 
-  const [p2Name, setP2Name] = useState('प्रिया वर्मा (Priya)');
-  const [p2Dob, setP2Dob] = useState('1994-11-23');
-  const [p2Mobile, setP2Mobile] = useState('9812345678');
+  const [p2Name, setP2Name] = useState('');
+  const [p2Dob, setP2Dob] = useState('');
+  const [p2Mobile, setP2Mobile] = useState('');
   const [p2Gender, setP2Gender] = useState<'MALE' | 'FEMALE'>('FEMALE');
 
   const [historyList, setHistoryList] = useState<SavedHistoryItem[]>([]);
@@ -71,21 +71,6 @@ export default function MarriageCompatibility() {
       } catch (e) {
         console.error('Failed to parse history', e);
       }
-    }
-
-    // Automatically generate initial report on mount with default sample
-    const initialReport = generateSynastryReport(
-      { name: p1Name, dob: p1Dob, mobile: p1Mobile, gender: p1Gender },
-      { name: p2Name, dob: p2Dob, mobile: p2Mobile, gender: p2Gender }
-    );
-    setReport(initialReport);
-    try {
-      const p1Key = getProfileIsolationKey({ name: p1Name, dob: p1Dob, gender: p1Gender });
-      const payload = JSON.stringify({ report: initialReport, timestamp: new Date().toISOString() });
-      localStorage.setItem(`leofamily_saved_synastry_audit_${p1Key}`, payload);
-      localStorage.setItem('leofamily_saved_synastry_audit', payload);
-    } catch (e) {
-      console.error('Failed to save initial synastry audit:', e);
     }
   }, []);
 
@@ -154,18 +139,6 @@ export default function MarriageCompatibility() {
     }, 400);
   };
 
-  const loadSample = () => {
-    setP1Name('आदित्य कपूर (Aditya)');
-    setP1Dob('1990-08-19');
-    setP1Mobile('9820012345');
-    setP1Gender('MALE');
-
-    setP2Name('अंजलि शर्मा (Anjali)');
-    setP2Dob('1993-04-12');
-    setP2Mobile('9830054321');
-    setP2Gender('FEMALE');
-  };
-
   const handlePrint = () => {
     window.print();
   };
@@ -199,13 +172,6 @@ export default function MarriageCompatibility() {
               <h3 className="font-playfair text-lg font-bold text-slate-800">दंपति विवरण दर्ज करें (Enter Couple Details)</h3>
               <p className="text-[11px] text-slate-500">दोनों व्यक्तियों के नाम एवं जन्मतिथि (DD/MM/YYYY) आवश्यक हैं</p>
             </div>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="text-[11px] font-mono text-[#D97706] hover:text-[#B45309] font-bold border border-[#D97706]/30 px-3 py-1.5 rounded-xl bg-[#D97706]/5 hover:bg-[#D97706]/10 transition-colors"
-            >
-              उदाहरण डेटा लोड करें (Load Sample)
-            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
@@ -1178,6 +1144,16 @@ export default function MarriageCompatibility() {
           </div>
 
         </motion.div>
+      )}
+
+      {!report && (
+        <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-3 max-w-xl mx-auto shadow-xs">
+          <Heart className="w-12 h-12 text-rose-500 mx-auto fill-rose-50" />
+          <h3 className="text-lg font-bold font-playfair text-slate-800">वैवाहिक अनुकूलता विश्लेषण प्रारंभ करें</h3>
+          <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+            7-स्तरीय वैदिक एवं ला-शू अंकशास्त्रीय प्रणाली से दोनों पार्टनर्स के मूलांक, भाग्यांक, नाम ध्वनि व ग्रहों का आपसी संतुलन जानने के लिए ऊपर दिए गए फॉर्म में दोनों का विवरण भरें।
+          </p>
+        </div>
       )}
 
     </div>

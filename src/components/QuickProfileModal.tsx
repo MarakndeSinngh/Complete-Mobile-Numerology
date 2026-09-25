@@ -11,7 +11,6 @@ interface QuickProfileModalProps {
   onClose: () => void;
   currentProfile: PersonalDetails | null;
   onSave: (profile: PersonalDetails) => void;
-  onLoadDemo: () => void;
 }
 
 export const QuickProfileModal: React.FC<QuickProfileModalProps> = ({
@@ -19,7 +18,6 @@ export const QuickProfileModal: React.FC<QuickProfileModalProps> = ({
   onClose,
   currentProfile,
   onSave,
-  onLoadDemo,
 }) => {
   const { t } = useLanguage();
   const [name, setName] = useState('');
@@ -54,15 +52,10 @@ export const QuickProfileModal: React.FC<QuickProfileModalProps> = ({
       name: name.trim(),
       dob,
       gender,
-      mobile: mobile.trim() || '9930117696',
+      mobile: mobile.trim(),
       email: email.trim(),
     };
     onSave(profile);
-    onClose();
-  };
-
-  const handleDemo = () => {
-    onLoadDemo();
     onClose();
   };
 
@@ -106,7 +99,7 @@ export const QuickProfileModal: React.FC<QuickProfileModalProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="उदा. राजीव सिंह चौहान"
+                  placeholder="उदा. राहुल शर्मा"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-[#F8F4EF] border border-[#E5E7EB] rounded-xl text-sm font-medium focus:border-[#D97706] outline-none transition"
@@ -152,7 +145,7 @@ export const QuickProfileModal: React.FC<QuickProfileModalProps> = ({
                   <input
                     type="text"
                     maxLength={10}
-                    placeholder="9930117696"
+                    placeholder="उदा. 9876543210"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/[^0-9]/g, ''))}
                     className="w-full pl-10 pr-4 py-3 bg-[#F8F4EF] border border-[#E5E7EB] rounded-xl text-sm font-mono focus:border-[#D97706] outline-none transition"
@@ -161,19 +154,12 @@ export const QuickProfileModal: React.FC<QuickProfileModalProps> = ({
               </div>
             </div>
 
-            <div className="pt-4 flex flex-col sm:flex-row gap-3">
+            <div className="pt-4">
               <button
                 type="submit"
-                className="flex-1 bg-gradient-to-r from-[#D97706] to-[#F59E0B] text-white py-3 px-6 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:from-[#B45309] hover:to-[#D97706] transition flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] text-white py-3.5 px-6 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:from-[#B45309] hover:to-[#D97706] transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" /> {t('common.save')}
-              </button>
-              <button
-                type="button"
-                onClick={handleDemo}
-                className="bg-[#F2E8DC] text-[#D97706] py-3 px-4 rounded-xl text-xs font-bold hover:bg-[#E5D7C6] transition border border-[#D97706]/20 flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5" /> {t('common.loadDemo')}
               </button>
             </div>
           </form>

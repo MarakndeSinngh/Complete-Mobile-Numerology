@@ -67,17 +67,17 @@ const INDUSTRIES: BusinessIndustryType[] = [
 ];
 
 export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardProps> = ({
-  initialDob = '15/08/1990',
-  initialName = 'Priya Sharma',
+  initialDob = '',
+  initialName = '',
   initialMobile = '',
-  initialGender = 'FEMALE',
+  initialGender = 'MALE',
   onSyncToMasterReport
 }) => {
   const { t, language } = useLanguage();
 
   // Input Form States
-  const [businessName, setBusinessName] = useState('Leo Occult Enterprises');
-  const [brandName, setBrandName] = useState('LeoFamily');
+  const [businessName, setBusinessName] = useState('');
+  const [brandName, setBrandName] = useState('');
   const [industry, setIndustry] = useState<BusinessIndustryType>('Consulting');
   const [ownerName, setOwnerName] = useState(initialName);
   const [ownerDob, setOwnerDob] = useState(initialDob);
@@ -85,14 +85,14 @@ export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardPr
   
   // Optional Partner States
   const [hasPartner, setHasPartner] = useState(false);
-  const [partnerName, setPartnerName] = useState('Rahul Verma');
-  const [partnerDob, setPartnerDob] = useState('10/04/1988');
+  const [partnerName, setPartnerName] = useState('');
+  const [partnerDob, setPartnerDob] = useState('');
 
   // Optional Secondary Inputs
-  const [businessMobile, setBusinessMobile] = useState(initialMobile || '9876543210');
-  const [officeAddress, setOfficeAddress] = useState('Office 304, Tower B');
-  const [domainName, setDomainName] = useState('leofamily.in');
-  const [suggestedName, setSuggestedName] = useState('LeoFamily Global');
+  const [businessMobile, setBusinessMobile] = useState(initialMobile);
+  const [officeAddress, setOfficeAddress] = useState('');
+  const [domainName, setDomainName] = useState('');
+  const [suggestedName, setSuggestedName] = useState('');
 
   // Report & Navigation States
   const [report, setReport] = useState<BusinessNumerologyReport | null>(null);
@@ -100,9 +100,19 @@ export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardPr
   const [showDetailedWhy, setShowDetailedWhy] = useState(false);
   const [syncedNotification, setSyncedNotification] = useState(false);
 
-  // Initialize calculation on mount
+  // Sync props when changed
   useEffect(() => {
-    runAnalysis();
+    if (initialDob) setOwnerDob(initialDob);
+    if (initialName) setOwnerName(initialName);
+    if (initialMobile) setBusinessMobile(initialMobile);
+    if (initialGender) setOwnerGender(initialGender);
+  }, [initialDob, initialName, initialMobile, initialGender]);
+
+  // Initialize calculation on mount only if businessName is provided
+  useEffect(() => {
+    if (businessName.trim()) {
+      runAnalysis();
+    }
   }, []);
 
   const runAnalysis = () => {
@@ -1305,6 +1315,16 @@ export const BusinessNumerologyDashboard: React.FC<BusinessNumerologyDashboardPr
             </p>
           </div>
 
+        </div>
+      )}
+
+      {!report && (
+        <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-3 max-w-xl mx-auto shadow-xs">
+          <Briefcase className="w-12 h-12 text-[#D97706] mx-auto opacity-80" />
+          <h3 className="text-lg font-bold font-playfair text-slate-800">व्यापार अंकशास्त्र विश्लेषण प्रारंभ करें</h3>
+          <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+            कंपनी / फर्म का नाम (उदा. Leo Enterprises) एवं उद्योग प्रकार दर्ज कर 'व्यापार विश्लेषण प्रारंभ करें' पर क्लिक करें।
+          </p>
         </div>
       )}
 

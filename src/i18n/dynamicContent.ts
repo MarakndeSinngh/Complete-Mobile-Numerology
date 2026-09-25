@@ -1029,9 +1029,10 @@ export function buildLocalizedExpertDossier(
   const bhagyankInfo = getLocalizedNumberMeaning(bhagyank, lang);
   const yoga81 = getLocalized81Yoga(mulank, bhagyank, lang);
 
-  const parsed = parseIndianDate(profile.identity.dob || '1984-11-23');
-  const day = parsed?.day || 23;
-  const year = parsed?.year || 1984;
+  const dobValue = profile.identity.dob || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+  const parsed = parseIndianDate(dobValue);
+  const day = parsed?.day || 1;
+  const year = parsed?.year || new Date().getFullYear();
 
   const currentYear = new Date().getFullYear();
   const rDay = ((day - 1) % 9) + 1;

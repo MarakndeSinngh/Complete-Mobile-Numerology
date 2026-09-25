@@ -46,22 +46,22 @@ export interface LuckyDatesFinderProps {
 }
 
 export const LuckyDatesFinder: React.FC<LuckyDatesFinderProps> = ({
-  initialDob = '15/08/1988',
-  initialName = 'Client',
+  initialDob = '',
+  initialName = '',
   onReportGenerated
 }) => {
   // Input States
-  const [dob, setDob] = useState<string>(initialDob || '15/08/1988');
-  const [name, setName] = useState<string>(initialName || 'Client');
+  const [dob, setDob] = useState<string>(initialDob || '');
+  const [name, setName] = useState<string>(initialName || '');
   const [purpose, setPurpose] = useState<LuckyDatesPurposeKey>('BUSINESS_LAUNCH');
   const [partnerDob, setPartnerDob] = useState<string>('');
   
   // Date Range Mode
   const [rangeMode, setRangeMode] = useState<'MONTH' | 'CUSTOM'>('MONTH');
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
-  const [startDate, setStartDate] = useState<string>('01/10/2026');
-  const [endDate, setEndDate] = useState<string>('31/10/2026');
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [startDate, setStartDate] = useState<string>(`01/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()}`);
+  const [endDate, setEndDate] = useState<string>(`28/${String(new Date().getMonth() + 1).padStart(2, '0')}/${new Date().getFullYear()}`);
 
   // Filters
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'SUPPORTIVE' | 'NEUTRAL' | 'NEEDS_ATTENTION'>('ALL');
@@ -901,6 +901,16 @@ export const LuckyDatesFinder: React.FC<LuckyDatesFinderProps> = ({
               </p>
             </div>
           </div>
+        </div>
+      )}
+
+      {!report && (
+        <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-3 max-w-xl mx-auto shadow-xs">
+          <Calendar className="w-12 h-12 text-[#D97706] mx-auto opacity-80" />
+          <h3 className="text-lg font-bold font-playfair text-slate-800">शुभ अंकशास्त्रीय तिथि चयन</h3>
+          <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+            कार्य का उद्देश्य एवं जन्मतिथि दर्ज कर 'शुभ तिथियां खोजें' पर क्लिक करें।
+          </p>
         </div>
       )}
 

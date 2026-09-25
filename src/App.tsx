@@ -83,11 +83,13 @@ const App: React.FC = () => {
 
   // Function to calculate and apply profile throughout the app
   const applyProfile = (details: PersonalDetails) => {
-    const finalName = details.name?.trim() || "Vibrations Seeker";
-    const finalDob = details.dob || "1984-11-23";
+    const finalName = details.name?.trim() || "";
+    const finalDob = details.dob || "";
     const finalGender = details.gender || "MALE";
-    const finalMobile = details.mobile || "9930117696";
+    const finalMobile = details.mobile || "";
     const finalEmail = details.email || "";
+
+    if (!finalDob) return;
 
     const cleanDetails: PersonalDetails = {
       name: finalName,
@@ -107,17 +109,17 @@ const App: React.FC = () => {
     // Generate unified core profile
     const profile = generateCompleteNumerologyProfile({
       dob: finalDob,
-      name: finalName,
+      name: finalName || "Vibrations Seeker",
       mobile: finalMobile,
       gender: finalGender
     });
     setNumerologyProfile(profile);
 
     // Populate backward-compatible analyses
-    const dobAnalysis = analyzeDateOfBirth(finalDob, finalName);
-    const nameAnalysis = analyzeNameSystems(finalName);
+    const dobAnalysis = analyzeDateOfBirth(finalDob, finalName || "Vibrations Seeker");
+    const nameAnalysis = analyzeNameSystems(finalName || "Seeker");
     const mobileAnalysis = analyzeMobileNumber(finalMobile);
-    const remediesResults = generateRemedies(finalDob, finalName);
+    const remediesResults = generateRemedies(finalDob, finalName || "Seeker");
 
     setDobData(dobAnalysis);
     setNameData(nameAnalysis);
@@ -301,28 +303,17 @@ const App: React.FC = () => {
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!mobile) return;
+    if (!mobile || !dob) return;
 
     const details: PersonalDetails = {
-      name: name.trim() || "Vibrations Seeker",
-      dob: dob || "1984-11-23",
+      name: name.trim() || "",
+      dob,
       gender: gender || "MALE",
       mobile,
       email: email || ""
     };
     applyProfile(details);
     setActiveTab('MOBILE');
-  };
-
-  const handleLoadDemoNumber = () => {
-    const demoProfile: PersonalDetails = {
-      name: 'Raajeev Singh Chauhann',
-      dob: '1984-11-23',
-      gender: 'MALE',
-      mobile: '9930117696',
-      email: 'contact@numerologysage.com'
-    };
-    applyProfile(demoProfile);
   };
 
   const handleQuickReset = () => {
@@ -339,13 +330,8 @@ const App: React.FC = () => {
     localStorage.removeItem('leo_active_quick_profile');
   };
 
-  // Safe fallback complete profile for Master Dossier
-  const effectiveProfile: NumerologyProfile = numerologyProfile || generateCompleteNumerologyProfile({
-    dob: personalDetails?.dob || "1984-11-23",
-    name: personalDetails?.name || "Raajeev Singh Chauhann",
-    mobile: personalDetails?.mobile || "9930117696",
-    gender: personalDetails?.gender || "MALE"
-  });
+  // Safe reference to active complete profile
+  const effectiveProfile: NumerologyProfile | null = numerologyProfile;
 
   const isPremiumSubModule = [
     'PREMIUM_VEHICLE', 'PREMIUM_HOUSE', 'PREMIUM_BUSINESS', 
@@ -415,12 +401,11 @@ const App: React.FC = () => {
               </div>
             ) : (
               <button
-                onClick={handleLoadDemoNumber}
-                className="bg-[#F2E8DC] hover:bg-[#E5D7C6] text-[#D97706] font-semibold px-3.5 py-2 rounded-xl text-xs transition border border-[#D97706]/20 flex items-center gap-1.5 cursor-pointer"
+                onClick={() => setIsProfileModalOpen(true)}
+                className="bg-[#D97706] hover:bg-[#B45309] text-white font-semibold px-3.5 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t('common.loadDemo')}</span>
-                <span className="sm:hidden">Demo</span>
+                <User className="w-3.5 h-3.5" />
+                <span>{t('profile.editProfileTitle')}</span>
               </button>
             )}
           </div>
@@ -441,7 +426,6 @@ const App: React.FC = () => {
           personalDetails={personalDetails}
           dobData={dobData}
           onEditProfile={() => setIsProfileModalOpen(true)}
-          onLoadDemo={handleLoadDemoNumber}
           onResetProfile={handleQuickReset}
         />
 
@@ -472,29 +456,38 @@ const App: React.FC = () => {
             profile={effectiveProfile}
             onNavigate={handlePortalNavigation}
             onOpenProfileModal={() => setIsProfileModalOpen(true)}
-            onLoadDemo={handleLoadDemoNumber}
           />
         ) : currentPortal === 'MASTER_REPORT' ? (
           <div className="space-y-6">
-            <MasterReportUnified
-              profile={effectiveProfile}
-              personalDetails={personalDetails || {
-                name: "Raajeev Singh Chauhann",
-                dob: "1984-11-23",
-                gender: "MALE",
-                mobile: "9930117696",
-                email: "contact@numerologysage.com"
-              }}
-              dobData={dobData || undefined}
-              nameData={nameData || undefined}
-              mobileData={mobileData || undefined}
-              remedies={remedies || undefined}
-            />
+            {effectiveProfile && personalDetails ? (
+              <MasterReportUnified
+                profile={effectiveProfile}
+                personalDetails={personalDetails}
+                dobData={dobData || undefined}
+                nameData={nameData || undefined}
+                mobileData={mobileData || undefined}
+                remedies={remedies || undefined}
+              />
+            ) : (
+              <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-4 max-w-xl mx-auto my-8 shadow-xs">
+                <Award className="w-12 h-12 text-[#D97706] mx-auto" />
+                <h3 className="text-xl font-bold font-playfair">मास्टर न्यूमरोलॉजी रिपोर्ट (Master Report)</h3>
+                <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+                  संपूर्ण 14-पृष्ठीय मास्टर रिपोर्ट जनरेट करने के लिए कृपया पहले अपनी प्रोफाइल दर्ज करें।
+                </p>
+                <button
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className="bg-gradient-to-r from-[#D97706] to-[#F59E0B] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md hover:from-[#B45309] hover:to-[#D97706] transition cursor-pointer"
+                >
+                  प्रोफाइल बनाएं (Create Profile)
+                </button>
+              </div>
+            )}
           </div>
         ) : currentPortal === 'CORE_LOSHU' ? (
           <CompleteLoshuGridAnalysis initialProfile={personalDetails ? { name: personalDetails.name, dob: personalDetails.dob, gender: personalDetails.gender || 'MALE' } : null} />
         ) : currentPortal === 'CORE_DASHBOARD' ? (
-          dobData && nameData && mobileData && remedies && personalDetails ? (
+          dobData && nameData && mobileData && remedies && personalDetails && effectiveProfile ? (
             <AstroDashboard
               dobData={dobData}
               nameData={nameData}
@@ -504,41 +497,41 @@ const App: React.FC = () => {
               profile={effectiveProfile}
             />
           ) : (
-            <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-4">
+            <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-4 max-w-xl mx-auto my-8 shadow-xs">
               <Compass className="w-12 h-12 text-[#D97706] mx-auto" />
               <h3 className="text-xl font-bold font-playfair">कृपया पहले अपनी जन्म तिथि दर्ज करें</h3>
               <p className="text-xs text-gray-500 max-w-md mx-auto">
-                मूलांक, भाग्यांक व 81 ग्रहीय युतियों का विश्लेषण देखने के लिए प्रोफाइल सेट करें या डेमो लोड करें।
+                मूलांक, भाग्यांक व 81 ग्रहीय युतियों का विश्लेषण देखने के लिए कृपया प्रोफाइल सेट करें।
               </p>
               <button
-                onClick={handleLoadDemoNumber}
-                className="bg-[#D97706] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider"
+                onClick={() => setIsProfileModalOpen(true)}
+                className="bg-[#D97706] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
               >
-                डेमो लोड करें (Load Demo)
+                प्रोफाइल बनाएं (Create Profile)
               </button>
             </div>
           )
         ) : currentPortal === 'NAME_NUMEROLOGY' ? (
-          effectiveProfile?.nameNumerology && dobData ? (
+          effectiveProfile?.nameNumerology && dobData && personalDetails ? (
             <NameNumerologyDashboard
               nameAnalysis={effectiveProfile.nameNumerology}
               mulank={dobData.birthNumber}
               bhagyank={dobData.lifePathNumber}
-              mobile={personalDetails?.mobile || '9930117696'}
-              dob={personalDetails?.dob || '1984-11-23'}
+              mobile={personalDetails.mobile || ''}
+              dob={personalDetails.dob}
             />
           ) : (
-            <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-4">
+            <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-4 max-w-xl mx-auto my-8 shadow-xs">
               <User className="w-12 h-12 text-[#D97706] mx-auto" />
               <h3 className="text-xl font-bold font-playfair">नाम अंकशास्त्र विश्लेषण हेतु प्रोफाइल आवश्यक है</h3>
               <p className="text-xs text-gray-500 max-w-md mx-auto">
-                चालडीयन व पाइथागोरियन नाम शुद्धि हेतु अपना नाम दर्ज करें या डेमो डेटा लोड करें।
+                चालडीयन व पाइथागोरियन नाम शुद्धि हेतु अपना नाम एवं जन्मतिथि दर्ज करें।
               </p>
               <button
-                onClick={handleLoadDemoNumber}
-                className="bg-[#D97706] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider"
+                onClick={() => setIsProfileModalOpen(true)}
+                className="bg-[#D97706] text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
               >
-                डेमो प्रोफाइल लोड करें
+                प्रोफाइल बनाएं (Create Profile)
               </button>
             </div>
           )
@@ -547,15 +540,15 @@ const App: React.FC = () => {
         ) : currentPortal === 'PREMIUM_VAASTU' ? (
           <NumeroVastuDashboard
             profile={effectiveProfile}
-            dob={personalDetails?.dob || '1984-11-23'}
-            name={personalDetails?.name || 'Raajeev Singh Chauhann'}
+            dob={personalDetails?.dob || ''}
+            name={personalDetails?.name || ''}
             gender={(personalDetails?.gender as any) || 'MALE'}
           />
         ) : currentPortal === 'PREMIUM_VEHICLE' ? (
           <VehicleNumerologyDashboard
-            initialDob={personalDetails?.dob ? formatDateIndian(personalDetails.dob) : '23/11/1984'}
-            initialName={personalDetails?.name || 'Raajeev Singh Chauhann'}
-            initialMobile={personalDetails?.mobile || '9930117696'}
+            initialDob={personalDetails?.dob ? formatDateIndian(personalDetails.dob) : ''}
+            initialName={personalDetails?.name || ''}
+            initialMobile={personalDetails?.mobile || ''}
             initialGender={(personalDetails?.gender as any) || 'MALE'}
           />
         ) : currentPortal === 'PREMIUM_HOUSE' ? (
@@ -596,13 +589,6 @@ const App: React.FC = () => {
                       <span className="text-xs font-bold text-[#D97706] uppercase tracking-wider">
                         📱 मोबाइल स्कैनर पोर्टल
                       </span>
-                      <button
-                        type="button"
-                        onClick={handleLoadDemoNumber}
-                        className="text-[10px] font-bold bg-[#F2E8DC] text-[#D97706] px-3 py-1.5 rounded-xl uppercase hover:bg-[#E5D7C6] transition border border-[#D97706]/20"
-                      >
-                        🔮 डेमो डेटा
-                      </button>
                     </div>
 
                     <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -616,7 +602,7 @@ const App: React.FC = () => {
                             type="text"
                             required
                             maxLength={10}
-                            placeholder="उदा. 9930117696"
+                            placeholder="उदा. 9876543210"
                             value={mobile}
                             onChange={(e) => setMobile(e.target.value.replace(/[^0-9]/g, ''))}
                             className="w-full pl-10 pr-4 py-3 bg-[#F8F4EF] border border-[#E5E7EB] rounded-xl text-base font-mono font-bold text-gray-900 focus:border-[#D97706] outline-none"
@@ -626,12 +612,13 @@ const App: React.FC = () => {
 
                       <div>
                         <label className="text-[11px] font-bold text-gray-700 uppercase block mb-1">
-                          जन्म तिथि (Date of Birth) — तालमेल जांच हेतु
+                          जन्म तिथि (Date of Birth) — तालमेल जांच हेतु *
                         </label>
                         <DateInput
                           id="mobile-input-dob"
                           value={dob}
                           onChange={setDob}
+                          required
                           className="py-3 bg-[#F8F4EF]"
                         />
                       </div>
@@ -644,7 +631,7 @@ const App: React.FC = () => {
                           <User className="w-4 h-4 text-[#D97706] absolute left-3.5 top-1/2 -translate-y-1/2" />
                           <input
                             type="text"
-                            placeholder="उदा. राजीव सिंह चौहान"
+                            placeholder="उदा. राहुल शर्मा"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="w-full pl-10 pr-4 py-3 bg-[#F8F4EF] border border-[#E5E7EB] rounded-xl text-sm text-gray-900 focus:border-[#D97706] outline-none"
@@ -724,7 +711,6 @@ const App: React.FC = () => {
         onSave={(updatedProfile) => {
           applyProfile(updatedProfile);
         }}
-        onLoadDemo={handleLoadDemoNumber}
       />
 
       {/* SEO & OCCULT AUTHORITY LIBRARY / FOOTER LINKING */}

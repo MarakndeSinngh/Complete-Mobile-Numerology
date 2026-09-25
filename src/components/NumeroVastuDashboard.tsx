@@ -12,16 +12,16 @@ interface NumeroVastuDashboardProps {
 
 export const NumeroVastuDashboard: React.FC<NumeroVastuDashboardProps> = ({
   profile,
-  dob = '1990-01-01',
-  name = 'User',
+  dob = '',
+  name = '',
   gender = 'MALE'
 }) => {
   // Local state for interactive property testing
-  const [houseInput, setHouseInput] = useState<string>('42');
-  const [flatInput, setFlatInput] = useState<string>('304');
-  const [floorInput, setFloorInput] = useState<string>('3');
-  const [buildingInput, setBuildingInput] = useState<string>('Tower B');
-  const [entranceInput, setEntranceInput] = useState<string>('42A');
+  const [houseInput, setHouseInput] = useState<string>('');
+  const [flatInput, setFlatInput] = useState<string>('');
+  const [floorInput, setFloorInput] = useState<string>('');
+  const [buildingInput, setBuildingInput] = useState<string>('');
+  const [entranceInput, setEntranceInput] = useState<string>('');
   const [facingDir, setFacingDir] = useState<string>('North');
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'FUSION' | 'KUA' | 'PROPERTY' | 'WORKSPACE' | 'REMEDIES'>('OVERVIEW');
 
@@ -34,7 +34,7 @@ export const NumeroVastuDashboard: React.FC<NumeroVastuDashboardProps> = ({
   // Compute live Vastu Analysis
   const vastuData: UnifiedVastuAnalysis = useMemo(() => {
     return analyzeNumeroVastu({
-      dob: effectiveDOB,
+      dob: effectiveDOB || '2000-01-01',
       gender: effectiveGender,
       mulank,
       bhagyank,
@@ -51,6 +51,18 @@ export const NumeroVastuDashboard: React.FC<NumeroVastuDashboardProps> = ({
   const kuaNumber = vastuData.kuaNumber;
   const isEastGroup = vastuData.groupType === 'EAST_GROUP';
   const groupLabel = isEastGroup ? 'ईस्ट ग्रुप (East Group)' : 'वेस्ट ग्रुप (West Group)';
+
+  if (!effectiveDOB) {
+    return (
+      <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-3 max-w-xl mx-auto shadow-xs">
+        <Compass className="w-12 h-12 text-[#D97706] mx-auto opacity-80" />
+        <h3 className="text-lg font-bold font-playfair text-slate-800">न्यूमरो वास्तु एवं दिशा विश्लेषण</h3>
+        <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+          कुआ नंबर, 8-दिशा ऊर्जा सिद्धांत और आवास वास्तु सामंजस्य देखने के लिए कृपया पहले अपनी जन्मतिथि दर्ज करें।
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 text-left">

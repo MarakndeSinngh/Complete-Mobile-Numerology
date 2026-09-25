@@ -22,7 +22,6 @@ interface MasterDashboardHubProps {
   profile: CompleteNumerologyProfile | null;
   onNavigate: (portalId: NavPortalId) => void;
   onOpenProfileModal: () => void;
-  onLoadDemo: () => void;
 }
 
 export const MasterDashboardHub: React.FC<MasterDashboardHubProps> = ({
@@ -34,7 +33,6 @@ export const MasterDashboardHub: React.FC<MasterDashboardHubProps> = ({
   profile,
   onNavigate,
   onOpenProfileModal,
-  onLoadDemo,
 }) => {
   const { t, language } = useLanguage();
 
@@ -88,20 +86,12 @@ export const MasterDashboardHub: React.FC<MasterDashboardHubProps> = ({
                 </button>
               </>
             ) : (
-              <>
-                <button
-                  onClick={onOpenProfileModal}
-                  className="bg-gradient-to-r from-[#D97706] to-[#F59E0B] hover:from-[#B45309] hover:to-[#D97706] text-white font-bold px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2 cursor-pointer"
-                >
-                  <User className="w-4 h-4" /> {t('profile.editProfileTitle')}
-                </button>
-                <button
-                  onClick={onLoadDemo}
-                  className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 font-bold px-5 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition shadow-xs flex items-center gap-2 cursor-pointer"
-                >
-                  <RefreshCw className="w-4 h-4 text-[#D97706]" /> {t('common.loadDemo')}
-                </button>
-              </>
+              <button
+                onClick={onOpenProfileModal}
+                className="bg-gradient-to-r from-[#D97706] to-[#F59E0B] hover:from-[#B45309] hover:to-[#D97706] text-white font-bold px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2 cursor-pointer"
+              >
+                <User className="w-4 h-4" /> {t('profile.editProfileTitle')}
+              </button>
             )}
           </div>
         </div>

@@ -51,16 +51,16 @@ interface ChildLuckyNamesDashboardProps {
 }
 
 export const ChildLuckyNamesDashboard: React.FC<ChildLuckyNamesDashboardProps> = ({
-  initialDob = '2024-05-15',
-  initialName = 'Aarav',
+  initialDob = '',
+  initialName = '',
   initialGender = 'BOY' as any,
   onSyncToMasterReport
 }) => {
   const { t, language } = useLanguage();
-  const [dob, setDob] = useState<string>(initialDob || '2024-05-15');
-  const [childName, setChildName] = useState<string>(initialName || 'Aarav');
+  const [dob, setDob] = useState<string>(initialDob || '');
+  const [childName, setChildName] = useState<string>(initialName || '');
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | 'OTHER'>((initialGender as any) || 'BOY');
-  const [candidateNames, setCandidateNames] = useState<string[]>(['Aarav', 'Advik', 'Ananya']);
+  const [candidateNames, setCandidateNames] = useState<string[]>([]);
   const [newCandidateInput, setNewCandidateInput] = useState<string>('');
   const [preferredLetter, setPreferredLetter] = useState<string>('ALL');
 
@@ -78,9 +78,18 @@ export const ChildLuckyNamesDashboard: React.FC<ChildLuckyNamesDashboardProps> =
   const [report, setReport] = useState<ChildLuckyNamesReport | null>(null);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
 
-  // Perform initial calculation on mount
+  // Sync props when changed
   useEffect(() => {
-    runAnalysis();
+    if (initialDob) setDob(initialDob);
+    if (initialName) setChildName(initialName);
+    if (initialGender) setGender((initialGender as any) || 'BOY');
+  }, [initialDob, initialName, initialGender]);
+
+  // Perform initial calculation on mount only if dob is provided
+  useEffect(() => {
+    if (dob.trim()) {
+      runAnalysis();
+    }
   }, []);
 
   const runAnalysis = () => {
@@ -1104,6 +1113,16 @@ export const ChildLuckyNamesDashboard: React.FC<ChildLuckyNamesDashboardProps> =
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {!report && (
+        <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-3 max-w-xl mx-auto shadow-xs">
+          <Baby className="w-12 h-12 text-[#D97706] mx-auto opacity-80" />
+          <h3 className="text-lg font-bold font-playfair text-slate-800">संतान नाम अंकशास्त्र विश्लेषण</h3>
+          <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+            शिशु की जन्मतिथि एवं नाम दर्ज कर 'संतान नाम विश्लेषण प्रारंभ करें' पर क्लिक करें।
+          </p>
         </div>
       )}
     </div>

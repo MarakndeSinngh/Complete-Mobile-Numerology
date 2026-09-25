@@ -105,7 +105,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
   const [analysisResult, setAnalysisResult] = useState<LoshuAnalysisResult | null>(null);
   const [masterReport, setMasterReport] = useState<LoshuMasterReport | null>(null);
   const [mobileNumber, setMobileNumber] = useState('');
-  const [calcDob, setCalcDob] = useState('05-08-1983');
+  const [calcDob, setCalcDob] = useState('');
   
   // Tab control inside Loshu Analysis
   const [activeSubTab, setActiveSubTab] = useState<'MASTER_CONSULTATION' | 'KARMIC_VEDIC' | 'GRID' | 'PLANES' | 'REMEDIES' | 'PERIODS' | 'COMPATIBILITY' | 'AI_REPORT' | 'HISTORY'>('MASTER_CONSULTATION');
@@ -367,7 +367,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Raajeev Singh Chauhann"
+                placeholder="उदा. राहुल शर्मा"
                 className="w-full bg-[#F8F4EF] border border-[#E5E7EB] focus:border-[#D97706] focus:bg-white transition-all rounded-2xl pl-12 pr-5 py-4 outline-none text-sm text-[#1F2937] font-semibold"
               />
             </div>

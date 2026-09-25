@@ -69,7 +69,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
 
   // Date formatting helpers ensuring Indian DD/MM/YYYY standard
   const formatToIndianDate = (dateStr?: string) => {
-    if (!dateStr) return '05/08/1983';
+    if (!dateStr) return '—';
     if (dateStr.includes('/')) return dateStr;
     const parts = dateStr.split('-');
     if (parts.length === 3) {
@@ -80,7 +80,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     return dateStr;
   };
 
-  const formattedDOB = formatToIndianDate(personalDetails?.dob || profile?.identity?.dob || '05/08/1983');
+  const formattedDOB = formatToIndianDate(personalDetails?.dob || profile?.identity?.dob || '');
   const formattedReportDate = formatLocalizedDate(new Date(), language);
 
   // Extract core entities from unified profile
@@ -118,10 +118,10 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
   const next2Year = currentYear + 2;
   const prevYear = currentYear - 1;
 
-  const dobStr = personalDetails?.dob || profile?.identity?.dob || '1984-11-23';
+  const dobStr = personalDetails?.dob || profile?.identity?.dob || `${new Date().getFullYear()}-01-01`;
   const parsedDob = parseIndianDate(dobStr);
-  const birthDay = parsedDob?.day || 15;
-  const birthMonth = parsedDob?.month || 8;
+  const birthDay = parsedDob?.day || 1;
+  const birthMonth = parsedDob?.month || 1;
   const birthDaySum = sumDigits(birthDay);
   const birthMonthSum = sumDigits(birthMonth);
 
@@ -155,9 +155,9 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     if ((profile?.vastu as any)?.kua && typeof (profile.vastu as any).kua === 'object') {
       return (profile.vastu as any).kua as KuaProfile;
     }
-    const dobStr = personalDetails?.dob || profile?.identity?.dob || '1984-11-23';
-    const parsed = parseIndianDate(dobStr);
-    const birthYear = parsed?.year || new Date(dobStr).getFullYear() || 1984;
+    const safeDobStr = personalDetails?.dob || profile?.identity?.dob || `${new Date().getFullYear()}-01-01`;
+    const parsed = parseIndianDate(safeDobStr);
+    const birthYear = parsed?.year || (safeDobStr ? new Date(safeDobStr).getFullYear() : new Date().getFullYear());
     const gender = (personalDetails?.gender || profile?.identity?.gender || 'MALE') as 'MALE' | 'FEMALE' | 'OTHER';
     return calculateKuaNumber(birthYear, gender);
   }, [profile?.kua, profile?.vastu, personalDetails?.dob, personalDetails?.gender, profile?.identity]);

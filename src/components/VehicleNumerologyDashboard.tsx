@@ -41,17 +41,17 @@ interface VehicleNumerologyDashboardProps {
 }
 
 export const VehicleNumerologyDashboard: React.FC<VehicleNumerologyDashboardProps> = ({
-  initialDob = '15/08/1990',
-  initialName = 'Priya Sharma',
+  initialDob = '',
+  initialName = '',
   initialMobile = '',
-  initialGender = 'FEMALE',
+  initialGender = 'MALE',
   onSyncToMasterReport
 }) => {
   const { t, language } = useLanguage();
 
   // Input Form States
-  const [regNumber, setRegNumber] = useState('DL 01 AB 1234');
-  const [vehicleNickname, setVehicleNickname] = useState('Honda City');
+  const [regNumber, setRegNumber] = useState('');
+  const [vehicleNickname, setVehicleNickname] = useState('');
   const [vehicleType, setVehicleType] = useState<VehicleAnalysisInput['vehicleType']>('Car');
   const [vehiclePurpose, setVehiclePurpose] = useState<VehicleAnalysisInput['vehiclePurpose']>('Personal Use');
   const [ownerDob, setOwnerDob] = useState(initialDob);
@@ -67,9 +67,19 @@ export const VehicleNumerologyDashboard: React.FC<VehicleNumerologyDashboardProp
   const [showDetailedWhy, setShowDetailedWhy] = useState(false);
   const [syncedNotification, setSyncedNotification] = useState(false);
 
-  // Initial Calculation on mount
+  // Sync props when changed
   useEffect(() => {
-    runAnalysis();
+    if (initialDob) setOwnerDob(initialDob);
+    if (initialName) setOwnerName(initialName);
+    if (initialMobile) setMobileNumber(initialMobile);
+    if (initialGender) setGender(initialGender);
+  }, [initialDob, initialName, initialMobile, initialGender]);
+
+  // Initial Calculation only if regNumber is already provided
+  useEffect(() => {
+    if (regNumber.trim()) {
+      runAnalysis();
+    }
   }, []);
 
   const runAnalysis = () => {
@@ -871,6 +881,16 @@ export const VehicleNumerologyDashboard: React.FC<VehicleNumerologyDashboardProp
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {!report && (
+        <div className="bg-white rounded-3xl p-8 text-center border border-[#E5E7EB] space-y-3 max-w-xl mx-auto shadow-xs">
+          <Car className="w-12 h-12 text-[#D97706] mx-auto opacity-80" />
+          <h3 className="text-lg font-bold font-playfair text-slate-800">वाहन अंकशास्त्र विश्लेषण प्रारंभ करें</h3>
+          <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+            गाड़ी का रजिस्ट्रेशन नंबर (उदा. DL 01 AB 1234) एवं स्वामी का विवरण दर्ज कर 'वाहन विश्लेषण करें' पर क्लिक करें।
+          </p>
         </div>
       )}
     </div>

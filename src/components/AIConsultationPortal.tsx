@@ -384,7 +384,7 @@ export default function AIConsultationPortal({ initialProfile, onProfileUpdate }
                 required
                 value={formName}
                 onChange={e => setFormName(e.target.value)}
-                placeholder="e.g. Rajiv Singh Chauhann"
+                placeholder="e.g. Rahul Sharma"
                 className="w-full bg-[#FDFCF7] border border-[#E5E7EB] rounded-2xl px-4 py-3.5 text-xs text-[#1F2937] focus:outline-none focus:border-[#D97706]"
               />
             </div>

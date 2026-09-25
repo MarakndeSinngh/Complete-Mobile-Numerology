@@ -99,7 +99,7 @@ export default function PremiumConsultations({ initialModule = 'VEHICLE' }: Prem
   const [businessResult, setBusinessResult] = useState<BusinessReport | null>(null);
 
   const [signatureStyle, setSignatureStyle] = useState<string>('RISING_UNDERLINE');
-  const [signatureResult, setSignatureResult] = useState<SignatureReport | null>(analyzeSignatureStyle('RISING_UNDERLINE'));
+  const [signatureResult, setSignatureResult] = useState<SignatureReport | null>(null);
 
   const [childDob, setChildDob] = useState('');
   const [childResult, setChildResult] = useState<ChildReport | null>(null);
@@ -1002,7 +1002,7 @@ export default function PremiumConsultations({ initialModule = 'VEHICLE' }: Prem
                       setSigName(e.target.value);
                       setSelectedProfileIndex(-1);
                     }}
-                    placeholder="e.g. Raajeev Singh"
+                    placeholder="e.g. Rahul Sharma"
                     className="w-full bg-white border border-slate-200 text-xs px-4 py-2.5 rounded-xl text-slate-800 font-sans focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/20 focus:border-[#1E3A8A]"
                   />
                 </div>
@@ -1823,7 +1823,7 @@ export default function PremiumConsultations({ initialModule = 'VEHICLE' }: Prem
                   <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Full Name (Optional)</label>
                   <input
                     type="text"
-                    placeholder="e.g. Raajeev Singh"
+                    placeholder="e.g. Rahul Sharma"
                     value={vaastuName}
                     onChange={(e) => setVaastuName(e.target.value)}
                     className="w-full bg-white border border-[#E5E7EB] py-3 px-4 rounded-xl text-sm font-sans focus:outline-none"
