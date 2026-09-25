@@ -6,6 +6,8 @@ import { PAIR_MEANINGS } from "./src/services/pairMeanings";
 import { generateMedicalNumerologyReport } from "./src/services/medicalNumerologyEngine";
 import { generateNumeroVaastuReport } from "./src/services/numeroVaastuEngine";
 import { calculateDashaAndYearForecast } from "./src/services/dashaEngine";
+import { reportAccessEngine } from "./src/server/accessEngine";
+import { CanonicalReportType } from "./src/types/reportAccess";
 
 async function startServer() {
   const app = express();
@@ -30,6 +32,126 @@ async function startServer() {
       }
     });
   };
+
+  // =========================================================================
+  // PHASE 16: LEOFAMILY REPORT ACCESS CONTROL & ₹33 MONETIZATION ENDPOINTS
+  // =========================================================================
+
+  // 1. Request OTP for mobile number verification
+  app.post("/api/auth/request-otp", (req, res) => {
+    try {
+      const { mobile } = req.body;
+      const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+      const userAgent = (req.headers['user-agent'] as string) || 'unknown';
+      const result = reportAccessEngine.requestOtp(mobile, ip, userAgent);
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Failed to request OTP" });
+    }
+  });
+
+  // 2. Verify OTP and return session token
+  app.post("/api/auth/verify-otp", (req, res) => {
+    try {
+      const { mobile, otp } = req.body;
+      const result = reportAccessEngine.verifyOtp(mobile, otp);
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Failed to verify OTP" });
+    }
+  });
+
+  // 3. Central Report Access Check
+  app.get("/api/reports/check-access", (req, res) => {
+    try {
+      const reportType = req.query.reportType as CanonicalReportType;
+      const profileKey = (req.query.profileKey as string) || 'default_profile';
+      const mobile = req.query.mobile as string | undefined;
+      const authHeader = req.headers['authorization'];
+      const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
+
+      if (!reportType) {
+        return res.status(400).json({ error: "Missing reportType parameter" });
+      }
+
+      const result = reportAccessEngine.checkReportAccess(reportType, profileKey, mobile, token);
+      res.json(result);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Failed to check report access" });
+    }
+  });
+
+  // 4. Claim First Free Report
+  app.post("/api/reports/claim-free", (req, res) => {
+    try {
+      const { reportType, profileKey, mobile } = req.body;
+      const authHeader = req.headers['authorization'];
+      const token = req.body.token || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
+
+      if (!reportType) {
+        return res.status(400).json({ error: "Missing reportType" });
+      }
+
+      const result = reportAccessEngine.claimFreeReport(reportType, profileKey, mobile, token);
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Failed to claim free report" });
+    }
+  });
+
+  // 5. Create ₹33 Payment Order
+  app.post("/api/payments/create-order", (req, res) => {
+    try {
+      const { reportType, profileKey, mobile } = req.body;
+      const authHeader = req.headers['authorization'];
+      const token = req.body.token || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
+
+      if (!reportType) {
+        return res.status(400).json({ error: "Missing reportType" });
+      }
+
+      const result = reportAccessEngine.createPaymentOrder(reportType, profileKey, mobile, token);
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Failed to create payment order" });
+    }
+  });
+
+  // 6. Verify Payment & Grant Entitlement (Idempotent)
+  app.post("/api/payments/verify-payment", (req, res) => {
+    try {
+      const { orderId, paymentId, signature, reportType, profileKey, mobile } = req.body;
+      const authHeader = req.headers['authorization'];
+      const token = req.body.token || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
+
+      if (!orderId || !reportType) {
+        return res.status(400).json({ error: "Missing orderId or reportType" });
+      }
+
+      const result = reportAccessEngine.verifyPayment(
+        orderId,
+        paymentId,
+        signature,
+        reportType,
+        profileKey,
+        mobile,
+        token
+      );
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Failed to verify payment" });
+    }
+  });
+
+  // 7. Admin Entitlements & Revenue Audit
+  app.get("/api/admin/entitlements", (req, res) => {
+    try {
+      const data = reportAccessEngine.getAdminAuditData();
+      res.json(data);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Failed to fetch admin audit data" });
+    }
+  });
 
   // API router for Gemini report generation
   app.post("/api/report", async (req, res) => {

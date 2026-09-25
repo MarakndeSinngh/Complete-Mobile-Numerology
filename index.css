@@ -69,3 +69,69 @@ body {
 .cosmic-drift {
   animation: drift 10s ease-in-out infinite alternate;
 }
+
+/* ==========================================================================
+   PRINT STYLES FOR PDF / PRINT DOSSIER EXPORT
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 10mm 12mm 10mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    font-size: 11pt;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    overflow: visible !important;
+  }
+
+  /* Force hide screen-only navigation, headers, footers and jump bars */
+  .no-print,
+  .print\:hidden,
+  #main-header,
+  #main-footer,
+  #seo-authority-centre,
+  .quick-jump-nav,
+  button {
+    display: none !important;
+  }
+
+  /* Expand main container to full printable width */
+  #report-unified-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Prevent awkward page breaks inside major report sections & cards */
+  .print-avoid-break,
+  section,
+  .rounded-3xl,
+  .rounded-2xl {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Explicit page break markers */
+  .print-page-break {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  /* Ensure text & borders remain crisp and legible in print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
+

@@ -3,7 +3,9 @@ import { useLanguage } from '../i18n';
 import { CompleteNumerologyProfile } from '../core/types';
 import { calculateKuaNumber, KuaProfile } from '../core/kuaEngine';
 import { deriveExpertConsultationDossier, ExpertConsultationDossier } from '../core/expertConsultationEngine';
-import { buildLocalizedExpertDossier, getPlanetName, getLocalizedNumberMeaning, getLocalized81Yoga, getLocalizedPlane } from '../i18n/dynamicContent';
+import { buildLocalizedExpertDossier, getPlanetName, getLocalizedNumberMeaning, getLocalized81Yoga, getLocalizedPlane, getLocalizedPersonalYear, LocalizedPersonalYear } from '../i18n/dynamicContent';
+import { calculatePersonalYearNumber } from '../core/luckyDatesEngine';
+import { sumDigits, reduceToDigit } from '../core/numerologyEngine';
 import { parseIndianDate } from '../utils/dateUtils';
 import { formatLocalizedDate, getProfileIsolationKey } from '../utils/localeUtils';
 import { PersonalDetails, DOBAnalysis, NameAnalysis, MobileAnalysis, remediesAdvice } from '../types';
@@ -39,6 +41,9 @@ import {
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { BrandLogo } from './BrandLogo';
+import { useReportAccess } from '../hooks/useReportAccess';
+import { ReportPaywallModal } from './ReportPaywallModal';
+import { Lock, Unlock, Gift } from 'lucide-react';
 
 interface MasterReportUnifiedProps {
   profile: CompleteNumerologyProfile;
@@ -106,9 +111,41 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
   const planes = loshu.planes || [];
   const arrows = loshu.arrows || [];
 
-  // Active Personal Year
+  // Active Personal Year & Multi-Year Calculations
+  const [activePyTab, setActivePyTab] = useState<'CURRENT' | 'UPCOMING' | 'NEXT_2' | 'TIMELINE'>('CURRENT');
   const currentYear = new Date().getFullYear();
-  const personalYearVal = dobData?.personalYear || 5;
+  const nextYear = currentYear + 1;
+  const next2Year = currentYear + 2;
+  const prevYear = currentYear - 1;
+
+  const dobStr = personalDetails?.dob || profile?.identity?.dob || '1984-11-23';
+  const parsedDob = parseIndianDate(dobStr);
+  const birthDay = parsedDob?.day || 15;
+  const birthMonth = parsedDob?.month || 8;
+  const birthDaySum = sumDigits(birthDay);
+  const birthMonthSum = sumDigits(birthMonth);
+
+  const currentPY = calculatePersonalYearNumber(dobStr, currentYear);
+  const nextPY = calculatePersonalYearNumber(dobStr, nextYear);
+  const next2PY = calculatePersonalYearNumber(dobStr, next2Year);
+  const prevPY = calculatePersonalYearNumber(dobStr, prevYear);
+  const personalYearVal = currentPY;
+
+  const currentPYForecast = React.useMemo(() => {
+    return getLocalizedPersonalYear(currentPY, currentYear, language);
+  }, [currentPY, currentYear, language]);
+
+  const nextPYForecast = React.useMemo(() => {
+    return getLocalizedPersonalYear(nextPY, nextYear, language);
+  }, [nextPY, nextYear, language]);
+
+  const next2PYForecast = React.useMemo(() => {
+    return getLocalizedPersonalYear(next2PY, next2Year, language);
+  }, [next2PY, next2Year, language]);
+
+  const prevPYForecast = React.useMemo(() => {
+    return getLocalizedPersonalYear(prevPY, prevYear, language);
+  }, [prevPY, prevYear, language]);
 
   // Resolve Kua profile safely from unified profile or existing core Kua engine
   const kuaProfile: KuaProfile = React.useMemo(() => {
@@ -334,18 +371,22 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <button
+            type="button"
             onClick={() => window.print()}
-            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#FAF5EE] text-[#78350F] border border-[#FDE68A] hover:bg-[#FEF3C7] transition-all cursor-pointer"
+            title="Print report directly or save as high-quality PDF via browser print dialog"
+            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold bg-[#FAF5EE] text-[#78350F] border border-[#FDE68A] hover:bg-[#FEF3C7] shadow-xs hover:shadow transition-all cursor-pointer group"
           >
-            <Printer className="w-4 h-4" /> Print Dossier
+            <Printer className="w-4 h-4 text-[#D97706] group-hover:scale-110 transition-transform" />
+            <span>Print Report</span>
           </button>
           <button
+            type="button"
             onClick={handleExportPDF}
             disabled={pdfGenerating}
-            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-[#D97706] hover:bg-[#B45309] text-white shadow-sm transition-all cursor-pointer disabled:opacity-50"
+            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-bold bg-[#D97706] hover:bg-[#B45309] text-white shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
-            {pdfGenerating ? 'Generating Master PDF...' : 'Download Master PDF'}
+            <span>{pdfGenerating ? 'Generating Master PDF...' : 'Download Master PDF'}</span>
           </button>
         </div>
       </div>
@@ -1384,49 +1425,322 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             </div>
           </div>
 
-          {/* 19. Personal Year Detailed Narrative */}
-          <div className="p-5 bg-gradient-to-br from-amber-500/10 via-[#FAF5EE] to-amber-500/5 rounded-2xl border border-[#FDE68A] space-y-3 text-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200 pb-2">
-              <span className="font-playfair font-bold text-sm text-[#92400E] flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-[#D97706]" />
-                19. व्यक्तिगत वर्ष {localizedDossier.personalYearNarrative.year} (Personal Year #{localizedDossier.personalYearNarrative.personalYear})
-              </span>
-              <span className="text-[10px] font-mono font-bold bg-[#D97706] text-white px-2.5 py-0.5 rounded-full w-fit">
-                {localizedDossier.personalYearNarrative.theme}
-              </span>
+          {/* ========================================================================= */}
+          {/* 19. PERSONAL YEAR FORECAST (CURRENT & UPCOMING TIME VIBRATIONS) */}
+          {/* ========================================================================= */}
+          <div className="p-6 md:p-7 bg-gradient-to-br from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] rounded-3xl border-2 border-amber-200/90 shadow-sm space-y-6 print-avoid-break">
+            {/* Header & Calculation Formula Header */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b-2 border-amber-200/70 pb-5">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-2 bg-[#D97706]/10 text-[#B45309] px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border border-[#D97706]/20">
+                  <Calendar className="w-3.5 h-3.5 text-[#D97706]" /> 19. व्यक्तिगत वर्ष भविष्यफल (Personal Year Forecast)
+                </div>
+                <h4 className="font-playfair text-xl md:text-2xl font-bold text-[#1F2937]">
+                  वर्तमान एवं आगामी व्यक्तिगत वर्ष चक्र ({currentYear} – {nextYear})
+                </h4>
+                <p className="text-xs text-[#6B7280]">
+                  वैदिक एवं पाश्चात्य अंकशास्त्र के अनुसार जन्मतिथि के आधार पर समय चक्र, वार्षिक ऊर्जा कंपन व भविष्यफल।
+                </p>
+              </div>
+
+              {/* Formula Badge */}
+              <div className="bg-white/90 p-3.5 rounded-2xl border border-amber-200 shadow-2xs space-y-1 text-left min-w-[280px]">
+                <span className="text-[9px] font-mono uppercase font-bold text-[#92400E] block tracking-wider">
+                  गणना सूत्र (Calculation Formula)
+                </span>
+                <div className="font-mono text-xs font-bold text-[#1F2937] flex items-center gap-1.5 flex-wrap">
+                  <span className="bg-amber-100/70 px-1.5 py-0.5 rounded text-[#78350F]">{birthDay} ({birthDaySum})</span>
+                  <span>+</span>
+                  <span className="bg-amber-100/70 px-1.5 py-0.5 rounded text-[#78350F]">{birthMonth} ({birthMonthSum})</span>
+                  <span>+</span>
+                  <span className="bg-amber-100/70 px-1.5 py-0.5 rounded text-[#78350F]">{activePyTab === 'UPCOMING' ? nextYear : activePyTab === 'NEXT_2' ? next2Year : currentYear} ({sumDigits(activePyTab === 'UPCOMING' ? nextYear : activePyTab === 'NEXT_2' ? next2Year : currentYear)})</span>
+                  <span>=</span>
+                  <span className="bg-[#D97706] text-white px-2 py-0.5 rounded-lg shadow-xs font-black">
+                    PY #{activePyTab === 'UPCOMING' ? nextPY : activePyTab === 'NEXT_2' ? next2PY : currentPY}
+                  </span>
+                </div>
+                <span className="text-[9px] text-[#78350F] block">
+                  जन्म दिन + जन्म माह + अभीष्ट वर्ष के अंकों का एकल योग
+                </span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-[11px]">
-              <div className="p-2.5 bg-white rounded-xl border border-amber-200">
-                <strong className="text-[#92400E] block text-[10px] uppercase">करियर (Career):</strong>
-                <p className="text-[#4B5563]">{localizedDossier.personalYearNarrative.career}</p>
-              </div>
-              <div className="p-2.5 bg-white rounded-xl border border-amber-200">
-                <strong className="text-[#92400E] block text-[10px] uppercase">वित्त (Finance):</strong>
-                <p className="text-[#4B5563]">{localizedDossier.personalYearNarrative.finance}</p>
-              </div>
-              <div className="p-2.5 bg-white rounded-xl border border-amber-200">
-                <strong className="text-[#92400E] block text-[10px] uppercase">संबंध (Relationships):</strong>
-                <p className="text-[#4B5563]">{localizedDossier.personalYearNarrative.relationships}</p>
-              </div>
-              <div className="p-2.5 bg-white rounded-xl border border-amber-200">
-                <strong className="text-[#92400E] block text-[10px] uppercase">यात्रा (Travel):</strong>
-                <p className="text-[#4B5563]">{localizedDossier.personalYearNarrative.travel}</p>
+            {/* Interactive Year Selector Tabs (Screen Only) */}
+            <div className="flex flex-wrap items-center gap-2 no-print">
+              <button
+                type="button"
+                onClick={() => setActivePyTab('CURRENT')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                  activePyTab === 'CURRENT'
+                    ? 'bg-[#D97706] text-white shadow-sm ring-2 ring-amber-400'
+                    : 'bg-white text-slate-700 hover:bg-amber-50 border border-slate-200'
+                }`}
+              >
+                <span>🌟 वर्तमान वर्ष {currentYear}</span>
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+                  activePyTab === 'CURRENT' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
+                }`}>
+                  PY #{currentPY}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActivePyTab('UPCOMING')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                  activePyTab === 'UPCOMING'
+                    ? 'bg-[#1E3A8A] text-white shadow-sm ring-2 ring-blue-400'
+                    : 'bg-white text-slate-700 hover:bg-blue-50 border border-slate-200'
+                }`}
+              >
+                <span>🚀 आगामी वर्ष {nextYear}</span>
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+                  activePyTab === 'UPCOMING' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-900'
+                }`}>
+                  PY #{nextPY}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActivePyTab('NEXT_2')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                  activePyTab === 'NEXT_2'
+                    ? 'bg-purple-700 text-white shadow-sm ring-2 ring-purple-400'
+                    : 'bg-white text-slate-700 hover:bg-purple-50 border border-slate-200'
+                }`}
+              >
+                <span>🔮 भविष्य चक्र {next2Year}</span>
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+                  activePyTab === 'NEXT_2' ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-900'
+                }`}>
+                  PY #{next2PY}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActivePyTab('TIMELINE')}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activePyTab === 'TIMELINE'
+                    ? 'bg-emerald-700 text-white shadow-sm ring-2 ring-emerald-400'
+                    : 'bg-white text-slate-700 hover:bg-emerald-50 border border-slate-200'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>3-वर्षीय समग्र तुलना Matrix</span>
+              </button>
+            </div>
+
+            {/* Render Selected Year Forecast in Screen View */}
+            {activePyTab !== 'TIMELINE' && (
+              (() => {
+                const targetYear = activePyTab === 'UPCOMING' ? nextYear : activePyTab === 'NEXT_2' ? next2Year : currentYear;
+                const targetPY = activePyTab === 'UPCOMING' ? nextPY : activePyTab === 'NEXT_2' ? next2PY : currentPY;
+                const targetForecast = activePyTab === 'UPCOMING' ? nextPYForecast : activePyTab === 'NEXT_2' ? next2PYForecast : currentPYForecast;
+
+                const pyMeta = {
+                  1: { ruler: 'सूर्य (Sun ☀️)', element: 'अग्नि (Fire)', nature: 'नई शुरुआत व नेतृत्व' },
+                  2: { ruler: 'चन्द्र (Moon 🌙)', element: 'जल (Water)', nature: 'साझेदारी, सहयोग व धैर्य' },
+                  3: { ruler: 'बृहस्पति (Jupiter ✨)', element: 'आकाश (Ether)', nature: 'रचनात्मकता, ज्ञान व सामाजिक विस्तार' },
+                  4: { ruler: 'राहु (Rahu 🏛️)', element: 'पृथ्वी (Earth)', nature: 'कठिन श्रम, व्यवस्था निर्माण व अनुशासन' },
+                  5: { ruler: 'बुध (Mercury ⚡)', element: 'वायु (Air)', nature: 'तीव्र परिवर्तन, स्वतंत्रता, व्यापार व यात्रा' },
+                  6: { ruler: 'शुक्र (Venus 💖)', element: 'जल/पृथ्वी (Water/Earth)', nature: 'पारिवारिक उत्तरदायित्व, प्रेम व गृह शांति' },
+                  7: { ruler: 'केतु (Ketu 🧘)', element: 'आकाश/जल (Ether/Water)', nature: 'आध्यात्मिक चिंतन, आत्म-खोज व विश्राम' },
+                  8: { ruler: 'शनि (Saturn ⚖️)', element: 'पृथ्वी/वायु (Earth/Air)', nature: 'कर्म फल, भौतिक विस्तार व वित्तीय सत्ता' },
+                  9: { ruler: 'मंगल (Mars 🔥)', element: 'अग्नि (Fire)', nature: 'पूर्णता, विसर्जन, रूपांतरण व नया संकल्प' }
+                }[targetPY] || { ruler: 'सूर्य (Sun)', element: 'अग्नि', nature: 'सक्रिय चक्र' };
+
+                return (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    {/* Year Card Hero Banner */}
+                    <div className="p-4 md:p-5 bg-white rounded-2xl border-2 border-amber-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white font-black font-playfair text-2xl flex items-center justify-center shadow-sm">
+                          #{targetPY}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-playfair text-lg font-bold text-[#1F2937]">
+                              वर्ष {targetYear} का व्यक्तिगत कंपन (Personal Year #{targetPY})
+                            </span>
+                            <span className="bg-amber-100 text-[#92400E] text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase">
+                              {activePyTab === 'UPCOMING' ? 'आगामी वर्ष' : activePyTab === 'NEXT_2' ? 'भविष्य वर्ष' : 'सक्रिय वर्तमान वर्ष'}
+                            </span>
+                          </div>
+                          <div className="text-xs text-[#6B7280] flex items-center gap-3 mt-1 flex-wrap">
+                            <span><strong>शासक ग्रह:</strong> {pyMeta.ruler}</span>
+                            <span>•</span>
+                            <span><strong>तत्व:</strong> {pyMeta.element}</span>
+                            <span>•</span>
+                            <span><strong>मूल प्रवृत्ति:</strong> {pyMeta.nature}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-[#FAF5EE] px-4 py-2 rounded-xl border border-amber-200 text-left md:text-right">
+                        <span className="text-[10px] font-mono uppercase text-[#92400E] block font-bold">मूलांक #{coreNumbers.mulank} व भाग्यांक #{coreNumbers.bhagyank} तालमेल</span>
+                        <span className="text-xs font-bold text-emerald-700 flex items-center md:justify-end gap-1 mt-0.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          सकारात्मक ऊर्जा प्रवाह (Harmonious Wave)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Thematic Headline */}
+                    <div className="p-3.5 bg-amber-500/10 border-l-4 border-[#D97706] rounded-r-2xl text-xs font-semibold text-[#78350F]">
+                      🎯 <strong>वार्षिक मूल मंत्र:</strong> {targetForecast.theme}
+                    </div>
+
+                    {/* 4 Life Pillar Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                      <div className="p-3.5 bg-white rounded-2xl border border-amber-200 shadow-2xs space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-[#92400E] font-bold text-[11px] uppercase tracking-wider border-b border-amber-100 pb-1">
+                          <Briefcase className="w-3.5 h-3.5 text-[#D97706]" /> करियर व व्यवसाय (Career)
+                        </div>
+                        <p className="text-[11px] text-[#4B5563] leading-relaxed">{targetForecast.career}</p>
+                      </div>
+
+                      <div className="p-3.5 bg-white rounded-2xl border border-amber-200 shadow-2xs space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-[#92400E] font-bold text-[11px] uppercase tracking-wider border-b border-amber-100 pb-1">
+                          <TrendingUp className="w-3.5 h-3.5 text-[#D97706]" /> धन व निवेश (Finance)
+                        </div>
+                        <p className="text-[11px] text-[#4B5563] leading-relaxed">{targetForecast.finance}</p>
+                      </div>
+
+                      <div className="p-3.5 bg-white rounded-2xl border border-amber-200 shadow-2xs space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-[#92400E] font-bold text-[11px] uppercase tracking-wider border-b border-amber-100 pb-1">
+                          <Heart className="w-3.5 h-3.5 text-[#D97706]" /> संबंध व परिवार (Relationships)
+                        </div>
+                        <p className="text-[11px] text-[#4B5563] leading-relaxed">{targetForecast.relationships}</p>
+                      </div>
+
+                      <div className="p-3.5 bg-white rounded-2xl border border-amber-200 shadow-2xs space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-[#92400E] font-bold text-[11px] uppercase tracking-wider border-b border-amber-100 pb-1">
+                          <Compass className="w-3.5 h-3.5 text-[#D97706]" /> यात्रा व पर्यावरण (Travel)
+                        </div>
+                        <p className="text-[11px] text-[#4B5563] leading-relaxed">{targetForecast.travel}</p>
+                      </div>
+                    </div>
+
+                    {/* 3 Strategic Action Guidance Blocks */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+                      <div className="p-3.5 bg-emerald-50/80 rounded-2xl border border-emerald-200 shadow-2xs space-y-1">
+                        <span className="text-[10px] font-mono uppercase font-bold text-emerald-900 block flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 text-emerald-700" /> स्वर्णिम अवसर (Key Opportunities)
+                        </span>
+                        <p className="text-[11px] text-emerald-900 leading-relaxed">{targetForecast.opportunities}</p>
+                      </div>
+
+                      <div className="p-3.5 bg-rose-50/80 rounded-2xl border border-rose-200 shadow-2xs space-y-1">
+                        <span className="text-[10px] font-mono uppercase font-bold text-rose-900 block flex items-center gap-1">
+                          <AlertTriangle className="w-3.5 h-3.5 text-rose-700" /> सावधानी व सतर्कता (Caution)
+                        </span>
+                        <p className="text-[11px] text-rose-900 leading-relaxed">{targetForecast.caution}</p>
+                      </div>
+
+                      <div className="p-3.5 bg-blue-50/80 rounded-2xl border border-blue-200 shadow-2xs space-y-1">
+                        <span className="text-[10px] font-mono uppercase font-bold text-blue-900 block flex items-center gap-1">
+                          <Target className="w-3.5 h-3.5 text-blue-700" /> अनुशंसित मुख्य लक्ष्य (Action Mantra)
+                        </span>
+                        <p className="text-[11px] text-blue-900 leading-relaxed">{targetForecast.recommendedFocus}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()
+            )}
+
+            {/* Multi-Year Timeline Comparison Matrix (Visible on Timeline Tab or Print) */}
+            <div className={`${activePyTab === 'TIMELINE' ? 'block' : 'hidden'} print:block space-y-3 pt-2`}>
+              <h5 className="text-xs font-bold uppercase tracking-wider text-[#92400E] flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[#D97706]" />
+                3-वर्षीय समग्र जीवन चक्र तुलना (Multi-Year Trajectory Matrix)
+              </h5>
+              <div className="overflow-x-auto rounded-2xl border border-amber-200">
+                <table className="w-full text-left text-xs bg-white">
+                  <thead className="bg-[#FAF5EE] text-[#78350F] font-mono text-[10px] uppercase border-b border-amber-200">
+                    <tr>
+                      <th className="p-3">कैलेंडर वर्ष</th>
+                      <th className="p-3">Personal Year</th>
+                      <th className="p-3">शासक ग्रह</th>
+                      <th className="p-3">प्रमुख थीम व ऊर्जा</th>
+                      <th className="p-3">करियर व धन दिशा</th>
+                      <th className="p-3">मुख्य अनुशंसित रणनीति</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-amber-100 text-[11px] text-[#4B5563]">
+                    <tr className="bg-slate-50/60 opacity-80">
+                      <td className="p-3 font-mono font-bold">{prevYear} (पिछला)</td>
+                      <td className="p-3 font-mono font-bold text-slate-700">#{prevPY}</td>
+                      <td className="p-3">{getPlanetName(prevPY, language)}</td>
+                      <td className="p-3 text-[10px]">{prevPYForecast.theme}</td>
+                      <td className="p-3 text-[10px]">{prevPYForecast.career}</td>
+                      <td className="p-3 text-[10px] text-slate-800">{prevPYForecast.recommendedFocus}</td>
+                    </tr>
+                    <tr className="bg-amber-50/60 font-semibold border-y-2 border-amber-300">
+                      <td className="p-3 font-mono font-bold text-[#B45309]">🌟 {currentYear} (वर्तमान)</td>
+                      <td className="p-3 font-mono font-bold text-[#B45309]">
+                        <span className="bg-[#D97706] text-white px-2 py-0.5 rounded font-black">#{currentPY}</span>
+                      </td>
+                      <td className="p-3 font-bold text-[#92400E]">{getPlanetName(currentPY, language)}</td>
+                      <td className="p-3 text-[#1F2937]">{currentPYForecast.theme}</td>
+                      <td className="p-3 text-[#1F2937]">{currentPYForecast.career}</td>
+                      <td className="p-3 text-[#92400E] font-bold">{currentPYForecast.recommendedFocus}</td>
+                    </tr>
+                    <tr className="bg-blue-50/40">
+                      <td className="p-3 font-mono font-bold text-blue-900">🚀 {nextYear} (आगामी)</td>
+                      <td className="p-3 font-mono font-bold text-blue-900">
+                        <span className="bg-[#1E3A8A] text-white px-2 py-0.5 rounded font-black">#{nextPY}</span>
+                      </td>
+                      <td className="p-3 font-bold text-blue-900">{getPlanetName(nextPY, language)}</td>
+                      <td className="p-3">{nextPYForecast.theme}</td>
+                      <td className="p-3">{nextPYForecast.career}</td>
+                      <td className="p-3 text-blue-900">{nextPYForecast.recommendedFocus}</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-mono font-bold text-purple-900">🔮 {next2Year} (भविष्य)</td>
+                      <td className="p-3 font-mono font-bold text-purple-900">
+                        <span className="bg-purple-700 text-white px-2 py-0.5 rounded font-black">#{next2PY}</span>
+                      </td>
+                      <td className="p-3 text-purple-900">{getPlanetName(next2PY, language)}</td>
+                      <td className="p-3">{next2PYForecast.theme}</td>
+                      <td className="p-3">{next2PYForecast.career}</td>
+                      <td className="p-3 text-purple-900">{next2PYForecast.recommendedFocus}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] pt-1">
-              <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200">
-                <strong className="text-emerald-900 block text-[10px] uppercase">अवसर (Opportunities):</strong>
-                <p className="text-emerald-800">{localizedDossier.personalYearNarrative.opportunities}</p>
+            {/* Print/PDF Export Fallback: Ensure Upcoming Year is fully rendered in print without depending on tab clicks */}
+            <div className="hidden print:block space-y-4 pt-4 border-t-2 border-amber-200">
+              <div className="p-4 bg-white rounded-2xl border border-blue-200 space-y-3">
+                <div className="flex justify-between items-center border-b border-blue-100 pb-2">
+                  <span className="font-playfair text-base font-bold text-blue-900">
+                    आगामी व्यक्तिगत वर्ष {nextYear} (Upcoming Personal Year #{nextPY})
+                  </span>
+                  <span className="text-[10px] font-mono font-bold bg-[#1E3A8A] text-white px-2.5 py-0.5 rounded-full">
+                    {nextPYForecast.theme}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5 text-[10px] text-[#4B5563]">
+                  <div><strong>💼 करियर:</strong> {nextPYForecast.career}</div>
+                  <div><strong>💰 वित्त:</strong> {nextPYForecast.finance}</div>
+                  <div><strong>❤️ संबंध:</strong> {nextPYForecast.relationships}</div>
+                  <div><strong>🎯 फोकस:</strong> {nextPYForecast.recommendedFocus}</div>
+                </div>
               </div>
-              <div className="p-2.5 bg-rose-50 rounded-xl border border-rose-200">
-                <strong className="text-rose-900 block text-[10px] uppercase">सावधानी (Caution):</strong>
-                <p className="text-rose-800">{localizedDossier.personalYearNarrative.caution}</p>
-              </div>
-              <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-200">
-                <strong className="text-blue-900 block text-[10px] uppercase">मुख्य फोकस (Focus):</strong>
-                <p className="text-blue-800">{localizedDossier.personalYearNarrative.recommendedFocus}</p>
+            </div>
+
+            {/* Annual Transition Guidance Note */}
+            <div className="p-3.5 bg-white/80 rounded-2xl border border-amber-200 text-[11px] text-[#78350F] flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <strong>वर्ष संक्रमण नियम (Annual Energy Transition Principle):</strong>
+                <p className="text-[#4B5563]">
+                  व्यक्तिगत वर्ष का प्रभाव आपके जन्म माह व तारीख से विशेष रूप से सक्रिय होता है और नए वर्ष के 2-3 महीने पूर्व से ही आगामी वर्ष ({nextYear}) के कंपन महसूस होने लगते हैं। अतः {currentYear} के अंतिम चरण में {nextYear} (Personal Year #{nextPY}) की कार्ययोजना का बीजारोपण करें।
+                </p>
               </div>
             </div>
           </div>
@@ -2385,6 +2699,46 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           </div>
         </section>
 
+      </div>
+
+      {/* Bottom Floating/Docked Export Actions Bar (Screen-only) */}
+      <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 no-print mt-8">
+        <div className="text-left space-y-0.5">
+          <h4 className="font-playfair font-bold text-base text-[#1F2937] flex items-center gap-2">
+            <FileText className="w-4 h-4 text-[#D97706]" /> सम्पूर्ण 32-अध्याय महा-परामर्श रिपोर्ट पूर्ण
+          </h4>
+          <p className="text-xs text-[#6B7280]">
+            Print or export high-resolution client dossier for <strong>{identity.fullName}</strong>.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-[#F8F4EF] text-[#4B5563] hover:bg-[#F2E8DC] transition-all cursor-pointer"
+          >
+            ↑ Top
+          </button>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            title="Print entire 32-section report or save as PDF"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-[#FAF5EE] text-[#78350F] border border-[#FDE68A] hover:bg-[#FEF3C7] shadow-xs transition-all cursor-pointer group"
+          >
+            <Printer className="w-4 h-4 text-[#D97706] group-hover:scale-110 transition-transform" />
+            <span>Print Report</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleExportPDF}
+            disabled={pdfGenerating}
+            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold bg-[#D97706] hover:bg-[#B45309] text-white shadow-sm transition-all cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            <span>{pdfGenerating ? 'Generating...' : 'Download Master PDF'}</span>
+          </button>
+        </div>
       </div>
     </div>
   );

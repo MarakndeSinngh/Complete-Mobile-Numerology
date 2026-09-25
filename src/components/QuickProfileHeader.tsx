@@ -49,7 +49,7 @@ export const QuickProfileHeader: React.FC<QuickProfileHeaderProps> = ({
   const personalYear = personalDetails?.dob ? computePersonalYear(personalDetails.dob) : null;
 
   return (
-    <div className="bg-gradient-to-r from-[#FFFDF9] via-[#FDFBF7] to-[#FAF6EE] border border-[#E5E7EB] rounded-2xl p-3 md:p-4 mb-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+    <div className="bg-gradient-to-r from-[#FFFDF9] via-[#FDFBF7] to-[#FAF6EE] border border-[#E5E7EB] rounded-2xl p-3 md:p-4 mb-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 text-xs print:hidden">
       {personalDetails && dobData ? (
         <>
           <div className="flex flex-wrap items-center gap-2 md:gap-4 w-full md:w-auto">
