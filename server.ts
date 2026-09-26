@@ -1060,16 +1060,16 @@ Return data in the EXACT JSON format matching the schema properties:
 
   // Catch-all 404 JSON handler for unknown /api/* endpoints
   // Prevents API calls from ever returning Vite or Express HTML fallback pages
-  app.all("/api/*", (req, res) => {
+  app.use("/api", (req, res) => {
     res.status(404).json({
       success: false,
       error: "ENDPOINT_NOT_FOUND",
-      message: `API endpoint ${req.method} ${req.path} not found.`
+      message: `API endpoint ${req.method} ${req.originalUrl || req.path} not found.`
     });
   });
 
   // Central error handling middleware for API routes
-  app.use("/api", (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error("API error uncaught:", err);
     res.status(500).json({
       success: false,
