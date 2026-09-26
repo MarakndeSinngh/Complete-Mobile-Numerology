@@ -48,10 +48,10 @@ router.post("/auth/request-otp", async (req, res) => {
 });
 
 // 2. Verify OTP and return session token
-router.post("/auth/verify-otp", (req, res) => {
+router.post("/auth/verify-otp", async (req, res) => {
   try {
     const { mobile, otp } = req.body || {};
-    const result = reportAccessEngine.verifyOtp(mobile, otp);
+    const result = await reportAccessEngine.verifyOtp(mobile, otp);
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Failed to verify OTP" });
@@ -59,7 +59,7 @@ router.post("/auth/verify-otp", (req, res) => {
 });
 
 // 3. Central Report Access Check
-router.get("/reports/check-access", (req, res) => {
+router.get("/reports/check-access", async (req, res) => {
   try {
     const reportType = req.query.reportType as CanonicalReportType;
     const profileKey = (req.query.profileKey as string) || 'default_profile';
@@ -71,7 +71,7 @@ router.get("/reports/check-access", (req, res) => {
       return res.status(400).json({ success: false, error: "Missing reportType parameter" });
     }
 
-    const result = reportAccessEngine.checkReportAccess(reportType, profileKey, mobile, token);
+    const result = await reportAccessEngine.checkReportAccess(reportType, profileKey, mobile, token);
     res.json(result);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to check report access" });
@@ -79,7 +79,7 @@ router.get("/reports/check-access", (req, res) => {
 });
 
 // 4. Claim First Free Report
-router.post("/reports/claim-free", (req, res) => {
+router.post("/reports/claim-free", async (req, res) => {
   try {
     const { reportType, profileKey, mobile } = req.body || {};
     const authHeader = req.headers['authorization'];
@@ -89,7 +89,7 @@ router.post("/reports/claim-free", (req, res) => {
       return res.status(400).json({ success: false, error: "Missing reportType" });
     }
 
-    const result = reportAccessEngine.claimFreeReport(reportType, profileKey, mobile, token);
+    const result = await reportAccessEngine.claimFreeReport(reportType, profileKey, mobile, token);
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Failed to claim free report" });
@@ -115,7 +115,7 @@ router.post("/payments/create-order", async (req, res) => {
 });
 
 // 6. Verify Razorpay Payment Signature & Grant Entitlement
-router.post("/payments/verify-payment", (req, res) => {
+router.post("/payments/verify-payment", async (req, res) => {
   try {
     const { orderId, paymentId, signature, reportType, profileKey, mobile } = req.body || {};
     const authHeader = req.headers['authorization'];
@@ -125,7 +125,7 @@ router.post("/payments/verify-payment", (req, res) => {
       return res.status(400).json({ success: false, error: "Missing orderId or reportType" });
     }
 
-    const result = reportAccessEngine.verifyPayment(
+    const result = await reportAccessEngine.verifyPayment(
       orderId,
       paymentId || '',
       signature || '',
@@ -141,11 +141,11 @@ router.post("/payments/verify-payment", (req, res) => {
 });
 
 // 7. Razorpay Webhook Endpoint
-router.post("/payments/webhook", (req, res) => {
+router.post("/payments/webhook", async (req, res) => {
   try {
     const signature = (req.headers['x-razorpay-signature'] as string) || '';
     const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
-    const result = reportAccessEngine.processWebhook(rawBody, signature);
+    const result = await reportAccessEngine.processWebhook(rawBody, signature);
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Webhook verification failed" });
@@ -153,13 +153,13 @@ router.post("/payments/webhook", (req, res) => {
 });
 
 // 8. Retrieve All Reports for Authenticated Customer
-router.get("/reports/my-reports", (req, res) => {
+router.get("/reports/my-reports", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
     const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
     const mobile = req.query.mobile as string | undefined;
 
-    const data = reportAccessEngine.getUserReports(token, mobile);
+    const data = await reportAccessEngine.getUserReports(token, mobile);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to fetch user reports" });
@@ -167,13 +167,13 @@ router.get("/reports/my-reports", (req, res) => {
 });
 
 // 9. Retrieve Verified Payment History for Customer
-router.get("/payments/history", (req, res) => {
+router.get("/payments/history", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
     const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
     const mobile = req.query.mobile as string | undefined;
 
-    const data = reportAccessEngine.getUserPaymentHistory(token, mobile);
+    const data = await reportAccessEngine.getUserPaymentHistory(token, mobile);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to fetch payment history" });
@@ -181,13 +181,13 @@ router.get("/payments/history", (req, res) => {
 });
 
 // 10. Retrieve Access & Entitlement Summary
-router.get("/reports/access-summary", (req, res) => {
+router.get("/reports/access-summary", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
     const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
     const mobile = req.query.mobile as string | undefined;
 
-    const data = reportAccessEngine.getUserAccessSummary(token, mobile);
+    const data = await reportAccessEngine.getUserAccessSummary(token, mobile);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to fetch access summary" });
@@ -195,14 +195,14 @@ router.get("/reports/access-summary", (req, res) => {
 });
 
 // 11. Retrieve Single Report with Server Ownership Check
-router.get("/reports/:reportId", (req, res) => {
+router.get("/reports/:reportId", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
     const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
     const mobile = req.query.mobile as string | undefined;
     const { reportId } = req.params;
 
-    const data = reportAccessEngine.getReportById(reportId, token, mobile);
+    const data = await reportAccessEngine.getReportById(reportId, token, mobile);
     res.json(data);
   } catch (e: any) {
     res.status(403).json({ success: false, error: e?.message || "Failed to access report" });
@@ -210,9 +210,9 @@ router.get("/reports/:reportId", (req, res) => {
 });
 
 // 12. Admin Entitlements & Revenue Audit
-router.get("/admin/entitlements", (req, res) => {
+router.get("/admin/entitlements", async (req, res) => {
   try {
-    const data = reportAccessEngine.getAdminAuditData();
+    const data = await reportAccessEngine.getAdminAuditData();
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to fetch admin audit data" });

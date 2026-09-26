@@ -6,7 +6,7 @@
       "mobileVerified": true,
       "token": "usr_tok_34297dc77c58bf58dd7cbc0907b68d67",
       "createdAt": "2026-09-26T16:23:59.497Z",
-      "lastLoginAt": "2026-09-26T16:23:59.497Z"
+      "lastLoginAt": "2026-09-26T16:44:44.706Z"
     }
   },
   "freeClaims": {
@@ -29,9 +29,59 @@
       "amount": 0,
       "paymentStatus": "GRANTED",
       "createdAt": "2026-09-26T16:24:12.085Z"
+    },
+    "9876543210_BUSINESS_default_profile": {
+      "id": "ent_paid_5dd9dfe3b8f78346",
+      "userId": "usr_b7b7f87fe71ad73d",
+      "mobile": "9876543210",
+      "reportType": "BUSINESS",
+      "profileKey": "default_profile",
+      "accessType": "PAID",
+      "amount": 33,
+      "paymentId": "pay_test_987654321",
+      "orderId": "order_TgjhIfpgFZej1W",
+      "paymentStatus": "PAID",
+      "createdAt": "2026-09-26T16:46:07.048Z"
     }
   },
-  "orders": {},
-  "payments": {},
+  "orders": {
+    "order_TgjhIfpgFZej1W": {
+      "orderId": "order_TgjhIfpgFZej1W",
+      "userId": "usr_b7b7f87fe71ad73d",
+      "mobile": "9876543210",
+      "reportType": "BUSINESS",
+      "profileKey": "default_profile",
+      "amount": 33,
+      "currency": "INR",
+      "receipt": "rcpt_1790441126214_busi",
+      "status": "PAID",
+      "createdAt": "2026-09-26T16:45:26.501Z"
+    },
+    "order_TgjhPvmgv4i4lY": {
+      "orderId": "order_TgjhPvmgv4i4lY",
+      "userId": "usr_b7b7f87fe71ad73d",
+      "mobile": "9876543210",
+      "reportType": "BUSINESS",
+      "profileKey": "default_profile",
+      "amount": 33,
+      "currency": "INR",
+      "receipt": "rcpt_1790441132861_busi",
+      "status": "CREATED",
+      "createdAt": "2026-09-26T16:45:33.145Z"
+    }
+  },
+  "payments": {
+    "pay_test_987654321": {
+      "internalUserId": "usr_b7b7f87fe71ad73d",
+      "profileKey": "default_profile",
+      "reportType": "BUSINESS",
+      "razorpayOrderId": "order_TgjhIfpgFZej1W",
+      "razorpayPaymentId": "pay_test_987654321",
+      "amount": 33,
+      "currency": "INR",
+      "paymentStatus": "PAID",
+      "createdAt": "2026-09-26T16:46:07.048Z"
+    }
+  },
   "processedEvents": []
 }
