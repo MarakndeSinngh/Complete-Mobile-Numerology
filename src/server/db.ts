@@ -9,14 +9,37 @@ const { Pool } = pg;
 // Detect database connection URL from environment variables
 export function getDatabaseConnectionString(): string | null {
   if (typeof process === 'undefined' || !process.env) return null;
-  return (
-    process.env.DATABASE_URL ||
-    process.env.SUPABASE_DB_URL ||
-    process.env.POSTGRES_URL ||
-    process.env.SUPABASE_POSTGRES_URL ||
-    process.env.POSTGRES_PRISMA_URL ||
-    null
-  );
+  const candidates = [
+    process.env.SUPABASE_DB_URL,
+    process.env.POSTGRES_URL,
+    process.env.SUPABASE_POSTGRES_URL,
+    process.env.POSTGRES_PRISMA_URL,
+    process.env.DATABASE_URL
+  ];
+
+  for (const url of candidates) {
+    if (!url || typeof url !== 'string') continue;
+    const trimmed = url.trim();
+
+    // Must be a valid postgres protocol
+    if (!trimmed.startsWith('postgres://') && !trimmed.startsWith('postgresql://')) {
+      continue;
+    }
+
+    // Filter out unpopulated placeholders from .env.example
+    if (
+      trimmed.includes('[YOUR-') ||
+      trimmed.includes('YOUR-PROJECT-REF') ||
+      trimmed.includes('[YOUR-PASSWORD]') ||
+      trimmed.includes('example.com')
+    ) {
+      continue;
+    }
+
+    return trimmed;
+  }
+
+  return null;
 }
 
 // Check whether a durable database is configured
