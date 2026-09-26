@@ -219,9 +219,20 @@ router.get("/admin/entitlements", (req, res) => {
   }
 });
 
-// 13. OTP and Gateway Environment Diagnostics
+// 13. OTP and Gateway Environment Diagnostics (Restricted in production)
 router.get("/otp-debug", (req, res) => {
   res.setHeader("Cache-Control", "no-store, max-age=0");
+  const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL;
+  const allowDebug = !isProduction || process.env.ENABLE_OTP_DEBUG === "true" || req.query.adminKey === process.env.ADMIN_SECRET_KEY;
+
+  if (!allowDebug) {
+    return res.status(403).json({
+      success: false,
+      error: "FORBIDDEN",
+      message: "Diagnostic debug endpoint is restricted in production mode."
+    });
+  }
+
   res.json({
     success: true,
     timestamp: new Date().toISOString(),
