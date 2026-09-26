@@ -131,6 +131,7 @@ export const hi: TranslationDictionary = {
     masterReportDesc: "360-डिग्री सम्पूर्ण जीवन परामर्श एवं रेमेडीज",
     aiConsultation: "वैदिक परामर्श केंद्र",
     aiConsultationDesc: "विशेषज्ञ प्रश्नोत्तरी व त्वरित वैदिक मार्गदर्शन",
+    myReports: "मेरे रिपोर्ट्स",
   },
   profile: {
     quickProfileTitle: "सक्रिय उपयोगकर्ता प्रोफाइल",

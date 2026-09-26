@@ -25,6 +25,7 @@ import { VehicleNumerologyDashboard } from './components/VehicleNumerologyDashbo
 import ErrorBoundary from './components/ErrorBoundary';
 import { MasterReportUnified } from './components/MasterReportUnified';
 import { ReportAccessGate } from './components/ReportAccessGate';
+import { MyReportsHub } from './components/MyReportsHub';
 import { MasterNavigation, NavPortalId } from './components/MasterNavigation';
 import { QuickProfileHeader } from './components/QuickProfileHeader';
 import { QuickProfileModal } from './components/QuickProfileModal';
@@ -166,6 +167,7 @@ const App: React.FC = () => {
     PREMIUM_DASHA: 'dasha-numerology',
     AI_CONSULTATION: 'consultation-hub',
     MASTER_REPORT: 'master-report',
+    MY_REPORTS: 'my-reports',
   };
 
   useEffect(() => {
@@ -177,7 +179,11 @@ const App: React.FC = () => {
       let title = "Leo Family Numerology - Premium Indian Numerology Portal";
       let description = "Vedic Numerology & Chaldean Frequencies. Explore hidden planetary yogas, material blockages, and cosmic alignments curated by Rajiv Singh Chauhann.";
 
-      if (path.includes('mobile-numerology')) {
+      if (path.includes('my-reports')) {
+        setCurrentPortal('MY_REPORTS');
+        title = "My Reports & Payment History - LeoFamily Access Center";
+        description = "Access all your unlocked Vedic reports, view verified payment history, and check entitlement status.";
+      } else if (path.includes('mobile-numerology')) {
         setCurrentPortal('MOBILE_NUMEROLOGY');
         title = "Mobile Numerology Scanner - Chaldean Planetary Frequencies";
         description = "Scan cumulative Chaldean vibrations, planetary yogas, material blockages, and cosmic remedies of your mobile number.";
@@ -632,6 +638,11 @@ const App: React.FC = () => {
           <AIConsultationPortal
             initialProfile={personalDetails}
             onProfileUpdate={(p) => applyProfile(p)}
+          />
+        ) : currentPortal === 'MY_REPORTS' ? (
+          <MyReportsHub
+            onNavigatePortal={(portalId) => handlePortalNavigation(portalId)}
+            onOpenProfileModal={() => setIsProfileModalOpen(true)}
           />
         ) : currentPortal === 'MOBILE_NUMEROLOGY' ? (
           !personalDetails ? (

@@ -131,6 +131,7 @@ export const bn: TranslationDictionary = {
     masterReportDesc: "৩৬০-ডিগ্রি সম্পূর্ণ জীবন নথি ও প্রতিকার",
     aiConsultation: "বৈদিক পরামর্শ কেন্দ্র",
     aiConsultationDesc: "বিশেষজ্ঞ প্রশ্নোত্তর ও তাৎক্ষণিক বৈদিক দিকনির্দেশনা",
+    myReports: "আমার রিপোর্ট",
   },
   profile: {
     quickProfileTitle: "সক্রিয় ব্যবহারকারী প্রোফাইল",

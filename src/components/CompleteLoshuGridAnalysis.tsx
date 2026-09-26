@@ -23,6 +23,7 @@ import { BrandLogo } from './BrandLogo';
 import { formatDateIndian } from '../utils/dateUtils';
 import { formatLocalizedDateTime } from '../utils/localeUtils';
 import { useLanguage } from '../i18n';
+import { safeFetchJson } from '../services/safeApiHelper';
 import { 
   Calendar, User, Compass, HelpCircle, Sparkles, RefreshCw, Star, 
   Trash2, Heart, Shield, BookOpen, Layers, Award, FileText, Download, 
@@ -246,7 +247,7 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
     setAiReport('');
     
     try {
-      const response = await fetch('/api/loshu-report', {
+      const data = await safeFetchJson<{ report?: string; error?: string }>('/api/loshu-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -263,15 +264,14 @@ export const CompleteLoshuGridAnalysis: React.FC<CompleteLoshuGridAnalysisProps>
         })
       });
       
-      const data = await response.json();
       if (data.report) {
         setAiReport(data.report);
       } else {
         setReportError(data.error || 'आकाशीय विसंगति: रिपोर्ट जनरेट नहीं हो सकी।');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setReportError('सर्वर से संपर्क विफल रहा। कृपया आवश्यक सेटिंग्स में अपनी GEMINI_API_KEY जांचें।');
+      setReportError(e?.message || 'सर्वर से संपर्क विफल रहा। कृपया आवश्यक सेटिंग्स में अपनी GEMINI_API_KEY जांचें।');
     } finally {
       setLoadingReport(false);
     }

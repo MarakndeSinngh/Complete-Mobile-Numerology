@@ -131,6 +131,7 @@ export const en: TranslationDictionary = {
     masterReportDesc: "360-degree life dossier & remedial blueprint",
     aiConsultation: "Vedic Consultation Hub",
     aiConsultationDesc: "Expert Q&A and instant Vedic guidance",
+    myReports: "My Reports",
   },
   profile: {
     quickProfileTitle: "Active User Profile",

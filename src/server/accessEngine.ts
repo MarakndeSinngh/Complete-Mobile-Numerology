@@ -13,7 +13,10 @@ import {
   ReportEntitlementRecord,
   PaymentOrderResponse,
   StoredPaymentRecord,
-  PaymentWebhookPayload
+  PaymentWebhookPayload,
+  UserReportItem,
+  PaymentHistoryItem,
+  UserAccessSummary
 } from '../types/reportAccess';
 
 export const REPORT_PRICE_INR = 33;
@@ -735,7 +738,307 @@ class ReportAccessEngine {
     };
   }
 
-  // 8. Admin Audit Data
+  // 8. Retrieve All Reports for Authenticated Customer
+  public getUserReports(token?: string, rawMobile?: string): { success: boolean; reports: UserReportItem[]; total: number } {
+    let user = this.getUserByToken(token);
+    let mobile = user ? user.mobile : normalizeIndianMobile(rawMobile);
+
+    if (!mobile || !user) {
+      if (mobile) {
+        user = this.users.get(mobile) || null;
+      }
+    }
+
+    if (!mobile || !user) {
+      return { success: true, reports: [], total: 0 };
+    }
+
+    const reportItems: UserReportItem[] = [];
+
+    // 1. Collect all claimed & purchased entitlements
+    for (const ent of this.entitlements.values()) {
+      if (ent.mobile === mobile || ent.userId === user.id) {
+        const def = REPORT_REGISTRY[ent.reportType] || REPORT_REGISTRY.MASTER_REPORT;
+        reportItems.push({
+          id: ent.id,
+          userId: ent.userId,
+          profileKey: ent.profileKey,
+          reportType: ent.reportType,
+          titleHi: def.titleHi,
+          titleEn: def.titleEn,
+          titleMr: def.titleMr,
+          titleBn: def.titleBn,
+          titleGu: def.titleGu,
+          accessType: ent.accessType,
+          amount: ent.amount,
+          currency: 'INR',
+          status: 'UNLOCKED',
+          paymentId: ent.paymentId,
+          orderId: ent.orderId,
+          createdAt: ent.createdAt,
+        });
+      }
+    }
+
+    // 2. Add Mobile Numerology as permanent Always Free entry
+    const mobileDef = REPORT_REGISTRY.MOBILE_NUMEROLOGY;
+    reportItems.push({
+      id: `perm_mobile_${mobile}`,
+      userId: user.id,
+      profileKey: 'mobile_scanner_profile',
+      reportType: 'MOBILE_NUMEROLOGY',
+      titleHi: mobileDef.titleHi,
+      titleEn: mobileDef.titleEn,
+      titleMr: mobileDef.titleMr,
+      titleBn: mobileDef.titleBn,
+      titleGu: mobileDef.titleGu,
+      accessType: 'ALWAYS_FREE',
+      amount: 0,
+      currency: 'INR',
+      status: 'UNLOCKED',
+      createdAt: user.createdAt,
+    });
+
+    // Sort newest first
+    reportItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return {
+      success: true,
+      reports: reportItems,
+      total: reportItems.length,
+    };
+  }
+
+  // 9. Retrieve Verified Payment History for Customer
+  public getUserPaymentHistory(token?: string, rawMobile?: string): { success: boolean; payments: PaymentHistoryItem[]; total: number } {
+    let user = this.getUserByToken(token);
+    let mobile = user ? user.mobile : normalizeIndianMobile(rawMobile);
+
+    if (!mobile || !user) {
+      if (mobile) {
+        user = this.users.get(mobile) || null;
+      }
+    }
+
+    if (!mobile || !user) {
+      return { success: true, payments: [], total: 0 };
+    }
+
+    const historyItems: PaymentHistoryItem[] = [];
+
+    // 1. Include Free Report Claim if used
+    const freeClaim = this.freeClaims.get(mobile);
+    if (freeClaim) {
+      historyItems.push({
+        id: `claim_${freeClaim.claimedAt}`,
+        userId: user.id,
+        reportType: freeClaim.reportType,
+        profileKey: freeClaim.profileKey,
+        amount: 0,
+        currency: 'INR',
+        status: 'FREE',
+        paymentReference: 'Complimentary Free Claim (₹0)',
+        createdAt: freeClaim.claimedAt,
+      });
+    }
+
+    // 2. Include Verified Paid Transactions
+    for (const p of this.payments.values()) {
+      if (p.internalUserId === user.id) {
+        historyItems.push({
+          id: p.razorpayPaymentId,
+          userId: p.internalUserId,
+          reportType: p.reportType,
+          profileKey: p.profileKey,
+          amount: p.amount,
+          currency: p.currency,
+          status: p.paymentStatus === 'CAPTURED' || p.paymentStatus === 'PAID' ? 'PAID' : 'CREATED',
+          paymentReference: p.razorpayPaymentId,
+          orderId: p.razorpayOrderId,
+          createdAt: p.createdAt,
+        });
+      }
+    }
+
+    // 3. Include Failed or Pending Orders
+    for (const order of this.orders.values()) {
+      if (order.userId === user.id && order.status === 'FAILED') {
+        historyItems.push({
+          id: order.orderId,
+          userId: order.userId,
+          reportType: order.reportType,
+          profileKey: order.profileKey,
+          amount: order.amount,
+          currency: order.currency,
+          status: 'FAILED',
+          paymentReference: `Failed Attempt (${order.orderId})`,
+          orderId: order.orderId,
+          createdAt: order.createdAt,
+        });
+      }
+    }
+
+    // Sort newest first
+    historyItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return {
+      success: true,
+      payments: historyItems,
+      total: historyItems.length,
+    };
+  }
+
+  // 10. Retrieve Access & Entitlement Summary
+  public getUserAccessSummary(token?: string, rawMobile?: string): { success: boolean; summary: UserAccessSummary } {
+    let user = this.getUserByToken(token);
+    let mobile = user ? user.mobile : normalizeIndianMobile(rawMobile);
+
+    if (!mobile || !user) {
+      if (mobile) {
+        user = this.users.get(mobile) || null;
+      }
+    }
+
+    if (!mobile || !user) {
+      return {
+        success: true,
+        summary: {
+          mobile: '',
+          mobileVerified: false,
+          mobileNumerology: {
+            status: 'ALWAYS_FREE',
+            price: 0,
+          },
+          firstNonMobileReport: {
+            status: 'AVAILABLE',
+          },
+          additionalReports: {
+            priceInr: REPORT_PRICE_INR,
+            pricePaise: REPORT_PRICE_PAISE,
+          },
+          totalReportsUnlocked: 0,
+          totalPaidAmountInr: 0,
+        },
+      };
+    }
+
+    const freeClaim = this.freeClaims.get(mobile);
+    const userEntitlements = Array.from(this.entitlements.values()).filter(
+      (e) => e.mobile === mobile || e.userId === user?.id
+    );
+    const paidEntitlements = userEntitlements.filter((e) => e.accessType === 'PAID');
+    const totalPaidAmount = paidEntitlements.reduce((sum, e) => sum + e.amount, 0);
+
+    return {
+      success: true,
+      summary: {
+        mobile,
+        mobileVerified: true,
+        mobileNumerology: {
+          status: 'ALWAYS_FREE',
+          price: 0,
+        },
+        firstNonMobileReport: {
+          status: freeClaim ? 'USED' : 'AVAILABLE',
+          reportType: freeClaim?.reportType,
+          claimedAt: freeClaim?.claimedAt,
+          profileKey: freeClaim?.profileKey,
+        },
+        additionalReports: {
+          priceInr: REPORT_PRICE_INR,
+          pricePaise: REPORT_PRICE_PAISE,
+        },
+        totalReportsUnlocked: userEntitlements.length + 1, // +1 for Mobile Numerology
+        totalPaidAmountInr: totalPaidAmount,
+      },
+    };
+  }
+
+  // 11. Retrieve Single Report by ID with Server Ownership Validation
+  public getReportById(reportId: string, token?: string, rawMobile?: string): { success: boolean; allowed: boolean; report: UserReportItem } {
+    let user = this.getUserByToken(token);
+    let mobile = user ? user.mobile : normalizeIndianMobile(rawMobile);
+
+    if (!mobile || !user) {
+      if (mobile) {
+        user = this.users.get(mobile) || null;
+      }
+    }
+
+    if (!mobile || !user) {
+      throw new Error("Authentication required to access report");
+    }
+
+    // Check permanent mobile report
+    if (reportId.startsWith('perm_mobile_')) {
+      const def = REPORT_REGISTRY.MOBILE_NUMEROLOGY;
+      return {
+        success: true,
+        allowed: true,
+        report: {
+          id: reportId,
+          userId: user.id,
+          profileKey: 'mobile_scanner_profile',
+          reportType: 'MOBILE_NUMEROLOGY',
+          titleHi: def.titleHi,
+          titleEn: def.titleEn,
+          titleMr: def.titleMr,
+          titleBn: def.titleBn,
+          titleGu: def.titleGu,
+          accessType: 'ALWAYS_FREE',
+          amount: 0,
+          currency: 'INR',
+          status: 'UNLOCKED',
+          createdAt: user.createdAt,
+        },
+      };
+    }
+
+    // Find in entitlements
+    let targetEnt: ReportEntitlementRecord | null = null;
+    for (const ent of this.entitlements.values()) {
+      if (ent.id === reportId) {
+        targetEnt = ent;
+        break;
+      }
+    }
+
+    if (!targetEnt) {
+      throw new Error("Report not found in server registry");
+    }
+
+    // Validate ownership
+    if (targetEnt.mobile !== mobile && targetEnt.userId !== user.id) {
+      throw new Error("Unauthorized: You do not own this report entitlement");
+    }
+
+    const def = REPORT_REGISTRY[targetEnt.reportType] || REPORT_REGISTRY.MASTER_REPORT;
+
+    return {
+      success: true,
+      allowed: true,
+      report: {
+        id: targetEnt.id,
+        userId: targetEnt.userId,
+        profileKey: targetEnt.profileKey,
+        reportType: targetEnt.reportType,
+        titleHi: def.titleHi,
+        titleEn: def.titleEn,
+        titleMr: def.titleMr,
+        titleBn: def.titleBn,
+        titleGu: def.titleGu,
+        accessType: targetEnt.accessType,
+        amount: targetEnt.amount,
+        currency: 'INR',
+        status: 'UNLOCKED',
+        paymentId: targetEnt.paymentId,
+        orderId: targetEnt.orderId,
+        createdAt: targetEnt.createdAt,
+      },
+    };
+  }
+
+  // 12. Admin Audit Data
   public getAdminAuditData() {
     return {
       totalUsers: this.users.size,

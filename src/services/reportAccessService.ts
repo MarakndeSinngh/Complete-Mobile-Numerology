@@ -1,6 +1,7 @@
 /**
  * LEOFAMILY REPORT ACCESS & ₹33 MONETIZATION CLIENT SERVICE
  * Phase 16: Centralized Access Gate & Payment Integration
+ * Hardened with safe JSON response parsing to prevent unexpected HTML/text parse exceptions.
  */
 
 import {
@@ -10,6 +11,7 @@ import {
   PaymentOrderResponse,
   UserSession,
 } from '../types/reportAccess';
+import { safeFetchJson } from './safeApiHelper';
 
 const TOKEN_KEY = 'leofamily_auth_token';
 const USER_KEY = 'leofamily_auth_user';
@@ -67,7 +69,6 @@ export class ReportAccessService {
         if (existingScript) {
           existingScript.addEventListener('load', () => resolve(true));
           existingScript.addEventListener('error', () => resolve(false));
-          // If already loaded
           if ((window as any).Razorpay) resolve(true);
           return;
         }
@@ -85,29 +86,35 @@ export class ReportAccessService {
 
   // 1. Request OTP for Indian mobile number
   public static async requestOtp(mobile: string): Promise<{ success: boolean; message: string; testOtp?: string }> {
-    const res = await fetch('/api/auth/request-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to request OTP');
-    }
-    return data;
+    return await safeFetchJson<{ success: boolean; message: string; testOtp?: string }>(
+      '/api/auth/request-otp',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile }),
+      }
+    );
   }
 
   // 2. Verify OTP & establish session
   public static async verifyOtp(mobile: string, otp: string): Promise<UserSession> {
-    const res = await fetch('/api/auth/verify-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile, otp }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to verify OTP');
-    }
+    const data = await safeFetchJson<{
+      success: boolean;
+      token: string;
+      user: {
+        id: string;
+        mobile: string;
+        hasClaimedFreeReport: boolean;
+        freeReportDetails?: any;
+      };
+    }>(
+      '/api/auth/verify-otp',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile, otp }),
+      }
+    );
 
     const session: UserSession = {
       userId: data.user.id,
@@ -157,14 +164,26 @@ export class ReportAccessService {
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch(`/api/reports/check-access?${params.toString()}`, {
-      headers,
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to check report access');
+    try {
+      return await safeFetchJson<ReportAccessCheckResult>(
+        `/api/reports/check-access?${params.toString()}`,
+        { headers }
+      );
+    } catch (err: any) {
+      console.warn("API check-access notice:", err.message);
+      // Return safe client fallback if server endpoint is temporarily disconnected
+      return {
+        allowed: false,
+        requiresPayment: true,
+        isFirstFreeReport: !storedUser?.hasClaimedFreeReport,
+        isFreeReportType: false,
+        canClaimFree: !storedUser?.hasClaimedFreeReport,
+        price: 33,
+        reportType,
+        profileKey: profileKey || 'default_profile',
+        accessType: 'PAID',
+      };
     }
-    return data;
   }
 
   // 4. Claim First Free Report
@@ -180,20 +199,19 @@ export class ReportAccessService {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch('/api/reports/claim-free', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        reportType,
-        profileKey: profileKey || 'default_profile',
-        mobile: activeMobile,
-        token,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to claim free report');
-    }
+    const data = await safeFetchJson<{ success: boolean; allowed: boolean; entitlement: any }>(
+      '/api/reports/claim-free',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reportType,
+          profileKey: profileKey || 'default_profile',
+          mobile: activeMobile,
+          token,
+        }),
+      }
+    );
 
     // Update stored session if present
     if (storedUser) {
@@ -222,21 +240,19 @@ export class ReportAccessService {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch('/api/payments/create-order', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        reportType,
-        profileKey: profileKey || 'default_profile',
-        mobile: activeMobile,
-        token,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Failed to create payment order');
-    }
-    return data;
+    return await safeFetchJson<PaymentOrderResponse>(
+      '/api/payments/create-order',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reportType,
+          profileKey: profileKey || 'default_profile',
+          mobile: activeMobile,
+          token,
+        }),
+      }
+    );
   }
 
   // 6. Verify Payment & Grant Entitlement
@@ -255,23 +271,97 @@ export class ReportAccessService {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch('/api/payments/verify-payment', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        orderId,
-        paymentId,
-        signature,
-        reportType,
-        profileKey: profileKey || 'default_profile',
-        mobile: activeMobile,
-        token,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Payment verification failed');
-    }
-    return data;
+    return await safeFetchJson<{ success: boolean; accessGranted: boolean; entitlement: any }>(
+      '/api/payments/verify-payment',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          orderId,
+          paymentId,
+          signature,
+          reportType,
+          profileKey: profileKey || 'default_profile',
+          mobile: activeMobile,
+          token,
+        }),
+      }
+    );
+  }
+
+  // 7. Get Customer's Historical Reports (Authoritative Server Query)
+  public static async getMyReports(mobile?: string): Promise<any> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const activeMobile = mobile || storedUser?.mobile;
+
+    const params = new URLSearchParams();
+    if (activeMobile) params.append('mobile', activeMobile);
+    if (token) params.append('token', token);
+
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<any>(
+      `/api/reports/my-reports?${params.toString()}`,
+      { headers }
+    );
+  }
+
+  // 8. Get Customer's Verified Payment History
+  public static async getPaymentHistory(mobile?: string): Promise<any> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const activeMobile = mobile || storedUser?.mobile;
+
+    const params = new URLSearchParams();
+    if (activeMobile) params.append('mobile', activeMobile);
+    if (token) params.append('token', token);
+
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<any>(
+      `/api/payments/history?${params.toString()}`,
+      { headers }
+    );
+  }
+
+  // 9. Get Entitlement Access Summary
+  public static async getAccessSummary(mobile?: string): Promise<any> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const activeMobile = mobile || storedUser?.mobile;
+
+    const params = new URLSearchParams();
+    if (activeMobile) params.append('mobile', activeMobile);
+    if (token) params.append('token', token);
+
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<any>(
+      `/api/reports/access-summary?${params.toString()}`,
+      { headers }
+    );
+  }
+
+  // 10. Get Single Report by ID with Server Entitlement Check
+  public static async getReportById(reportId: string, mobile?: string): Promise<any> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const activeMobile = mobile || storedUser?.mobile;
+
+    const params = new URLSearchParams();
+    if (activeMobile) params.append('mobile', activeMobile);
+    if (token) params.append('token', token);
+
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<any>(
+      `/api/reports/${encodeURIComponent(reportId)}?${params.toString()}`,
+      { headers }
+    );
   }
 }

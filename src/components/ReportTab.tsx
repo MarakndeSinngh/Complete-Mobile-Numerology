@@ -13,6 +13,8 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { formatDateIndian, parseIndianDate } from '../utils/dateUtils';
 
+import { safeFetchJson } from '../services/safeApiHelper';
+
 interface ReportTabProps {
   personalDetails: PersonalDetails;
   dobData: DOBAnalysis;
@@ -43,7 +45,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await fetch('/api/report', {
+      const data = await safeFetchJson<{ report?: string; error?: string }>('/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -54,7 +56,6 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
           remedies
         })
       });
-      const data = await response.json();
       if (data.report) {
         setReportText(data.report);
       } else if (data.error) {
@@ -62,8 +63,8 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
       } else {
         setErrorMessage('Celestial wave obstruction. Please try again in a few moments.');
       }
-    } catch (err) {
-      setErrorMessage('Could not establish connection with servers. Please check if your GEMINI_API_KEY is correctly set in your environment configuration (Settings > Secrets).');
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Could not establish connection with servers. Please check if your GEMINI_API_KEY is correctly set in your environment configuration (Settings > Secrets).');
     } finally {
       setLoading(false);
     }

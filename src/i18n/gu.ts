@@ -131,6 +131,7 @@ export const gu: TranslationDictionary = {
     masterReportDesc: "360-ડિગ્રી સંપૂર્ણ જીવન દસ્તાવેજ અને ઉપાયો",
     aiConsultation: "વૈદિક સલાહ કેન્દ્ર",
     aiConsultationDesc: "નિષ્ણાત પ્રશ્નોત્તરી અને ત્વરિત વૈદિક માર્ગદર્શન",
+    myReports: "મારા રિપોર્ટ્સ",
   },
   profile: {
     quickProfileTitle: "સક્રિય વપરાશકર્તા પ્રોફાઇલ",

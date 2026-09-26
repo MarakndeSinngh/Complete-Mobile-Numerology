@@ -33,6 +33,12 @@ async function startServer() {
     });
   };
 
+  // Ensure all API responses explicitly default to Content-Type: application/json
+  app.use("/api", (req, res, next) => {
+    res.setHeader("Content-Type", "application/json");
+    next();
+  });
+
   // =========================================================================
   // PHASE 16: LEOFAMILY REPORT ACCESS CONTROL & ₹33 MONETIZATION ENDPOINTS
   // =========================================================================
@@ -156,7 +162,64 @@ async function startServer() {
     }
   });
 
-  // 8. Admin Entitlements & Revenue Audit
+  // 8. Retrieve All Reports for Authenticated Customer
+  app.get("/api/reports/my-reports", (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
+      const mobile = req.query.mobile as string | undefined;
+
+      const data = reportAccessEngine.getUserReports(token, mobile);
+      res.json(data);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Failed to fetch user reports" });
+    }
+  });
+
+  // 9. Retrieve Verified Payment History for Customer
+  app.get("/api/payments/history", (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
+      const mobile = req.query.mobile as string | undefined;
+
+      const data = reportAccessEngine.getUserPaymentHistory(token, mobile);
+      res.json(data);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Failed to fetch payment history" });
+    }
+  });
+
+  // 10. Retrieve Access & Entitlement Summary
+  app.get("/api/reports/access-summary", (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
+      const mobile = req.query.mobile as string | undefined;
+
+      const data = reportAccessEngine.getUserAccessSummary(token, mobile);
+      res.json(data);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Failed to fetch access summary" });
+    }
+  });
+
+  // 11. Retrieve Single Report with Server Ownership Check
+  app.get("/api/reports/:reportId", (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
+      const mobile = req.query.mobile as string | undefined;
+      const { reportId } = req.params;
+
+      const data = reportAccessEngine.getReportById(reportId, token, mobile);
+      res.json(data);
+    } catch (e: any) {
+      res.status(403).json({ error: e.message || "Failed to access report" });
+    }
+  });
+
+  // 12. Admin Entitlements & Revenue Audit
   app.get("/api/admin/entitlements", (req, res) => {
     try {
       const data = reportAccessEngine.getAdminAuditData();
@@ -962,6 +1025,26 @@ Return data in the EXACT JSON format matching the schema properties:
       );
       res.json(fallbackResult);
     }
+  });
+
+  // Catch-all 404 JSON handler for unknown /api/* endpoints
+  // Prevents API calls from ever returning Vite or Express HTML fallback pages
+  app.all("/api/*", (req, res) => {
+    res.status(404).json({
+      success: false,
+      error: "ENDPOINT_NOT_FOUND",
+      message: `API endpoint ${req.method} ${req.path} not found.`
+    });
+  });
+
+  // Central error handling middleware for API routes
+  app.use("/api", (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("API error uncaught:", err);
+    res.status(500).json({
+      success: false,
+      error: "INTERNAL_SERVER_ERROR",
+      message: err?.message || "An unexpected internal server error occurred."
+    });
   });
 
   // Vite integration

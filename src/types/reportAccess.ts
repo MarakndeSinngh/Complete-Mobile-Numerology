@@ -455,3 +455,339 @@ export const PAYMENT_I18N: Record<string, PaymentI18nEntry> = {
     secureTransactionNote: '🔒 256-બીટ સુરક્ષિત Razorpay ચુકવણી • ગોપનીયતા ગેરંટી',
   },
 };
+
+export interface UserReportItem {
+  id: string;
+  userId: string;
+  profileKey: string;
+  profileName?: string;
+  reportType: CanonicalReportType;
+  titleHi: string;
+  titleEn: string;
+  titleMr: string;
+  titleBn: string;
+  titleGu: string;
+  accessType: 'FREE' | 'PAID' | 'ALWAYS_FREE';
+  amount: number;
+  currency: string;
+  status: 'UNLOCKED' | 'PENDING' | 'FAILED';
+  paymentId?: string;
+  orderId?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface PaymentHistoryItem {
+  id: string;
+  userId: string;
+  reportType: CanonicalReportType;
+  profileKey: string;
+  amount: number;
+  currency: string;
+  status: 'PAID' | 'CAPTURED' | 'FREE' | 'CREATED' | 'FAILED';
+  paymentReference: string;
+  orderId?: string;
+  createdAt: string;
+}
+
+export interface UserAccessSummary {
+  mobile: string;
+  mobileVerified: boolean;
+  mobileNumerology: {
+    status: 'ALWAYS_FREE';
+    price: 0;
+  };
+  firstNonMobileReport: {
+    status: 'AVAILABLE' | 'USED';
+    reportType?: CanonicalReportType;
+    claimedAt?: string;
+    profileKey?: string;
+  };
+  additionalReports: {
+    priceInr: number;
+    pricePaise: number;
+  };
+  totalReportsUnlocked: number;
+  totalPaidAmountInr: number;
+}
+
+export interface MyReportsI18nEntry {
+  myReportsTitle: string;
+  myReportsSubtitle: string;
+  tabReports: string;
+  tabPayments: string;
+  tabEntitlements: string;
+  searchPlaceholder: string;
+  filterAll: string;
+  filterFree: string;
+  filterPaid: string;
+  statusUnlocked: string;
+  statusPending: string;
+  statusFailed: string;
+  viewReportBtn: string;
+  downloadPdfBtn: string;
+  printBtn: string;
+  noReportsYet: string;
+  noReportsDesc: string;
+  generateFirstFreeBtn: string;
+  paymentHistoryTitle: string;
+  paymentHistorySubtitle: string;
+  entitlementCenterTitle: string;
+  entitlementCenterSubtitle: string;
+  mobileNumerologyStatus: string;
+  firstReportStatus: string;
+  firstReportAvailable: string;
+  firstReportUsed: string;
+  additionalReportsRate: string;
+  unlockedReportsCount: string;
+  totalSpent: string;
+  complimentaryBadge: string;
+  paidBadge: string;
+  alwaysFreeBadge: string;
+  dateCol: string;
+  reportCol: string;
+  amountCol: string;
+  statusCol: string;
+  referenceCol: string;
+  refreshBtn: string;
+  loginRequiredTitle: string;
+  loginRequiredDesc: string;
+  verifyNowBtn: string;
+  loadingHistory: string;
+  errorLoading: string;
+  retryBtn: string;
+}
+
+export const MY_REPORTS_I18N: Record<string, MyReportsI18nEntry> = {
+  hi: {
+    myReportsTitle: 'मेरे रिपोर्ट्स व परामर्श डॉसियर',
+    myReportsSubtitle: 'आपके द्वारा अनलॉक की गई सभी वैदिक रिपोर्ट्स, पेमेंट रसीदें एवं विशेषाधिकार केंद्र।',
+    tabReports: 'मेरी रिपोर्ट्स (Reports)',
+    tabPayments: 'पेमेंट इतिहास (Payments)',
+    tabEntitlements: 'अधिकार केंद्र (Entitlements)',
+    searchPlaceholder: 'रिपोर्ट या प्रोफाइल नाम से खोजें...',
+    filterAll: 'सभी रिपोर्ट्स',
+    filterFree: 'निःशुल्क (Complimentary)',
+    filterPaid: 'सशुल्क (Paid ₹33)',
+    statusUnlocked: 'अनलॉक (सक्रिय)',
+    statusPending: 'प्रक्रियाधीन',
+    statusFailed: 'विफल',
+    viewReportBtn: 'रिपोर्ट देखें',
+    downloadPdfBtn: 'PDF डाउनलोड',
+    printBtn: 'प्रिंट करें',
+    noReportsYet: 'अभी तक कोई रिपोर्ट अनलॉक नहीं की गई है',
+    noReportsDesc: 'अपनी पहली विशेषज्ञ रिपोर्ट का लाभ 100% मुफ़्त प्राप्त करें अथवा मोबाइल स्कैनर का उपयोग करें।',
+    generateFirstFreeBtn: 'प्रथम मुफ़्त रिपोर्ट बनाएं',
+    paymentHistoryTitle: 'सुरक्षित पेमेंट इतिहास',
+    paymentHistorySubtitle: 'Razorpay द्वारा संसाधित सभी लेन-देन एवं रसीद संदर्भ।',
+    entitlementCenterTitle: 'रिपोर्ट अधिकार व शुल्क संरचना',
+    entitlementCenterSubtitle: 'पारदर्शी एवं निष्पक्ष वैदिक परामर्श अधिकार विवरण।',
+    mobileNumerologyStatus: 'मोबाइल अंकशास्त्र: हमेशा 100% मुफ़्त',
+    firstReportStatus: 'प्रथम विशेषज्ञ रिपोर्ट',
+    firstReportAvailable: 'उपलब्ध (FREE ₹0)',
+    firstReportUsed: 'उपयोग हो चुका (Used)',
+    additionalReportsRate: 'अतिरिक्त रिपोर्ट्स: ₹33 प्रति रिपोर्ट',
+    unlockedReportsCount: 'कुल सक्रिय रिपोर्ट्स',
+    totalSpent: 'कुल भुगतान',
+    complimentaryBadge: 'निःशुल्क उपहार (Free)',
+    paidBadge: 'सशुल्क (Paid ₹33)',
+    alwaysFreeBadge: 'सदा मुफ़्त (Always Free)',
+    dateCol: 'दिनांक',
+    reportCol: 'रिपोर्ट नाम',
+    amountCol: 'राशि',
+    statusCol: 'स्थिति',
+    referenceCol: 'पेमेंट संदर्भ / Order ID',
+    refreshBtn: 'ताज़ा करें (Refresh)',
+    loginRequiredTitle: 'रिपोर्ट इतिहास देखने हेतु मोबाइल सत्यापन आवश्यक है',
+    loginRequiredDesc: 'कृपया अपना 10-अंकीय मोबाइल नंबर OTP द्वारा सत्यापित करें ताकि आपकी पुरानी सभी रिपोर्ट्स स्वतः लोड हो सकें।',
+    verifyNowBtn: 'मोबाइल सत्यापित करें (Verify Mobile)',
+    loadingHistory: 'सर्वर से रिपोर्ट इतिहास लोड हो रहा है...',
+    errorLoading: 'रिपोर्ट लोड करने में समस्या हुई। कृपया पुनः प्रयास करें।',
+    retryBtn: 'पुनः प्रयास करें (Retry)',
+  },
+  en: {
+    myReportsTitle: 'My Reports & Consultation Dossiers',
+    myReportsSubtitle: 'All your unlocked Vedic reports, verified payment receipts, and entitlement status.',
+    tabReports: 'My Reports',
+    tabPayments: 'Payment History',
+    tabEntitlements: 'Entitlement Center',
+    searchPlaceholder: 'Search by report or profile name...',
+    filterAll: 'All Reports',
+    filterFree: 'Complimentary',
+    filterPaid: 'Paid (₹33)',
+    statusUnlocked: 'Unlocked (Active)',
+    statusPending: 'Pending',
+    statusFailed: 'Failed',
+    viewReportBtn: 'View Report',
+    downloadPdfBtn: 'Download PDF',
+    printBtn: 'Print',
+    noReportsYet: 'No reports unlocked yet',
+    noReportsDesc: 'Claim your first comprehensive specialist report for 100% FREE or explore Mobile Scanner.',
+    generateFirstFreeBtn: 'Claim First Free Report',
+    paymentHistoryTitle: 'Secure Payment History',
+    paymentHistorySubtitle: 'All transactions processed securely via Razorpay with verifiable reference IDs.',
+    entitlementCenterTitle: 'Report Access & Pricing Policy',
+    entitlementCenterSubtitle: 'Transparent and authentic Vedic consultation access rules.',
+    mobileNumerologyStatus: 'Mobile Numerology: Always 100% Free',
+    firstReportStatus: 'First Specialist Report',
+    firstReportAvailable: 'Available (FREE ₹0)',
+    firstReportUsed: 'Consumed (Used)',
+    additionalReportsRate: 'Additional Reports: ₹33 per report',
+    unlockedReportsCount: 'Active Reports Unlocked',
+    totalSpent: 'Total Paid',
+    complimentaryBadge: 'Complimentary (Free)',
+    paidBadge: 'Paid (₹33)',
+    alwaysFreeBadge: 'Always Free',
+    dateCol: 'Date',
+    reportCol: 'Report Name',
+    amountCol: 'Amount',
+    statusCol: 'Status',
+    referenceCol: 'Payment Ref / Order ID',
+    refreshBtn: 'Refresh',
+    loginRequiredTitle: 'Mobile Verification Required to Access History',
+    loginRequiredDesc: 'Please verify your 10-digit mobile number with OTP to securely retrieve all your previously unlocked reports.',
+    verifyNowBtn: 'Verify Mobile Now',
+    loadingHistory: 'Retrieving your reports from server...',
+    errorLoading: 'Unable to load report history. Please try again.',
+    retryBtn: 'Retry',
+  },
+  mr: {
+    myReportsTitle: 'माझे अहवाल आणि सल्लागार डॉसियर',
+    myReportsSubtitle: 'सर्व अनलॉक केलेले वैदिक अहवाल, पेमेंट पावत्या आणि अधिकार केंद्र.',
+    tabReports: 'माझे अहवाल',
+    tabPayments: 'पेमेंट इतिहास',
+    tabEntitlements: 'अधिकार केंद्र',
+    searchPlaceholder: 'अहवाल किंवा प्रोफाईल नावाने शोधा...',
+    filterAll: 'सर्व अहवाल',
+    filterFree: 'विनामूल्य (Free)',
+    filterPaid: 'सशुल्क (₹33)',
+    statusUnlocked: 'अनलॉक (सक्रिय)',
+    statusPending: 'प्रलंबित',
+    statusFailed: 'अयशस्वी',
+    viewReportBtn: 'अहवाल पहा',
+    downloadPdfBtn: 'PDF डाउनलोड',
+    printBtn: 'प्रिंट करा',
+    noReportsYet: 'अद्याप कोणतेही अहवाल अनलॉक केलेले नाहीत',
+    noReportsDesc: 'तुमचा पहिला तज्ञ अहवाल 100% विनामूल्य अनलॉक करा.',
+    generateFirstFreeBtn: 'पहिला मोफत अहवाल मिळवा',
+    paymentHistoryTitle: 'सुरक्षित पेमेंट इतिहास',
+    paymentHistorySubtitle: 'Razorpay द्वारे प्रक्रिया केलेले सर्व व्यवहार तपशील.',
+    entitlementCenterTitle: 'अहवाल अधिकार आणि शुल्क रचना',
+    entitlementCenterSubtitle: 'पारदर्शक आणि निष्पक्ष वैदिक सल्लागार नियम.',
+    mobileNumerologyStatus: 'मोबाईल अंकशास्त्र: नेहमी 100% मोफत',
+    firstReportStatus: 'पहिला तज्ञ अहवाल',
+    firstReportAvailable: 'उपलब्ध (मोफत ₹0)',
+    firstReportUsed: 'वापरले गेले (Used)',
+    additionalReportsRate: 'अतिरिक्त अहवाल: ₹33 प्रति अहवाल',
+    unlockedReportsCount: 'एकूण सक्रिय अहवाल',
+    totalSpent: 'एकूण खर्च',
+    complimentaryBadge: 'मोफत भेट (Free)',
+    paidBadge: 'सशुल्क (₹33)',
+    alwaysFreeBadge: 'नेहमी मोफत',
+    dateCol: 'तारीख',
+    reportCol: 'अहवाल नाव',
+    amountCol: 'रक्कम',
+    statusCol: 'स्थिती',
+    referenceCol: 'पेमेंट संदर्भ / Order ID',
+    refreshBtn: 'ताजे करा',
+    loginRequiredTitle: 'इतिहास पाहण्यासाठी मोबाईल पडताळणी आवश्यक आहे',
+    loginRequiredDesc: 'मागील सर्व अहवाल पाहण्यासाठी कृपया मोबाईल नंबर OTP द्वारे सत्यापित करा.',
+    verifyNowBtn: 'मोबाईल सत्यापित करा',
+    loadingHistory: 'सर्व्हरवरून अहवाल लोड होत आहेत...',
+    errorLoading: 'अहवाल लोड करण्यात अडचण आली. कृपया पुन्हा प्रयत्न करा.',
+    retryBtn: 'पुन्हा प्रयत्न करा',
+  },
+  bn: {
+    myReportsTitle: 'আমার রিপোর্ট ও পরামর্শ ডসিয়ার',
+    myReportsSubtitle: 'আপনার সমস্ত আনলক করা বৈদিক রিপোর্ট, পেমেন্ট রসিদ এবং এনটাইটেলমেন্ট সেন্টার।',
+    tabReports: 'আমার রিপোর্ট',
+    tabPayments: 'পেমেন্ট ইতিহাস',
+    tabEntitlements: 'অধিকার কেন্দ্র',
+    searchPlaceholder: 'রিপোর্ট বা প্রোফাইল নাম দিয়ে খুঁজুন...',
+    filterAll: 'সব রিপোর্ট',
+    filterFree: 'বিনামূল্যে (Free)',
+    filterPaid: 'পেইড (₹৩৩)',
+    statusUnlocked: 'আনলক (সক্রিয়)',
+    statusPending: 'প্রক্রিয়াধীন',
+    statusFailed: 'ব্যর্থ',
+    viewReportBtn: 'রিপোর্ট দেখুন',
+    downloadPdfBtn: 'PDF ডাউনলোড',
+    printBtn: 'প্রিন্ট করুন',
+    noReportsYet: 'এখনও কোনো রিপোর্ট আনলক করা হয়নি',
+    noReportsDesc: 'আপনার প্রথম বিশেষজ্ঞ রিপোর্টটি ১০০% বিনামূল্যে আনলক করুন।',
+    generateFirstFreeBtn: 'প্রথম ফ্রি রিপোর্ট পান',
+    paymentHistoryTitle: 'নিরাপদ পেমেন্ট ইতিহাস',
+    paymentHistorySubtitle: 'Razorpay দ্বারা প্রক্রিয়া করা সমস্ত লেনদেন ও রেফারেন্স আইডি।',
+    entitlementCenterTitle: 'রিপোর্ট অধিকার ও মূল্য নীতি',
+    entitlementCenterSubtitle: 'স্বচ্ছ বৈদিক পরামর্শ নীতি।',
+    mobileNumerologyStatus: 'মোবাইল সংখ্যাতত্ত্ব: সর্বদা ১০০% ফ্রি',
+    firstReportStatus: 'প্রথম বিশেষজ্ঞ রিপোর্ট',
+    firstReportAvailable: 'উপলব্ধ (FREE ₹০)',
+    firstReportUsed: 'ব্যবহৃত (Used)',
+    additionalReportsRate: 'অতিরিক্ত রিপোর্ট: ₹৩৩ প্রতি রিপোর্ট',
+    unlockedReportsCount: 'মোট আনলক রিপোর্ট',
+    totalSpent: 'মোট খরচ',
+    complimentaryBadge: 'বিনামূল্যে উপহার',
+    paidBadge: 'পেইড (₹৩৩)',
+    alwaysFreeBadge: 'সর্বদা ফ্রি',
+    dateCol: 'তারিখ',
+    reportCol: 'রিপোর্টের নাম',
+    amountCol: 'পরিমাণ',
+    statusCol: 'স্থিতি',
+    referenceCol: 'পেমেন্ট রেফারেন্স / Order ID',
+    refreshBtn: 'রিফ্রেশ',
+    loginRequiredTitle: 'ইতিহাস দেখার জন্য মোবাইল যাচাইকরণ প্রয়োজন',
+    loginRequiredDesc: 'আপনার পূর্ববর্তী আনলক করা রিপোর্ট দেখতে অনুগ্রহ করে মোবাইল নম্বর যাচাই করুন।',
+    verifyNowBtn: 'মোবাইল যাচাই করুন',
+    loadingHistory: 'সার্ভার থেকে রিপোর্ট লোড হচ্ছে...',
+    errorLoading: 'রিপোর্ট লোড করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।',
+    retryBtn: 'আবার চেষ্টা করুন',
+  },
+  gu: {
+    myReportsTitle: 'મારા રિપોર્ટ્સ અને કન્સલ્ટેશન ડૉસિયર',
+    myReportsSubtitle: 'તમારા અનલૉક થયેલા તમામ વૈદિક રિપોર્ટ્સ, પેમેન્ટ રસીદો અને અધિકાર કેન્દ્ર.',
+    tabReports: 'મારા રિપોર્ટ્સ',
+    tabPayments: 'ચૂકવણી ઇતિહાસ',
+    tabEntitlements: 'અધિકાર કેન્દ્ર',
+    searchPlaceholder: 'રિપોર્ટ અથવા પ્રોફાઇલ નામથી શોધો...',
+    filterAll: 'બધા રિપોર્ટ્સ',
+    filterFree: 'મફત (Free)',
+    filterPaid: 'સશુલ્ક (₹33)',
+    statusUnlocked: 'અનલૉક (સક્રિય)',
+    statusPending: 'પ્રક્રિયા હેઠળ',
+    statusFailed: 'નિષ્ફળ',
+    viewReportBtn: 'રિપોર્ટ જુઓ',
+    downloadPdfBtn: 'PDF ડાઉનલોડ',
+    printBtn: 'પ્રિન્ટ કરો',
+    noReportsYet: 'હજુ સુધી કોઈ રિપોર્ટ અનલૉક થયો નથી',
+    noReportsDesc: 'તમારો પ્રથમ નિષ્ણાત રિપોર્ટ 100% મફતમાં મેળવો અથવા મોબાઇલ સ્કેનર અજમાવો.',
+    generateFirstFreeBtn: 'પ્રથમ મફત રિપોર્ટ બનાવો',
+    paymentHistoryTitle: 'સુરક્ષિત ચૂકવણી ઇતિહાસ',
+    paymentHistorySubtitle: 'Razorpay દ્વારા સુરક્ષિત રીતે પ્રોસેસ થયેલ તમામ ટ્રાન્ઝેક્શન્સ.',
+    entitlementCenterTitle: 'રિપોર્ટ અધિકાર અને કિંમત નીતિ',
+    entitlementCenterSubtitle: 'પારદર્શક વૈદિક કન્સલ્ટેશન નિયમો.',
+    mobileNumerologyStatus: 'મોબાઇલ અંકશાસ્ત્ર: હંમેશા 100% મફત',
+    firstReportStatus: 'પ્રથમ નિષ્ણાત રિપોર્ટ',
+    firstReportAvailable: 'ઉપલબ્ધ (FREE ₹0)',
+    firstReportUsed: 'વપરાયેલ (Used)',
+    additionalReportsRate: 'વધારાના રિપોર્ટ્સ: ₹33 પ્રતિ રિપોર્ટ',
+    unlockedReportsCount: 'કુલ સક્રિય રિપોર્ટ્સ',
+    totalSpent: 'કુલ ચૂકવણી',
+    complimentaryBadge: 'મફત ભેટ (Free)',
+    paidBadge: 'સશુલ્ક (₹33)',
+    alwaysFreeBadge: 'હંમેશા મફત',
+    dateCol: 'તારીખ',
+    reportCol: 'રિપોર્ટ નામ',
+    amountCol: 'રકમ',
+    statusCol: 'સ્થિતિ',
+    referenceCol: 'પેમેન્ટ રેફરન્સ / Order ID',
+    refreshBtn: 'રીફ્રેશ',
+    loginRequiredTitle: 'ઇતિહાસ જોવા માટે મોબાઇલ ચકાસણી જરૂરી છે',
+    loginRequiredDesc: 'તમારા અગાઉના અનલૉક રિપોર્ટ્સ જોવા માટે કૃપા કરીને OTP વડે મોબાઇલ નંબર ચકાસો.',
+    verifyNowBtn: 'મોબાઇલ ચકાસો',
+    loadingHistory: 'સર્વર પરથી રિપોર્ટ લોડ થઈ રહ્યા છે...',
+    errorLoading: 'રિપોર્ટ લોડ કરવામાં સમસ્યા આવી. કૃપા કરીને ફરી પ્રયાસ કરો.',
+    retryBtn: 'ફરી પ્રયાસ કરો',
+  },
+};
+

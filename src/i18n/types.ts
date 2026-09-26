@@ -146,6 +146,7 @@ export interface TranslationDictionary {
     masterReportDesc: string;
     aiConsultation: string;
     aiConsultationDesc: string;
+    myReports?: string;
   };
   profile: {
     quickProfileTitle: string;

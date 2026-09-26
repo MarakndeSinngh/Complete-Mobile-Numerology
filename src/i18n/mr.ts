@@ -131,6 +131,7 @@ export const mr: TranslationDictionary = {
     masterReportDesc: "360-अंश संपूर्ण जीवन दस्तऐवज व उपाय",
     aiConsultation: "वैदिक सल्लागार केंद्र",
     aiConsultationDesc: "तज्ज्ञ प्रश्नोत्तरे आणि त्वरित वैदिक मार्गदर्शन",
+    myReports: "माझे अहवाल",
   },
   profile: {
     quickProfileTitle: "सक्रिय वापरकर्ता प्रोफाइल",

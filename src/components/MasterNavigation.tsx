@@ -24,7 +24,8 @@ export type NavPortalId =
   | 'PREMIUM_VAASTU'
   | 'PREMIUM_DASHA'
   | 'AI_CONSULTATION'
-  | 'MASTER_REPORT';
+  | 'MASTER_REPORT'
+  | 'MY_REPORTS';
 
 export interface NavCategory {
   id: string;
@@ -385,6 +386,19 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
           </button>
 
           <button
+            onClick={() => handlePortalSelect('MY_REPORTS')}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-200 cursor-pointer ${
+              currentPortalId === 'MY_REPORTS'
+                ? 'bg-amber-800 text-white shadow-xs'
+                : 'bg-amber-100/60 text-amber-900 hover:bg-amber-100 border border-amber-300'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5 text-amber-700" />
+            <span className="hidden sm:inline">{t('nav.myReports') || 'मेरे रिपोर्ट्स'}</span>
+            <span className="sm:hidden">Reports</span>
+          </button>
+
+          <button
             onClick={() => handlePortalSelect('MASTER_REPORT')}
             className={`hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition duration-200 cursor-pointer ${
               currentPortalId === 'MASTER_REPORT'
@@ -522,8 +536,16 @@ export const MasterNavigation: React.FC<MasterNavigationProps> = ({
 
           <div className="pt-2 border-t space-y-2">
             <button
+              onClick={() => handlePortalSelect('MY_REPORTS')}
+              className="w-full py-2.5 px-4 rounded-xl bg-amber-800 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <FileText className="w-4 h-4 text-amber-200" />
+              <span>{t('nav.myReports') || 'मेरे रिपोर्ट्स (My Reports)'}</span>
+            </button>
+
+            <button
               onClick={() => handlePortalSelect('MASTER_REPORT')}
-              className="w-full py-2.5 px-4 rounded-xl bg-amber-100 text-amber-900 font-bold text-xs flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-xl bg-amber-100 text-amber-900 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer"
             >
               <Award className="w-4 h-4 text-amber-700" />
               <span>{t('nav.masterReport')}</span>
