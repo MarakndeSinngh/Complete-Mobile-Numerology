@@ -44,15 +44,16 @@ async function startServer() {
   // =========================================================================
 
   // 1. Request OTP for mobile number verification
-  app.post("/api/auth/request-otp", (req, res) => {
+  app.post("/api/auth/request-otp", async (req, res) => {
     try {
-      const { mobile } = req.body;
-      const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+      const { mobile } = req.body || {};
+      const forwarded = req.headers['x-forwarded-for'];
+      const ip = (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : undefined) || req.socket?.remoteAddress || '127.0.0.1';
       const userAgent = (req.headers['user-agent'] as string) || 'unknown';
-      const result = reportAccessEngine.requestOtp(mobile, ip, userAgent);
+      const result = await reportAccessEngine.requestOtp(mobile, ip, userAgent);
       res.json(result);
     } catch (e: any) {
-      res.status(400).json({ error: e.message || "Failed to request OTP" });
+      res.status(400).json({ success: false, error: e?.message || "Failed to request OTP" });
     }
   });
 
@@ -227,6 +228,36 @@ async function startServer() {
     } catch (e: any) {
       res.status(500).json({ error: e.message || "Failed to fetch admin audit data" });
     }
+  });
+
+  // 13. OTP & Gateway Environment Diagnostics
+  app.get("/api/otp-debug", (req, res) => {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      runtime: {
+        isServerless: false,
+        nodeVersion: process.version,
+        platform: process.platform,
+        environment: process.env.NODE_ENV || "development"
+      },
+      otpConfig: {
+        OTP_MODE: process.env.OTP_MODE || (process.env.SMS_PROVIDER_API_KEY ? "live" : "sandbox"),
+        FAST2SMS_API_KEY_PRESENT: !!process.env.FAST2SMS_API_KEY,
+        SMS_PROVIDER_API_KEY_PRESENT: !!process.env.SMS_PROVIDER_API_KEY,
+        OTP_API_KEY_PRESENT: !!process.env.OTP_API_KEY,
+        OTP_PROVIDER_URL_PRESENT: !!(process.env.OTP_PROVIDER_URL || process.env.SMS_API_URL)
+      },
+      gatewayConfig: {
+        RAZORPAY_KEY_ID_PRESENT: !!process.env.RAZORPAY_KEY_ID,
+        RAZORPAY_KEY_SECRET_PRESENT: !!process.env.RAZORPAY_KEY_SECRET,
+        RAZORPAY_WEBHOOK_SECRET_PRESENT: !!process.env.RAZORPAY_WEBHOOK_SECRET
+      },
+      aiConfig: {
+        GEMINI_API_KEY_PRESENT: !!process.env.GEMINI_API_KEY
+      }
+    });
   });
 
   // API router for Gemini report generation
