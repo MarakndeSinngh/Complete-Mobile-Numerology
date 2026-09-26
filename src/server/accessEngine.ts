@@ -69,35 +69,52 @@ interface StoredAntiAbuse {
   lastSeen: string;
 }
 
-// Ensure writable data directory in both local development and Vercel serverless (/tmp)
-const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION || process.env.NODE_ENV === 'production');
-const DATA_DIR = isServerless ? path.join(os.tmpdir(), 'leofamily_data') : path.join(process.cwd(), '.data');
-const DATA_FILE = path.join(DATA_DIR, 'entitlements_store.json');
+// Dynamic path helpers to ensure environment variables are evaluated per-request without top-level module caching issues
+function isServerlessRuntime(): boolean {
+  return !!(
+    (typeof process !== 'undefined' && process.env?.VERCEL) ||
+    (typeof process !== 'undefined' && process.env?.AWS_LAMBDA_FUNCTION_VERSION) ||
+    (typeof process !== 'undefined' && process.env?.NODE_ENV === 'production')
+  );
+}
+
+function getDataDir(): string {
+  try {
+    return isServerlessRuntime() ? path.join(os.tmpdir(), 'leofamily_data') : path.join(process.cwd(), '.data');
+  } catch {
+    return '/tmp/leofamily_data';
+  }
+}
+
+function getDataFile(): string {
+  return path.join(getDataDir(), 'entitlements_store.json');
+}
 
 // Log safe configuration diagnostics without exposing secret values
 export function getSafeConfigAudit() {
+  const env = (typeof process !== 'undefined' && process.env) || {};
   return {
-    OTP_PROVIDER_KEY_PRESENT: !!(process.env.FAST2SMS_API_KEY || process.env.SMS_PROVIDER_API_KEY || process.env.OTP_API_KEY),
-    OTP_PROVIDER_URL_PRESENT: !!(process.env.OTP_PROVIDER_URL || process.env.SMS_API_URL),
-    RAZORPAY_KEY_PRESENT: !!process.env.RAZORPAY_KEY_ID,
-    RAZORPAY_SECRET_PRESENT: !!process.env.RAZORPAY_KEY_SECRET,
-    RAZORPAY_WEBHOOK_PRESENT: !!process.env.RAZORPAY_WEBHOOK_SECRET,
-    GEMINI_KEY_PRESENT: !!process.env.GEMINI_API_KEY,
-    IS_SERVERLESS_RUNTIME: isServerless
+    OTP_PROVIDER_KEY_PRESENT: !!(env.FAST2SMS_API_KEY || env.SMS_PROVIDER_API_KEY || env.OTP_API_KEY),
+    OTP_PROVIDER_URL_PRESENT: !!(env.OTP_PROVIDER_URL || env.SMS_API_URL),
+    RAZORPAY_KEY_PRESENT: !!env.RAZORPAY_KEY_ID,
+    RAZORPAY_SECRET_PRESENT: !!env.RAZORPAY_KEY_SECRET,
+    RAZORPAY_WEBHOOK_PRESENT: !!env.RAZORPAY_WEBHOOK_SECRET,
+    GEMINI_KEY_PRESENT: !!env.GEMINI_API_KEY,
+    IS_SERVERLESS_RUNTIME: isServerlessRuntime()
   };
 }
 
 // Get Razorpay Configuration safely from Environment
 export function getRazorpayKeyId(): string {
-  return process.env.RAZORPAY_KEY_ID || 'rzp_test_leofamily_sandbox';
+  return (typeof process !== 'undefined' && process.env?.RAZORPAY_KEY_ID) || 'rzp_test_leofamily_sandbox';
 }
 
 export function getRazorpayKeySecret(): string {
-  return process.env.RAZORPAY_KEY_SECRET || 'sandbox_secret_leofamily_2026';
+  return (typeof process !== 'undefined' && process.env?.RAZORPAY_KEY_SECRET) || 'sandbox_secret_leofamily_2026';
 }
 
 export function getRazorpayWebhookSecret(): string {
-  return process.env.RAZORPAY_WEBHOOK_SECRET || 'sandbox_webhook_secret_leofamily_2026';
+  return (typeof process !== 'undefined' && process.env?.RAZORPAY_WEBHOOK_SECRET) || 'sandbox_webhook_secret_leofamily_2026';
 }
 
 // Normalize Indian 10-digit mobile number
@@ -138,15 +155,17 @@ class ReportAccessEngine {
 
   private loadData() {
     try {
-      if (!fs.existsSync(DATA_DIR)) {
+      const dataDir = getDataDir();
+      const dataFile = getDataFile();
+      if (!fs.existsSync(dataDir)) {
         try {
-          fs.mkdirSync(DATA_DIR, { recursive: true });
+          fs.mkdirSync(dataDir, { recursive: true });
         } catch {
           // Ignored if read-only
         }
       }
-      if (fs.existsSync(DATA_FILE)) {
-        const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      if (fs.existsSync(dataFile)) {
+        const raw = fs.readFileSync(dataFile, 'utf-8');
         const data = JSON.parse(raw);
         if (data.users) Object.entries(data.users).forEach(([k, v]) => {
           this.users.set(k, v as StoredUser);
@@ -160,7 +179,7 @@ class ReportAccessEngine {
           data.processedEvents.forEach((ev: string) => this.processedEvents.add(ev));
         }
       }
-    } catch (e) {
+    } catch {
       // Safe fallback to in-memory store
       console.warn("Notice: Initialized fresh in-memory report access store.");
     }
@@ -168,8 +187,10 @@ class ReportAccessEngine {
 
   private saveData() {
     try {
-      if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
+      const dataDir = getDataDir();
+      const dataFile = getDataFile();
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
       }
       const data = {
         users: Object.fromEntries(this.users),
@@ -179,7 +200,7 @@ class ReportAccessEngine {
         payments: Object.fromEntries(this.payments),
         processedEvents: Array.from(this.processedEvents),
       };
-      fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      fs.writeFileSync(dataFile, JSON.stringify(data, null, 2), 'utf-8');
     } catch {
       // Non-blocking in serverless environments
     }
