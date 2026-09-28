@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   ShieldCheck,
-  Sparkles,
+  Mail,
   Lock,
   Unlock,
   CheckCircle2,
   AlertCircle,
-  Phone,
   QrCode,
   CreditCard,
   X,
@@ -21,9 +20,10 @@ import {
   REPORT_REGISTRY,
   ReportAccessCheckResult,
   PAYMENT_I18N,
-  PaymentI18nEntry
+  PaymentI18nEntry,
 } from '../types/reportAccess';
 import { ReportAccessService } from '../services/reportAccessService';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import { useLanguage } from '../i18n';
 import { BrandLogo } from './BrandLogo';
 
@@ -34,6 +34,7 @@ export interface ReportPaywallModalProps {
   profileKey: string;
   profileName?: string;
   initialMobile?: string;
+  initialEmail?: string;
   onAccessGranted: () => void;
 }
 
@@ -44,152 +45,190 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
   profileKey,
   profileName,
   initialMobile = '',
+  initialEmail = '',
   onAccessGranted,
 }) => {
   const { language } = useLanguage();
   const reportDef = REPORT_REGISTRY[reportType] || REPORT_REGISTRY.MASTER_REPORT;
   const i18n: PaymentI18nEntry = PAYMENT_I18N[language] || PAYMENT_I18N.hi;
 
-  // Stored auth user state
-  const [userMobile, setUserMobile] = useState<string>(() => {
-    const stored = ReportAccessService.getStoredUser();
-    return stored?.mobile || initialMobile.replace(/\D/g, '').slice(-10);
-  });
-  const [isVerified, setIsVerified] = useState<boolean>(() => {
-    const stored = ReportAccessService.getStoredUser();
-    return !!stored?.mobileVerified;
-  });
+  const {
+    user: supabaseUser,
+    appUser,
+    isAuthenticated,
+    isSendingOtp,
+    isVerifyingOtp,
+    otpSent,
+    targetEmail,
+    cooldownSeconds,
+    canResend,
+    error: authHookError,
+    sendOtp,
+    verifyOtp,
+    resendOtp,
+    clearError: clearAuthError,
+    resetOtpFlow,
+  } = useSupabaseAuth();
 
-  // Step state: 'OTP_REQUEST' | 'OTP_VERIFY' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'
-  const [step, setStep] = useState<'OTP_REQUEST' | 'OTP_VERIFY' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'>(
-    isVerified ? 'ACCESS_OPTIONS' : 'OTP_REQUEST'
-  );
+  // Local state for Email input
+  const [emailInput, setEmailInput] = useState<string>(() => {
+    const stored = ReportAccessService.getStoredUser();
+    return stored?.email || initialEmail || '';
+  });
 
   const [otpInput, setOtpInput] = useState<string>('');
-  const [sandboxOtpHint, setSandboxOtpHint] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localLoading, setLocalLoading] = useState<boolean>(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [accessResult, setAccessResult] = useState<ReportAccessCheckResult | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'UPI' | 'QR' | 'CARD'>('UPI');
+
+  // Step state: 'OTP_REQUEST' | 'OTP_VERIFY' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'
+  const [step, setStep] = useState<'OTP_REQUEST' | 'OTP_VERIFY' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'>('OTP_REQUEST');
+
+  const error = localError || authHookError;
 
   // Pre-load Razorpay SDK script in background
   useEffect(() => {
     ReportAccessService.loadRazorpayScript().catch(() => {});
   }, []);
 
-  // Sync when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setError(null);
-      const stored = ReportAccessService.getStoredUser();
-      if (stored && stored.mobileVerified) {
-        setUserMobile(stored.mobile);
-        setIsVerified(true);
-        setStep('ACCESS_OPTIONS');
-        fetchAccessDetails(stored.mobile);
-      } else {
-        setStep('OTP_REQUEST');
-      }
-    }
-  }, [isOpen, reportType, profileKey]);
-
   // Fetch access details from server
-  const fetchAccessDetails = async (mobile: string) => {
-    setIsLoading(true);
+  const fetchAccessDetails = useCallback(async () => {
+    setLocalLoading(true);
     try {
-      const res = await ReportAccessService.checkAccess(reportType, profileKey, mobile);
+      const res = await ReportAccessService.checkAccess(reportType, profileKey, initialMobile);
       setAccessResult(res);
       if (res.allowed) {
         setStep('SUCCESS');
+      } else {
+        setStep('ACCESS_OPTIONS');
       }
     } catch (e: any) {
-      setError(e.message || 'Failed to check report status');
+      setLocalError(e.message || 'Failed to check report status');
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
-  };
+  }, [reportType, profileKey, initialMobile]);
+
+  // Sync state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setLocalError(null);
+      clearAuthError();
+
+      const stored = ReportAccessService.getStoredUser();
+      const hasValidSession = !!(isAuthenticated || stored?.token || stored?.emailVerified);
+
+      if (hasValidSession) {
+        if (stored?.email) {
+          setEmailInput(stored.email);
+        }
+        setStep('ACCESS_OPTIONS');
+        fetchAccessDetails();
+      } else {
+        setStep('OTP_REQUEST');
+        setOtpInput('');
+      }
+    }
+  }, [isOpen, isAuthenticated, reportType, profileKey, fetchAccessDetails, clearAuthError]);
 
   // 1. Request OTP Handler
   const handleRequestOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const clean = userMobile.replace(/\D/g, '');
-    if (clean.length < 10) {
-      setError(language === 'hi' ? 'कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें' : 'Please enter a valid 10-digit mobile number');
+    if (isLoading) return;
+    const cleanEmail = emailInput.trim().toLowerCase();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setLocalError(i18n.invalidEmail);
       return;
     }
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await ReportAccessService.requestOtp(clean);
-      setSandboxOtpHint(res.testOtp || null);
+
+    setLocalError(null);
+    clearAuthError();
+
+    const res = await sendOtp(cleanEmail);
+    if (res.success) {
       setStep('OTP_VERIFY');
-    } catch (e: any) {
-      setError(e.message || 'OTP अनुरोध विफल रहा');
-    } finally {
-      setIsLoading(false);
+      setOtpInput('');
+    } else {
+      setLocalError(res.message || i18n.invalidEmail);
     }
   };
 
   // 2. Verify OTP Handler
   const handleVerifyOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!otpInput.trim()) {
-      setError(language === 'hi' ? 'कृपया प्राप्त OTP दर्ज करें' : 'Please enter the OTP');
+    if (isLoading) return;
+    const cleanOtp = otpInput.replace(/[\s-]/g, '').trim();
+    if (!cleanOtp || cleanOtp.length < 4) {
+      setLocalError(i18n.invalidOtp);
       return;
     }
-    setIsLoading(true);
-    setError(null);
-    try {
-      const session = await ReportAccessService.verifyOtp(userMobile, otpInput.trim());
-      setIsVerified(true);
+
+    setLocalError(null);
+    clearAuthError();
+
+    const emailToVerify = targetEmail || emailInput.trim().toLowerCase();
+    const res = await verifyOtp(emailToVerify, cleanOtp);
+
+    if (res.success) {
       setStep('ACCESS_OPTIONS');
-      await fetchAccessDetails(session.mobile);
-    } catch (e: any) {
-      setError(e.message || 'OTP सत्यापन विफल रहा');
-    } finally {
-      setIsLoading(false);
+      await fetchAccessDetails();
+    } else {
+      setLocalError(res.error || i18n.invalidOtp);
     }
   };
 
-  // 3. Claim Free Report Handler
+  // 3. Resend OTP Handler
+  const handleResendOtp = async () => {
+    if (!canResend || isLoading) return;
+    setLocalError(null);
+    clearAuthError();
+    setOtpInput('');
+
+    const res = await resendOtp();
+    if (res.success) {
+      setLocalError(null);
+    } else {
+      setLocalError(res.message);
+    }
+  };
+
+  // 4. Claim Free Report Handler
   const handleClaimFree = async () => {
-    setIsLoading(true);
-    setError(null);
+    setLocalLoading(true);
+    setLocalError(null);
     try {
-      await ReportAccessService.claimFreeReport(reportType, profileKey, userMobile);
+      await ReportAccessService.claimFreeReport(reportType, profileKey, initialMobile);
       setStep('SUCCESS');
       setTimeout(() => {
         onAccessGranted();
       }, 1200);
     } catch (e: any) {
-      setError(e.message || 'मुफ़्त रिपोर्ट क्लेम करने में त्रुटि हुई');
+      setLocalError(e.message || 'मुफ़्त रिपोर्ट क्लेम करने में त्रुटि हुई');
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   };
 
-  // 4. Real Razorpay Checkout & Server Signature Verification Flow
+  // 5. Razorpay Payment Handler (₹33)
   const handleInitiatePayment = async () => {
-    setIsLoading(true);
-    setError(null);
+    setLocalLoading(true);
+    setLocalError(null);
     try {
-      // Step 1: Server creates Razorpay order (₹33 = 3300 paise enforced strictly by backend)
-      const order = await ReportAccessService.createPaymentOrder(reportType, profileKey, userMobile);
-
-      // Check if Razorpay Checkout SDK is available in window
+      const order = await ReportAccessService.createPaymentOrder(reportType, profileKey, initialMobile);
       const hasRazorpay = typeof window !== 'undefined' && !!(window as any).Razorpay;
 
       if (hasRazorpay) {
-        // Real Razorpay Checkout Options
         const options: any = {
           key: order.keyId,
-          amount: order.amountPaise, // 3300 paise
+          amount: order.amountPaise,
           currency: order.currency || 'INR',
           name: 'LeoFamily Astro-Numerology',
           description: `${reportTitle} — Report Unlock`,
           order_id: order.orderId,
           prefill: {
-            contact: userMobile,
+            contact: initialMobile,
+            email: emailInput || appUser?.email || '',
             name: profileName || 'LeoFamily Client',
           },
           theme: {
@@ -197,17 +236,16 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
           },
           handler: async function (response: any) {
             try {
-              setIsLoading(true);
+              setLocalLoading(true);
               setStep('PAYMENT_PROCESSING');
 
-              // Step 2: Send Razorpay signature to server for HMAC-SHA256 verification
               await ReportAccessService.verifyPayment(
                 response.razorpay_order_id || order.orderId,
                 response.razorpay_payment_id || `pay_${Date.now()}`,
                 response.razorpay_signature || `sig_${Date.now()}`,
                 reportType,
                 profileKey,
-                userMobile
+                initialMobile
               );
 
               setStep('SUCCESS');
@@ -215,30 +253,30 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                 onAccessGranted();
               }, 1200);
             } catch (err: any) {
-              setError(err.message || i18n.paymentFailed);
+              setLocalError(err.message || i18n.paymentFailed);
               setStep('ACCESS_OPTIONS');
             } finally {
-              setIsLoading(false);
+              setLocalLoading(false);
             }
           },
           modal: {
             ondismiss: function () {
-              setIsLoading(false);
+              setLocalLoading(false);
               setStep('ACCESS_OPTIONS');
-              setError(i18n.paymentCancelled);
+              setLocalError(i18n.paymentCancelled);
             },
           },
         };
 
         const rzp = new (window as any).Razorpay(options);
         rzp.on('payment.failed', function (response: any) {
-          setIsLoading(false);
+          setLocalLoading(false);
           setStep('ACCESS_OPTIONS');
-          setError(response?.error?.description || i18n.paymentFailed);
+          setLocalError(response?.error?.description || i18n.paymentFailed);
         });
         rzp.open();
       } else {
-        // Fallback for sandboxed test suites / headless test execution
+        // Fallback for sandboxed test suites / headless execution
         setStep('PAYMENT_PROCESSING');
         const testPaymentId = `pay_test_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
         const testSignature = `sig_test_${Date.now()}`;
@@ -251,7 +289,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
           testSignature,
           reportType,
           profileKey,
-          userMobile
+          initialMobile
         );
 
         setStep('SUCCESS');
@@ -260,16 +298,15 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
         }, 1200);
       }
     } catch (e: any) {
-      setError(e.message || i18n.paymentFailed);
+      setLocalError(e.message || i18n.paymentFailed);
       setStep('ACCESS_OPTIONS');
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   };
 
   if (!isOpen) return null;
 
-  // Localized Report Title
   const reportTitle =
     language === 'hi'
       ? reportDef.titleHi
@@ -280,6 +317,9 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
       : language === 'gu'
       ? reportDef.titleGu
       : reportDef.titleEn;
+
+  const isLoading = isSendingOtp || isVerifyingOtp || localLoading;
+  const verifiedEmail = appUser?.email || supabaseUser?.email || emailInput;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -309,14 +349,17 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 space-y-5">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center justify-between text-xs text-red-700">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center justify-between text-xs text-red-700 animate-in fade-in">
               <div className="flex items-center gap-2.5">
                 <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
                 <span>{error}</span>
               </div>
               <button
                 type="button"
-                onClick={() => setError(null)}
+                onClick={() => {
+                  setLocalError(null);
+                  clearAuthError();
+                }}
                 className="text-red-500 hover:text-red-700 text-xs font-bold px-1.5 cursor-pointer"
               >
                 ✕
@@ -324,50 +367,50 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
             </div>
           )}
 
-          {/* STEP 1: PHONE NUMBER INPUT */}
+          {/* STEP 1: EMAIL ADDRESS INPUT */}
           {step === 'OTP_REQUEST' && (
             <form onSubmit={handleRequestOtp} className="space-y-4 text-left">
               <div className="text-center space-y-1">
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-[#D97706] flex items-center justify-center mx-auto mb-2">
-                  <Phone className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-[#D97706] flex items-center justify-center mx-auto mb-2 shadow-xs">
+                  <Mail className="w-6 h-6" />
                 </div>
                 <h4 className="font-playfair font-bold text-lg text-slate-800">
-                  {i18n.verifyMobileTitle}
+                  {i18n.verifyEmailTitle}
                 </h4>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
                   {language === 'hi'
-                    ? 'आपकी प्रथम निःशुल्क रिपोर्ट का लाभ प्राप्त करने हेतु कृपया मोबाइल नंबर सत्यापित करें।'
-                    : 'Verify your mobile number to claim your first FREE report entitlement.'}
+                    ? 'आपकी प्रथम निःशुल्क रिपोर्ट का लाभ प्राप्त करने हेतु कृपया अपना ईमेल पता सत्यापित करें।'
+                    : 'Verify your email address with a secure passwordless OTP to claim your complimentary specialist report.'}
                 </p>
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-[10px] font-mono uppercase font-bold text-slate-500">
-                  {language === 'hi' ? '10 अंकों का मोबाइल नंबर' : '10-Digit Mobile Number'}
+                  {i18n.emailAddressLabel}
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-xs font-mono font-bold text-slate-400">
-                    +91
+                  <span className="absolute left-3.5 text-slate-400">
+                    <Mail className="w-4 h-4" />
                   </span>
                   <input
-                    type="tel"
-                    maxLength={10}
-                    value={userMobile}
-                    onChange={(e) => setUserMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    placeholder="9876543210"
+                    type="email"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    placeholder="user@example.com"
                     required
-                    className="w-full bg-white border border-slate-300 rounded-2xl pl-12 pr-4 py-3 text-sm font-mono font-bold text-slate-800 focus:outline-none focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706]"
+                    autoFocus
+                    className="w-full bg-white border border-slate-300 rounded-2xl pl-10 pr-4 py-3 text-sm font-sans font-medium text-slate-800 focus:outline-none focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706]"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                disabled={isLoading || userMobile.length < 10}
+                disabled={isLoading || !emailInput.trim()}
                 className="w-full bg-[#D97706] hover:bg-[#B45309] text-white font-bold py-3.5 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-                <span>{language === 'hi' ? 'OTP प्राप्त करें (Get OTP)' : 'Send Verification OTP'}</span>
+                <span>{i18n.getOtpButton}</span>
               </button>
 
               <div className="text-[10px] text-center text-slate-400">
@@ -376,47 +419,52 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
             </form>
           )}
 
-          {/* STEP 2: OTP VERIFICATION */}
+          {/* STEP 2: EMAIL OTP VERIFICATION */}
           {step === 'OTP_VERIFY' && (
             <form onSubmit={handleVerifyOtp} className="space-y-4 text-left">
               <div className="text-center space-y-1">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 shadow-xs">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <h4 className="font-playfair font-bold text-lg text-slate-800">
-                  {i18n.enterOtpTitle}
+                  {i18n.enterEmailOtpTitle}
                 </h4>
                 <p className="text-xs text-slate-500">
-                  +91 {userMobile} {language === 'hi' ? 'पर भेजा गया कोड दर्ज करें' : 'sent verification code'}
+                  <span className="font-semibold text-slate-700">{targetEmail || emailInput}</span> {i18n.enterOtpSubtitle}
                 </p>
               </div>
-
-              {sandboxOtpHint && (
-                <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-center text-[11px] text-[#92400E]">
-                  🔑 <strong>Sandbox Test OTP:</strong> <span className="font-mono font-bold text-sm bg-white px-2 py-0.5 rounded border border-amber-300 ml-1">{sandboxOtpHint}</span>
-                </div>
-              )}
 
               <div className="space-y-1.5">
                 <input
                   type="text"
-                  maxLength={6}
+                  maxLength={16}
                   value={otpInput}
-                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={(e) => setOtpInput(e.target.value.replace(/[\s-]/g, ''))}
                   placeholder="------"
                   autoFocus
                   required
-                  className="w-full text-center tracking-[0.4em] bg-white border border-slate-300 rounded-2xl py-3 text-lg font-mono font-black text-slate-800 focus:outline-none focus:border-[#D97706]"
+                  className="w-full text-center tracking-[0.3em] bg-white border border-slate-300 rounded-2xl py-3 text-lg font-mono font-black text-slate-800 focus:outline-none focus:border-[#D97706]"
                 />
               </div>
 
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setStep('OTP_REQUEST')}
+                  onClick={() => {
+                    resetOtpFlow();
+                    setStep('OTP_REQUEST');
+                  }}
                   className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-xs font-semibold cursor-pointer"
                 >
-                  {i18n.changeMobile}
+                  {i18n.changeEmail}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={!canResend || isLoading}
+                  className="px-4 py-3 bg-amber-50 hover:bg-amber-100 text-[#92400E] border border-amber-200 rounded-2xl text-xs font-semibold cursor-pointer disabled:opacity-50"
+                >
+                  {cooldownSeconds > 0 ? `${i18n.resendOtpButton} (${cooldownSeconds}s)` : i18n.resendOtpButton}
                 </button>
                 <button
                   type="submit"
@@ -424,7 +472,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                   className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  <span>{language === 'hi' ? 'सत्यापित करें (Verify OTP)' : 'Verify OTP & Continue'}</span>
+                  <span>{i18n.verifyOtpButton}</span>
                 </button>
               </div>
             </form>
@@ -433,15 +481,15 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
           {/* STEP 3: ACCESS OPTIONS (FIRST FREE vs. ₹33 PER-REPORT VIA RAZORPAY) */}
           {step === 'ACCESS_OPTIONS' && (
             <div className="space-y-5 text-left">
-              {/* Profile Details Badge */}
+              {/* Profile & Verified Email Badge */}
               <div className="bg-white p-3.5 rounded-2xl border border-slate-200 flex items-center justify-between text-xs">
                 <div>
                   <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold">Client Profile</span>
                   <span className="font-bold text-slate-800">{profileName || 'Primary Profile'}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold">Verified Mobile</span>
-                  <span className="font-mono font-bold text-slate-700">+91 {userMobile}</span>
+                  <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold">Verified Email</span>
+                  <span className="font-mono font-bold text-slate-700">{verifiedEmail}</span>
                 </div>
               </div>
 
@@ -461,7 +509,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                     <p className="text-xs text-emerald-800 max-w-sm mx-auto">
                       {language === 'hi'
                         ? 'लियोफैमिली की ओर से यह विशेष परामर्श रिपोर्ट आपके लिए निःशुल्क अनलॉक की जा रही है।'
-                        : 'LeoFamily is delighted to offer your first comprehensive specialist report as a free gift.'}
+                        : 'LeoFamily is delighted to offer your first comprehensive specialist report as a complimentary gift.'}
                     </p>
                   </div>
 

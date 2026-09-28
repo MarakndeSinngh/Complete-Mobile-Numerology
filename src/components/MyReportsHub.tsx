@@ -16,6 +16,7 @@ import {
   Sparkles,
   Gift,
   RefreshCw,
+  Mail,
   Phone,
   ArrowRight,
   Shield,
@@ -64,8 +65,9 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
   // Auth / Login Modal State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const storedUser = ReportAccessService.getStoredUser();
+  const userEmail = storedUser?.email || '';
   const userMobile = storedUser?.mobile || '';
-  const isVerified = !!storedUser?.mobileVerified;
+  const isVerified = !!(storedUser?.emailVerified || storedUser?.token);
 
   // Load user data from server (Authoritative server-side persistence)
   const fetchUserData = async () => {
@@ -97,7 +99,7 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
 
   useEffect(() => {
     fetchUserData();
-  }, [userMobile, isVerified]);
+  }, [userEmail, userMobile, isVerified]);
 
   // Map canonical report type to NavPortalId
   const getPortalIdForReport = (reportType: CanonicalReportType): NavPortalId => {
@@ -214,15 +216,15 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
               </span>
             )}
           </div>
-          <div className="font-mono text-sm font-bold text-slate-800">
-            {userMobile ? `+91 ${userMobile}` : 'No Mobile Linked'}
+          <div className="font-sans text-xs font-bold text-slate-800 truncate max-w-[220px]">
+            {userEmail ? userEmail : userMobile ? `+91 ${userMobile}` : 'Guest User'}
           </div>
           {!isVerified ? (
             <button
               onClick={() => setIsAuthModalOpen(true)}
               className="w-full bg-[#D97706] hover:bg-[#B45309] text-white text-[11px] font-bold py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <Phone className="w-3 h-3" />
+              <Mail className="w-3 h-3" />
               <span>{i18n.verifyNowBtn}</span>
             </button>
           ) : (

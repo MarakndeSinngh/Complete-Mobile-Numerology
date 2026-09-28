@@ -231,6 +231,9 @@ export const REPORT_REGISTRY: Record<CanonicalReportType, ReportTypeDefinition> 
 
 export interface UserSession {
   userId: string;
+  supabaseUserId?: string;
+  email?: string;
+  emailVerified?: boolean;
   mobile: string;
   mobileVerified: boolean;
   token: string;
@@ -342,6 +345,17 @@ export interface PaymentI18nEntry {
   upiOption: string;
   cardOption: string;
   netbankingOption: string;
+  verifyEmailTitle: string;
+  emailAddressLabel: string;
+  getOtpButton: string;
+  enterEmailOtpTitle: string;
+  enterOtpSubtitle: string;
+  verifyOtpButton: string;
+  resendOtpButton: string;
+  changeEmail: string;
+  invalidEmail: string;
+  invalidOtp: string;
+  otpSentNotice: string;
   verifyMobileTitle: string;
   enterOtpTitle: string;
   changeMobile: string;
@@ -365,6 +379,17 @@ export const PAYMENT_I18N: Record<string, PaymentI18nEntry> = {
     upiOption: 'UPI / GPay / PhonePe / Paytm',
     cardOption: 'डेबिट / क्रेडिट कार्ड',
     netbankingOption: 'नेट बैंकिंग',
+    verifyEmailTitle: 'ईमेल सत्यापन (Email Verification)',
+    emailAddressLabel: 'ईमेल पता (Email Address)',
+    getOtpButton: 'OTP प्राप्त करें (Get OTP)',
+    enterEmailOtpTitle: 'ईमेल पर प्राप्त OTP दर्ज करें',
+    enterOtpSubtitle: 'आपके इनबॉक्स / स्पैम फोल्डर में भेजा गया 6-अंकों का कोड दर्ज करें',
+    verifyOtpButton: 'सत्यापित करें (Verify OTP)',
+    resendOtpButton: 'OTP पुनः भेजें (Resend OTP)',
+    changeEmail: 'ईमेल बदलें',
+    invalidEmail: 'कृपया एक मान्य ईमेल पता दर्ज करें',
+    invalidOtp: 'कृपया 6-अंकों का मान्य OTP दर्ज करें',
+    otpSentNotice: 'OTP आपके ईमेल पर भेज दिया गया है। इनबॉक्स एवं स्पैम फोल्डर देखें।',
     verifyMobileTitle: 'मोबाइल नंबर सत्यापन',
     enterOtpTitle: '6-अंकों का OTP दर्ज करें',
     changeMobile: 'नंबर बदलें',
@@ -386,6 +411,17 @@ export const PAYMENT_I18N: Record<string, PaymentI18nEntry> = {
     upiOption: 'UPI / GPay / PhonePe / Paytm',
     cardOption: 'Debit / Credit Cards',
     netbankingOption: 'Net Banking',
+    verifyEmailTitle: 'Email Verification',
+    emailAddressLabel: 'Email Address',
+    getOtpButton: 'Get OTP',
+    enterEmailOtpTitle: 'Enter Email OTP',
+    enterOtpSubtitle: 'Enter the 6-digit code sent to your inbox & spam folder',
+    verifyOtpButton: 'Verify OTP',
+    resendOtpButton: 'Resend OTP',
+    changeEmail: 'Change Email',
+    invalidEmail: 'Please enter a valid email address',
+    invalidOtp: 'Please enter a valid 6-digit verification OTP',
+    otpSentNotice: 'OTP sent to your email. Please check your inbox and spam folder.',
     verifyMobileTitle: 'Mobile Number Verification',
     enterOtpTitle: 'Enter 6-Digit OTP',
     changeMobile: 'Change Number',
@@ -407,6 +443,17 @@ export const PAYMENT_I18N: Record<string, PaymentI18nEntry> = {
     upiOption: 'UPI / GPay / PhonePe',
     cardOption: 'डेबिट / क्रेडिट कार्ड',
     netbankingOption: 'नेट बँकिंग',
+    verifyEmailTitle: 'ईमेल पडताळणी (Email Verification)',
+    emailAddressLabel: 'ईमेल पत्ता (Email Address)',
+    getOtpButton: 'OTP मिळवा (Get OTP)',
+    enterEmailOtpTitle: 'ईमेलवर प्राप्त OTP प्रविष्ट करा',
+    enterOtpSubtitle: 'तुमच्या इनबॉक्स / स्पॅम फोल्डरमध्ये पाठवलेला 6-अंकी कोड प्रविष्ट करा',
+    verifyOtpButton: 'पडताळणी करा (Verify OTP)',
+    resendOtpButton: 'OTP पुन्हा पाठवा (Resend OTP)',
+    changeEmail: 'ईमेल बदला',
+    invalidEmail: 'कृपया वैध ईमेल पत्ता प्रविष्ट करा',
+    invalidOtp: 'कृपया 6-अंकी वैध OTP प्रविष्ट करा',
+    otpSentNotice: 'OTP तुमच्या ईमेलवर पाठवला आहे. इनबॉक्स आणि स्पॅम फोल्डर तपासा.',
     verifyMobileTitle: 'मोबाईल नंबर पडताळणी',
     enterOtpTitle: '6-अंकी OTP प्रविष्ट करा',
     changeMobile: 'नंबर बदला',
@@ -428,6 +475,17 @@ export const PAYMENT_I18N: Record<string, PaymentI18nEntry> = {
     upiOption: 'UPI / GPay / PhonePe',
     cardOption: 'ডেবিট / ক্রেডিট কার্ড',
     netbankingOption: 'নেট ব্যাঙ্কিং',
+    verifyEmailTitle: 'ইমেল যাচাইকরণ (Email Verification)',
+    emailAddressLabel: 'ইমেল ঠিকানা (Email Address)',
+    getOtpButton: 'OTP পান (Get OTP)',
+    enterEmailOtpTitle: 'ইমেলে প্রাপ্ত OTP লিখুন',
+    enterOtpSubtitle: 'আপনার ইনবক্স এবং স্প্যাম ফোল্ডারে পাঠানো ৬-সংখ্যার কোডটি লিখুন',
+    verifyOtpButton: 'যাচাই করুন (Verify OTP)',
+    resendOtpButton: 'OTP পুনরায় পাঠান (Resend OTP)',
+    changeEmail: 'ইমেল পরিবর্তন',
+    invalidEmail: 'অনুগ্রহ করে একটি বৈধ ইমেল ঠিকানা লিখুন',
+    invalidOtp: 'অনুগ্রহ করে একটি বৈধ ৬-সংখ্যার OTP লিখুন',
+    otpSentNotice: 'OTP আপনার ইমেলে পাঠানো হয়েছে। ইনবক্স এবং স্প্যাম ফোল্ডার চেক করুন।',
     verifyMobileTitle: 'মোবাইল নম্বর যাচাইকরণ',
     enterOtpTitle: '৬-সংখ্যার OTP লিখুন',
     changeMobile: 'নম্বর পরিবর্তন',
@@ -449,6 +507,17 @@ export const PAYMENT_I18N: Record<string, PaymentI18nEntry> = {
     upiOption: 'UPI / GPay / PhonePe',
     cardOption: 'ડેબિટ / ક્રેડિટ કાર્ડ',
     netbankingOption: 'નેટ બેંકિંગ',
+    verifyEmailTitle: 'ઇમેઇલ ચકાસણી (Email Verification)',
+    emailAddressLabel: 'ઇમેઇલ સરનામું (Email Address)',
+    getOtpButton: 'OTP મેળવો (Get OTP)',
+    enterEmailOtpTitle: 'ઇમેઇલ પર પ્રાપ્ત OTP દાખલ કરો',
+    enterOtpSubtitle: 'તમારા ઇનબોક્સ અને સ્પામ ફોલ્ડરમાં મોકલેલ 6-અંકનો કોડ દાખલ કરો',
+    verifyOtpButton: 'ચકાસો (Verify OTP)',
+    resendOtpButton: 'OTP ફરી મોકલો (Resend OTP)',
+    changeEmail: 'ઇમેઇલ બદલો',
+    invalidEmail: 'કૃપા કરીને માન્ય ઇમેઇલ સરનામું દાખલ કરો',
+    invalidOtp: 'કૃપા કરીને 6-અંકનો માન્ય OTP દાખલ કરો',
+    otpSentNotice: 'OTP તમારા ઇમેઇલ પર મોકલવામાં આવ્યો છે. ઇનબોક્સ અને સ્પામ ફોલ્ડર તપાસો.',
     verifyMobileTitle: 'મોબાઇલ નંબર ચકાસણી',
     enterOtpTitle: '6-અંકનો OTP દાખલ કરો',
     changeMobile: 'નંબર બદલો',

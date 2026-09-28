@@ -48,10 +48,23 @@ router.post("/auth/send-email-otp", async (req, res) => {
 router.post("/auth/verify-email-otp", async (req, res) => {
   try {
     const { email, token } = req.body || {};
-    const result = await reportAccessEngine.verifyEmailOtp(email, token);
+    const authHeader = req.headers['authorization'] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
+    const result = await reportAccessEngine.verifyEmailOtp(email, token, authHeader);
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Failed to verify email OTP" });
+  }
+});
+
+// 2b. Synchronize Authenticated Supabase Session
+router.post("/auth/sync-session", async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    const authHeader = req.headers['authorization'] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
+    const result = await reportAccessEngine.syncSession(authHeader, email);
+    res.json(result);
+  } catch (e: any) {
+    res.status(401).json({ success: false, error: e?.message || "Unauthorized session" });
   }
 });
 

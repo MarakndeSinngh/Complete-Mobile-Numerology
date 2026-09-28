@@ -1,6 +1,6 @@
 /**
  * LEOFAMILY REPORT ACCESS & ₹33 MONETIZATION CLIENT SERVICE
- * Phase 16: Centralized Access Gate & Payment Integration
+ * Phase 16C.4: Supabase Auth Email OTP & Centralized Entitlement Integration
  * Hardened with safe JSON response parsing to prevent unexpected HTML/text parse exceptions.
  */
 
@@ -84,49 +84,79 @@ export class ReportAccessService {
     });
   }
 
-  // 1. Request OTP for Indian mobile number
-  public static async requestOtp(mobile: string): Promise<{ success: boolean; message: string; testOtp?: string }> {
-    return await safeFetchJson<{ success: boolean; message: string; testOtp?: string }>(
-      '/api/auth/request-otp',
+  // 1. Send Email OTP (via Backend or Supabase Auth)
+  public static async sendEmailOtp(email: string): Promise<{ success: boolean; message: string }> {
+    return await safeFetchJson<{ success: boolean; message: string }>(
+      '/api/auth/send-email-otp',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile }),
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       }
     );
   }
 
-  // 2. Verify OTP & establish session
-  public static async verifyOtp(mobile: string, otp: string): Promise<UserSession> {
+  // 2. Verify Email OTP & establish session
+  public static async verifyEmailOtp(email: string, token: string): Promise<UserSession> {
     const data = await safeFetchJson<{
       success: boolean;
-      token: string;
+      session?: {
+        access_token: string;
+        user?: any;
+      };
       user: {
         id: string;
-        mobile: string;
+        supabaseUserId?: string;
+        email?: string;
+        emailVerified?: boolean;
+        mobile?: string;
         hasClaimedFreeReport: boolean;
         freeReportDetails?: any;
       };
     }>(
-      '/api/auth/verify-otp',
+      '/api/auth/verify-email-otp',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile, otp }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), token: token.trim() }),
       }
     );
 
+    const authToken = data.session?.access_token || `token_${Date.now()}`;
     const session: UserSession = {
       userId: data.user.id,
-      mobile: data.user.mobile,
-      mobileVerified: true,
-      token: data.token,
-      hasClaimedFreeReport: data.user.hasClaimedFreeReport,
+      supabaseUserId: data.user.supabaseUserId || data.user.id,
+      email: data.user.email || email.trim().toLowerCase(),
+      emailVerified: true,
+      mobile: data.user.mobile || '',
+      mobileVerified: !!data.user.mobile,
+      token: authToken,
+      hasClaimedFreeReport: !!data.user.hasClaimedFreeReport,
       freeReportDetails: data.user.freeReportDetails,
     };
 
     this.saveSession(session);
     return session;
+  }
+
+  // Legacy fallback helpers (deprecated, mapped to email where available)
+  public static async requestOtp(mobileOrEmail: string): Promise<{ success: boolean; message: string; testOtp?: string }> {
+    const isEmail = mobileOrEmail.includes('@');
+    const target = isEmail ? mobileOrEmail : `${mobileOrEmail}@leofamily.local`;
+    return await safeFetchJson<{ success: boolean; message: string; testOtp?: string }>(
+      '/api/auth/send-email-otp',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: target }),
+      }
+    );
+  }
+
+  public static async verifyOtp(mobileOrEmail: string, otp: string): Promise<UserSession> {
+    const isEmail = mobileOrEmail.includes('@');
+    const target = isEmail ? mobileOrEmail : `${mobileOrEmail}@leofamily.local`;
+    return await this.verifyEmailOtp(target, otp);
   }
 
   // 3. Central Report Access Check
@@ -153,11 +183,13 @@ export class ReportAccessService {
     const token = this.getToken();
     const storedUser = this.getStoredUser();
     const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = storedUser?.email;
 
     const params = new URLSearchParams({
       reportType,
       profileKey: profileKey || 'default_profile',
     });
+    if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
     if (token) params.append('token', token);
 
@@ -171,7 +203,6 @@ export class ReportAccessService {
       );
     } catch (err: any) {
       console.warn("API check-access notice:", err.message);
-      // Return safe client fallback if server endpoint is temporarily disconnected
       return {
         allowed: false,
         requiresPayment: true,
@@ -195,6 +226,7 @@ export class ReportAccessService {
     const token = this.getToken();
     const storedUser = this.getStoredUser();
     const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = storedUser?.email;
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -207,6 +239,7 @@ export class ReportAccessService {
         body: JSON.stringify({
           reportType,
           profileKey: profileKey || 'default_profile',
+          email: activeEmail,
           mobile: activeMobile,
           token,
         }),
@@ -236,6 +269,7 @@ export class ReportAccessService {
     const token = this.getToken();
     const storedUser = this.getStoredUser();
     const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = storedUser?.email;
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -248,6 +282,7 @@ export class ReportAccessService {
         body: JSON.stringify({
           reportType,
           profileKey: profileKey || 'default_profile',
+          email: activeEmail,
           mobile: activeMobile,
           token,
         }),
@@ -267,6 +302,7 @@ export class ReportAccessService {
     const token = this.getToken();
     const storedUser = this.getStoredUser();
     const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = storedUser?.email;
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -282,6 +318,7 @@ export class ReportAccessService {
           signature,
           reportType,
           profileKey: profileKey || 'default_profile',
+          email: activeEmail,
           mobile: activeMobile,
           token,
         }),
@@ -294,8 +331,10 @@ export class ReportAccessService {
     const token = this.getToken();
     const storedUser = this.getStoredUser();
     const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = storedUser?.email;
 
     const params = new URLSearchParams();
+    if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
     if (token) params.append('token', token);
 
@@ -313,8 +352,10 @@ export class ReportAccessService {
     const token = this.getToken();
     const storedUser = this.getStoredUser();
     const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = storedUser?.email;
 
     const params = new URLSearchParams();
+    if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
     if (token) params.append('token', token);
 
@@ -332,8 +373,10 @@ export class ReportAccessService {
     const token = this.getToken();
     const storedUser = this.getStoredUser();
     const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = storedUser?.email;
 
     const params = new URLSearchParams();
+    if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
     if (token) params.append('token', token);
 
@@ -351,8 +394,10 @@ export class ReportAccessService {
     const token = this.getToken();
     const storedUser = this.getStoredUser();
     const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = storedUser?.email;
 
     const params = new URLSearchParams();
+    if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
     if (token) params.append('token', token);
 

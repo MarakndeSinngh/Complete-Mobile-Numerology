@@ -58,10 +58,23 @@ async function startServer() {
   app.post("/api/auth/verify-email-otp", async (req, res) => {
     try {
       const { email, token } = req.body || {};
-      const result = await reportAccessEngine.verifyEmailOtp(email, token);
+      const authHeader = req.headers['authorization'] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
+      const result = await reportAccessEngine.verifyEmailOtp(email, token, authHeader);
       res.json(result);
     } catch (e: any) {
       res.status(400).json({ error: e.message || "Failed to verify email OTP" });
+    }
+  });
+
+  // 2b. Synchronize Authenticated Supabase Session
+  app.post("/api/auth/sync-session", async (req, res) => {
+    try {
+      const { email } = req.body || {};
+      const authHeader = req.headers['authorization'] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
+      const result = await reportAccessEngine.syncSession(authHeader, email);
+      res.json(result);
+    } catch (e: any) {
+      res.status(401).json({ error: e.message || "Unauthorized session" });
     }
   });
 

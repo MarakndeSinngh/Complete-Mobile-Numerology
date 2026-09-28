@@ -211,10 +211,15 @@ class ReportAccessEngine {
 
     if (isSupabaseServerConfigured()) {
       const client = getServerSupabaseClient();
+      const productionRedirect =
+        process.env.APP_URL ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://complete-mobile-numerology.vercel.app');
+
       const { error } = await client.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: true
+          shouldCreateUser: true,
+          emailRedirectTo: productionRedirect,
         }
       });
 
@@ -232,16 +237,36 @@ class ReportAccessEngine {
     };
   }
 
-  // 2. Verify Email OTP using Supabase Auth
-  public async verifyEmailOtp(rawEmail: string, token: string): Promise<{ success: boolean; session: any; user: any }> {
+  // 2. Verify Email OTP using Supabase Auth (or sync verified session)
+  public async verifyEmailOtp(
+    rawEmail: string,
+    token: string,
+    authHeader?: string | null
+  ): Promise<{ success: boolean; session: any; user: any }> {
     const email = normalizeEmail(rawEmail);
-    const cleanToken = (token || '').trim();
+    const cleanToken = (token || '').replace(/[\s-]/g, '').trim();
+
+    // If an authenticated Bearer token is provided or passed as token, resolve via JWT
+    if (authHeader || (cleanToken && cleanToken.length > 30)) {
+      const header = authHeader || `Bearer ${cleanToken}`;
+      const authUser = await this.resolveAuthenticatedUser(header, email);
+      if (authUser) {
+        return {
+          success: true,
+          session: {
+            access_token: header.replace('Bearer ', '').trim(),
+            user: authUser
+          },
+          user: authUser
+        };
+      }
+    }
 
     if (!email) {
       throw new Error("Missing email address");
     }
     if (!cleanToken) {
-      throw new Error("कृपया ईमेल पर प्राप्त 6-अंकों का OTP दर्ज करें (Please enter the 6-digit OTP sent to your email)");
+      throw new Error("कृपया ईमेल पर प्राप्त OTP दर्ज करें (Please enter the OTP sent to your email)");
     }
 
     if (isSupabaseServerConfigured()) {
@@ -301,6 +326,60 @@ class ReportAccessEngine {
         user
       };
     }
+  }
+
+  // 2b. Synchronize Authenticated Supabase Session & Ensure User Record Exists
+  public async syncSession(
+    authHeader?: string | null,
+    optionalEmail?: string
+  ): Promise<{ success: boolean; user: any }> {
+    await this.ensureDb();
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
+      throw new Error("UNAUTHORIZED: Invalid or expired session token");
+    }
+
+    // Check user claim status
+    let hasClaimedFreeReport = false;
+    let freeReportDetails: any = undefined;
+
+    if (isDatabaseConfigured()) {
+      const claimRes = await query(
+        `SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3`,
+        [authUser.id, authUser.supabaseUserId, authUser.email]
+      );
+      if (claimRes.rows.length > 0) {
+        hasClaimedFreeReport = true;
+        freeReportDetails = {
+          reportType: claimRes.rows[0].report_type,
+          claimedAt: claimRes.rows[0].claimed_at,
+          profileKey: claimRes.rows[0].profile_key,
+        };
+      }
+    } else {
+      const fc = this.localSandbox.freeClaims.get(authUser.email);
+      if (fc) {
+        hasClaimedFreeReport = true;
+        freeReportDetails = {
+          reportType: fc.reportType,
+          claimedAt: fc.claimedAt,
+          profileKey: fc.profileKey,
+        };
+      }
+    }
+
+    return {
+      success: true,
+      user: {
+        id: authUser.id,
+        supabaseUserId: authUser.supabaseUserId,
+        email: authUser.email,
+        emailVerified: authUser.emailVerified,
+        mobile: authUser.mobile || '',
+        hasClaimedFreeReport,
+        freeReportDetails
+      }
+    };
   }
 
   // 3. Central Report Access Check
