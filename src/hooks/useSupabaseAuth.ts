@@ -6,9 +6,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { supabase, isSupabaseConfigured, getSupabaseClientConfigAudit } from '../lib/supabaseClient';
 import { ReportAccessService } from '../services/reportAccessService';
 import { UserSession } from '../types/reportAccess';
+import { safeFetchJson } from '../services/safeApiHelper';
 
 export interface SupabaseAuthState {
   user: User | null;
@@ -199,14 +200,26 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
           throw sbError;
         }
       } else {
-        // Fallback: Call backend proxy endpoint
-        const res = await fetch('/api/auth/send-email-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cleanEmail }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) {
+        const isBrowser = typeof window !== 'undefined';
+        const isProd = isBrowser && window.location?.hostname !== 'localhost' && window.location?.hostname !== '127.0.0.1';
+        
+        if (isProd) {
+          const configMsg = 'Authentication service is not configured. Please contact administrator.';
+          setError(configMsg);
+          return { success: false, message: configMsg };
+        }
+
+        // Local development sandbox only
+        const data = await safeFetchJson<{ success: boolean; error?: string }>(
+          '/api/auth/send-email-otp',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: cleanEmail }),
+          }
+        );
+
+        if (!data.success) {
           throw new Error(data.error || 'Failed to send OTP');
         }
       }
@@ -221,7 +234,7 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
       };
     } catch (err: any) {
       console.error('[useSupabaseAuth] sendOtp error:', err);
-      let errorMsg = err?.message || 'Failed to send OTP. Please check your email and try again.';
+      let errorMsg = err?.message || 'Authentication service is temporarily unavailable. Please try again.';
       if (err?.status === 429 || errorMsg.toLowerCase().includes('rate')) {
         errorMsg = 'Too many requests. Please wait a minute before requesting another OTP.';
       }
@@ -299,23 +312,20 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
         setUser(verifiedUser);
 
         // Step 2: Synchronize with backend using the validated JWT Bearer Token
-        const syncRes = await fetch('/api/auth/sync-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ email: cleanEmail }),
-        });
+        const syncData = await safeFetchJson<{ success: boolean; user?: any; error?: string }>(
+          '/api/auth/sync-session',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ email: cleanEmail }),
+          }
+        );
 
-        if (!syncRes.ok) {
-          const syncErrData = await syncRes.json().catch(() => ({}));
-          throw new Error(syncErrData.error || 'Backend session synchronization failed. Please retry.');
-        }
-
-        const syncData = await syncRes.json();
         if (!syncData.success || !syncData.user) {
-          throw new Error('Failed to resolve authenticated user profile from backend.');
+          throw new Error(syncData.error || 'Failed to resolve authenticated user profile from backend.');
         }
 
         const appUserSession: UserSession = {
@@ -340,8 +350,22 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
           session: appUserSession,
         };
       } else {
-        // Fallback for local development environment without client-side Supabase keys: Verify via backend endpoint
-        const backendRes = await fetch('/api/auth/verify-email-otp', {
+        const isBrowser = typeof window !== 'undefined';
+        const isProd = isBrowser && window.location?.hostname !== 'localhost' && window.location?.hostname !== '127.0.0.1';
+        
+        if (isProd) {
+          const configMsg = 'Authentication service is not configured. Please contact administrator.';
+          setError(configMsg);
+          return { success: false, error: configMsg };
+        }
+
+        // Local development sandbox only
+        const backendData = await safeFetchJson<{
+          success: boolean;
+          error?: string;
+          user?: any;
+          session?: any;
+        }>('/api/auth/verify-email-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -350,8 +374,7 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
           }),
         });
 
-        const backendData = await backendRes.json();
-        if (!backendRes.ok || !backendData.success) {
+        if (!backendData.success) {
           const rawErr = backendData.error || 'Invalid or expired OTP';
           if (rawErr.toLowerCase().includes('expired') || rawErr.toLowerCase().includes('invalid')) {
             throw new Error('यह OTP मान्य नहीं है या समाप्त हो चुका है। कृपया नवीनतम कोड दर्ज करें (Invalid or expired OTP).');

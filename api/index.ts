@@ -100,13 +100,29 @@ router.get("/reports/check-access", async (req, res) => {
     const authHeader = req.headers['authorization'];
 
     if (!reportType) {
-      return res.status(400).json({ success: false, error: "Missing reportType parameter" });
+      return res.status(400).json({
+        success: false,
+        error: "Missing reportType parameter",
+        code: "INVALID_REQUEST"
+      });
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[API:CheckAccess] Checking access for ${reportType} (profile: ${profileKey})`);
     }
 
     const result = await reportAccessEngine.checkReportAccess(reportType, profileKey, authHeader, email);
     res.json(result);
   } catch (e: any) {
-    res.status(500).json({ success: false, error: e?.message || "Failed to check report access" });
+    console.error("[API:CheckAccess:Error]", e?.message || e);
+    const isDbErr = e?.message?.includes('DATABASE') || e?.message?.includes('connection') || e?.message?.includes('Pool');
+    res.status(isDbErr ? 503 : 500).json({
+      success: false,
+      error: isDbErr
+        ? "Database connection is temporarily unavailable. Please retry in a few moments."
+        : (e?.message || "Failed to check report access"),
+      code: isDbErr ? "DATABASE_UNAVAILABLE" : "ACCESS_CHECK_FAILED"
+    });
   }
 });
 
@@ -117,13 +133,32 @@ router.post("/reports/claim-free", async (req, res) => {
     const authHeader = req.headers['authorization'];
 
     if (!reportType) {
-      return res.status(400).json({ success: false, error: "Missing reportType" });
+      return res.status(400).json({
+        success: false,
+        error: "Missing reportType",
+        code: "INVALID_REQUEST"
+      });
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[API:ClaimFree] Attempting free claim for ${reportType} (profile: ${profileKey})`);
     }
 
     const result = await reportAccessEngine.claimFreeReport(reportType, profileKey, authHeader, email);
     res.json(result);
   } catch (e: any) {
-    res.status(400).json({ success: false, error: e?.message || "Failed to claim free report" });
+    console.error("[API:ClaimFree:Error]", e?.message || e);
+    const msg = e?.message || "Failed to claim free report";
+    const isAuth = msg.includes("UNAUTHORIZED") || msg.includes("session");
+    const isDbErr = msg.includes('DATABASE') || msg.includes('connection');
+    const isAlready = msg.includes("पहले ही") || msg.includes("already");
+
+    const status = isAuth ? 401 : isDbErr ? 503 : 400;
+    res.status(status).json({
+      success: false,
+      error: msg,
+      code: isAuth ? "UNAUTHORIZED" : isDbErr ? "DATABASE_UNAVAILABLE" : isAlready ? "ALREADY_CLAIMED" : "CLAIM_FAILED"
+    });
   }
 });
 
@@ -134,13 +169,24 @@ router.post("/payments/create-order", async (req, res) => {
     const authHeader = req.headers['authorization'];
 
     if (!reportType) {
-      return res.status(400).json({ success: false, error: "Missing reportType" });
+      return res.status(400).json({
+        success: false,
+        error: "Missing reportType",
+        code: "INVALID_REQUEST"
+      });
     }
 
     const result = await reportAccessEngine.createPaymentOrder(reportType, profileKey, authHeader, email);
     res.json(result);
   } catch (e: any) {
-    res.status(400).json({ success: false, error: e?.message || "Failed to create payment order" });
+    console.error("[API:CreateOrder:Error]", e?.message || e);
+    const msg = e?.message || "Failed to create payment order";
+    const isAuth = msg.includes("UNAUTHORIZED") || msg.includes("verify email");
+    res.status(isAuth ? 401 : 400).json({
+      success: false,
+      error: msg,
+      code: isAuth ? "UNAUTHORIZED" : "ORDER_CREATION_FAILED"
+    });
   }
 });
 
@@ -151,7 +197,11 @@ router.post("/payments/verify-payment", async (req, res) => {
     const authHeader = req.headers['authorization'];
 
     if (!orderId || !reportType) {
-      return res.status(400).json({ success: false, error: "Missing orderId or reportType" });
+      return res.status(400).json({
+        success: false,
+        error: "Missing orderId or reportType",
+        code: "INVALID_REQUEST"
+      });
     }
 
     const result = await reportAccessEngine.verifyPayment(
@@ -165,7 +215,12 @@ router.post("/payments/verify-payment", async (req, res) => {
     );
     res.json(result);
   } catch (e: any) {
-    res.status(400).json({ success: false, error: e?.message || "Failed to verify payment" });
+    console.error("[API:VerifyPayment:Error]", e?.message || e);
+    res.status(400).json({
+      success: false,
+      error: e?.message || "Failed to verify payment",
+      code: "PAYMENT_VERIFICATION_FAILED"
+    });
   }
 });
 

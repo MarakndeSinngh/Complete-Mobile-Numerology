@@ -131,51 +131,32 @@ class ReportAccessEngine {
         const supabaseId = supabaseUser.supabaseUserId;
         const isVerified = supabaseUser.emailVerified;
 
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`[AuthEngine:ResolveUser] Resolved Supabase ID: ${supabaseId} (Verified: ${isVerified})`);
+        }
+
         if (isDatabaseConfigured()) {
-          // Primary lookup strictly by supabase_user_id
-          const userRes = await query(
-            `SELECT id, supabase_user_id, email, email_verified, mobile FROM users WHERE supabase_user_id = $1`,
-            [supabaseId]
+          const generatedId = `usr_${crypto.randomBytes(8).toString('hex')}`;
+          // Atomic UPSERT using ON CONFLICT (supabase_user_id) to eliminate concurrency race conditions
+          const upsertRes = await query(
+            `INSERT INTO users (id, supabase_user_id, email, email_verified, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, NOW(), NOW())
+             ON CONFLICT (supabase_user_id) WHERE supabase_user_id IS NOT NULL
+             DO UPDATE SET email = EXCLUDED.email, email_verified = EXCLUDED.email_verified, updated_at = NOW()
+             RETURNING id, supabase_user_id, email, email_verified, mobile`,
+            [generatedId, supabaseId, userEmail, isVerified]
           );
 
-          let internalId = '';
-          let mobile = '';
-          if (userRes.rows.length > 0) {
-            internalId = userRes.rows[0].id;
-            mobile = userRes.rows[0].mobile || '';
-            await query(
-              `UPDATE users SET email = $1, email_verified = $2, updated_at = NOW() WHERE id = $3`,
-              [userEmail, isVerified, internalId]
-            );
-          } else {
-            // First-time legacy migration check (only if supabase_user_id is not set)
-            const legacyRes = await query(
-              `SELECT id, mobile FROM users WHERE email = $1 AND (supabase_user_id IS NULL OR supabase_user_id = '')`,
-              [userEmail]
-            );
-            if (legacyRes.rows.length > 0) {
-              internalId = legacyRes.rows[0].id;
-              mobile = legacyRes.rows[0].mobile || '';
-              await query(
-                `UPDATE users SET supabase_user_id = $1, email_verified = $2, updated_at = NOW() WHERE id = $3`,
-                [supabaseId, isVerified, internalId]
-              );
-            } else {
-              internalId = `usr_${crypto.randomBytes(8).toString('hex')}`;
-              await query(
-                `INSERT INTO users (id, supabase_user_id, email, email_verified, created_at, updated_at) VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-                [internalId, supabaseId, userEmail, isVerified]
-              );
-            }
+          if (upsertRes.rows.length > 0) {
+            const row = upsertRes.rows[0];
+            return {
+              id: row.id,
+              supabaseUserId: row.supabase_user_id || supabaseId,
+              email: row.email || userEmail,
+              emailVerified: row.email_verified ?? isVerified,
+              mobile: row.mobile || undefined
+            };
           }
-
-          return {
-            id: internalId,
-            supabaseUserId: supabaseId,
-            email: userEmail,
-            emailVerified: isVerified,
-            mobile
-          };
         } else {
           let user = this.localSandbox.users.get(supabaseId) || this.localSandbox.users.get(userEmail);
           if (!user) {
