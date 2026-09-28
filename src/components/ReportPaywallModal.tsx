@@ -239,10 +239,14 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
               setLocalLoading(true);
               setStep('PAYMENT_PROCESSING');
 
+              if (!response.razorpay_payment_id || !response.razorpay_signature) {
+                throw new Error('Payment gateway did not return valid verification credentials.');
+              }
+
               await ReportAccessService.verifyPayment(
                 response.razorpay_order_id || order.orderId,
-                response.razorpay_payment_id || `pay_${Date.now()}`,
-                response.razorpay_signature || `sig_${Date.now()}`,
+                response.razorpay_payment_id,
+                response.razorpay_signature,
                 reportType,
                 profileKey,
                 initialMobile
@@ -276,10 +280,15 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
         });
         rzp.open();
       } else {
-        // Fallback for sandboxed test suites / headless execution
+        const isProd = typeof window !== 'undefined' && window.location?.hostname !== 'localhost' && window.location?.hostname !== '127.0.0.1';
+        if (isProd) {
+          throw new Error('Payment gateway could not be loaded. Please check your internet connection or disable ad blockers and try again.');
+        }
+
+        // Local development sandbox only
         setStep('PAYMENT_PROCESSING');
-        const testPaymentId = `pay_test_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-        const testSignature = `sig_test_${Date.now()}`;
+        const testPaymentId = `pay_sandbox_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        const testSignature = `sig_sandbox_${Date.now()}`;
 
         await new Promise((resolve) => setTimeout(resolve, 1200));
 
