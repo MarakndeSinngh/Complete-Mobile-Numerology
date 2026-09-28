@@ -1,10 +1,10 @@
 import express from "express";
-import { reportAccessEngine } from "../src/server/accessEngine";
-import { CanonicalReportType } from "../src/types/reportAccess";
-import { generateMedicalNumerologyReport } from "../src/services/medicalNumerologyEngine";
-import { generateNumeroVaastuReport } from "../src/services/numeroVaastuEngine";
-import { calculateDashaAndYearForecast } from "../src/services/dashaEngine";
-import { PAIR_MEANINGS } from "../src/services/pairMeanings";
+import { reportAccessEngine } from "./accessEngine";
+import { CanonicalReportType } from "../types/reportAccess";
+import { generateMedicalNumerologyReport } from "../services/medicalNumerologyEngine";
+import { generateNumeroVaastuReport } from "../services/numeroVaastuEngine";
+import { calculateDashaAndYearForecast } from "../services/dashaEngine";
+import { PAIR_MEANINGS } from "../services/pairMeanings";
 import { GoogleGenAI } from "@google/genai";
 
 const app = express();
@@ -373,4 +373,3 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 export default (req: any, res: any) => {
   return app(req, res);
 };
-
