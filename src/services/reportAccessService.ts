@@ -122,7 +122,10 @@ export class ReportAccessService {
       }
     );
 
-    const authToken = data.session?.access_token || `token_${Date.now()}`;
+    const authToken = data.session?.access_token;
+    if (!authToken) {
+      throw new Error('Verification did not return an authenticated session token');
+    }
     const session: UserSession = {
       userId: data.user.id,
       supabaseUserId: data.user.supabaseUserId || data.user.id,

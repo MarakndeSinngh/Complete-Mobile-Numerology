@@ -76,7 +76,7 @@ export async function verifySupabaseToken(
       return {
         supabaseUserId: data.user.id,
         email: data.user.email || '',
-        emailVerified: !!data.user.email_confirmed_at || !!data.user.confirmed_at || true,
+        emailVerified: !!(data.user.email_confirmed_at || data.user.confirmed_at),
       };
     } catch {
       return null;

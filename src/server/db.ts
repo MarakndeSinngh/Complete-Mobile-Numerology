@@ -135,12 +135,12 @@ export async function ensureDatabaseSchema(): Promise<void> {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
       ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile_verified BOOLEAN NOT NULL DEFAULT FALSE;
-      CREATE INDEX IF NOT EXISTS idx_users_supabase_id ON users(supabase_user_id);
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_users_mobile ON users(mobile);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_supabase_id_unique ON users(supabase_user_id) WHERE supabase_user_id IS NOT NULL;
     `);
 
-    // 2. Free claims table (Enforces 1 free report per user / email / supabase_user_id)
+    // 2. Free claims table (Enforces exactly 1 free report per user / supabase_user_id)
     await query(`
       CREATE TABLE IF NOT EXISTS free_claims (
         id VARCHAR(64) PRIMARY KEY,
@@ -155,12 +155,12 @@ export async function ensureDatabaseSchema(): Promise<void> {
       ALTER TABLE free_claims ADD COLUMN IF NOT EXISTS supabase_user_id VARCHAR(64);
       ALTER TABLE free_claims ADD COLUMN IF NOT EXISTS email VARCHAR(255);
       ALTER TABLE free_claims ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
-      CREATE INDEX IF NOT EXISTS idx_free_claims_user ON free_claims(user_id);
-      CREATE INDEX IF NOT EXISTS idx_free_claims_supabase ON free_claims(supabase_user_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_free_claims_user_unique ON free_claims(user_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_free_claims_supabase_unique ON free_claims(supabase_user_id) WHERE supabase_user_id IS NOT NULL;
       CREATE INDEX IF NOT EXISTS idx_free_claims_email ON free_claims(email);
     `);
 
-    // 3. Entitlements table (Tied to user_id / supabase_user_id + profile_key + report_type)
+    // 3. Entitlements table (Tied to user_id + profile_key + report_type)
     await query(`
       CREATE TABLE IF NOT EXISTS entitlements (
         id VARCHAR(64) PRIMARY KEY,
@@ -182,10 +182,9 @@ export async function ensureDatabaseSchema(): Promise<void> {
       ALTER TABLE entitlements ADD COLUMN IF NOT EXISTS supabase_user_id VARCHAR(64);
       ALTER TABLE entitlements ADD COLUMN IF NOT EXISTS email VARCHAR(255);
       ALTER TABLE entitlements ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
-      CREATE INDEX IF NOT EXISTS idx_entitlements_user ON entitlements(user_id);
       CREATE INDEX IF NOT EXISTS idx_entitlements_supabase ON entitlements(supabase_user_id);
       CREATE INDEX IF NOT EXISTS idx_entitlements_email ON entitlements(email);
-      CREATE INDEX IF NOT EXISTS idx_entitlements_lookup ON entitlements(user_id, profile_key, report_type);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_entitlements_user_profile_report_unique ON entitlements(user_id, profile_key, report_type);
       CREATE INDEX IF NOT EXISTS idx_entitlements_rzp_pay ON entitlements(razorpay_payment_id);
     `);
 
@@ -213,6 +212,7 @@ export async function ensureDatabaseSchema(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_tx_user ON payment_transactions(user_id);
       CREATE INDEX IF NOT EXISTS idx_tx_supabase ON payment_transactions(supabase_user_id);
       CREATE INDEX IF NOT EXISTS idx_tx_email ON payment_transactions(email);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_tx_order_id_unique ON payment_transactions(razorpay_order_id);
     `);
 
     // 6. Webhook events table (Deduplication & idempotency)

@@ -291,54 +291,56 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
         verifiedUser = data.user;
         accessToken = verifiedSession?.access_token || '';
 
-        if (verifiedSession) {
-          setSession(verifiedSession);
-          setUser(verifiedUser);
+        if (!verifiedSession || !accessToken) {
+          throw new Error('Supabase authentication completed without valid session token.');
         }
+
+        setSession(verifiedSession);
+        setUser(verifiedUser);
 
         // Step 2: Synchronize with backend using the validated JWT Bearer Token
-        // CRITICAL: We pass the Bearer JWT access token so the backend DOES NOT re-attempt to consume the single-use OTP!
-        try {
-          const syncRes = await fetch('/api/auth/sync-session', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({ email: cleanEmail }),
-          });
+        const syncRes = await fetch('/api/auth/sync-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ email: cleanEmail }),
+        });
 
-          if (syncRes.ok) {
-            const syncData = await syncRes.json();
-            if (syncData.success && syncData.user) {
-              const appUserSession: UserSession = {
-                userId: syncData.user.id,
-                supabaseUserId: syncData.user.supabaseUserId || verifiedUser?.id,
-                email: cleanEmail,
-                emailVerified: true,
-                mobile: syncData.user.mobile || '',
-                mobileVerified: !!syncData.user.mobile,
-                token: accessToken,
-                hasClaimedFreeReport: !!syncData.user.hasClaimedFreeReport,
-                freeReportDetails: syncData.user.freeReportDetails,
-              };
-
-              ReportAccessService.saveSession(appUserSession);
-              setAppUser(appUserSession);
-              clearCooldownTimer();
-              setCooldownSeconds(0);
-
-              return {
-                success: true,
-                session: appUserSession,
-              };
-            }
-          }
-        } catch (syncErr) {
-          console.warn('[SupabaseAuth] Non-fatal backend sync notice:', syncErr);
+        if (!syncRes.ok) {
+          const syncErrData = await syncRes.json().catch(() => ({}));
+          throw new Error(syncErrData.error || 'Backend session synchronization failed. Please retry.');
         }
+
+        const syncData = await syncRes.json();
+        if (!syncData.success || !syncData.user) {
+          throw new Error('Failed to resolve authenticated user profile from backend.');
+        }
+
+        const appUserSession: UserSession = {
+          userId: syncData.user.id,
+          supabaseUserId: syncData.user.supabaseUserId || verifiedUser?.id,
+          email: cleanEmail,
+          emailVerified: true,
+          mobile: syncData.user.mobile || '',
+          mobileVerified: !!syncData.user.mobile,
+          token: accessToken,
+          hasClaimedFreeReport: !!syncData.user.hasClaimedFreeReport,
+          freeReportDetails: syncData.user.freeReportDetails,
+        };
+
+        ReportAccessService.saveSession(appUserSession);
+        setAppUser(appUserSession);
+        clearCooldownTimer();
+        setCooldownSeconds(0);
+
+        return {
+          success: true,
+          session: appUserSession,
+        };
       } else {
-        // Fallback for environment without client-side Supabase keys: Verify via backend endpoint
+        // Fallback for local development environment without client-side Supabase keys: Verify via backend endpoint
         const backendRes = await fetch('/api/auth/verify-email-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -357,13 +359,16 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
           throw new Error(rawErr);
         }
 
-        const userObj = backendData.user || {};
-        const sessionObj = backendData.session || {};
-        accessToken = sessionObj.access_token || `token_${Date.now()}`;
+        const userObj = backendData.user;
+        const sessionObj = backendData.session;
+        if (!userObj || !sessionObj?.access_token) {
+          throw new Error('Server did not return a valid authentication session.');
+        }
+        accessToken = sessionObj.access_token;
 
         const appUserSession: UserSession = {
-          userId: userObj.id || `usr_${Date.now()}`,
-          supabaseUserId: userObj.supabaseUserId,
+          userId: userObj.id,
+          supabaseUserId: userObj.supabaseUserId || userObj.id,
           email: cleanEmail,
           emailVerified: true,
           mobile: userObj.mobile || '',
@@ -383,28 +388,6 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
           session: appUserSession,
         };
       }
-
-      // Fallback local session if sync was bypassed
-      const fallbackSession: UserSession = {
-        userId: verifiedUser?.id || `usr_${Date.now()}`,
-        supabaseUserId: verifiedUser?.id,
-        email: cleanEmail,
-        emailVerified: true,
-        mobile: '',
-        mobileVerified: false,
-        token: accessToken || `token_${Date.now()}`,
-        hasClaimedFreeReport: false,
-      };
-
-      ReportAccessService.saveSession(fallbackSession);
-      setAppUser(fallbackSession);
-      clearCooldownTimer();
-      setCooldownSeconds(0);
-
-      return {
-        success: true,
-        session: fallbackSession,
-      };
     } catch (err: any) {
       console.error('[useSupabaseAuth] verifyOtp error:', err);
       const errorMsg = err?.message || 'Verification failed. Please check your OTP code and retry.';
