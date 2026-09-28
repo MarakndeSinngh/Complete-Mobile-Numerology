@@ -122,49 +122,52 @@ export async function ensureDatabaseSchema(): Promise<void> {
     await query(`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(64) PRIMARY KEY,
-        mobile VARCHAR(15) NOT NULL UNIQUE,
+        supabase_user_id VARCHAR(64),
+        email VARCHAR(255),
+        email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+        mobile VARCHAR(15),
         mobile_verified BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS supabase_user_id VARCHAR(64);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile_verified BOOLEAN NOT NULL DEFAULT FALSE;
+      CREATE INDEX IF NOT EXISTS idx_users_supabase_id ON users(supabase_user_id);
+      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_users_mobile ON users(mobile);
     `);
 
-    // 2. OTPs table
-    await query(`
-      CREATE TABLE IF NOT EXISTS otps (
-        id VARCHAR(64) PRIMARY KEY,
-        mobile VARCHAR(15) NOT NULL,
-        otp_hash VARCHAR(128) NOT NULL,
-        expires_at BIGINT NOT NULL,
-        attempts INT NOT NULL DEFAULT 0,
-        verified_at TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-      CREATE INDEX IF NOT EXISTS idx_otps_mobile ON otps(mobile);
-    `);
-
-    // 3. Free claims table (Enforces 1 free report per user)
+    // 2. Free claims table (Enforces 1 free report per user / email / supabase_user_id)
     await query(`
       CREATE TABLE IF NOT EXISTS free_claims (
         id VARCHAR(64) PRIMARY KEY,
         user_id VARCHAR(64) NOT NULL,
-        mobile VARCHAR(15) NOT NULL,
+        supabase_user_id VARCHAR(64),
+        email VARCHAR(255),
+        mobile VARCHAR(15),
         report_type VARCHAR(64) NOT NULL,
         profile_key VARCHAR(128) NOT NULL,
-        claimed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        CONSTRAINT uq_free_claim_user UNIQUE (user_id),
-        CONSTRAINT uq_free_claim_mobile UNIQUE (mobile)
+        claimed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+      ALTER TABLE free_claims ADD COLUMN IF NOT EXISTS supabase_user_id VARCHAR(64);
+      ALTER TABLE free_claims ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+      ALTER TABLE free_claims ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
       CREATE INDEX IF NOT EXISTS idx_free_claims_user ON free_claims(user_id);
+      CREATE INDEX IF NOT EXISTS idx_free_claims_supabase ON free_claims(supabase_user_id);
+      CREATE INDEX IF NOT EXISTS idx_free_claims_email ON free_claims(email);
     `);
 
-    // 4. Entitlements table (Tied to user_id + profile_key + report_type)
+    // 3. Entitlements table (Tied to user_id / supabase_user_id + profile_key + report_type)
     await query(`
       CREATE TABLE IF NOT EXISTS entitlements (
         id VARCHAR(64) PRIMARY KEY,
         user_id VARCHAR(64) NOT NULL,
-        mobile VARCHAR(15) NOT NULL,
+        supabase_user_id VARCHAR(64),
+        email VARCHAR(255),
+        mobile VARCHAR(15),
         report_type VARCHAR(64) NOT NULL,
         profile_key VARCHAR(128) NOT NULL,
         access_type VARCHAR(32) NOT NULL,
@@ -174,20 +177,26 @@ export async function ensureDatabaseSchema(): Promise<void> {
         razorpay_order_id VARCHAR(128),
         razorpay_payment_id VARCHAR(128),
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        CONSTRAINT uq_user_profile_report UNIQUE (user_id, profile_key, report_type)
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+      ALTER TABLE entitlements ADD COLUMN IF NOT EXISTS supabase_user_id VARCHAR(64);
+      ALTER TABLE entitlements ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+      ALTER TABLE entitlements ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
       CREATE INDEX IF NOT EXISTS idx_entitlements_user ON entitlements(user_id);
+      CREATE INDEX IF NOT EXISTS idx_entitlements_supabase ON entitlements(supabase_user_id);
+      CREATE INDEX IF NOT EXISTS idx_entitlements_email ON entitlements(email);
       CREATE INDEX IF NOT EXISTS idx_entitlements_lookup ON entitlements(user_id, profile_key, report_type);
       CREATE INDEX IF NOT EXISTS idx_entitlements_rzp_pay ON entitlements(razorpay_payment_id);
     `);
 
-    // 5. Payment transactions table (Idempotent order & payment recording)
+    // 4. Payment transactions table (Idempotent order & payment recording)
     await query(`
       CREATE TABLE IF NOT EXISTS payment_transactions (
         id VARCHAR(64) PRIMARY KEY,
         user_id VARCHAR(64) NOT NULL,
-        mobile VARCHAR(15) NOT NULL,
+        supabase_user_id VARCHAR(64),
+        email VARCHAR(255),
+        mobile VARCHAR(15),
         profile_key VARCHAR(128) NOT NULL,
         report_type VARCHAR(64) NOT NULL,
         razorpay_order_id VARCHAR(128) NOT NULL,
@@ -196,11 +205,14 @@ export async function ensureDatabaseSchema(): Promise<void> {
         currency VARCHAR(8) NOT NULL DEFAULT 'INR',
         status VARCHAR(32) NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        CONSTRAINT uq_tx_rzp_order UNIQUE (razorpay_order_id),
-        CONSTRAINT uq_tx_rzp_payment UNIQUE (razorpay_payment_id)
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+      ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS supabase_user_id VARCHAR(64);
+      ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+      ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
       CREATE INDEX IF NOT EXISTS idx_tx_user ON payment_transactions(user_id);
+      CREATE INDEX IF NOT EXISTS idx_tx_supabase ON payment_transactions(supabase_user_id);
+      CREATE INDEX IF NOT EXISTS idx_tx_email ON payment_transactions(email);
     `);
 
     // 6. Webhook events table (Deduplication & idempotency)

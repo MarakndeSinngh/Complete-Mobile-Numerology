@@ -121,7 +121,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
     setError(null);
     try {
       const res = await ReportAccessService.requestOtp(clean);
-      setSandboxOtpHint(res.testOtp || '333333');
+      setSandboxOtpHint(res.testOtp || null);
       setStep('OTP_VERIFY');
     } catch (e: any) {
       setError(e.message || 'OTP अनुरोध विफल रहा');
@@ -403,7 +403,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                   maxLength={6}
                   value={otpInput}
                   onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="333333"
+                  placeholder="------"
                   autoFocus
                   required
                   className="w-full text-center tracking-[0.4em] bg-white border border-slate-300 rounded-2xl py-3 text-lg font-mono font-black text-slate-800 focus:outline-none focus:border-[#D97706]"

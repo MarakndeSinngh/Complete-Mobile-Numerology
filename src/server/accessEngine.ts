@@ -1,6 +1,6 @@
 /**
- * LEOFAMILY DURABLE POSTGRESQL REPORT ACCESS CONTROL & ₹33 PAYMENT GATEWAY ENGINE
- * Phase 16C.2: Supabase PostgreSQL Architecture, ACID Transactions & Idempotent Verification
+ * LEOFAMILY DURABLE POSTGRESQL REPORT ACCESS CONTROL & SUPABASE EMAIL OTP ENGINE
+ * Phase 16C.3: Supabase Auth Passwordless Email OTP, PostgreSQL Persistence & Entitlements
  */
 
 import crypto from 'crypto';
@@ -10,7 +10,6 @@ import {
   ReportAccessCheckResult,
   ReportEntitlementRecord,
   PaymentOrderResponse,
-  StoredPaymentRecord,
   UserReportItem,
   PaymentHistoryItem,
   UserAccessSummary
@@ -21,12 +20,17 @@ import {
   query,
   withTransaction
 } from './db';
+import {
+  isSupabaseServerConfigured,
+  getServerSupabaseClient,
+  verifySupabaseToken
+} from './supabaseServer';
 
 export const REPORT_PRICE_INR = 33;
 export const REPORT_PRICE_PAISE = 3300;
 
 // Dynamic check for Serverless runtime
-function isServerlessRuntime(): boolean {
+export function isServerlessRuntime(): boolean {
   return !!(
     (typeof process !== 'undefined' && process.env?.VERCEL) ||
     (typeof process !== 'undefined' && process.env?.AWS_LAMBDA_FUNCTION_VERSION) ||
@@ -38,9 +42,11 @@ function isServerlessRuntime(): boolean {
 export function getSafeConfigAudit() {
   const env = (typeof process !== 'undefined' && process.env) || {};
   return {
+    AUTH_PROVIDER: 'SUPABASE_EMAIL_OTP',
+    SUPABASE_AUTH_CONFIGURED: isSupabaseServerConfigured(),
+    SUPABASE_URL_PRESENT: !!(env.SUPABASE_URL || env.VITE_SUPABASE_URL),
+    SUPABASE_KEY_PRESENT: !!(env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY || env.VITE_SUPABASE_ANON_KEY),
     DATABASE_CONFIGURED: isDatabaseConfigured(),
-    OTP_PROVIDER_KEY_PRESENT: !!(env.FAST2SMS_API_KEY || env.SMS_PROVIDER_API_KEY || env.OTP_API_KEY),
-    OTP_PROVIDER_URL_PRESENT: !!(env.OTP_PROVIDER_URL || env.SMS_API_URL),
     RAZORPAY_KEY_PRESENT: !!env.RAZORPAY_KEY_ID,
     RAZORPAY_SECRET_PRESENT: !!env.RAZORPAY_KEY_SECRET,
     RAZORPAY_WEBHOOK_PRESENT: !!env.RAZORPAY_WEBHOOK_SECRET,
@@ -61,7 +67,12 @@ export function getRazorpayWebhookSecret(): string {
   return (typeof process !== 'undefined' && process.env?.RAZORPAY_WEBHOOK_SECRET) || 'sandbox_webhook_secret_leofamily_2026';
 }
 
-// Normalize Indian 10-digit mobile number
+export function normalizeEmail(rawEmail: string | undefined | null): string {
+  if (!rawEmail || typeof rawEmail !== 'string') return '';
+  return rawEmail.trim().toLowerCase();
+}
+
+// Normalize Indian 10-digit mobile number for numerology profile calculations
 export function normalizeIndianMobile(rawMobile: string | undefined | null): string {
   if (!rawMobile) return '';
   const digits = String(rawMobile).replace(/\D/g, '');
@@ -72,30 +83,24 @@ export function normalizeIndianMobile(rawMobile: string | undefined | null): str
   return digits;
 }
 
-export function hashSignal(input: string): string {
-  return crypto.createHash('sha256').update(input || 'anonymous').digest('hex').substring(0, 16);
-}
-
-export function hashOtp(otp: string): string {
-  return crypto.createHash('sha256').update(otp.trim()).digest('hex');
-}
-
-export function generateSecureOtp(): string {
-  return crypto.randomInt(100000, 1000000).toString();
+export interface AuthenticatedUserIdentity {
+  id: string;
+  supabaseUserId: string;
+  email: string;
+  emailVerified: boolean;
+  mobile?: string;
 }
 
 /**
- * Local Sandbox In-Memory Cache (Only used for local sandbox development when DATABASE_URL is not provided)
+ * Local Sandbox In-Memory Cache (Only active in local dev when PostgreSQL is not configured)
  */
 class LocalSandboxFallback {
   public users = new Map<string, any>();
-  public otps = new Map<string, any>();
   public freeClaims = new Map<string, any>();
   public entitlements = new Map<string, any>();
   public orders = new Map<string, any>();
   public payments = new Map<string, any>();
   public processedEvents = new Set<string>();
-  public antiAbuse = new Map<string, any>();
 }
 
 class ReportAccessEngine {
@@ -104,229 +109,206 @@ class ReportAccessEngine {
   private async ensureDb() {
     if (isDatabaseConfigured()) {
       await ensureDatabaseSchema();
+    } else if (isServerlessRuntime()) {
+      throw new Error("DATABASE_UNAVAILABLE: Database connection is required in production environment.");
     }
   }
 
-  // 1. Request OTP for Indian mobile number (Rate-limited, cryptographically secure)
-  public async requestOtp(
-    rawMobile: string,
-    ip: string = '127.0.0.1',
-    userAgent: string = 'unknown'
-  ): Promise<{ success: boolean; message: string; testOtp?: string }> {
-    await this.ensureDb();
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile || mobile.length !== 10) {
-      throw new Error("कृपया 10 अंकों का मान्य भारतीय मोबाइल नंबर दर्ज करें (Please enter a valid 10-digit Indian mobile number)");
-    }
+  /**
+   * Cryptographically resolve and authenticate user session from Supabase Bearer Token
+   */
+  public async resolveAuthenticatedUser(
+    authHeader?: string | null,
+    optionalEmail?: string
+  ): Promise<AuthenticatedUserIdentity | null> {
+    const cleanEmail = normalizeEmail(optionalEmail);
 
-    const now = Date.now();
-    const isExplicitTestMode = process.env.OTP_MODE === 'test' || !process.env.SMS_PROVIDER_API_KEY;
-    const generatedOtp = isExplicitTestMode ? "333333" : generateSecureOtp();
-    const expiresAt = now + 10 * 60 * 1000; // 10 minutes expiry
-    const otpHash = hashOtp(generatedOtp);
+    if (authHeader) {
+      const supabaseUser = await verifySupabaseToken(authHeader);
+      if (supabaseUser) {
+        await this.ensureDb();
+        const userEmail = normalizeEmail(supabaseUser.email) || cleanEmail;
+        const supabaseId = supabaseUser.supabaseUserId;
 
-    if (isDatabaseConfigured()) {
-      // 1. Invalidate previous unverified OTPs for this mobile
-      await query(`DELETE FROM otps WHERE mobile = $1 AND verified_at IS NULL`, [mobile]);
+        if (isDatabaseConfigured()) {
+          const userRes = await query(
+            `SELECT id, supabase_user_id, email, email_verified, mobile FROM users WHERE supabase_user_id = $1 OR email = $2`,
+            [supabaseId, userEmail]
+          );
 
-      // 2. Insert new OTP record with hash and expiration
-      const otpId = `otp_${crypto.randomBytes(8).toString('hex')}`;
-      await query(
-        `INSERT INTO otps (id, mobile, otp_hash, expires_at, attempts, created_at)
-         VALUES ($1, $2, $3, $4, 0, NOW())`,
-        [otpId, mobile, otpHash, expiresAt]
-      );
-    } else {
-      // Local Sandbox Fallback
-      this.localSandbox.otps.set(mobile, {
-        mobile,
-        otp: generatedOtp,
-        expiresAt,
-        attempts: 0
-      });
-    }
+          let internalId = '';
+          let mobile = '';
+          if (userRes.rows.length > 0) {
+            internalId = userRes.rows[0].id;
+            mobile = userRes.rows[0].mobile || '';
+            await query(
+              `UPDATE users SET supabase_user_id = $1, email = $2, email_verified = TRUE, updated_at = NOW() WHERE id = $3`,
+              [supabaseId, userEmail, internalId]
+            );
+          } else {
+            internalId = `usr_${crypto.randomBytes(8).toString('hex')}`;
+            await query(
+              `INSERT INTO users (id, supabase_user_id, email, email_verified, created_at, updated_at) VALUES ($1, $2, $3, TRUE, NOW(), NOW())`,
+              [internalId, supabaseId, userEmail]
+            );
+          }
 
-    // External SMS dispatch if SMS provider key is present
-    const smsApiKey = process.env.FAST2SMS_API_KEY || process.env.SMS_PROVIDER_API_KEY;
-    if (smsApiKey) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-        await fetch('https://www.fast2sms.com/dev/bulkV2', {
-          method: 'POST',
-          headers: {
-            'authorization': smsApiKey,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            variables_values: generatedOtp,
-            route: 'otp',
-            numbers: mobile
-          }),
-          signal: controller.signal
-        }).finally(() => clearTimeout(timeout));
-      } catch {
-        console.warn("Notice: External SMS dispatch unavailable, continuing with server OTP verification.");
+          return {
+            id: internalId,
+            supabaseUserId: supabaseId,
+            email: userEmail,
+            emailVerified: true,
+            mobile
+          };
+        } else {
+          let user = this.localSandbox.users.get(userEmail) || this.localSandbox.users.get(supabaseId);
+          if (!user) {
+            const internalId = `usr_${crypto.randomBytes(8).toString('hex')}`;
+            user = {
+              id: internalId,
+              supabaseUserId: supabaseId,
+              email: userEmail,
+              emailVerified: true
+            };
+            this.localSandbox.users.set(userEmail, user);
+            this.localSandbox.users.set(supabaseId, user);
+          }
+          return user;
+        }
       }
+    }
+
+    // In local development sandbox when no Supabase key is configured, allow email-based dev session
+    if (!isServerlessRuntime() && cleanEmail) {
+      await this.ensureDb();
+      if (isDatabaseConfigured()) {
+        const userRes = await query(`SELECT id, supabase_user_id, email, email_verified, mobile FROM users WHERE email = $1`, [cleanEmail]);
+        if (userRes.rows.length > 0) {
+          const u = userRes.rows[0];
+          return {
+            id: u.id,
+            supabaseUserId: u.supabase_user_id || u.id,
+            email: u.email,
+            emailVerified: u.email_verified,
+            mobile: u.mobile
+          };
+        }
+      } else {
+        const u = this.localSandbox.users.get(cleanEmail);
+        if (u) return u;
+      }
+    }
+
+    return null;
+  }
+
+  // 1. Send Email OTP using Supabase Auth
+  public async sendEmailOtp(rawEmail: string): Promise<{ success: boolean; message: string }> {
+    const email = normalizeEmail(rawEmail);
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      throw new Error("कृपया एक मान्य ईमेल पता दर्ज करें (Please enter a valid email address)");
+    }
+
+    if (isSupabaseServerConfigured()) {
+      const client = getServerSupabaseClient();
+      const { error } = await client.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true
+        }
+      });
+
+      if (error) {
+        console.error("Supabase Auth sendEmailOtp error:", error);
+        throw new Error(`SUPABASE_AUTH_ERROR: ${error.message || 'Unable to send verification email'}`);
+      }
+    } else {
+      console.log(`[Local Development Notice] Supabase Auth Email OTP requested for: ${email}`);
     }
 
     return {
       success: true,
-      message: `OTP sent successfully to +91 ${mobile.substring(0, 2)}******${mobile.substring(8)}`,
-      testOtp: isExplicitTestMode ? generatedOtp : undefined
+      message: `OTP sent successfully to ${email}. Please check your inbox and spam folder.`
     };
   }
 
-  // 2. Verify OTP and create/return user session token (Durable PostgreSQL)
-  public async verifyOtp(rawMobile: string, inputOtp: string): Promise<{ success: boolean; token: string; user: any }> {
-    await this.ensureDb();
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile || mobile.length !== 10) {
-      throw new Error("Invalid mobile number format");
+  // 2. Verify Email OTP using Supabase Auth
+  public async verifyEmailOtp(rawEmail: string, token: string): Promise<{ success: boolean; session: any; user: any }> {
+    const email = normalizeEmail(rawEmail);
+    const cleanToken = (token || '').trim();
+
+    if (!email) {
+      throw new Error("Missing email address");
+    }
+    if (!cleanToken) {
+      throw new Error("कृपया ईमेल पर प्राप्त 6-अंकों का OTP दर्ज करें (Please enter the 6-digit OTP sent to your email)");
     }
 
-    const cleanInput = (inputOtp || '').trim();
-    if (!cleanInput) {
-      throw new Error("कृपया OTP दर्ज करें (Please enter the OTP)");
-    }
+    if (isSupabaseServerConfigured()) {
+      const client = getServerSupabaseClient();
+      const { data, error } = await client.auth.verifyOtp({
+        email,
+        token: cleanToken,
+        type: 'email'
+      });
 
-    const isSandboxTestOtp = cleanInput === "333333" || cleanInput === "123456";
-    const inputHash = hashOtp(cleanInput);
-    const now = Date.now();
+      if (error || !data.user) {
+        console.error("Supabase Auth verifyOtp error:", error);
+        throw new Error(`INVALID_OTP: ${error?.message || 'Invalid or expired OTP. Please check and retry.'}`);
+      }
 
-    if (isDatabaseConfigured()) {
-      // Check durable OTP in PostgreSQL
-      const otpRes = await query(
-        `SELECT id, otp_hash, expires_at, attempts FROM otps WHERE mobile = $1 AND verified_at IS NULL ORDER BY created_at DESC LIMIT 1`,
-        [mobile]
-      );
+      await this.ensureDb();
+      const supabaseId = data.user.id;
 
-      const record = otpRes.rows[0];
-      const isRecordMatch = record && (record.otp_hash === inputHash) && (Number(record.expires_at) > now);
-
-      if (!isRecordMatch && !isSandboxTestOtp) {
-        if (record) {
-          await query(`UPDATE otps SET attempts = attempts + 1 WHERE id = $1`, [record.id]);
-          if (record.attempts >= 4) {
-            await query(`DELETE FROM otps WHERE id = $1`, [record.id]);
-            throw new Error("अधिक गलत प्रयासों के कारण OTP समाप्त हो गया है। कृपया नया OTP प्राप्त करें।");
-          }
+      if (isDatabaseConfigured()) {
+        const userRes = await query(`SELECT id FROM users WHERE supabase_user_id = $1 OR email = $2`, [supabaseId, email]);
+        if (userRes.rows.length === 0) {
+          const internalId = `usr_${crypto.randomBytes(8).toString('hex')}`;
+          await query(
+            `INSERT INTO users (id, supabase_user_id, email, email_verified, created_at, updated_at) VALUES ($1, $2, $3, TRUE, NOW(), NOW())`,
+            [internalId, supabaseId, email]
+          );
+        } else {
+          await query(
+            `UPDATE users SET supabase_user_id = $1, email = $2, email_verified = TRUE, updated_at = NOW() WHERE id = $3`,
+            [supabaseId, email, userRes.rows[0].id]
+          );
         }
-        throw new Error("अमान्य या समाप्त OTP (Invalid or expired OTP. Please check and retry)");
       }
-
-      if (record) {
-        await query(`UPDATE otps SET verified_at = NOW() WHERE id = $1`, [record.id]);
-      }
-
-      // Upsert User in PostgreSQL
-      const existingUserRes = await query(`SELECT id, mobile, mobile_verified, created_at FROM users WHERE mobile = $1`, [mobile]);
-      let userId = '';
-      if (existingUserRes.rows.length > 0) {
-        userId = existingUserRes.rows[0].id;
-        await query(`UPDATE users SET mobile_verified = TRUE, updated_at = NOW() WHERE id = $1`, [userId]);
-      } else {
-        userId = `usr_${crypto.randomBytes(8).toString('hex')}`;
-        await query(
-          `INSERT INTO users (id, mobile, mobile_verified, created_at, updated_at) VALUES ($1, $2, TRUE, NOW(), NOW())`,
-          [userId, mobile]
-        );
-      }
-
-      // Check if user has claimed their free report
-      const claimRes = await query(`SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR mobile = $2`, [userId, mobile]);
-      const freeClaim = claimRes.rows[0] || null;
-
-      // Deterministic session token derived from server secret & user identity
-      const token = `usr_tok_${crypto.createHmac('sha256', getRazorpayKeySecret()).update(`${userId}:${mobile}`).digest('hex')}`;
 
       return {
         success: true,
-        token,
-        user: {
-          id: userId,
-          mobile,
-          mobileVerified: true,
-          hasClaimedFreeReport: !!freeClaim,
-          freeReportDetails: freeClaim ? {
-            reportType: freeClaim.report_type,
-            claimedAt: freeClaim.claimed_at,
-            profileKey: freeClaim.profile_key
-          } : undefined
-        }
+        session: data.session,
+        user: data.user
       };
     } else {
       // Local Sandbox Fallback
-      const record = this.localSandbox.otps.get(mobile);
-      const isRecordMatch = record && record.otp === cleanInput && record.expiresAt > now;
-
-      if (!isRecordMatch && !isSandboxTestOtp) {
-        throw new Error("अमान्य या समाप्त OTP (Invalid or expired OTP. Please check and retry)");
-      }
-
-      this.localSandbox.otps.delete(mobile);
-
-      let user = this.localSandbox.users.get(mobile);
+      let user = this.localSandbox.users.get(email);
       if (!user) {
-        const token = `usr_tok_${crypto.randomBytes(16).toString('hex')}`;
+        const internalId = `usr_${crypto.randomBytes(8).toString('hex')}`;
         user = {
-          id: `usr_${crypto.randomBytes(8).toString('hex')}`,
-          mobile,
-          mobileVerified: true,
-          token,
-          createdAt: new Date().toISOString()
+          id: internalId,
+          supabaseUserId: `sub_${internalId}`,
+          email,
+          emailVerified: true
         };
-        this.localSandbox.users.set(mobile, user);
+        this.localSandbox.users.set(email, user);
       }
-
-      const freeClaim = this.localSandbox.freeClaims.get(mobile);
 
       return {
         success: true,
-        token: user.token,
-        user: {
-          id: user.id,
-          mobile: user.mobile,
-          mobileVerified: true,
-          hasClaimedFreeReport: !!freeClaim,
-          freeReportDetails: freeClaim
-        }
+        session: { access_token: `dev_token_${user.id}`, user },
+        user
       };
     }
   }
 
-  // Retrieve user by mobile or deterministic token
-  public async getUserByTokenOrMobile(token?: string, rawMobile?: string): Promise<{ id: string; mobile: string; mobileVerified: boolean } | null> {
-    await this.ensureDb();
-    const mobile = normalizeIndianMobile(rawMobile);
-
-    if (isDatabaseConfigured()) {
-      if (mobile) {
-        const res = await query(`SELECT id, mobile, mobile_verified FROM users WHERE mobile = $1`, [mobile]);
-        if (res.rows.length > 0) {
-          return {
-            id: res.rows[0].id,
-            mobile: res.rows[0].mobile,
-            mobileVerified: res.rows[0].mobile_verified
-          };
-        }
-      }
-      return null;
-    } else {
-      if (mobile) {
-        const u = this.localSandbox.users.get(mobile);
-        if (u) return { id: u.id, mobile: u.mobile, mobileVerified: u.mobileVerified };
-      }
-      return null;
-    }
-  }
-
-  // 3. Central Report Access Check (Durable PostgreSQL)
+  // 3. Central Report Access Check
   public async checkReportAccess(
     reportType: CanonicalReportType,
     profileKey: string,
-    rawMobile?: string,
-    token?: string
+    authHeader?: string | null,
+    optionalEmail?: string
   ): Promise<ReportAccessCheckResult> {
     await this.ensureDb();
     const safeKey = profileKey || 'default_profile';
@@ -360,72 +342,66 @@ class ReportAccessEngine {
       };
     }
 
-    const mobile = normalizeIndianMobile(rawMobile);
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
 
-    if (isDatabaseConfigured()) {
-      if (mobile) {
-        // 1. Lookup user
-        const userRes = await query(`SELECT id, mobile, mobile_verified FROM users WHERE mobile = $1`, [mobile]);
-        const user = userRes.rows[0] || null;
+    if (authUser) {
+      if (isDatabaseConfigured()) {
+        // Check if entitlement exists for this user + profileKey + reportType
+        const entRes = await query(
+          `SELECT id, access_type, amount FROM entitlements WHERE (user_id = $1 OR supabase_user_id = $2 OR email = $3) AND profile_key = $4 AND report_type = $5`,
+          [authUser.id, authUser.supabaseUserId, authUser.email, safeKey, reportType]
+        );
 
-        if (user) {
-          // 2. Check if specific entitlement exists for user_id + profileKey + reportType
-          const entRes = await query(
-            `SELECT id, access_type, amount FROM entitlements WHERE (user_id = $1 OR mobile = $2) AND profile_key = $3 AND report_type = $4`,
-            [user.id, mobile, safeKey, reportType]
-          );
-
-          if (entRes.rows.length > 0) {
-            const ent = entRes.rows[0];
-            return {
-              allowed: true,
-              requiresPayment: false,
-              isFirstFreeReport: false,
-              isFreeReportType: false,
-              canClaimFree: false,
-              price: ent.amount,
-              reportType,
-              profileKey: safeKey,
-              accessType: ent.access_type,
-              entitlementId: ent.id
-            };
-          }
-
-          // 3. Check if user has already claimed their first free report
-          const claimRes = await query(`SELECT id FROM free_claims WHERE user_id = $1 OR mobile = $2`, [user.id, mobile]);
-          if (claimRes.rows.length === 0) {
-            // First free report available
-            return {
-              allowed: false,
-              requiresPayment: false,
-              isFirstFreeReport: true,
-              isFreeReportType: false,
-              canClaimFree: true,
-              price: 0,
-              reportType,
-              profileKey: safeKey,
-              reason: 'Your first specialist report is 100% FREE. Click Claim Free Report to generate.'
-            };
-          } else {
-            // Free report consumed -> Requires ₹33
-            return {
-              allowed: false,
-              requiresPayment: true,
-              isFirstFreeReport: false,
-              isFreeReportType: false,
-              canClaimFree: false,
-              price: REPORT_PRICE_INR,
-              reportType,
-              profileKey: safeKey,
-              reason: 'Free report entitlement already consumed. ₹33 required per additional report.'
-            };
-          }
+        if (entRes.rows.length > 0) {
+          const ent = entRes.rows[0];
+          return {
+            allowed: true,
+            requiresPayment: false,
+            isFirstFreeReport: false,
+            isFreeReportType: false,
+            canClaimFree: false,
+            price: ent.amount,
+            reportType,
+            profileKey: safeKey,
+            accessType: ent.access_type,
+            entitlementId: ent.id
+          };
         }
-      }
-    } else {
-      // Local Sandbox Fallback
-      if (mobile) {
-        const entKey = `${mobile}_${reportType}_${safeKey}`;
+
+        // Check if user has already claimed their first free report
+        const claimRes = await query(
+          `SELECT id, report_type FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3`,
+          [authUser.id, authUser.supabaseUserId, authUser.email]
+        );
+
+        if (claimRes.rows.length === 0) {
+          return {
+            allowed: false,
+            requiresPayment: false,
+            isFirstFreeReport: true,
+            isFreeReportType: false,
+            canClaimFree: true,
+            price: 0,
+            reportType,
+            profileKey: safeKey,
+            reason: 'Your first specialist report is 100% FREE. Click Claim Free Report to generate.'
+          };
+        } else {
+          return {
+            allowed: false,
+            requiresPayment: true,
+            isFirstFreeReport: false,
+            isFreeReportType: false,
+            canClaimFree: false,
+            price: REPORT_PRICE_INR,
+            reportType,
+            profileKey: safeKey,
+            reason: 'Free report entitlement already consumed. ₹33 required per additional report.'
+          };
+        }
+      } else {
+        // Sandbox Fallback
+        const entKey = `${authUser.email}_${reportType}_${safeKey}`;
         const ent = this.localSandbox.entitlements.get(entKey);
         if (ent) {
           return {
@@ -442,7 +418,7 @@ class ReportAccessEngine {
           };
         }
 
-        const freeClaim = this.localSandbox.freeClaims.get(mobile);
+        const freeClaim = this.localSandbox.freeClaims.get(authUser.email);
         if (!freeClaim) {
           return {
             allowed: false,
@@ -480,7 +456,7 @@ class ReportAccessEngine {
       price: REPORT_PRICE_INR,
       reportType,
       profileKey: safeKey,
-      reason: 'Please verify mobile number to access your report.'
+      reason: 'Please verify email to access your report.'
     };
   }
 
@@ -488,8 +464,8 @@ class ReportAccessEngine {
   public async claimFreeReport(
     reportType: CanonicalReportType,
     profileKey: string,
-    rawMobile: string,
-    token?: string
+    authHeader?: string | null,
+    optionalEmail?: string
   ): Promise<{ success: boolean; allowed: boolean; entitlement: ReportEntitlementRecord }> {
     await this.ensureDb();
     if (reportType === 'MOBILE_NUMEROLOGY') {
@@ -500,49 +476,44 @@ class ReportAccessEngine {
       throw new Error("Invalid report type");
     }
 
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile || mobile.length !== 10) {
-      throw new Error("मोबाइल नंबर सत्यापन अनिवार्य है (Mobile verification required)");
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
+      throw new Error("UNAUTHORIZED: Valid authenticated email session is required to claim free report.");
     }
 
+    const { id: userId, supabaseUserId, email } = authUser;
     const safeKey = profileKey || 'default_profile';
     const now = new Date().toISOString();
 
     if (isDatabaseConfigured()) {
       return await withTransaction(async (client) => {
-        // 1. Get or create user
-        const userRes = await client.query(`SELECT id FROM users WHERE mobile = $1`, [mobile]);
-        if (userRes.rows.length === 0) {
-          throw new Error("कृपया पहले OTP द्वारा मोबाइल नंबर सत्यापित करें");
-        }
-        const userId = userRes.rows[0].id;
-
-        // 2. Check if already claimed
-        const existingClaimRes = await client.query(`SELECT report_type FROM free_claims WHERE user_id = $1 OR mobile = $2`, [userId, mobile]);
+        // Enforce 1 free claim per verified user
+        const existingClaimRes = await client.query(
+          `SELECT report_type FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3`,
+          [userId, supabaseUserId, email]
+        );
         if (existingClaimRes.rows.length > 0) {
           throw new Error(`मुफ़्त रिपोर्ट अधिकार पहले ही ${existingClaimRes.rows[0].report_type} के लिए उपयोग किया जा चुका है। Additional reports are ₹33.`);
         }
 
-        // 3. Insert into free_claims
         const claimId = `claim_${crypto.randomBytes(8).toString('hex')}`;
         await client.query(
-          `INSERT INTO free_claims (id, user_id, mobile, report_type, profile_key, claimed_at) VALUES ($1, $2, $3, $4, $5, NOW())`,
-          [claimId, userId, mobile, reportType, safeKey]
+          `INSERT INTO free_claims (id, user_id, supabase_user_id, email, report_type, profile_key, claimed_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+          [claimId, userId, supabaseUserId, email, reportType, safeKey]
         );
 
-        // 4. Insert into entitlements
         const entitlementId = `ent_free_${crypto.randomBytes(8).toString('hex')}`;
         await client.query(
-          `INSERT INTO entitlements (id, user_id, mobile, report_type, profile_key, access_type, amount, currency, payment_status, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, 'FREE', 0, 'INR', 'GRANTED', NOW(), NOW())
+          `INSERT INTO entitlements (id, user_id, supabase_user_id, email, report_type, profile_key, access_type, amount, currency, payment_status, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, 'FREE', 0, 'INR', 'GRANTED', NOW(), NOW())
            ON CONFLICT (user_id, profile_key, report_type) DO NOTHING`,
-          [entitlementId, userId, mobile, reportType, safeKey]
+          [entitlementId, userId, supabaseUserId, email, reportType, safeKey]
         );
 
         const entitlement: ReportEntitlementRecord = {
           id: entitlementId,
           userId,
-          mobile,
+          mobile: email,
           reportType,
           profileKey: safeKey,
           accessType: 'FREE',
@@ -551,25 +522,17 @@ class ReportAccessEngine {
           createdAt: now
         };
 
-        return {
-          success: true,
-          allowed: true,
-          entitlement
-        };
+        return { success: true, allowed: true, entitlement };
       });
     } else {
-      // Local Sandbox Fallback
-      let user = this.localSandbox.users.get(mobile);
-      if (!user) {
-        throw new Error("कृपया पहले OTP द्वारा मोबाइल नंबर सत्यापित करें");
-      }
-      if (this.localSandbox.freeClaims.has(mobile)) {
+      if (this.localSandbox.freeClaims.has(email)) {
         throw new Error("मुफ़्त रिपोर्ट अधिकार पहले ही उपयोग किया जा चुका है।");
       }
 
-      this.localSandbox.freeClaims.set(mobile, {
-        userId: user.id,
-        mobile,
+      this.localSandbox.freeClaims.set(email, {
+        userId,
+        supabaseUserId,
+        email,
         reportType,
         profileKey: safeKey,
         claimedAt: now
@@ -578,8 +541,8 @@ class ReportAccessEngine {
       const entitlementId = `ent_free_${crypto.randomBytes(8).toString('hex')}`;
       const entitlement: ReportEntitlementRecord = {
         id: entitlementId,
-        userId: user.id,
-        mobile,
+        userId,
+        mobile: email,
         reportType,
         profileKey: safeKey,
         accessType: 'FREE',
@@ -587,13 +550,9 @@ class ReportAccessEngine {
         paymentStatus: 'GRANTED',
         createdAt: now
       };
-      this.localSandbox.entitlements.set(`${mobile}_${reportType}_${safeKey}`, entitlement);
+      this.localSandbox.entitlements.set(`${email}_${reportType}_${safeKey}`, entitlement);
 
-      return {
-        success: true,
-        allowed: true,
-        entitlement
-      };
+      return { success: true, allowed: true, entitlement };
     }
   }
 
@@ -601,19 +560,20 @@ class ReportAccessEngine {
   public async createPaymentOrder(
     reportType: CanonicalReportType,
     profileKey: string,
-    rawMobile: string,
-    token?: string
+    authHeader?: string | null,
+    optionalEmail?: string
   ): Promise<PaymentOrderResponse> {
     await this.ensureDb();
     if (!REPORT_REGISTRY[reportType]) {
       throw new Error("Invalid report type");
     }
 
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile || mobile.length !== 10) {
-      throw new Error("Mobile verification required before order creation");
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
+      throw new Error("UNAUTHORIZED: Please verify email before initiating payment.");
     }
 
+    const { id: userId, supabaseUserId, email } = authUser;
     const safeKey = profileKey || 'default_profile';
     const keyId = getRazorpayKeyId();
     const keySecret = getRazorpayKeySecret();
@@ -622,7 +582,7 @@ class ReportAccessEngine {
 
     if (keyId.startsWith('rzp_') && keySecret && !keyId.includes('sandbox')) {
       try {
-        const authHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`;
+        const rzpAuthHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`;
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 6000);
 
@@ -630,16 +590,18 @@ class ReportAccessEngine {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': authHeader
+            'Authorization': rzpAuthHeader
           },
           body: JSON.stringify({
             amount: REPORT_PRICE_PAISE,
             currency: 'INR',
             receipt,
             notes: {
+              userId,
+              supabaseUserId,
+              email,
               profileKey: safeKey,
-              reportType,
-              mobile
+              reportType
             }
           }),
           signal: controller.signal
@@ -652,25 +614,23 @@ class ReportAccessEngine {
           }
         }
       } catch {
-        console.warn("Notice: Razorpay API order creation fallback used.");
+        console.warn("Notice: Razorpay API network fallback used.");
       }
     }
 
     if (isDatabaseConfigured()) {
-      const userRes = await query(`SELECT id FROM users WHERE mobile = $1`, [mobile]);
-      const userId = userRes.rows[0]?.id || `usr_temp_${mobile}`;
       const txId = `tx_${crypto.randomBytes(8).toString('hex')}`;
-
       await query(
-        `INSERT INTO payment_transactions (id, user_id, mobile, profile_key, report_type, razorpay_order_id, amount, currency, status, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'INR', 'CREATED', NOW(), NOW())
+        `INSERT INTO payment_transactions (id, user_id, supabase_user_id, email, profile_key, report_type, razorpay_order_id, amount, currency, status, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'INR', 'CREATED', NOW(), NOW())
          ON CONFLICT (razorpay_order_id) DO NOTHING`,
-        [txId, userId, mobile, safeKey, reportType, razorpayOrderId, REPORT_PRICE_INR]
+        [txId, userId, supabaseUserId, email, safeKey, reportType, razorpayOrderId, REPORT_PRICE_INR]
       );
     } else {
       this.localSandbox.orders.set(razorpayOrderId, {
         orderId: razorpayOrderId,
-        mobile,
+        userId,
+        email,
         reportType,
         profileKey: safeKey,
         amount: REPORT_PRICE_INR,
@@ -686,31 +646,32 @@ class ReportAccessEngine {
       keyId,
       reportType,
       profileKey: safeKey,
-      mobile,
+      mobile: email,
       receipt
     };
   }
 
-  // 6. Verify Razorpay Payment Signature & Grant Entitlement (ACID Transaction & Idempotent)
+  // 6. Verify Razorpay Payment Signature & Grant Entitlement (ACID Transaction)
   public async verifyPayment(
     orderId: string,
     paymentId: string,
     signature: string,
     reportType: CanonicalReportType,
     profileKey: string,
-    rawMobile: string,
-    token?: string
+    authHeader?: string | null,
+    optionalEmail?: string
   ): Promise<{ success: boolean; accessGranted: boolean; entitlement: ReportEntitlementRecord }> {
     await this.ensureDb();
     if (!orderId || !paymentId) {
       throw new Error("Missing orderId or paymentId");
     }
 
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile || mobile.length !== 10) {
-      throw new Error("Mobile verification required for payment verification");
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
+      throw new Error("UNAUTHORIZED: Valid authenticated email session required for payment verification.");
     }
 
+    const { id: userId, supabaseUserId, email } = authUser;
     const safeKey = profileKey || 'default_profile';
 
     // Verify HMAC signature
@@ -731,18 +692,10 @@ class ReportAccessEngine {
 
     if (isDatabaseConfigured()) {
       return await withTransaction(async (client) => {
-        // 1. Get or create user
-        const userRes = await client.query(`SELECT id FROM users WHERE mobile = $1`, [mobile]);
-        let userId = userRes.rows[0]?.id;
-        if (!userId) {
-          userId = `usr_${crypto.randomBytes(8).toString('hex')}`;
-          await client.query(`INSERT INTO users (id, mobile, mobile_verified, created_at, updated_at) VALUES ($1, $2, TRUE, NOW(), NOW())`, [userId, mobile]);
-        }
-
-        // 2. Check if entitlement already granted
+        // Idempotency: check if already granted
         const existingEntRes = await client.query(
-          `SELECT id, user_id, mobile, report_type, profile_key, access_type, amount, created_at FROM entitlements WHERE user_id = $1 AND profile_key = $2 AND report_type = $3`,
-          [userId, safeKey, reportType]
+          `SELECT id, user_id, supabase_user_id, email, report_type, profile_key, access_type, amount, created_at FROM entitlements WHERE (user_id = $1 OR supabase_user_id = $2 OR email = $3) AND profile_key = $4 AND report_type = $5`,
+          [userId, supabaseUserId, email, safeKey, reportType]
         );
 
         if (existingEntRes.rows.length > 0) {
@@ -753,7 +706,7 @@ class ReportAccessEngine {
             entitlement: {
               id: e.id,
               userId: e.user_id,
-              mobile: e.mobile,
+              mobile: e.email || e.mobile,
               reportType: e.report_type,
               profileKey: e.profile_key,
               accessType: e.access_type,
@@ -766,28 +719,28 @@ class ReportAccessEngine {
           };
         }
 
-        // 3. Upsert payment transaction
+        // Record payment transaction
         const txId = `tx_${crypto.randomBytes(8).toString('hex')}`;
         await client.query(
-          `INSERT INTO payment_transactions (id, user_id, mobile, profile_key, report_type, razorpay_order_id, razorpay_payment_id, amount, currency, status, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'INR', 'PAID', NOW(), NOW())
+          `INSERT INTO payment_transactions (id, user_id, supabase_user_id, email, profile_key, report_type, razorpay_order_id, razorpay_payment_id, amount, currency, status, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'INR', 'PAID', NOW(), NOW())
            ON CONFLICT (razorpay_payment_id) DO UPDATE SET status = 'PAID', updated_at = NOW()`,
-          [txId, userId, mobile, safeKey, reportType, orderId, paymentId, REPORT_PRICE_INR]
+          [txId, userId, supabaseUserId, email, safeKey, reportType, orderId, paymentId, REPORT_PRICE_INR]
         );
 
-        // 4. Insert entitlement
+        // Grant report entitlement
         const entitlementId = `ent_paid_${crypto.randomBytes(8).toString('hex')}`;
         await client.query(
-          `INSERT INTO entitlements (id, user_id, mobile, report_type, profile_key, access_type, amount, currency, payment_status, razorpay_order_id, razorpay_payment_id, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, 'PAID', $6, 'INR', 'PAID', $7, $8, NOW(), NOW())
+          `INSERT INTO entitlements (id, user_id, supabase_user_id, email, report_type, profile_key, access_type, amount, currency, payment_status, razorpay_order_id, razorpay_payment_id, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, 'PAID', $7, 'INR', 'PAID', $8, $9, NOW(), NOW())
            ON CONFLICT (user_id, profile_key, report_type) DO UPDATE SET payment_status = 'PAID', updated_at = NOW()`,
-          [entitlementId, userId, mobile, reportType, safeKey, REPORT_PRICE_INR, orderId, paymentId]
+          [entitlementId, userId, supabaseUserId, email, reportType, safeKey, REPORT_PRICE_INR, orderId, paymentId]
         );
 
         const entitlement: ReportEntitlementRecord = {
           id: entitlementId,
           userId,
-          mobile,
+          mobile: email,
           reportType,
           profileKey: safeKey,
           accessType: 'PAID',
@@ -798,27 +751,19 @@ class ReportAccessEngine {
           createdAt: now
         };
 
-        return {
-          success: true,
-          accessGranted: true,
-          entitlement
-        };
+        return { success: true, accessGranted: true, entitlement };
       });
     } else {
-      // Local Sandbox Fallback
-      const entKey = `${mobile}_${reportType}_${safeKey}`;
+      const entKey = `${email}_${reportType}_${safeKey}`;
       const existing = this.localSandbox.entitlements.get(entKey);
       if (existing) {
         return { success: true, accessGranted: true, entitlement: existing };
       }
 
-      let user = this.localSandbox.users.get(mobile);
-      const userId = user ? user.id : `usr_${mobile}`;
-
       const entitlement: ReportEntitlementRecord = {
         id: `ent_paid_${crypto.randomBytes(8).toString('hex')}`,
         userId,
-        mobile,
+        mobile: email,
         reportType,
         profileKey: safeKey,
         accessType: 'PAID',
@@ -832,6 +777,7 @@ class ReportAccessEngine {
       this.localSandbox.entitlements.set(entKey, entitlement);
       this.localSandbox.payments.set(paymentId, {
         internalUserId: userId,
+        email,
         profileKey: safeKey,
         reportType,
         razorpayOrderId: orderId,
@@ -842,15 +788,11 @@ class ReportAccessEngine {
         createdAt: now
       });
 
-      return {
-        success: true,
-        accessGranted: true,
-        entitlement
-      };
+      return { success: true, accessGranted: true, entitlement };
     }
   }
 
-  // 7. Razorpay Webhook Verification & Idempotent Processing (PostgreSQL Deduplicated)
+  // 7. Webhook processing
   public async processWebhook(
     rawBody: string,
     signatureHeader: string
@@ -881,7 +823,6 @@ class ReportAccessEngine {
     const eventType = payload.event || 'unknown';
 
     if (isDatabaseConfigured()) {
-      // Check event idempotency
       const existingEvt = await query(`SELECT id FROM payment_webhook_events WHERE event_id = $1`, [eventId]);
       if (existingEvt.rows.length > 0) {
         return {
@@ -906,15 +847,15 @@ class ReportAccessEngine {
         const paymentId = paymentEntity?.id || `pay_wh_${Date.now()}`;
 
         if (orderId) {
-          const txRes = await query(`SELECT user_id, mobile, profile_key, report_type FROM payment_transactions WHERE razorpay_order_id = $1`, [orderId]);
+          const txRes = await query(`SELECT user_id, supabase_user_id, email, profile_key, report_type FROM payment_transactions WHERE razorpay_order_id = $1`, [orderId]);
           if (txRes.rows.length > 0) {
             const tx = txRes.rows[0];
             const entId = `ent_paid_${crypto.randomBytes(8).toString('hex')}`;
             await query(
-              `INSERT INTO entitlements (id, user_id, mobile, report_type, profile_key, access_type, amount, currency, payment_status, razorpay_order_id, razorpay_payment_id, created_at, updated_at)
-               VALUES ($1, $2, $3, $4, $5, 'PAID', $6, 'INR', 'PAID', $7, $8, NOW(), NOW())
+              `INSERT INTO entitlements (id, user_id, supabase_user_id, email, report_type, profile_key, access_type, amount, currency, payment_status, razorpay_order_id, razorpay_payment_id, created_at, updated_at)
+               VALUES ($1, $2, $3, $4, $5, $6, 'PAID', $7, 'INR', 'PAID', $8, $9, NOW(), NOW())
                ON CONFLICT (user_id, profile_key, report_type) DO UPDATE SET payment_status = 'PAID', updated_at = NOW()`,
-              [entId, tx.user_id, tx.mobile, tx.report_type, tx.profile_key, REPORT_PRICE_INR, orderId, paymentId]
+              [entId, tx.user_id, tx.supabase_user_id, tx.email, tx.report_type, tx.profile_key, REPORT_PRICE_INR, orderId, paymentId]
             );
           }
         }
@@ -939,24 +880,21 @@ class ReportAccessEngine {
     };
   }
 
-  // 8. Retrieve All Reports for Authenticated Customer (Durable PostgreSQL)
-  public async getUserReports(token?: string, rawMobile?: string): Promise<{ success: boolean; reports: UserReportItem[]; total: number }> {
+  // 8. Retrieve All Reports for Authenticated Customer
+  public async getUserReports(authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; reports: UserReportItem[]; total: number }> {
     await this.ensureDb();
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile) {
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
       return { success: true, reports: [], total: 0 };
     }
 
     const reportItems: UserReportItem[] = [];
 
     if (isDatabaseConfigured()) {
-      const userRes = await query(`SELECT id, created_at FROM users WHERE mobile = $1`, [mobile]);
-      const user = userRes.rows[0] || { id: `usr_${mobile}`, created_at: new Date().toISOString() };
-
       const entRes = await query(
         `SELECT id, user_id, profile_key, report_type, access_type, amount, currency, payment_status, razorpay_payment_id, razorpay_order_id, created_at
-         FROM entitlements WHERE mobile = $1 OR user_id = $2 ORDER BY created_at DESC`,
-        [mobile, user.id]
+         FROM entitlements WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3 ORDER BY created_at DESC`,
+        [authUser.id, authUser.supabaseUserId, authUser.email]
       );
 
       for (const ent of entRes.rows) {
@@ -984,8 +922,8 @@ class ReportAccessEngine {
       // Add Always Free Mobile Numerology
       const mobileDef = REPORT_REGISTRY.MOBILE_NUMEROLOGY;
       reportItems.push({
-        id: `perm_mobile_${mobile}`,
-        userId: user.id,
+        id: `perm_mobile_${authUser.id}`,
+        userId: authUser.id,
         profileKey: 'mobile_scanner_profile',
         reportType: 'MOBILE_NUMEROLOGY',
         titleHi: mobileDef.titleHi,
@@ -997,12 +935,11 @@ class ReportAccessEngine {
         amount: 0,
         currency: 'INR',
         status: 'UNLOCKED',
-        createdAt: user.created_at,
+        createdAt: new Date().toISOString(),
       });
     } else {
-      // Local Sandbox Fallback
       for (const ent of this.localSandbox.entitlements.values()) {
-        if (ent.mobile === mobile) {
+        if (ent.email === authUser.email || ent.userId === authUser.id) {
           const def = REPORT_REGISTRY[ent.reportType as CanonicalReportType] || REPORT_REGISTRY.MASTER_REPORT;
           reportItems.push({
             id: ent.id,
@@ -1027,8 +964,8 @@ class ReportAccessEngine {
 
       const mobileDef = REPORT_REGISTRY.MOBILE_NUMEROLOGY;
       reportItems.push({
-        id: `perm_mobile_${mobile}`,
-        userId: `usr_${mobile}`,
+        id: `perm_mobile_${authUser.id}`,
+        userId: authUser.id,
         profileKey: 'mobile_scanner_profile',
         reportType: 'MOBILE_NUMEROLOGY',
         titleHi: mobileDef.titleHi,
@@ -1053,67 +990,62 @@ class ReportAccessEngine {
     };
   }
 
-  // 9. Retrieve Verified Payment History for Customer (Durable PostgreSQL)
-  public async getUserPaymentHistory(token?: string, rawMobile?: string): Promise<{ success: boolean; payments: PaymentHistoryItem[]; total: number }> {
+  // 9. Retrieve Verified Payment History for Customer
+  public async getUserPaymentHistory(authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; payments: PaymentHistoryItem[]; total: number }> {
     await this.ensureDb();
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile) {
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
       return { success: true, payments: [], total: 0 };
     }
 
     const historyItems: PaymentHistoryItem[] = [];
 
     if (isDatabaseConfigured()) {
-      const userRes = await query(`SELECT id FROM users WHERE mobile = $1`, [mobile]);
-      const userId = userRes.rows[0]?.id;
+      const claimRes = await query(
+        `SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3`,
+        [authUser.id, authUser.supabaseUserId, authUser.email]
+      );
+      if (claimRes.rows.length > 0) {
+        const fc = claimRes.rows[0];
+        historyItems.push({
+          id: `claim_${fc.claimed_at}`,
+          userId: authUser.id,
+          reportType: fc.report_type,
+          profileKey: fc.profile_key,
+          amount: 0,
+          currency: 'INR',
+          status: 'FREE',
+          paymentReference: 'Complimentary Free Claim (₹0)',
+          createdAt: fc.claimed_at,
+        });
+      }
 
-      if (userId) {
-        // 1. Free Claim if used
-        const claimRes = await query(`SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR mobile = $2`, [userId, mobile]);
-        if (claimRes.rows.length > 0) {
-          const fc = claimRes.rows[0];
-          historyItems.push({
-            id: `claim_${fc.claimed_at}`,
-            userId,
-            reportType: fc.report_type,
-            profileKey: fc.profile_key,
-            amount: 0,
-            currency: 'INR',
-            status: 'FREE',
-            paymentReference: 'Complimentary Free Claim (₹0)',
-            createdAt: fc.claimed_at,
-          });
-        }
+      const txRes = await query(
+        `SELECT id, report_type, profile_key, amount, currency, status, razorpay_order_id, razorpay_payment_id, created_at
+         FROM payment_transactions WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3 ORDER BY created_at DESC`,
+        [authUser.id, authUser.supabaseUserId, authUser.email]
+      );
 
-        // 2. Paid Transactions
-        const txRes = await query(
-          `SELECT id, report_type, profile_key, amount, currency, status, razorpay_order_id, razorpay_payment_id, created_at
-           FROM payment_transactions WHERE user_id = $1 OR mobile = $2 ORDER BY created_at DESC`,
-          [userId, mobile]
-        );
-
-        for (const tx of txRes.rows) {
-          historyItems.push({
-            id: tx.razorpay_payment_id || tx.id,
-            userId,
-            reportType: tx.report_type,
-            profileKey: tx.profile_key,
-            amount: tx.amount,
-            currency: tx.currency,
-            status: tx.status === 'PAID' ? 'PAID' : 'CREATED',
-            paymentReference: tx.razorpay_payment_id || `Order (${tx.razorpay_order_id})`,
-            orderId: tx.razorpay_order_id,
-            createdAt: tx.created_at,
-          });
-        }
+      for (const tx of txRes.rows) {
+        historyItems.push({
+          id: tx.razorpay_payment_id || tx.id,
+          userId: authUser.id,
+          reportType: tx.report_type,
+          profileKey: tx.profile_key,
+          amount: tx.amount,
+          currency: tx.currency,
+          status: tx.status === 'PAID' ? 'PAID' : 'CREATED',
+          paymentReference: tx.razorpay_payment_id || `Order (${tx.razorpay_order_id})`,
+          orderId: tx.razorpay_order_id,
+          createdAt: tx.created_at,
+        });
       }
     } else {
-      // Local Sandbox Fallback
-      const freeClaim = this.localSandbox.freeClaims.get(mobile);
+      const freeClaim = this.localSandbox.freeClaims.get(authUser.email);
       if (freeClaim) {
         historyItems.push({
           id: `claim_${freeClaim.claimedAt}`,
-          userId: freeClaim.userId,
+          userId: authUser.id,
           reportType: freeClaim.reportType,
           profileKey: freeClaim.profileKey,
           amount: 0,
@@ -1125,18 +1057,20 @@ class ReportAccessEngine {
       }
 
       for (const p of this.localSandbox.payments.values()) {
-        historyItems.push({
-          id: p.razorpayPaymentId,
-          userId: p.internalUserId,
-          reportType: p.reportType,
-          profileKey: p.profileKey,
-          amount: p.amount,
-          currency: p.currency,
-          status: 'PAID',
-          paymentReference: p.razorpayPaymentId,
-          orderId: p.razorpayOrderId,
-          createdAt: p.createdAt,
-        });
+        if (p.email === authUser.email || p.internalUserId === authUser.id) {
+          historyItems.push({
+            id: p.razorpayPaymentId,
+            userId: authUser.id,
+            reportType: p.reportType,
+            profileKey: p.profileKey,
+            amount: p.amount,
+            currency: p.currency,
+            status: 'PAID',
+            paymentReference: p.razorpayPaymentId,
+            orderId: p.razorpayOrderId,
+            createdAt: p.createdAt,
+          });
+        }
       }
     }
 
@@ -1150,10 +1084,10 @@ class ReportAccessEngine {
   }
 
   // 10. Retrieve Access & Entitlement Summary
-  public async getUserAccessSummary(token?: string, rawMobile?: string): Promise<{ success: boolean; summary: UserAccessSummary }> {
+  public async getUserAccessSummary(authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; summary: UserAccessSummary }> {
     await this.ensureDb();
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile) {
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
       return {
         success: true,
         summary: {
@@ -1169,13 +1103,10 @@ class ReportAccessEngine {
     }
 
     if (isDatabaseConfigured()) {
-      const userRes = await query(`SELECT id, mobile_verified FROM users WHERE mobile = $1`, [mobile]);
-      const user = userRes.rows[0];
-
-      const claimRes = await query(`SELECT report_type, profile_key, claimed_at FROM free_claims WHERE mobile = $1`, [mobile]);
+      const claimRes = await query(`SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR email = $2`, [authUser.id, authUser.email]);
       const freeClaim = claimRes.rows[0];
 
-      const entRes = await query(`SELECT access_type, amount FROM entitlements WHERE mobile = $1`, [mobile]);
+      const entRes = await query(`SELECT access_type, amount FROM entitlements WHERE user_id = $1 OR email = $2`, [authUser.id, authUser.email]);
       const entitlements = entRes.rows;
       const paidEntitlements = entitlements.filter(e => e.access_type === 'PAID');
       const totalPaidAmount = paidEntitlements.reduce((sum, e) => sum + Number(e.amount), 0);
@@ -1183,8 +1114,8 @@ class ReportAccessEngine {
       return {
         success: true,
         summary: {
-          mobile,
-          mobileVerified: user ? user.mobile_verified : false,
+          mobile: authUser.email,
+          mobileVerified: authUser.emailVerified,
           mobileNumerology: { status: 'ALWAYS_FREE', price: 0 },
           firstNonMobileReport: {
             status: freeClaim ? 'USED' : 'AVAILABLE',
@@ -1193,21 +1124,20 @@ class ReportAccessEngine {
             profileKey: freeClaim?.profile_key,
           },
           additionalReports: { priceInr: REPORT_PRICE_INR, pricePaise: REPORT_PRICE_PAISE },
-          totalReportsUnlocked: entitlements.length + 1, // +1 for Always Free Mobile Numerology
+          totalReportsUnlocked: entitlements.length + 1, // +1 for Mobile Numerology
           totalPaidAmountInr: totalPaidAmount,
         }
       };
     } else {
-      // Local Sandbox Fallback
-      const freeClaim = this.localSandbox.freeClaims.get(mobile);
-      const userEntitlements = Array.from(this.localSandbox.entitlements.values()).filter(e => e.mobile === mobile);
+      const freeClaim = this.localSandbox.freeClaims.get(authUser.email);
+      const userEntitlements = Array.from(this.localSandbox.entitlements.values()).filter(e => e.email === authUser.email);
       const paidEntitlements = userEntitlements.filter(e => e.accessType === 'PAID');
       const totalPaidAmount = paidEntitlements.reduce((sum, e) => sum + e.amount, 0);
 
       return {
         success: true,
         summary: {
-          mobile,
+          mobile: authUser.email,
           mobileVerified: true,
           mobileNumerology: { status: 'ALWAYS_FREE', price: 0 },
           firstNonMobileReport: {
@@ -1225,10 +1155,10 @@ class ReportAccessEngine {
   }
 
   // 11. Retrieve Single Report by ID with Server Ownership Validation
-  public async getReportById(reportId: string, token?: string, rawMobile?: string): Promise<{ success: boolean; allowed: boolean; report: UserReportItem }> {
+  public async getReportById(reportId: string, authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; allowed: boolean; report: UserReportItem }> {
     await this.ensureDb();
-    const mobile = normalizeIndianMobile(rawMobile);
-    if (!mobile) {
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
       throw new Error("Authentication required to access report");
     }
 
@@ -1239,7 +1169,7 @@ class ReportAccessEngine {
         allowed: true,
         report: {
           id: reportId,
-          userId: `usr_${mobile}`,
+          userId: authUser.id,
           profileKey: 'mobile_scanner_profile',
           reportType: 'MOBILE_NUMEROLOGY',
           titleHi: def.titleHi,
@@ -1263,7 +1193,7 @@ class ReportAccessEngine {
       }
       const ent = entRes.rows[0];
 
-      if (ent.mobile !== mobile) {
+      if (ent.user_id !== authUser.id && ent.supabase_user_id !== authUser.supabaseUserId && ent.email !== authUser.email) {
         throw new Error("Unauthorized: You do not own this report entitlement");
       }
 
@@ -1291,7 +1221,6 @@ class ReportAccessEngine {
         },
       };
     } else {
-      // Local Sandbox Fallback
       let targetEnt: any = null;
       for (const ent of this.localSandbox.entitlements.values()) {
         if (ent.id === reportId) {
@@ -1304,7 +1233,7 @@ class ReportAccessEngine {
         throw new Error("Report not found in server registry");
       }
 
-      if (targetEnt.mobile !== mobile) {
+      if (targetEnt.userId !== authUser.id && targetEnt.email !== authUser.email) {
         throw new Error("Unauthorized: You do not own this report entitlement");
       }
 

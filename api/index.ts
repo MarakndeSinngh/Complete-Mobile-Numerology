@@ -33,25 +33,45 @@ const getGeminiClient = () => {
 // Create router to mount on both "/api" and "/" for transparent Vercel URL rewrite compatibility
 const router = express.Router();
 
-// 1. Request OTP for mobile number verification
+// 1. Send Email OTP using Supabase Auth
+router.post("/auth/send-email-otp", async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    const result = await reportAccessEngine.sendEmailOtp(email);
+    res.json(result);
+  } catch (e: any) {
+    res.status(400).json({ success: false, error: e?.message || "Failed to send email OTP" });
+  }
+});
+
+// 2. Verify Email OTP using Supabase Auth
+router.post("/auth/verify-email-otp", async (req, res) => {
+  try {
+    const { email, token } = req.body || {};
+    const result = await reportAccessEngine.verifyEmailOtp(email, token);
+    res.json(result);
+  } catch (e: any) {
+    res.status(400).json({ success: false, error: e?.message || "Failed to verify email OTP" });
+  }
+});
+
+// Deprecated legacy routes (Mapped to email or safe notice)
 router.post("/auth/request-otp", async (req, res) => {
   try {
-    const { mobile } = req.body || {};
-    const forwarded = req.headers['x-forwarded-for'];
-    const ip = (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : undefined) || req.socket?.remoteAddress || '127.0.0.1';
-    const userAgent = (req.headers['user-agent'] as string) || 'unknown';
-    const result = await reportAccessEngine.requestOtp(mobile, ip, userAgent);
+    const { email, mobile } = req.body || {};
+    const target = email || (mobile ? `${mobile}@leofamily.local` : '');
+    const result = await reportAccessEngine.sendEmailOtp(target);
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Failed to request OTP" });
   }
 });
 
-// 2. Verify OTP and return session token
 router.post("/auth/verify-otp", async (req, res) => {
   try {
-    const { mobile, otp } = req.body || {};
-    const result = await reportAccessEngine.verifyOtp(mobile, otp);
+    const { email, mobile, otp } = req.body || {};
+    const target = email || (mobile ? `${mobile}@leofamily.local` : '');
+    const result = await reportAccessEngine.verifyEmailOtp(target, otp);
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Failed to verify OTP" });
@@ -63,15 +83,14 @@ router.get("/reports/check-access", async (req, res) => {
   try {
     const reportType = req.query.reportType as CanonicalReportType;
     const profileKey = (req.query.profileKey as string) || 'default_profile';
-    const mobile = req.query.mobile as string | undefined;
+    const email = req.query.email as string | undefined;
     const authHeader = req.headers['authorization'];
-    const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
 
     if (!reportType) {
       return res.status(400).json({ success: false, error: "Missing reportType parameter" });
     }
 
-    const result = await reportAccessEngine.checkReportAccess(reportType, profileKey, mobile, token);
+    const result = await reportAccessEngine.checkReportAccess(reportType, profileKey, authHeader, email);
     res.json(result);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to check report access" });
@@ -81,15 +100,14 @@ router.get("/reports/check-access", async (req, res) => {
 // 4. Claim First Free Report
 router.post("/reports/claim-free", async (req, res) => {
   try {
-    const { reportType, profileKey, mobile } = req.body || {};
+    const { reportType, profileKey, email } = req.body || {};
     const authHeader = req.headers['authorization'];
-    const token = req.body?.token || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
 
     if (!reportType) {
       return res.status(400).json({ success: false, error: "Missing reportType" });
     }
 
-    const result = await reportAccessEngine.claimFreeReport(reportType, profileKey, mobile, token);
+    const result = await reportAccessEngine.claimFreeReport(reportType, profileKey, authHeader, email);
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Failed to claim free report" });
@@ -99,15 +117,14 @@ router.post("/reports/claim-free", async (req, res) => {
 // 5. Create ₹33 Razorpay Payment Order
 router.post("/payments/create-order", async (req, res) => {
   try {
-    const { reportType, profileKey, mobile } = req.body || {};
+    const { reportType, profileKey, email } = req.body || {};
     const authHeader = req.headers['authorization'];
-    const token = req.body?.token || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
 
     if (!reportType) {
       return res.status(400).json({ success: false, error: "Missing reportType" });
     }
 
-    const result = await reportAccessEngine.createPaymentOrder(reportType, profileKey, mobile, token);
+    const result = await reportAccessEngine.createPaymentOrder(reportType, profileKey, authHeader, email);
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Failed to create payment order" });
@@ -117,9 +134,8 @@ router.post("/payments/create-order", async (req, res) => {
 // 6. Verify Razorpay Payment Signature & Grant Entitlement
 router.post("/payments/verify-payment", async (req, res) => {
   try {
-    const { orderId, paymentId, signature, reportType, profileKey, mobile } = req.body || {};
+    const { orderId, paymentId, signature, reportType, profileKey, email } = req.body || {};
     const authHeader = req.headers['authorization'];
-    const token = req.body?.token || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
 
     if (!orderId || !reportType) {
       return res.status(400).json({ success: false, error: "Missing orderId or reportType" });
@@ -131,8 +147,8 @@ router.post("/payments/verify-payment", async (req, res) => {
       signature || '',
       reportType,
       profileKey,
-      mobile,
-      token
+      authHeader,
+      email
     );
     res.json(result);
   } catch (e: any) {
@@ -156,10 +172,9 @@ router.post("/payments/webhook", async (req, res) => {
 router.get("/reports/my-reports", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
-    const mobile = req.query.mobile as string | undefined;
+    const email = req.query.email as string | undefined;
 
-    const data = await reportAccessEngine.getUserReports(token, mobile);
+    const data = await reportAccessEngine.getUserReports(authHeader, email);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to fetch user reports" });
@@ -170,10 +185,9 @@ router.get("/reports/my-reports", async (req, res) => {
 router.get("/payments/history", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
-    const mobile = req.query.mobile as string | undefined;
+    const email = req.query.email as string | undefined;
 
-    const data = await reportAccessEngine.getUserPaymentHistory(token, mobile);
+    const data = await reportAccessEngine.getUserPaymentHistory(authHeader, email);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to fetch payment history" });
@@ -184,10 +198,9 @@ router.get("/payments/history", async (req, res) => {
 router.get("/reports/access-summary", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
-    const mobile = req.query.mobile as string | undefined;
+    const email = req.query.email as string | undefined;
 
-    const data = await reportAccessEngine.getUserAccessSummary(token, mobile);
+    const data = await reportAccessEngine.getUserAccessSummary(authHeader, email);
     res.json(data);
   } catch (e: any) {
     res.status(500).json({ success: false, error: e?.message || "Failed to fetch access summary" });
@@ -198,11 +211,10 @@ router.get("/reports/access-summary", async (req, res) => {
 router.get("/reports/:reportId", async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = (req.query.token as string) || (authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : undefined);
-    const mobile = req.query.mobile as string | undefined;
+    const email = req.query.email as string | undefined;
     const { reportId } = req.params;
 
-    const data = await reportAccessEngine.getReportById(reportId, token, mobile);
+    const data = await reportAccessEngine.getReportById(reportId, authHeader, email);
     res.json(data);
   } catch (e: any) {
     res.status(403).json({ success: false, error: e?.message || "Failed to access report" });
@@ -233,6 +245,8 @@ router.get("/otp-debug", (req, res) => {
     });
   }
 
+  const audit = reportAccessEngine ? (reportAccessEngine as any).getSafeConfigAudit?.() : {};
+
   res.json({
     success: true,
     timestamp: new Date().toISOString(),
@@ -242,17 +256,22 @@ router.get("/otp-debug", (req, res) => {
       platform: process.platform,
       environment: process.env.NODE_ENV || "development"
     },
-    otpConfig: {
-      OTP_MODE: process.env.OTP_MODE || (process.env.SMS_PROVIDER_API_KEY ? "live" : "sandbox"),
+    fast2smsConfig: {
+      OTP_MODE: process.env.OTP_MODE || (isProduction ? "live" : "test"),
       FAST2SMS_API_KEY_PRESENT: !!process.env.FAST2SMS_API_KEY,
-      SMS_PROVIDER_API_KEY_PRESENT: !!process.env.SMS_PROVIDER_API_KEY,
-      OTP_API_KEY_PRESENT: !!process.env.OTP_API_KEY,
-      OTP_PROVIDER_URL_PRESENT: !!(process.env.OTP_PROVIDER_URL || process.env.SMS_API_URL)
+      FAST2SMS_OTP_ID_PRESENT: !!process.env.FAST2SMS_OTP_ID,
+      FAST2SMS_API_URL_PRESENT: !!process.env.FAST2SMS_API_URL,
+      FAST2SMS_VERIFY_URL_PRESENT: !!process.env.FAST2SMS_VERIFY_URL,
+      FAST2SMS_EFFECTIVE_SEND_ENDPOINT: process.env.FAST2SMS_API_URL || 'https://www.fast2sms.com/dev/otp/send',
+      FAST2SMS_EFFECTIVE_VERIFY_ENDPOINT: process.env.FAST2SMS_VERIFY_URL || 'https://www.fast2sms.com/dev/otp/verify',
     },
     gatewayConfig: {
       RAZORPAY_KEY_ID_PRESENT: !!process.env.RAZORPAY_KEY_ID,
       RAZORPAY_KEY_SECRET_PRESENT: !!process.env.RAZORPAY_KEY_SECRET,
       RAZORPAY_WEBHOOK_SECRET_PRESENT: !!process.env.RAZORPAY_WEBHOOK_SECRET
+    },
+    databaseConfig: {
+      DATABASE_CONFIGURED: !!(process.env.DATABASE_URL || process.env.SUPABASE_DB_URL)
     },
     aiConfig: {
       GEMINI_API_KEY_PRESENT: !!process.env.GEMINI_API_KEY
