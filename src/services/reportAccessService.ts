@@ -84,82 +84,124 @@ export class ReportAccessService {
     });
   }
 
-  // 1. Send Email OTP (via Backend or Supabase Auth)
-  public static async sendEmailOtp(email: string): Promise<{ success: boolean; message: string }> {
-    return await safeFetchJson<{ success: boolean; message: string }>(
-      '/api/auth/send-email-otp',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
-      }
-    );
-  }
-
-  // 2. Verify Email OTP & establish session
-  public static async verifyEmailOtp(email: string, token: string): Promise<UserSession> {
-    const data = await safeFetchJson<{
-      success: boolean;
-      session?: {
-        access_token: string;
-        user?: any;
-      };
-      user: {
-        id: string;
-        supabaseUserId?: string;
-        email?: string;
-        emailVerified?: boolean;
-        mobile?: string;
-        hasClaimedFreeReport: boolean;
-        freeReportDetails?: any;
-      };
-    }>(
-      '/api/auth/verify-email-otp',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), token: token.trim() }),
-      }
-    );
-
-    const authToken = data.session?.access_token;
+  // 1. Synchronize Supabase Auth session with backend
+  public static async syncSession(token?: string, profileData?: any): Promise<{ success: boolean; user?: any; profile?: any }> {
+    const authToken = token || this.getToken();
     if (!authToken) {
-      throw new Error('Verification did not return an authenticated session token');
+      throw new Error("No authentication token available to sync");
     }
-    const session: UserSession = {
-      userId: data.user.id,
-      supabaseUserId: data.user.supabaseUserId || data.user.id,
-      email: data.user.email || email.trim().toLowerCase(),
-      emailVerified: true,
-      mobile: data.user.mobile || '',
-      mobileVerified: !!data.user.mobile,
-      token: authToken,
-      hasClaimedFreeReport: !!data.user.hasClaimedFreeReport,
-      freeReportDetails: data.user.freeReportDetails,
-    };
 
-    this.saveSession(session);
-    return session;
-  }
-
-  // Legacy fallback helpers (deprecated, mapped to email where available)
-  public static async requestOtp(mobileOrEmail: string): Promise<{ success: boolean; message: string; testOtp?: string }> {
-    const isEmail = mobileOrEmail.includes('@');
-    const target = isEmail ? mobileOrEmail : `${mobileOrEmail}@leofamily.local`;
-    return await safeFetchJson<{ success: boolean; message: string; testOtp?: string }>(
-      '/api/auth/send-email-otp',
+    const data = await safeFetchJson<{ success: boolean; user?: any; profile?: any; error?: string }>(
+      '/api/auth/sync-session',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: target }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(profileData || {}),
+      }
+    );
+
+    if (data.success && data.user) {
+      const appUser: UserSession = {
+        userId: data.user.id,
+        supabaseUserId: data.user.supabaseUserId || data.user.id,
+        email: data.user.email || '',
+        emailVerified: !!data.user.emailVerified,
+        phone: data.user.phone || '',
+        phoneVerified: !!data.user.phoneVerified,
+        fullName: data.user.fullName || '',
+        avatarUrl: data.user.avatarUrl || '',
+        authProvider: data.user.authProvider || 'supabase',
+        mobile: data.user.phone || data.user.mobile || '',
+        mobileVerified: !!(data.user.phoneVerified || data.user.mobileVerified),
+        token: authToken,
+        hasClaimedFreeReport: !!data.user.hasClaimedFreeReport,
+        freeReportDetails: data.user.freeReportDetails,
+      };
+      this.saveSession(appUser);
+    }
+
+    return data;
+  }
+
+  // 2. Save / Update User Numerology Profile
+  public static async saveNumerologyProfile(profileData: {
+    fullName: string;
+    dateOfBirth: string;
+    mobileNumber?: string;
+    email?: string;
+    gender?: string;
+    language?: string;
+    mulank?: number;
+    bhagyank?: number;
+    kuaNumber?: number;
+  }): Promise<{ success: boolean; profile?: any }> {
+    const token = this.getToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{ success: boolean; profile?: any }>(
+      '/api/profiles/save',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(profileData),
       }
     );
   }
 
-  public static async verifyOtp(mobileOrEmail: string, otp: string): Promise<UserSession> {
-    const isEmail = mobileOrEmail.includes('@');
-    const target = isEmail ? mobileOrEmail : `${mobileOrEmail}@leofamily.local`;
-    return await this.verifyEmailOtp(target, otp);
+  // 3. Get Current User's Saved Numerology Profile
+  public static async getCurrentNumerologyProfile(): Promise<{ success: boolean; profile?: any }> {
+    const token = this.getToken();
+    if (!token) return { success: true, profile: null };
+
+    const headers: Record<string, string> = { 'Authorization': `Bearer ${token}` };
+    return await safeFetchJson<{ success: boolean; profile?: any }>(
+      '/api/profiles/current',
+      { headers }
+    );
+  }
+
+  // 4. Record Report Run
+  public static async recordReportRun(reportData: {
+    reportType: string;
+    profileName?: string;
+    dobString?: string;
+    reportKey?: string;
+    language?: string;
+    metadata?: any;
+  }): Promise<{ success: boolean; reportRunId?: string }> {
+    const token = this.getToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{ success: boolean; reportRunId?: string }>(
+      '/api/reports/record-run',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(reportData),
+      }
+    );
+  }
+
+  // 5. Log User Activity
+  public static async logActivity(eventType: string, metadata: any = {}): Promise<void> {
+    const token = this.getToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    try {
+      await safeFetchJson('/api/activity/log', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ eventType, metadata }),
+      });
+    } catch {
+      // Ignored
+    }
   }
 
   // 3. Central Report Access Check

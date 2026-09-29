@@ -1,76 +1,80 @@
 /**
- * SUPABASE AUTH HOOK
- * Manages Supabase Auth session state, email OTP delivery, verification, and cooldown workflows.
- * Hardened for single-use OTP validation, duplicate request prevention, and JWT Bearer session synchronization.
+ * SUPABASE AUTHENTICATION HOOK & STATE MANAGER
+ * Phase 16: Production Supabase Auth (Google OAuth & WhatsApp Phone OTP)
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured, getSupabaseClientConfigAudit } from '../lib/supabaseClient';
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { ReportAccessService } from '../services/reportAccessService';
-import { UserSession } from '../types/reportAccess';
-import { safeFetchJson } from '../services/safeApiHelper';
+import { UserSession, UserProfileData } from '../types/reportAccess';
 
-export interface SupabaseAuthState {
+export interface UseSupabaseAuthReturn {
   user: User | null;
-  appUser: UserSession | null;
   session: Session | null;
+  appUser: UserSession | null;
+  profile: UserProfileData | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isSendingOtp: boolean;
   isVerifyingOtp: boolean;
   otpSent: boolean;
-  targetEmail: string;
+  targetPhone: string;
   cooldownSeconds: number;
   canResend: boolean;
   error: string | null;
   isConfigured: boolean;
-}
-
-export interface UseSupabaseAuthReturn extends SupabaseAuthState {
-  sendOtp: (email: string) => Promise<{ success: boolean; message: string }>;
-  verifyOtp: (email: string, token: string) => Promise<{ success: boolean; session?: any; error?: string }>;
-  resendOtp: () => Promise<{ success: boolean; message: string }>;
+  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  signInWithWhatsApp: (phone: string) => Promise<{ success: boolean; message?: string; error?: string }>;
+  verifyWhatsAppOtp: (phone: string, token: string) => Promise<{ success: boolean; session?: any; error?: string }>;
+  resendWhatsAppOtp: () => Promise<{ success: boolean; message?: string; error?: string }>;
   signOut: () => Promise<void>;
   clearError: () => void;
   resetOtpFlow: () => void;
   refreshSession: () => Promise<Session | null>;
 }
 
-const COOLDOWN_DURATION = 60; // 60 seconds cooldown between OTP requests
+const COOLDOWN_DURATION = 60; // 60 seconds countdown between WhatsApp OTP requests
 
-// Helper to safely mask email in debug logs
-function maskEmail(email: string): string {
-  if (!email) return '';
-  const parts = email.split('@');
-  if (parts.length !== 2) return '***';
-  const name = parts[0];
-  const domain = parts[1];
-  const maskedName = name.length > 2 ? `${name.substring(0, 2)}***` : '***';
-  return `${maskedName}@${domain}`;
+// Formats phone to international E.164 standard (e.g. +919876543210)
+export function formatToE164(phone: string): string {
+  const digits = (phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length === 10) {
+    return `+91${digits}`;
+  }
+  if (digits.length === 12 && digits.startsWith('91')) {
+    return `+${digits}`;
+  }
+  if (digits.length === 11 && digits.startsWith('0')) {
+    return `+91${digits.substring(1)}`;
+  }
+  if (digits.startsWith('91')) {
+    return `+${digits}`;
+  }
+  return `+${digits}`;
 }
 
 export function useSupabaseAuth(): UseSupabaseAuthReturn {
   const [user, setUser] = useState<User | null>(null);
-  const [appUser, setAppUser] = useState<UserSession | null>(() => ReportAccessService.getStoredUser());
   const [session, setSession] = useState<Session | null>(null);
+  const [appUser, setAppUser] = useState<UserSession | null>(() => ReportAccessService.getStoredUser());
+  const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState<boolean>(false);
   const [otpSent, setOtpSent] = useState<boolean>(false);
-  const [targetEmail, setTargetEmail] = useState<string>('');
+  const [targetPhone, setTargetPhone] = useState<string>('');
   const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
 
   const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isSendingRef = useRef<boolean>(false);
   const isVerifyingRef = useRef<boolean>(false);
-  const activeEmailRef = useRef<string>('');
-  const activeRequestIdRef = useRef<string>('');
+  const activePhoneRef = useRef<string>('');
   const isConfigured = isSupabaseConfigured();
 
-  // Clear cooldown interval helper
   const clearCooldownTimer = useCallback(() => {
     if (cooldownTimerRef.current) {
       clearInterval(cooldownTimerRef.current);
@@ -78,7 +82,6 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
     }
   }, []);
 
-  // Start cooldown countdown
   const startCooldown = useCallback((duration: number = COOLDOWN_DURATION) => {
     clearCooldownTimer();
     setCooldownSeconds(duration);
@@ -93,14 +96,32 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
     }, 1000);
   }, [clearCooldownTimer]);
 
-  // Clean up interval on unmount
   useEffect(() => {
     return () => {
       clearCooldownTimer();
     };
   }, [clearCooldownTimer]);
 
-  // Initial session check and auth state listener
+  // Sync session with backend
+  const syncWithBackend = useCallback(async (currentSession: Session | null) => {
+    if (!currentSession?.access_token) return;
+    try {
+      const syncRes = await ReportAccessService.syncSession(currentSession.access_token);
+      if (syncRes.success && syncRes.user) {
+        const stored = ReportAccessService.getStoredUser();
+        if (stored) {
+          setAppUser(stored);
+        }
+        if (syncRes.profile) {
+          setProfile(syncRes.profile);
+        }
+      }
+    } catch (err) {
+      console.warn('[useSupabaseAuth] Backend sync notice:', err);
+    }
+  }, []);
+
+  // Initialize session & Auth state listener
   useEffect(() => {
     let mounted = true;
 
@@ -114,10 +135,11 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
           if (mounted && initialSession) {
             setSession(initialSession);
             setUser(initialSession.user);
+            await syncWithBackend(initialSession);
           }
         }
       } catch (err: any) {
-        console.warn('[useSupabaseAuth] Initialization error:', err?.message || err);
+        console.warn('[useSupabaseAuth] Init error:', err?.message || err);
       } finally {
         if (mounted) {
           setIsLoading(false);
@@ -128,22 +150,19 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
 
     initAuth();
 
-    // Subscribe to Supabase auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, currentSession: Session | null) => {
+      async (event: AuthChangeEvent, currentSession: Session | null) => {
         if (!mounted) return;
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (event === 'SIGNED_OUT') {
           setAppUser(null);
+          setProfile(null);
           ReportAccessService.clearSession();
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-          if (currentSession?.user?.email) {
-            const existing = ReportAccessService.getStoredUser();
-            if (existing) {
-              setAppUser(existing);
-            }
+          if (currentSession) {
+            await syncWithBackend(currentSession);
           }
         }
       }
@@ -153,120 +172,128 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
       mounted = false;
       subscription.unsubscribe();
     };
+  }, [isConfigured, syncWithBackend]);
+
+  // 1. Google OAuth Sign In
+  const signInWithGoogle = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+    setError(null);
+    try {
+      if (!isConfigured) {
+        throw new Error('Supabase Authentication is not configured. Please check environment variables.');
+      }
+
+      const redirectUrl =
+        typeof window !== 'undefined' && window.location?.origin
+          ? window.location.origin
+          : 'https://complete-mobile-numerology.vercel.app';
+
+      const { error: sbError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+
+      if (sbError) {
+        throw sbError;
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      console.error('[useSupabaseAuth] Google Sign-In error:', err);
+      const msg = err?.message || 'Google login failed. Please try again.';
+      setError(msg);
+      return { success: false, error: msg };
+    }
   }, [isConfigured]);
 
-  // 1. Send OTP to email with strict deduplication
-  const sendOtp = useCallback(async (email: string): Promise<{ success: boolean; message: string }> => {
-    const cleanEmail = (email || '').trim().toLowerCase();
-    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      const msg = 'Please enter a valid email address';
+  // 2. WhatsApp Phone OTP Sign In
+  const signInWithWhatsApp = useCallback(async (
+    rawPhone: string
+  ): Promise<{ success: boolean; message?: string; error?: string }> => {
+    const formattedPhone = formatToE164(rawPhone);
+    const digitsOnly = formattedPhone.replace(/\D/g, '');
+
+    if (!formattedPhone || digitsOnly.length < 10) {
+      const msg = 'कृपया एक मान्य 10-अंकीय मोबाइल नंबर दर्ज करें (Please enter a valid mobile number)';
       setError(msg);
-      return { success: false, message: msg };
+      return { success: false, error: msg };
     }
 
-    // Strict in-flight guard to prevent duplicate calls from double clicks
     if (isSendingRef.current) {
-      return { success: false, message: 'OTP request already in progress' };
+      return { success: false, error: 'OTP request already in progress...' };
     }
 
     isSendingRef.current = true;
     setIsSendingOtp(true);
     setError(null);
 
-    const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    activeRequestIdRef.current = requestId;
-    activeEmailRef.current = cleanEmail;
-
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[SupabaseAuth] Requesting OTP [ID: ${requestId}] for ${maskEmail(cleanEmail)} at ${new Date().toISOString()}`);
-    }
+    activePhoneRef.current = formattedPhone;
 
     try {
-      if (isConfigured) {
-        const redirectOrigin =
-          typeof window !== 'undefined' && window.location?.origin
-            ? window.location.origin
-            : 'https://complete-mobile-numerology.vercel.app';
+      if (!isConfigured) {
+        throw new Error('Supabase Authentication is not configured.');
+      }
 
-        const { error: sbError } = await supabase.auth.signInWithOtp({
-          email: cleanEmail,
-          options: {
-            shouldCreateUser: true,
-            emailRedirectTo: redirectOrigin,
-          },
-        });
+      // Send OTP via Supabase Phone Auth with WhatsApp channel
+      const { error: sbError } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
+        options: {
+          channel: 'whatsapp',
+          shouldCreateUser: true,
+        },
+      });
 
-        if (sbError) {
-          throw sbError;
-        }
-      } else {
-        const isBrowser = typeof window !== 'undefined';
-        const isProd = isBrowser && window.location?.hostname !== 'localhost' && window.location?.hostname !== '127.0.0.1';
-        
-        if (isProd) {
-          const configMsg = 'Authentication service is not configured. Please contact administrator.';
-          setError(configMsg);
-          return { success: false, message: configMsg };
-        }
-
-        // Local development sandbox only
-        const data = await safeFetchJson<{ success: boolean; error?: string }>(
-          '/api/auth/send-email-otp',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: cleanEmail }),
-          }
-        );
-
-        if (!data.success) {
-          throw new Error(data.error || 'Failed to send OTP');
-        }
+      if (sbError) {
+        throw sbError;
       }
 
       setOtpSent(true);
-      setTargetEmail(cleanEmail);
+      setTargetPhone(formattedPhone);
       startCooldown(COOLDOWN_DURATION);
 
       return {
         success: true,
-        message: `OTP sent successfully to ${cleanEmail}. Please check your inbox and spam folder.`,
+        message: `WhatsApp verification code sent to ${formattedPhone}. Please check your WhatsApp messages.`,
       };
     } catch (err: any) {
-      console.error('[useSupabaseAuth] sendOtp error:', err);
-      let errorMsg = err?.message || 'Authentication service is temporarily unavailable. Please try again.';
-      if (err?.status === 429 || errorMsg.toLowerCase().includes('rate')) {
-        errorMsg = 'Too many requests. Please wait a minute before requesting another OTP.';
+      console.error('[useSupabaseAuth] WhatsApp OTP send error:', err);
+      let msg = err?.message || 'Unable to send WhatsApp code. Please check your phone number and try again.';
+      if (err?.status === 429 || msg.toLowerCase().includes('rate')) {
+        msg = 'Too many attempts. Please wait a minute before requesting another code.';
       }
-      setError(errorMsg);
-      return { success: false, message: errorMsg };
+      setError(msg);
+      return { success: false, error: msg };
     } finally {
       isSendingRef.current = false;
       setIsSendingOtp(false);
     }
   }, [isConfigured, startCooldown]);
 
-  // 2. Verify OTP with single-use consumption safeguard & backend sync
-  const verifyOtp = useCallback(async (
-    email: string,
+  // 3. Verify WhatsApp OTP
+  const verifyWhatsAppOtp = useCallback(async (
+    rawPhone: string,
     token: string
   ): Promise<{ success: boolean; session?: any; error?: string }> => {
-    const cleanEmail = (email || activeEmailRef.current || targetEmail || '').trim().toLowerCase();
+    const formattedPhone = formatToE164(rawPhone || activePhoneRef.current || targetPhone);
     const cleanToken = (token || '').replace(/[\s-]/g, '').trim();
 
-    if (!cleanEmail) {
-      const msg = 'Email address is required';
+    if (!formattedPhone) {
+      const msg = 'Phone number is required';
       setError(msg);
       return { success: false, error: msg };
     }
 
     if (!cleanToken || cleanToken.length < 4) {
-      const msg = 'Please enter the verification code received on your email';
+      const msg = 'कृपया व्हाट्सएप पर प्राप्त सत्यापन कोड दर्ज करें (Please enter the WhatsApp verification code)';
       setError(msg);
       return { success: false, error: msg };
     }
 
-    // In-flight guard
     if (isVerifyingRef.current) {
       return { success: false, error: 'Verification in progress...' };
     }
@@ -275,172 +302,77 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
     setIsVerifyingOtp(true);
     setError(null);
 
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`[SupabaseAuth] Verifying OTP [Length: ${cleanToken.length}] for ${maskEmail(cleanEmail)}`);
-    }
-
     try {
-      let verifiedSession: Session | null = null;
-      let verifiedUser: User | null = null;
-      let accessToken = '';
-
-      if (isConfigured) {
-        // Step 1: Verify directly with Supabase Auth client
-        const { data, error: sbError } = await supabase.auth.verifyOtp({
-          email: cleanEmail,
-          token: cleanToken,
-          type: 'email',
-        });
-
-        if (sbError) {
-          const rawMsg = sbError.message || '';
-          if (rawMsg.toLowerCase().includes('expired') || rawMsg.toLowerCase().includes('invalid')) {
-            throw new Error('यह OTP मान्य नहीं है या समाप्त हो चुका है। कृपया नवीनतम कोड दर्ज करें (Invalid or expired OTP).');
-          }
-          throw sbError;
-        }
-
-        verifiedSession = data.session;
-        verifiedUser = data.user;
-        accessToken = verifiedSession?.access_token || '';
-
-        if (!verifiedSession || !accessToken) {
-          throw new Error('Supabase authentication completed without valid session token.');
-        }
-
-        setSession(verifiedSession);
-        setUser(verifiedUser);
-
-        // Step 2: Synchronize with backend using the validated JWT Bearer Token
-        const syncData = await safeFetchJson<{ success: boolean; user?: any; error?: string }>(
-          '/api/auth/sync-session',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({ email: cleanEmail }),
-          }
-        );
-
-        if (!syncData.success || !syncData.user) {
-          throw new Error(syncData.error || 'Failed to resolve authenticated user profile from backend.');
-        }
-
-        const appUserSession: UserSession = {
-          userId: syncData.user.id,
-          supabaseUserId: syncData.user.supabaseUserId || verifiedUser?.id,
-          email: cleanEmail,
-          emailVerified: true,
-          mobile: syncData.user.mobile || '',
-          mobileVerified: !!syncData.user.mobile,
-          token: accessToken,
-          hasClaimedFreeReport: !!syncData.user.hasClaimedFreeReport,
-          freeReportDetails: syncData.user.freeReportDetails,
-        };
-
-        ReportAccessService.saveSession(appUserSession);
-        setAppUser(appUserSession);
-        clearCooldownTimer();
-        setCooldownSeconds(0);
-
-        return {
-          success: true,
-          session: appUserSession,
-        };
-      } else {
-        const isBrowser = typeof window !== 'undefined';
-        const isProd = isBrowser && window.location?.hostname !== 'localhost' && window.location?.hostname !== '127.0.0.1';
-        
-        if (isProd) {
-          const configMsg = 'Authentication service is not configured. Please contact administrator.';
-          setError(configMsg);
-          return { success: false, error: configMsg };
-        }
-
-        // Local development sandbox only
-        const backendData = await safeFetchJson<{
-          success: boolean;
-          error?: string;
-          user?: any;
-          session?: any;
-        }>('/api/auth/verify-email-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: cleanEmail,
-            token: cleanToken,
-          }),
-        });
-
-        if (!backendData.success) {
-          const rawErr = backendData.error || 'Invalid or expired OTP';
-          if (rawErr.toLowerCase().includes('expired') || rawErr.toLowerCase().includes('invalid')) {
-            throw new Error('यह OTP मान्य नहीं है या समाप्त हो चुका है। कृपया नवीनतम कोड दर्ज करें (Invalid or expired OTP).');
-          }
-          throw new Error(rawErr);
-        }
-
-        const userObj = backendData.user;
-        const sessionObj = backendData.session;
-        if (!userObj || !sessionObj?.access_token) {
-          throw new Error('Server did not return a valid authentication session.');
-        }
-        accessToken = sessionObj.access_token;
-
-        const appUserSession: UserSession = {
-          userId: userObj.id,
-          supabaseUserId: userObj.supabaseUserId || userObj.id,
-          email: cleanEmail,
-          emailVerified: true,
-          mobile: userObj.mobile || '',
-          mobileVerified: !!userObj.mobile,
-          token: accessToken,
-          hasClaimedFreeReport: !!userObj.hasClaimedFreeReport,
-          freeReportDetails: userObj.freeReportDetails,
-        };
-
-        ReportAccessService.saveSession(appUserSession);
-        setAppUser(appUserSession);
-        clearCooldownTimer();
-        setCooldownSeconds(0);
-
-        return {
-          success: true,
-          session: appUserSession,
-        };
+      if (!isConfigured) {
+        throw new Error('Supabase Authentication is not configured.');
       }
+
+      // Verify OTP with Supabase Auth Phone API
+      const { data, error: sbError } = await supabase.auth.verifyOtp({
+        phone: formattedPhone,
+        token: cleanToken,
+        type: 'sms', // Standard Supabase type for phone verification
+      });
+
+      if (sbError) {
+        const rawMsg = sbError.message || '';
+        if (rawMsg.toLowerCase().includes('expired') || rawMsg.toLowerCase().includes('invalid')) {
+          throw new Error('यह WhatsApp कोड अमान्य है या समाप्त हो चुका है। कृपया नवीनतम कोड दर्ज करें (Invalid or expired code).');
+        }
+        throw sbError;
+      }
+
+      const verifiedSession = data.session;
+      const verifiedUser = data.user;
+      const accessToken = verifiedSession?.access_token || '';
+
+      if (!verifiedSession || !accessToken) {
+        throw new Error('Supabase authentication completed without valid session token.');
+      }
+
+      setSession(verifiedSession);
+      setUser(verifiedUser);
+
+      // Sync verified user profile with PostgreSQL backend
+      await syncWithBackend(verifiedSession);
+
+      clearCooldownTimer();
+      setCooldownSeconds(0);
+
+      return {
+        success: true,
+        session: verifiedSession,
+      };
     } catch (err: any) {
-      console.error('[useSupabaseAuth] verifyOtp error:', err);
-      const errorMsg = err?.message || 'Verification failed. Please check your OTP code and retry.';
-      setError(errorMsg);
-      return { success: false, error: errorMsg };
+      console.error('[useSupabaseAuth] verifyWhatsAppOtp error:', err);
+      const msg = err?.message || 'Verification failed. Please check the code and retry.';
+      setError(msg);
+      return { success: false, error: msg };
     } finally {
       isVerifyingRef.current = false;
       setIsVerifyingOtp(false);
     }
-  }, [clearCooldownTimer, isConfigured, targetEmail]);
+  }, [clearCooldownTimer, isConfigured, syncWithBackend, targetPhone]);
 
-  // 3. Resend OTP to the active email
-  const resendOtp = useCallback(async (): Promise<{ success: boolean; message: string }> => {
+  // 4. Resend WhatsApp OTP
+  const resendWhatsAppOtp = useCallback(async (): Promise<{ success: boolean; message?: string; error?: string }> => {
     if (cooldownSeconds > 0) {
       return {
         success: false,
-        message: `Please wait ${cooldownSeconds} seconds before requesting a new code.`,
+        error: `Please wait ${cooldownSeconds} seconds before requesting a new code.`,
       };
     }
-    const emailToResend = activeEmailRef.current || targetEmail;
-    if (!emailToResend) {
+    const phoneToResend = activePhoneRef.current || targetPhone;
+    if (!phoneToResend) {
       return {
         success: false,
-        message: 'No email address available to resend code.',
+        error: 'No phone number available to resend code.',
       };
     }
-    return await sendOtp(emailToResend);
-  }, [cooldownSeconds, sendOtp, targetEmail]);
+    return await signInWithWhatsApp(phoneToResend);
+  }, [cooldownSeconds, signInWithWhatsApp, targetPhone]);
 
-  // 4. Sign out
+  // 5. Sign Out
   const signOut = useCallback(async (): Promise<void> => {
     try {
       if (isConfigured) {
@@ -451,69 +383,72 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
     } finally {
       ReportAccessService.clearSession();
       setUser(null);
-      setAppUser(null);
       setSession(null);
+      setAppUser(null);
+      setProfile(null);
       setOtpSent(false);
-      setTargetEmail('');
-      activeEmailRef.current = '';
+      setTargetPhone('');
+      activePhoneRef.current = '';
       setError(null);
       clearCooldownTimer();
       setCooldownSeconds(0);
     }
   }, [clearCooldownTimer, isConfigured]);
 
-  // 5. Clear error
   const clearError = useCallback(() => {
     setError(null);
   }, []);
 
-  // 6. Reset OTP flow
   const resetOtpFlow = useCallback(() => {
     setOtpSent(false);
-    setTargetEmail('');
-    activeEmailRef.current = '';
+    setTargetPhone('');
+    activePhoneRef.current = '';
     setError(null);
     clearCooldownTimer();
     setCooldownSeconds(0);
   }, [clearCooldownTimer]);
 
-  // 7. Refresh current session
   const refreshSession = useCallback(async (): Promise<Session | null> => {
     try {
       if (isConfigured) {
         const { data: { session: freshSession } } = await supabase.auth.getSession();
         setSession(freshSession);
         setUser(freshSession?.user ?? null);
+        if (freshSession) {
+          await syncWithBackend(freshSession);
+        }
         return freshSession;
       }
     } catch (err) {
       console.warn('[useSupabaseAuth] refreshSession notice:', err);
     }
     return null;
-  }, [isConfigured]);
+  }, [isConfigured, syncWithBackend]);
 
-  const isAuthenticated = !!(user || appUser || session);
+  const isAuthenticated = !!(user || session || appUser?.token);
   const accessToken = session?.access_token || appUser?.token || null;
   const canResend = otpSent && cooldownSeconds === 0;
 
   return {
     user,
-    appUser,
     session,
+    appUser,
+    profile,
     accessToken,
     isAuthenticated,
     isLoading,
     isSendingOtp,
     isVerifyingOtp,
     otpSent,
-    targetEmail,
+    targetPhone,
     cooldownSeconds,
     canResend,
     error,
     isConfigured,
-    sendOtp,
-    verifyOtp,
-    resendOtp,
+    signInWithGoogle,
+    signInWithWhatsApp,
+    verifyWhatsAppOtp,
+    resendWhatsAppOtp,
     signOut,
     clearError,
     resetOtpFlow,

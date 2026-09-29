@@ -52,7 +52,14 @@ export const getServerSupabaseClient = (): SupabaseClient => {
 export interface AuthenticatedSupabaseUser {
   supabaseUserId: string;
   email: string;
+  phone: string;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  authProvider: string;
   emailVerified: boolean;
+  phoneVerified: boolean;
 }
 
 /**
@@ -73,10 +80,28 @@ export async function verifySupabaseToken(
       if (error || !data.user) {
         return null;
       }
+      const u = data.user;
+      const meta = u.user_metadata || {};
+      const appMeta = u.app_metadata || {};
+      
+      const provider = appMeta.provider || (u.phone ? 'whatsapp' : 'google');
+      const fullName = meta.full_name || meta.name || [meta.first_name, meta.last_name].filter(Boolean).join(' ') || '';
+      const parts = fullName.split(' ');
+      const firstName = meta.first_name || parts[0] || '';
+      const lastName = meta.last_name || parts.slice(1).join(' ') || '';
+      const avatarUrl = meta.avatar_url || meta.picture || '';
+
       return {
-        supabaseUserId: data.user.id,
-        email: data.user.email || '',
-        emailVerified: !!(data.user.email_confirmed_at || data.user.confirmed_at),
+        supabaseUserId: u.id,
+        email: u.email || '',
+        phone: u.phone || '',
+        fullName,
+        firstName,
+        lastName,
+        avatarUrl,
+        authProvider: provider,
+        emailVerified: !!(u.email_confirmed_at || u.confirmed_at),
+        phoneVerified: !!(u.phone_confirmed_at || (u.phone && (u.confirmed_at || meta.phone_verified))),
       };
     } catch {
       return null;
@@ -84,4 +109,17 @@ export async function verifySupabaseToken(
   }
 
   return null;
+}
+
+/**
+ * Express Middleware / Authorization Validator
+ */
+export async function requireAuthenticatedUser(
+  authHeader: string | undefined | null
+): Promise<AuthenticatedSupabaseUser> {
+  const user = await verifySupabaseToken(authHeader);
+  if (!user || !user.supabaseUserId) {
+    throw new Error("UNAUTHORIZED: Valid Supabase authentication token is required.");
+  }
+  return user;
 }

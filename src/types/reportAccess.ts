@@ -229,11 +229,69 @@ export const REPORT_REGISTRY: Record<CanonicalReportType, ReportTypeDefinition> 
   },
 };
 
+export const isPublicReport = (reportType: string | CanonicalReportType): boolean => {
+  const norm = String(reportType).toUpperCase().replace(/\s+/g, '_');
+  return norm === 'MOBILE_NUMEROLOGY' || norm === 'MOBILE' || norm === 'LOSHU' || norm === 'LOSHU_GRID';
+};
+
+export const requiresAuthentication = (reportType: string | CanonicalReportType): boolean => {
+  return !isPublicReport(reportType);
+};
+
+export interface UserProfileData {
+  userId: string;
+  email?: string;
+  phone?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  preferredLanguage?: string;
+  countryCode?: string;
+  authProvider?: string;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  lastLoginAt?: string;
+  createdAt?: string;
+}
+
+export interface NumerologyProfileData {
+  userId: string;
+  fullName: string;
+  dateOfBirth: string; // YYYY-MM-DD or DD/MM/YYYY
+  mobileNumber?: string;
+  email?: string;
+  gender?: string;
+  language?: string;
+  mulank?: number;
+  bhagyank?: number;
+  kuaNumber?: number;
+}
+
+export interface ReportRunRecord {
+  id: string;
+  userId: string;
+  profileId?: string;
+  profileName?: string;
+  dobString?: string;
+  reportType: CanonicalReportType | string;
+  reportKey?: string;
+  language: string;
+  status: string;
+  metadata?: any;
+  generatedAt: string;
+}
+
 export interface UserSession {
   userId: string;
   supabaseUserId?: string;
   email?: string;
   emailVerified?: boolean;
+  phone?: string;
+  phoneVerified?: boolean;
+  fullName?: string;
+  avatarUrl?: string;
+  authProvider?: string;
   mobile: string;
   mobileVerified: boolean;
   token: string;

@@ -129,14 +129,14 @@ export async function ensureDatabaseSchema(): Promise<void> {
 
   schemaInitPromise = (async () => {
     try {
-      // 1. Users table & indexes
+      // 1. Users & Profiles table & indexes
       await query(`
         CREATE TABLE IF NOT EXISTS users (
           id VARCHAR(64) PRIMARY KEY,
           supabase_user_id VARCHAR(64),
           email VARCHAR(255),
           email_verified BOOLEAN NOT NULL DEFAULT FALSE,
-          mobile VARCHAR(15),
+          mobile VARCHAR(20),
           mobile_verified BOOLEAN NOT NULL DEFAULT FALSE,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -144,12 +144,101 @@ export async function ensureDatabaseSchema(): Promise<void> {
         ALTER TABLE users ADD COLUMN IF NOT EXISTS supabase_user_id VARCHAR(64);
         ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255);
         ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile VARCHAR(20);
         ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile_verified BOOLEAN NOT NULL DEFAULT FALSE;
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
         CREATE INDEX IF NOT EXISTS idx_users_mobile ON users(mobile);
         CREATE UNIQUE INDEX IF NOT EXISTS idx_users_mobile_unique ON users(mobile) WHERE mobile IS NOT NULL AND mobile != '';
         CREATE UNIQUE INDEX IF NOT EXISTS idx_users_supabase_id_unique ON users(supabase_user_id) WHERE supabase_user_id IS NOT NULL;
+
+        CREATE TABLE IF NOT EXISTS profiles (
+          id VARCHAR(64) PRIMARY KEY,
+          user_id VARCHAR(64) NOT NULL,
+          email TEXT,
+          phone TEXT,
+          full_name TEXT,
+          first_name TEXT,
+          last_name TEXT,
+          avatar_url TEXT,
+          preferred_language TEXT DEFAULT 'hi',
+          country_code TEXT DEFAULT 'IN',
+          auth_provider TEXT,
+          email_verified BOOLEAN DEFAULT FALSE,
+          phone_verified BOOLEAN DEFAULT FALSE,
+          last_login_at TIMESTAMPTZ DEFAULT NOW(),
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS user_id VARCHAR(64);
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email TEXT;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS first_name TEXT;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_name TEXT;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS preferred_language TEXT DEFAULT 'hi';
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS country_code TEXT DEFAULT 'IN';
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS auth_provider TEXT;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT FALSE;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ DEFAULT NOW();
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_user_id_unique ON profiles(user_id);
+        CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles(email);
+        CREATE INDEX IF NOT EXISTS idx_profiles_phone ON profiles(phone);
+
+        CREATE TABLE IF NOT EXISTS numerology_profiles (
+          id VARCHAR(64) PRIMARY KEY,
+          user_id VARCHAR(64) NOT NULL,
+          full_name TEXT,
+          date_of_birth DATE,
+          dob_string VARCHAR(32),
+          mobile_number TEXT,
+          email TEXT,
+          gender TEXT,
+          language TEXT DEFAULT 'hi',
+          birth_day INTEGER,
+          birth_month INTEGER,
+          birth_year INTEGER,
+          mulank INTEGER,
+          bhagyank INTEGER,
+          kua_number INTEGER,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        ALTER TABLE numerology_profiles ADD COLUMN IF NOT EXISTS dob_string VARCHAR(32);
+        ALTER TABLE numerology_profiles ADD COLUMN IF NOT EXISTS kua_number INTEGER;
+        CREATE INDEX IF NOT EXISTS idx_num_profiles_user ON numerology_profiles(user_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_num_profiles_user_unique ON numerology_profiles(user_id);
+
+        CREATE TABLE IF NOT EXISTS report_runs (
+          id VARCHAR(64) PRIMARY KEY,
+          user_id VARCHAR(64) NOT NULL,
+          profile_id VARCHAR(64),
+          profile_name TEXT,
+          dob_string VARCHAR(32),
+          report_type VARCHAR(64) NOT NULL,
+          report_key VARCHAR(128),
+          language VARCHAR(16) DEFAULT 'hi',
+          status VARCHAR(32) DEFAULT 'generated',
+          metadata JSONB DEFAULT '{}'::jsonb,
+          generated_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_report_runs_user ON report_runs(user_id);
+        CREATE INDEX IF NOT EXISTS idx_report_runs_type ON report_runs(report_type);
+        CREATE INDEX IF NOT EXISTS idx_report_runs_generated_at ON report_runs(generated_at);
+
+        CREATE TABLE IF NOT EXISTS user_activity (
+          id VARCHAR(64) PRIMARY KEY,
+          user_id VARCHAR(64) NOT NULL,
+          event_type VARCHAR(64) NOT NULL,
+          page VARCHAR(128),
+          report_type VARCHAR(64),
+          metadata JSONB DEFAULT '{}'::jsonb,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_user_activity_user ON user_activity(user_id);
+        CREATE INDEX IF NOT EXISTS idx_user_activity_created_at ON user_activity(created_at);
       `);
 
       // 2. Free claims table

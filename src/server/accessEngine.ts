@@ -325,25 +325,73 @@ class ReportAccessEngine {
     }
   }
 
-  // 2b. Synchronize Authenticated Supabase Session & Ensure User Record Exists
+  // 2b. Synchronize Authenticated Supabase Session & Ensure User + Profile Record Exists
   public async syncSession(
     authHeader?: string | null,
-    optionalEmail?: string
-  ): Promise<{ success: boolean; user: any }> {
+    optionalProfile?: any
+  ): Promise<{ success: boolean; user: any; profile: any }> {
     await this.ensureDb();
-    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
-    if (!authUser) {
+    const supabaseUser = await verifySupabaseToken(authHeader);
+    if (!supabaseUser || !supabaseUser.supabaseUserId) {
       throw new Error("UNAUTHORIZED: Invalid or expired session token");
     }
 
-    // Check user claim status
+    const userId = supabaseUser.supabaseUserId;
+    const email = supabaseUser.email || optionalProfile?.email || '';
+    const phone = supabaseUser.phone || optionalProfile?.phone || '';
+    const fullName = supabaseUser.fullName || optionalProfile?.fullName || '';
+    const firstName = supabaseUser.firstName || optionalProfile?.firstName || '';
+    const lastName = supabaseUser.lastName || optionalProfile?.lastName || '';
+    const avatarUrl = supabaseUser.avatarUrl || optionalProfile?.avatarUrl || '';
+    const authProvider = supabaseUser.authProvider || (phone ? 'whatsapp' : 'google');
+    const emailVerified = supabaseUser.emailVerified;
+    const phoneVerified = supabaseUser.phoneVerified;
+    const lang = optionalProfile?.language || 'hi';
+
+    let userProfile: any = null;
+
+    if (isDatabaseConfigured()) {
+      // 1. Upsert users table
+      await query(
+        `INSERT INTO users (id, supabase_user_id, email, email_verified, mobile, mobile_verified, created_at, updated_at)
+         VALUES ($1, $1, $2, $3, $4, $5, NOW(), NOW())
+         ON CONFLICT (supabase_user_id) WHERE supabase_user_id IS NOT NULL
+         DO UPDATE SET email = EXCLUDED.email, email_verified = EXCLUDED.email_verified, mobile = COALESCE(EXCLUDED.mobile, users.mobile), mobile_verified = COALESCE(EXCLUDED.mobile_verified, users.mobile_verified), updated_at = NOW()`,
+        [userId, email, emailVerified, phone, phoneVerified]
+      );
+
+      // 2. Upsert profiles table
+      const profRes = await query(
+        `INSERT INTO profiles (id, user_id, email, phone, full_name, first_name, last_name, avatar_url, preferred_language, auth_provider, email_verified, phone_verified, last_login_at, created_at, updated_at)
+         VALUES ($1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW(), NOW())
+         ON CONFLICT (user_id)
+         DO UPDATE SET
+           email = COALESCE(EXCLUDED.email, profiles.email),
+           phone = COALESCE(EXCLUDED.phone, profiles.phone),
+           full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
+           avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url),
+           auth_provider = COALESCE(EXCLUDED.auth_provider, profiles.auth_provider),
+           email_verified = EXCLUDED.email_verified OR profiles.email_verified,
+           phone_verified = EXCLUDED.phone_verified OR profiles.phone_verified,
+           last_login_at = NOW(),
+           updated_at = NOW()
+         RETURNING *`,
+        [userId, email, phone, fullName, firstName, lastName, avatarUrl, lang, authProvider, emailVerified, phoneVerified]
+      );
+      userProfile = profRes.rows[0];
+
+      // 3. Log user activity
+      await this.logUserActivity(authHeader, 'login', { provider: authProvider });
+    }
+
+    // Check free claims status
     let hasClaimedFreeReport = false;
     let freeReportDetails: any = undefined;
 
     if (isDatabaseConfigured()) {
       const claimRes = await query(
-        `SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3`,
-        [authUser.id, authUser.supabaseUserId, authUser.email]
+        `SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $1`,
+        [userId]
       );
       if (claimRes.rows.length > 0) {
         hasClaimedFreeReport = true;
@@ -353,30 +401,197 @@ class ReportAccessEngine {
           profileKey: claimRes.rows[0].profile_key,
         };
       }
-    } else {
-      const fc = this.localSandbox.freeClaims.get(authUser.email);
-      if (fc) {
-        hasClaimedFreeReport = true;
-        freeReportDetails = {
-          reportType: fc.reportType,
-          claimedAt: fc.claimedAt,
-          profileKey: fc.profileKey,
-        };
-      }
     }
 
     return {
       success: true,
       user: {
-        id: authUser.id,
-        supabaseUserId: authUser.supabaseUserId,
-        email: authUser.email,
-        emailVerified: authUser.emailVerified,
-        mobile: authUser.mobile || '',
+        id: userId,
+        supabaseUserId: userId,
+        email,
+        phone,
+        fullName,
+        avatarUrl,
+        authProvider,
+        emailVerified,
+        phoneVerified,
         hasClaimedFreeReport,
         freeReportDetails
+      },
+      profile: userProfile || {
+        userId,
+        email,
+        phone,
+        fullName,
+        avatarUrl,
+        authProvider,
+        emailVerified,
+        phoneVerified,
+        preferredLanguage: lang,
       }
     };
+  }
+
+  // 2c. Save/Update Numerology Profile
+  public async saveNumerologyProfile(
+    authHeader: string | null | undefined,
+    profileData: {
+      fullName: string;
+      dateOfBirth: string;
+      mobileNumber?: string;
+      email?: string;
+      gender?: string;
+      language?: string;
+      mulank?: number;
+      bhagyank?: number;
+      kuaNumber?: number;
+    }
+  ): Promise<{ success: boolean; profile: any }> {
+    await this.ensureDb();
+    const supabaseUser = await verifySupabaseToken(authHeader);
+    if (!supabaseUser || !supabaseUser.supabaseUserId) {
+      throw new Error("UNAUTHORIZED: Login required to save numerology profile.");
+    }
+
+    const userId = supabaseUser.supabaseUserId;
+    const {
+      fullName,
+      dateOfBirth,
+      mobileNumber,
+      email,
+      gender,
+      language = 'hi',
+      mulank,
+      bhagyank,
+      kuaNumber
+    } = profileData;
+
+    let dobDate: string | null = null;
+    if (dateOfBirth) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
+        dobDate = dateOfBirth;
+      } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateOfBirth)) {
+        const [d, m, y] = dateOfBirth.split('/');
+        dobDate = `${y}-${m}-${d}`;
+      }
+    }
+
+    let bDay = 0, bMonth = 0, bYear = 0;
+    if (dobDate) {
+      const parts = dobDate.split('-');
+      bYear = parseInt(parts[0], 10) || 0;
+      bMonth = parseInt(parts[1], 10) || 0;
+      bDay = parseInt(parts[2], 10) || 0;
+    }
+
+    if (isDatabaseConfigured()) {
+      const profileId = `np_${crypto.randomBytes(8).toString('hex')}`;
+      const res = await query(
+        `INSERT INTO numerology_profiles (id, user_id, full_name, date_of_birth, dob_string, mobile_number, email, gender, language, birth_day, birth_month, birth_year, mulank, bhagyank, kua_number, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+         ON CONFLICT (user_id)
+         DO UPDATE SET
+           full_name = EXCLUDED.full_name,
+           date_of_birth = EXCLUDED.date_of_birth,
+           dob_string = EXCLUDED.dob_string,
+           mobile_number = EXCLUDED.mobile_number,
+           email = EXCLUDED.email,
+           gender = EXCLUDED.gender,
+           language = EXCLUDED.language,
+           birth_day = EXCLUDED.birth_day,
+           birth_month = EXCLUDED.birth_month,
+           birth_year = EXCLUDED.birth_year,
+           mulank = EXCLUDED.mulank,
+           bhagyank = EXCLUDED.bhagyank,
+           kua_number = EXCLUDED.kua_number,
+           updated_at = NOW()
+         RETURNING *`,
+        [profileId, userId, fullName, dobDate, dateOfBirth, mobileNumber, email, gender, language, bDay, bMonth, bYear, mulank, bhagyank, kuaNumber]
+      );
+
+      await this.logUserActivity(authHeader, 'profile_updated', { fullName, dateOfBirth });
+
+      return { success: true, profile: res.rows[0] };
+    }
+
+    return { success: true, profile: { userId, fullName, dateOfBirth, mobileNumber, email, gender } };
+  }
+
+  // 2d. Get Current User's Saved Numerology Profile
+  public async getNumerologyProfile(authHeader?: string | null): Promise<{ success: boolean; profile: any | null }> {
+    await this.ensureDb();
+    const supabaseUser = await verifySupabaseToken(authHeader);
+    if (!supabaseUser || !supabaseUser.supabaseUserId) {
+      return { success: true, profile: null };
+    }
+
+    if (isDatabaseConfigured()) {
+      const res = await query(`SELECT * FROM numerology_profiles WHERE user_id = $1`, [supabaseUser.supabaseUserId]);
+      return { success: true, profile: res.rows[0] || null };
+    }
+
+    return { success: true, profile: null };
+  }
+
+  // 2e. Record Report Run in report_runs table
+  public async recordReportRun(
+    authHeader: string | null | undefined,
+    reportData: {
+      reportType: string;
+      profileName?: string;
+      dobString?: string;
+      reportKey?: string;
+      language?: string;
+      metadata?: any;
+    }
+  ): Promise<{ success: boolean; reportRunId: string }> {
+    await this.ensureDb();
+    const supabaseUser = await verifySupabaseToken(authHeader);
+    if (!supabaseUser || !supabaseUser.supabaseUserId) {
+      return { success: false, reportRunId: '' };
+    }
+
+    const userId = supabaseUser.supabaseUserId;
+    const runId = `run_${crypto.randomBytes(8).toString('hex')}`;
+    const lang = reportData.language || 'hi';
+
+    if (isDatabaseConfigured()) {
+      await query(
+        `INSERT INTO report_runs (id, user_id, profile_name, dob_string, report_type, report_key, language, status, metadata, generated_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'generated', $8, NOW(), NOW())`,
+        [runId, userId, reportData.profileName || '', reportData.dobString || '', reportData.reportType, reportData.reportKey || '', lang, JSON.stringify(reportData.metadata || {})]
+      );
+
+      await this.logUserActivity(authHeader, 'report_generated', {
+        reportType: reportData.reportType,
+        profileName: reportData.profileName
+      });
+    }
+
+    return { success: true, reportRunId: runId };
+  }
+
+  // 2f. Log User Activity
+  public async logUserActivity(
+    authHeader: string | null | undefined,
+    eventType: string,
+    metadata: any = {}
+  ): Promise<void> {
+    try {
+      if (!isDatabaseConfigured()) return;
+      const supabaseUser = await verifySupabaseToken(authHeader);
+      if (!supabaseUser || !supabaseUser.supabaseUserId) return;
+
+      const actId = `act_${crypto.randomBytes(8).toString('hex')}`;
+      await query(
+        `INSERT INTO user_activity (id, user_id, event_type, report_type, metadata, created_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [actId, supabaseUser.supabaseUserId, eventType, metadata?.reportType || null, JSON.stringify(metadata || {})]
+      );
+    } catch (e) {
+      // Non-blocking telemetry
+      console.warn('[ActivityLogger] Notice:', e);
+    }
   }
 
   // 3. Central Report Access Check
@@ -403,8 +618,8 @@ class ReportAccessEngine {
       };
     }
 
-    // Mobile Numerology is ALWAYS PERMANENTLY FREE
-    if (reportType === 'MOBILE_NUMEROLOGY') {
+    // Public / No-Login Reports: Mobile Numerology and Lo Shu Grid
+    if (reportType === 'MOBILE_NUMEROLOGY' || reportType === 'LOSHU') {
       return {
         allowed: true,
         requiresPayment: false,

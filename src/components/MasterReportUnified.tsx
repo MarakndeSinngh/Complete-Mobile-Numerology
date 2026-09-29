@@ -43,6 +43,7 @@ import html2canvas from 'html2canvas';
 import { BrandLogo } from './BrandLogo';
 import { useReportAccess } from '../hooks/useReportAccess';
 import { ReportPaywallModal } from './ReportPaywallModal';
+import { ReportAccessGate } from './ReportAccessGate';
 import { Lock, Unlock, Gift } from 'lucide-react';
 
 interface MasterReportUnifiedProps {
@@ -350,8 +351,21 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     }
   };
 
+  const profileKey = getProfileIsolationKey({
+    name: personalDetails?.name || profile?.identity?.fullName || '',
+    dob: personalDetails?.dob || profile?.identity?.dob || '',
+    mobile: personalDetails?.mobile || profile?.identity?.mobile || ''
+  });
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 text-left">
+    <ReportAccessGate
+      reportType="MASTER_REPORT"
+      profileKey={profileKey}
+      profileName={identity.fullName}
+      mobile={identity.mobile}
+      title={language === 'hi' ? '32-अध्याय महा-परामर्श संपूर्ण रिपोर्ट' : '32-Section Master Consultation Dossier'}
+    >
+      <div className="space-y-8 animate-in fade-in duration-500 text-left">
       {/* Top Banner with Action Controls */}
       <div className="bg-white border border-[#E5E7EB] rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
         <div>
@@ -2741,6 +2755,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         </div>
       </div>
     </div>
+    </ReportAccessGate>
   );
 };
 

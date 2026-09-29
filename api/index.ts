@@ -1,5 +1,6 @@
 import express from "express";
-import { reportAccessEngine } from "../src/server/accessEngine";
+import { reportAccessEngine, isPublicReport } from "../src/server/accessEngine";
+import { verifySupabaseToken, requireAuthenticatedUser } from "../src/server/supabaseServer";
 import { CanonicalReportType } from "../src/types/reportAccess";
 import { generateMedicalNumerologyReport } from "../src/services/medicalNumerologyEngine";
 import { generateNumeroVaastuReport } from "../src/services/numeroVaastuEngine";
@@ -55,70 +56,53 @@ const getGeminiClient = () => {
 // Create router to mount on both "/api" and "/" for transparent Vercel URL rewrite compatibility
 const router = express.Router();
 
-// 1. Send Email OTP using Supabase Auth
-router.post("/auth/send-email-otp", async (req, res) => {
+// 1. Synchronize / Update Authenticated Supabase User Profile
+router.post("/user/profile", async (req, res) => {
   try {
-    const { email } = req.body || {};
-    const result = await reportAccessEngine.sendEmailOtp(email);
-    res.json(result);
+    const user = await requireAuthenticatedUser(req);
+    const { preferredLanguage, fullName, dob, mobile, gender, mulank, bhagyank } = req.body || {};
+
+    await reportAccessEngine.syncProfileRecord(user, {
+      preferredLanguage,
+      fullName,
+    });
+
+    let numerologyProfile = null;
+    if (dob && (fullName || user.fullName)) {
+      numerologyProfile = await reportAccessEngine.saveNumerologyProfile(user.supabaseUserId, {
+        fullName: fullName || user.fullName || 'Seeker',
+        dob,
+        mobile: mobile || user.phone,
+        email: user.email,
+        gender: gender || 'MALE',
+        language: preferredLanguage || 'hi',
+        mulank,
+        bhagyank,
+      });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: user.supabaseUserId,
+        email: user.email,
+        phone: user.phone,
+        fullName: user.fullName,
+        authProvider: user.authProvider,
+      },
+      numerologyProfile,
+    });
   } catch (e: any) {
-    res.status(400).json({ success: false, error: e?.message || "Failed to send email OTP" });
+    const isAuth = e?.message?.includes("UNAUTHORIZED");
+    res.status(isAuth ? 401 : 500).json({ success: false, error: e?.message || "Failed to sync profile" });
   }
 });
 
-// 2. Verify Email OTP using Supabase Auth
-router.post("/auth/verify-email-otp", async (req, res) => {
-  try {
-    const { email, token } = req.body || {};
-    const authHeader = req.headers["authorization"] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
-    const result = await reportAccessEngine.verifyEmailOtp(email, token, authHeader);
-    res.json(result);
-  } catch (e: any) {
-    res.status(400).json({ success: false, error: e?.message || "Failed to verify email OTP" });
-  }
-});
-
-// 2b. Synchronize Authenticated Supabase Session
-router.post("/auth/sync-session", async (req, res) => {
-  try {
-    const { email } = req.body || {};
-    const authHeader = req.headers["authorization"] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
-    const result = await reportAccessEngine.syncSession(authHeader, email);
-    res.json(result);
-  } catch (e: any) {
-    res.status(401).json({ success: false, error: e?.message || "Unauthorized session" });
-  }
-});
-
-// Deprecated legacy routes (Mapped to email or safe notice)
-router.post("/auth/request-otp", async (req, res) => {
-  try {
-    const { email, mobile } = req.body || {};
-    const target = email || (mobile ? `${mobile}@leofamily.local` : "");
-    const result = await reportAccessEngine.sendEmailOtp(target);
-    res.json(result);
-  } catch (e: any) {
-    res.status(400).json({ success: false, error: e?.message || "Failed to request OTP" });
-  }
-});
-
-router.post("/auth/verify-otp", async (req, res) => {
-  try {
-    const { email, mobile, otp } = req.body || {};
-    const target = email || (mobile ? `${mobile}@leofamily.local` : "");
-    const result = await reportAccessEngine.verifyEmailOtp(target, otp);
-    res.json(result);
-  } catch (e: any) {
-    res.status(400).json({ success: false, error: e?.message || "Failed to verify OTP" });
-  }
-});
-
-// 3. Central Report Access Check
+// 2. Central Report Access Check
 router.get("/reports/check-access", async (req, res) => {
   try {
     const reportType = req.query.reportType as CanonicalReportType;
     const profileKey = (req.query.profileKey as string) || "default_profile";
-    const email = req.query.email as string | undefined;
     const authHeader = req.headers["authorization"];
 
     if (!reportType) {
@@ -129,26 +113,22 @@ router.get("/reports/check-access", async (req, res) => {
       });
     }
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log(`[API:CheckAccess] Checking access for ${reportType} (profile: ${profileKey})`);
-    }
-
-    const result = await reportAccessEngine.checkReportAccess(reportType, profileKey, authHeader, email);
+    const result = await reportAccessEngine.checkReportAccess(reportType, profileKey, authHeader);
     res.json(result);
   } catch (e: any) {
     console.error("[API:CheckAccess:Error]", e?.message || e);
-    const isDbErr = e?.message?.includes("DATABASE") || e?.message?.includes("connection") || e?.message?.includes("Pool");
+    const isDbErr = e?.message?.includes("DATABASE") || e?.message?.includes("connection");
     res.status(isDbErr ? 503 : 500).json({
       success: false,
       error: isDbErr
-        ? "Database connection is temporarily unavailable. Please retry in a few moments."
+        ? "Database connection is temporarily unavailable."
         : (e?.message || "Failed to check report access"),
       code: isDbErr ? "DATABASE_UNAVAILABLE" : "ACCESS_CHECK_FAILED",
     });
   }
 });
 
-// 4. Claim First Free Report
+// 3. Claim First Free Report
 router.all("/reports/claim-free", (req, res, next) => {
   if (req.method !== "POST" && req.method !== "OPTIONS") {
     return res.status(405).json({
@@ -162,7 +142,7 @@ router.all("/reports/claim-free", (req, res, next) => {
 
 router.post("/reports/claim-free", async (req, res) => {
   try {
-    const { reportType, profileKey, email } = req.body || {};
+    const { reportType, profileKey } = req.body || {};
     const authHeader = req.headers["authorization"];
 
     if (!reportType) {
@@ -173,20 +153,16 @@ router.post("/reports/claim-free", async (req, res) => {
       });
     }
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log(`[API:ClaimFree] Attempting free claim for ${reportType} (profile: ${profileKey})`);
-    }
-
-    const result = await reportAccessEngine.claimFreeReport(reportType, profileKey, authHeader, email);
+    const result = await reportAccessEngine.claimFreeReport(reportType, profileKey, authHeader);
     res.json(result);
   } catch (e: any) {
     console.error("[API:ClaimFree:Error]", e?.message || e);
     const msg = e?.message || "Failed to claim free report";
-    const isAuth = msg.includes("UNAUTHORIZED") || msg.includes("session");
+    const isAuth = msg.includes("UNAUTHORIZED") || msg.includes("login");
     const isDbErr = msg.includes("DATABASE") || msg.includes("connection");
-    const isAlready = msg.includes("पहले ही") || msg.includes("already");
+    const isAlready = msg.includes("ALREADY_CLAIMED") || msg.includes("already");
 
-    const status = isAuth ? 401 : isDbErr ? 503 : 400;
+    const status = isAuth ? 401 : isDbErr ? 503 : isAlready ? 400 : 400;
     res.status(status).json({
       success: false,
       error: msg,
@@ -195,10 +171,10 @@ router.post("/reports/claim-free", async (req, res) => {
   }
 });
 
-// 5. Create ₹33 Razorpay Payment Order
+// 4. Create ₹33 Razorpay Payment Order
 router.post("/payments/create-order", async (req, res) => {
   try {
-    const { reportType, profileKey, email } = req.body || {};
+    const { reportType, profileKey } = req.body || {};
     const authHeader = req.headers["authorization"];
 
     if (!reportType) {
@@ -209,12 +185,12 @@ router.post("/payments/create-order", async (req, res) => {
       });
     }
 
-    const result = await reportAccessEngine.createPaymentOrder(reportType, profileKey, authHeader, email);
+    const result = await reportAccessEngine.createPaymentOrder(reportType, profileKey, authHeader);
     res.json(result);
   } catch (e: any) {
     console.error("[API:CreateOrder:Error]", e?.message || e);
     const msg = e?.message || "Failed to create payment order";
-    const isAuth = msg.includes("UNAUTHORIZED") || msg.includes("verify email");
+    const isAuth = msg.includes("UNAUTHORIZED") || msg.includes("login");
     res.status(isAuth ? 401 : 400).json({
       success: false,
       error: msg,
@@ -223,10 +199,10 @@ router.post("/payments/create-order", async (req, res) => {
   }
 });
 
-// 6. Verify Razorpay Payment Signature & Grant Entitlement
+// 5. Verify Razorpay Payment Signature & Grant Entitlement
 router.post("/payments/verify-payment", async (req, res) => {
   try {
-    const { orderId, paymentId, signature, reportType, profileKey, email } = req.body || {};
+    const { orderId, paymentId, signature, reportType, profileKey } = req.body || {};
     const authHeader = req.headers["authorization"];
 
     if (!orderId || !reportType) {
@@ -243,13 +219,13 @@ router.post("/payments/verify-payment", async (req, res) => {
       signature || "",
       reportType,
       profileKey,
-      authHeader,
-      email
+      authHeader
     );
     res.json(result);
   } catch (e: any) {
     console.error("[API:VerifyPayment:Error]", e?.message || e);
-    res.status(400).json({
+    const isAuth = e?.message?.includes("UNAUTHORIZED");
+    res.status(isAuth ? 401 : 400).json({
       success: false,
       error: e?.message || "Failed to verify payment",
       code: "PAYMENT_VERIFICATION_FAILED",
@@ -257,7 +233,7 @@ router.post("/payments/verify-payment", async (req, res) => {
   }
 });
 
-// 7. Razorpay Webhook Endpoint
+// 6. Razorpay Webhook Endpoint
 router.post("/payments/webhook", async (req, res) => {
   try {
     const signature = (req.headers["x-razorpay-signature"] as string) || "";
@@ -269,16 +245,48 @@ router.post("/payments/webhook", async (req, res) => {
   }
 });
 
+// 7. Save Generated Report Run (Requires Authentication for protected reports)
+router.post("/reports/save-run", async (req, res) => {
+  try {
+    const user = await requireAuthenticatedUser(req);
+    const { reportType, reportKey, reportData, profileName, dob, mobile, language, accessType, amount, paymentId } = req.body || {};
+
+    if (!reportType || !reportData) {
+      return res.status(400).json({ success: false, error: "Missing reportType or reportData" });
+    }
+
+    const runId = await reportAccessEngine.saveReportRun(
+      user.supabaseUserId,
+      reportType,
+      reportKey || `${reportType}_${Date.now()}`,
+      reportData,
+      {
+        profileName,
+        dob,
+        mobile,
+        language,
+        accessType,
+        amount,
+        paymentId,
+      }
+    );
+
+    res.json({ success: true, runId });
+  } catch (e: any) {
+    const isAuth = e?.message?.includes("UNAUTHORIZED");
+    res.status(isAuth ? 401 : 500).json({ success: false, error: e?.message || "Failed to save report run" });
+  }
+});
+
 // 8. Retrieve All Reports for Authenticated Customer
 router.get("/reports/my-reports", async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
-    const email = req.query.email as string | undefined;
-
-    const data = await reportAccessEngine.getUserReports(authHeader, email);
+    const data = await reportAccessEngine.getUserReports(authHeader);
     res.json(data);
   } catch (e: any) {
-    res.status(500).json({ success: false, error: e?.message || "Failed to fetch user reports" });
+    const isAuth = e?.message?.includes("UNAUTHORIZED");
+    res.status(isAuth ? 401 : 500).json({ success: false, error: e?.message || "Failed to fetch user reports" });
   }
 });
 
@@ -286,98 +294,26 @@ router.get("/reports/my-reports", async (req, res) => {
 router.get("/payments/history", async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
-    const email = req.query.email as string | undefined;
-
-    const data = await reportAccessEngine.getUserPaymentHistory(authHeader, email);
+    const data = await reportAccessEngine.getUserPaymentHistory(authHeader);
     res.json(data);
   } catch (e: any) {
-    res.status(500).json({ success: false, error: e?.message || "Failed to fetch payment history" });
+    const isAuth = e?.message?.includes("UNAUTHORIZED");
+    res.status(isAuth ? 401 : 500).json({ success: false, error: e?.message || "Failed to fetch payment history" });
   }
 });
 
-// 10. Retrieve Access & Entitlement Summary
-router.get("/reports/access-summary", async (req, res) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const email = req.query.email as string | undefined;
-
-    const data = await reportAccessEngine.getUserAccessSummary(authHeader, email);
-    res.json(data);
-  } catch (e: any) {
-    res.status(500).json({ success: false, error: e?.message || "Failed to fetch access summary" });
-  }
-});
-
-// 11. Retrieve Single Report with Server Ownership Check
+// 10. Retrieve Single Report with Server Ownership Check
 router.get("/reports/:reportId", async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
-    const email = req.query.email as string | undefined;
     const { reportId } = req.params;
 
-    const data = await reportAccessEngine.getReportById(reportId, authHeader, email);
+    const data = await reportAccessEngine.getReportById(reportId, authHeader);
     res.json(data);
   } catch (e: any) {
-    res.status(403).json({ success: false, error: e?.message || "Failed to access report" });
+    const isAuth = e?.message?.includes("UNAUTHORIZED");
+    res.status(isAuth ? 401 : 403).json({ success: false, error: e?.message || "Failed to access report" });
   }
-});
-
-// 12. Admin Entitlements & Revenue Audit
-router.get("/admin/entitlements", async (req, res) => {
-  try {
-    const data = await reportAccessEngine.getAdminAuditData();
-    res.json(data);
-  } catch (e: any) {
-    res.status(500).json({ success: false, error: e?.message || "Failed to fetch admin audit data" });
-  }
-});
-
-// 13. OTP and Gateway Environment Diagnostics (Restricted in production)
-router.get("/otp-debug", (req, res) => {
-  res.setHeader("Cache-Control", "no-store, max-age=0");
-  const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL;
-  const allowDebug = !isProduction || process.env.ENABLE_OTP_DEBUG === "true" || req.query.adminKey === process.env.ADMIN_SECRET_KEY;
-
-  if (!allowDebug) {
-    return res.status(403).json({
-      success: false,
-      error: "FORBIDDEN",
-      message: "Diagnostic debug endpoint is restricted in production mode.",
-    });
-  }
-
-  const audit = reportAccessEngine ? (reportAccessEngine as any).getSafeConfigAudit?.() : {};
-
-  res.json({
-    success: true,
-    timestamp: new Date().toISOString(),
-    runtime: {
-      isServerless: !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION || process.env.NODE_ENV === "production"),
-      nodeVersion: process.version,
-      platform: process.platform,
-      environment: process.env.NODE_ENV || "development",
-    },
-    fast2smsConfig: {
-      OTP_MODE: process.env.OTP_MODE || (isProduction ? "live" : "test"),
-      FAST2SMS_API_KEY_PRESENT: !!process.env.FAST2SMS_API_KEY,
-      FAST2SMS_OTP_ID_PRESENT: !!process.env.FAST2SMS_OTP_ID,
-      FAST2SMS_API_URL_PRESENT: !!process.env.FAST2SMS_API_URL,
-      FAST2SMS_VERIFY_URL_PRESENT: !!process.env.FAST2SMS_VERIFY_URL,
-      FAST2SMS_EFFECTIVE_SEND_ENDPOINT: process.env.FAST2SMS_API_URL || "https://www.fast2sms.com/dev/otp/send",
-      FAST2SMS_EFFECTIVE_VERIFY_ENDPOINT: process.env.FAST2SMS_VERIFY_URL || "https://www.fast2sms.com/dev/otp/verify",
-    },
-    gatewayConfig: {
-      RAZORPAY_KEY_ID_PRESENT: !!process.env.RAZORPAY_KEY_ID,
-      RAZORPAY_KEY_SECRET_PRESENT: !!process.env.RAZORPAY_KEY_SECRET,
-      RAZORPAY_WEBHOOK_SECRET_PRESENT: !!process.env.RAZORPAY_WEBHOOK_SECRET,
-    },
-    databaseConfig: {
-      DATABASE_CONFIGURED: !!(process.env.DATABASE_URL || process.env.SUPABASE_DB_URL),
-    },
-    aiConfig: {
-      GEMINI_API_KEY_PRESENT: !!process.env.GEMINI_API_KEY,
-    },
-  });
 });
 
 // Mount router on both "/api" and "/"
@@ -395,7 +331,7 @@ app.use((req, res) => {
 
 // Central error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Vercel Serverless Error:", err);
+  console.error("Serverless Error:", err);
   res.status(500).json({
     success: false,
     error: "INTERNAL_SERVER_ERROR",

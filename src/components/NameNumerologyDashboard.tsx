@@ -25,6 +25,8 @@ import {
   Zap,
   Globe
 } from 'lucide-react';
+import { ReportAccessGate } from './ReportAccessGate';
+import { getProfileIsolationKey } from '../utils/localeUtils';
 
 interface NameNumerologyDashboardProps {
   nameAnalysis: ComprehensiveNameAnalysis;
@@ -62,8 +64,21 @@ export const NameNumerologyDashboard: React.FC<NameNumerologyDashboardProps> = (
   const chaldean = data.chaldean;
   const pythagorean = data.pythagorean;
 
+  const profileKey = getProfileIsolationKey({
+    name: initialData?.fullName || '',
+    dob: dob || '',
+    mobile: mobile || ''
+  });
+
   return (
-    <div className="space-y-6">
+    <ReportAccessGate
+      reportType="NAME_NUMEROLOGY"
+      profileKey={profileKey}
+      profileName={initialData.fullName}
+      mobile={mobile}
+      title="नाम अंकशास्त्र एवं स्पेलिंग संतुलन (Name Numerology Suite)"
+    >
+      <div className="space-y-6">
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="absolute right-0 top-0 opacity-10 translate-x-8 -translate-y-8 pointer-events-none">
@@ -754,6 +769,7 @@ export const NameNumerologyDashboard: React.FC<NameNumerologyDashboardProps> = (
         </div>
       )}
     </div>
+    </ReportAccessGate>
   );
 };
 

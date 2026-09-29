@@ -34,6 +34,7 @@ import DateInput from './components/DateInput';
 import { formatDateIndian } from './utils/dateUtils';
 import { useLanguage, LanguageSelector } from './i18n';
 import { BrandLogo } from './components/BrandLogo';
+import { ReportAccessService } from './services/reportAccessService';
 
 type ViewTab = 'DASHBOARD' | 'MOBILE' | 'NAME' | 'COMPATIBILITY' | 'REMEDIES' | 'REPORT' | 'ADMIN';
 
@@ -141,6 +142,18 @@ const App: React.FC = () => {
         profilesList.unshift(cleanDetails);
       }
       localStorage.setItem('leo_saved_consultation_profiles', JSON.stringify(profilesList));
+
+      // Progressively save to Supabase Database if authenticated
+      ReportAccessService.saveNumerologyProfile({
+        fullName: finalName,
+        dateOfBirth: finalDob,
+        mobileNumber: finalMobile,
+        email: finalEmail,
+        gender: finalGender,
+        mulank: dobAnalysis?.birthNumber,
+        bhagyank: dobAnalysis?.lifePathNumber,
+        kuaNumber: profile?.kua?.kuaNumber
+      }).catch(() => {});
     } catch (err) {
       console.error("Failed to save profile to localStorage:", err);
     }

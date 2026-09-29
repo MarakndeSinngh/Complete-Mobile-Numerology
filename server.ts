@@ -43,61 +43,60 @@ async function startServer() {
   // PHASE 16: LEOFAMILY REPORT ACCESS CONTROL & ₹33 MONETIZATION ENDPOINTS
   // =========================================================================
 
-  // 1. Send Email OTP using Supabase Auth
-  app.post("/api/auth/send-email-otp", async (req, res) => {
-    try {
-      const { email } = req.body || {};
-      const result = await reportAccessEngine.sendEmailOtp(email);
-      res.json(result);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message || "Failed to send email OTP" });
-    }
-  });
-
-  // 2. Verify Email OTP using Supabase Auth
-  app.post("/api/auth/verify-email-otp", async (req, res) => {
-    try {
-      const { email, token } = req.body || {};
-      const authHeader = req.headers['authorization'] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
-      const result = await reportAccessEngine.verifyEmailOtp(email, token, authHeader);
-      res.json(result);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message || "Failed to verify email OTP" });
-    }
-  });
-
-  // 2b. Synchronize Authenticated Supabase Session
+  // 1. Synchronize Authenticated Supabase Session & Upsert Profile
   app.post("/api/auth/sync-session", async (req, res) => {
     try {
-      const { email } = req.body || {};
       const authHeader = req.headers['authorization'] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
-      const result = await reportAccessEngine.syncSession(authHeader, email);
+      const result = await reportAccessEngine.syncSession(authHeader, req.body);
       res.json(result);
     } catch (e: any) {
       res.status(401).json({ error: e.message || "Unauthorized session" });
     }
   });
 
-  // Deprecated legacy routes
-  app.post("/api/auth/request-otp", async (req, res) => {
+  // 2. Save / Update User Numerology Profile
+  app.post("/api/profiles/save", async (req, res) => {
     try {
-      const { email, mobile } = req.body || {};
-      const target = email || (mobile ? `${mobile}@leofamily.local` : '');
-      const result = await reportAccessEngine.sendEmailOtp(target);
+      const authHeader = req.headers['authorization'];
+      const result = await reportAccessEngine.saveNumerologyProfile(authHeader, req.body);
       res.json(result);
     } catch (e: any) {
-      res.status(400).json({ success: false, error: e?.message || "Failed to request OTP" });
+      const isAuth = e?.message?.includes('UNAUTHORIZED');
+      res.status(isAuth ? 401 : 400).json({ error: e?.message || "Failed to save profile" });
     }
   });
 
-  app.post("/api/auth/verify-otp", async (req, res) => {
+  // 3. Get Current User's Saved Numerology Profile
+  app.get("/api/profiles/current", async (req, res) => {
     try {
-      const { email, mobile, otp } = req.body || {};
-      const target = email || (mobile ? `${mobile}@leofamily.local` : '');
-      const result = await reportAccessEngine.verifyEmailOtp(target, otp);
+      const authHeader = req.headers['authorization'];
+      const result = await reportAccessEngine.getNumerologyProfile(authHeader);
       res.json(result);
     } catch (e: any) {
-      res.status(400).json({ error: e.message || "Failed to verify OTP" });
+      res.status(500).json({ error: e?.message || "Failed to fetch profile" });
+    }
+  });
+
+  // 4. Record Report Run
+  app.post("/api/reports/record-run", async (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const result = await reportAccessEngine.recordReportRun(authHeader, req.body);
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e?.message || "Failed to record report run" });
+    }
+  });
+
+  // 5. Log User Activity
+  app.post("/api/activity/log", async (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const { eventType, metadata } = req.body || {};
+      await reportAccessEngine.logUserActivity(authHeader, eventType, metadata);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.json({ success: false, error: e?.message });
     }
   });
 
@@ -133,7 +132,9 @@ async function startServer() {
       const result = await reportAccessEngine.claimFreeReport(reportType, profileKey, authHeader, email);
       res.json(result);
     } catch (e: any) {
-      res.status(400).json({ error: e.message || "Failed to claim free report" });
+      const msg = e?.message || "Failed to claim free report";
+      const isAuth = msg.includes("UNAUTHORIZED") || msg.includes("session");
+      res.status(isAuth ? 401 : 400).json({ error: msg });
     }
   });
 
@@ -278,14 +279,11 @@ async function startServer() {
         platform: process.platform,
         environment: process.env.NODE_ENV || "development"
       },
-      fast2smsConfig: {
-        OTP_MODE: process.env.OTP_MODE || (isProduction ? "live" : "test"),
-        FAST2SMS_API_KEY_PRESENT: !!process.env.FAST2SMS_API_KEY,
-        FAST2SMS_OTP_ID_PRESENT: !!process.env.FAST2SMS_OTP_ID,
-        FAST2SMS_API_URL_PRESENT: !!process.env.FAST2SMS_API_URL,
-        FAST2SMS_VERIFY_URL_PRESENT: !!process.env.FAST2SMS_VERIFY_URL,
-        FAST2SMS_EFFECTIVE_SEND_ENDPOINT: process.env.FAST2SMS_API_URL || 'https://www.fast2sms.com/dev/otp/send',
-        FAST2SMS_EFFECTIVE_VERIFY_ENDPOINT: process.env.FAST2SMS_VERIFY_URL || 'https://www.fast2sms.com/dev/otp/verify',
+      authConfig: {
+        AUTH_PROVIDER: "SUPABASE_AUTH",
+        SUPABASE_URL_PRESENT: !!(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL),
+        SUPABASE_ANON_KEY_PRESENT: !!(process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY),
+        SUPABASE_SERVICE_ROLE_KEY_PRESENT: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       },
       gatewayConfig: {
         RAZORPAY_KEY_ID_PRESENT: !!process.env.RAZORPAY_KEY_ID,

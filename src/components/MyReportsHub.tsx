@@ -23,6 +23,7 @@ import {
   Layers,
   Award,
   ChevronRight,
+  User,
 } from 'lucide-react';
 import {
   CanonicalReportType,
@@ -38,7 +39,8 @@ import { useLanguage } from '../i18n';
 import { formatLocalizedDate } from '../utils/localeUtils';
 import { BrandLogo } from './BrandLogo';
 import { NavPortalId } from './MasterNavigation';
-import { ReportPaywallModal } from './ReportPaywallModal';
+import { LeoFamilyAuthModal } from './LeoFamilyAuthModal';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 
 export interface MyReportsHubProps {
   onNavigatePortal: (portalId: NavPortalId) => void;
@@ -50,6 +52,7 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
   onOpenProfileModal,
 }) => {
   const { language } = useLanguage();
+  const { user, session, profile, isAuthenticated, signOut } = useSupabaseAuth();
   const i18n: MyReportsI18nEntry = MY_REPORTS_I18N[language] || MY_REPORTS_I18N.hi;
 
   const [activeTab, setActiveTab] = useState<'REPORTS' | 'PAYMENTS' | 'ENTITLEMENTS'>('REPORTS');
@@ -64,10 +67,9 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
 
   // Auth / Login Modal State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const storedUser = ReportAccessService.getStoredUser();
-  const userEmail = storedUser?.email || '';
-  const userMobile = storedUser?.mobile || '';
-  const isVerified = !!(storedUser?.emailVerified || storedUser?.token);
+  const userEmail = profile?.email || user?.email || '';
+  const userMobile = profile?.phone || user?.phone || '';
+  const displayName = profile?.fullName || userEmail || userMobile || 'Account';
 
   // Load user data from server (Authoritative server-side persistence)
   const fetchUserData = async () => {
@@ -99,7 +101,7 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
 
   useEffect(() => {
     fetchUserData();
-  }, [userEmail, userMobile, isVerified]);
+  }, [userEmail, userMobile, isAuthenticated]);
 
   // Map canonical report type to NavPortalId
   const getPortalIdForReport = (reportType: CanonicalReportType): NavPortalId => {
@@ -206,9 +208,9 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
         <div className="bg-white/90 backdrop-blur-xs border border-amber-200 p-4 rounded-2xl shadow-xs space-y-2 min-w-[240px]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase font-bold text-slate-400">Account Identity</span>
-            {isVerified ? (
+            {isAuthenticated ? (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                <CheckCircle2 className="w-3 h-3" /> Verified
+                <CheckCircle2 className="w-3 h-3" /> Signed In
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
@@ -219,13 +221,13 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
           <div className="font-sans text-xs font-bold text-slate-800 truncate max-w-[220px]">
             {userEmail ? userEmail : userMobile ? `+91 ${userMobile}` : 'Guest User'}
           </div>
-          {!isVerified ? (
+          {!isAuthenticated ? (
             <button
               onClick={() => setIsAuthModalOpen(true)}
               className="w-full bg-[#D97706] hover:bg-[#B45309] text-white text-[11px] font-bold py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <Mail className="w-3 h-3" />
-              <span>{i18n.verifyNowBtn}</span>
+              <User className="w-3 h-3" />
+              <span>{language === 'hi' ? 'लॉगिन करें' : 'Sign In Now'}</span>
             </button>
           ) : (
             <button
@@ -687,15 +689,11 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
         </div>
       )}
 
-      {/* Paywall / Verification Modal when guest wants to link mobile */}
-      <ReportPaywallModal
+      {/* LeoFamily Google & WhatsApp Auth Modal */}
+      <LeoFamilyAuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        reportType="MASTER_REPORT"
-        profileKey="auth_sync_profile"
-        profileName={storedUser?.mobile || 'Account'}
-        initialMobile={userMobile}
-        onAccessGranted={() => {
+        onSuccess={() => {
           setIsAuthModalOpen(false);
           fetchUserData();
         }}

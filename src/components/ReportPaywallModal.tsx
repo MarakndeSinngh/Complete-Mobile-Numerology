@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   ShieldCheck,
-  Mail,
   Lock,
   Unlock,
   CheckCircle2,
@@ -14,6 +13,7 @@ import {
   Gift,
   Zap,
   RotateCcw,
+  MessageSquare,
 } from 'lucide-react';
 import {
   CanonicalReportType,
@@ -34,7 +34,6 @@ export interface ReportPaywallModalProps {
   profileKey: string;
   profileName?: string;
   initialMobile?: string;
-  initialEmail?: string;
   onAccessGranted: () => void;
 }
 
@@ -45,7 +44,6 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
   profileKey,
   profileName,
   initialMobile = '',
-  initialEmail = '',
   onAccessGranted,
 }) => {
   const { language } = useLanguage();
@@ -59,33 +57,31 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
     isSendingOtp,
     isVerifyingOtp,
     otpSent,
-    targetEmail,
+    targetPhone,
     cooldownSeconds,
     canResend,
     error: authHookError,
-    sendOtp,
-    verifyOtp,
-    resendOtp,
+    signInWithGoogle,
+    signInWithWhatsApp,
+    verifyWhatsAppOtp,
+    resendWhatsAppOtp,
     clearError: clearAuthError,
     resetOtpFlow,
   } = useSupabaseAuth();
 
-  // Local state for Email input
-  const [emailInput, setEmailInput] = useState<string>(() => {
-    const stored = ReportAccessService.getStoredUser();
-    return stored?.email || initialEmail || '';
-  });
-
+  const [phoneInput, setPhoneInput] = useState<string>(initialMobile || '');
   const [otpInput, setOtpInput] = useState<string>('');
   const [localLoading, setLocalLoading] = useState<boolean>(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [accessResult, setAccessResult] = useState<ReportAccessCheckResult | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'UPI' | 'QR' | 'CARD'>('UPI');
 
-  // Step state: 'OTP_REQUEST' | 'OTP_VERIFY' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'
-  const [step, setStep] = useState<'OTP_REQUEST' | 'OTP_VERIFY' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'>('OTP_REQUEST');
+  // Step state: 'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'
+  const [step, setStep] = useState<'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'>('AUTH_REQUIRED');
 
   const error = localError || authHookError;
+  const isLoading = localLoading || isSendingOtp || isVerifyingOtp || isGoogleLoading;
 
   // Pre-load Razorpay SDK script in background
   useEffect(() => {
@@ -104,576 +100,526 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
         setStep('ACCESS_OPTIONS');
       }
     } catch (e: any) {
-      setLocalError(e.message || 'Failed to check report status');
+      setLocalError(e?.message || 'Failed to check report status');
     } finally {
       setLocalLoading(false);
     }
   }, [reportType, profileKey, initialMobile]);
 
-  // Sync state when modal opens
+  // Sync state when modal opens or authentication changes
   useEffect(() => {
     if (isOpen) {
       setLocalError(null);
       clearAuthError();
 
-      const stored = ReportAccessService.getStoredUser();
-      const hasValidSession = !!(isAuthenticated || stored?.token || stored?.emailVerified);
-
-      if (hasValidSession) {
-        if (stored?.email) {
-          setEmailInput(stored.email);
-        }
+      if (isAuthenticated) {
         setStep('ACCESS_OPTIONS');
         fetchAccessDetails();
       } else {
-        setStep('OTP_REQUEST');
+        setStep('AUTH_REQUIRED');
+        resetOtpFlow();
         setOtpInput('');
       }
     }
-  }, [isOpen, isAuthenticated, reportType, profileKey, fetchAccessDetails, clearAuthError]);
+  }, [isOpen, isAuthenticated, reportType, profileKey, fetchAccessDetails, clearAuthError, resetOtpFlow]);
 
-  // 1. Request OTP Handler
-  const handleRequestOtp = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (isLoading) return;
-    const cleanEmail = emailInput.trim().toLowerCase();
-    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      setLocalError(i18n.invalidEmail);
-      return;
-    }
+  if (!isOpen) return null;
 
+  // 1. Google Sign-In
+  const handleGoogleSignIn = async () => {
     setLocalError(null);
     clearAuthError();
-
-    const res = await sendOtp(cleanEmail);
-    if (res.success) {
-      setStep('OTP_VERIFY');
-      setOtpInput('');
-    } else {
-      setLocalError(res.message || i18n.invalidEmail);
+    setIsGoogleLoading(true);
+    try {
+      const res = await signInWithGoogle();
+      if (!res.success) {
+        setLocalError(res.error || 'Google login failed');
+      }
+    } catch (e: any) {
+      setLocalError(e?.message || 'Google login failed');
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
-  // 2. Verify OTP Handler
-  const handleVerifyOtp = async (e?: React.FormEvent) => {
+  // 2. Send WhatsApp OTP
+  const handleSendWhatsAppOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (isLoading) return;
-    const cleanOtp = otpInput.replace(/[\s-]/g, '').trim();
-    if (!cleanOtp || cleanOtp.length < 4) {
-      setLocalError(i18n.invalidOtp);
-      return;
-    }
-
     setLocalError(null);
     clearAuthError();
 
-    const emailToVerify = targetEmail || emailInput.trim().toLowerCase();
-    const res = await verifyOtp(emailToVerify, cleanOtp);
+    const digits = phoneInput.replace(/\D/g, '');
+    if (!digits || digits.length < 10) {
+      setLocalError(
+        language === 'hi'
+          ? 'कृपया एक मान्य 10-अंकीय मोबाइल नंबर दर्ज करें'
+          : 'Please enter a valid 10-digit mobile number'
+      );
+      return;
+    }
 
+    const res = await signInWithWhatsApp(phoneInput);
+    if (!res.success) {
+      setLocalError(res.error || 'Failed to send WhatsApp code');
+    }
+  };
+
+  // 3. Verify WhatsApp OTP
+  const handleVerifyWhatsAppOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setLocalError(null);
+    clearAuthError();
+
+    const cleanOtp = otpInput.replace(/\D/g, '').trim();
+    if (!cleanOtp || cleanOtp.length < 4) {
+      setLocalError(
+        language === 'hi'
+          ? 'कृपया व्हाट्सएप पर प्राप्त सत्यापन कोड दर्ज करें'
+          : 'Please enter the verification code received on WhatsApp'
+      );
+      return;
+    }
+
+    const res = await verifyWhatsAppOtp(targetPhone || phoneInput, cleanOtp);
     if (res.success) {
       setStep('ACCESS_OPTIONS');
       await fetchAccessDetails();
     } else {
-      setLocalError(res.error || i18n.invalidOtp);
+      setLocalError(res.error || 'Verification failed. Please check the code.');
     }
   };
 
-  // 3. Resend OTP Handler
-  const handleResendOtp = async () => {
-    if (!canResend || isLoading) return;
-    setLocalError(null);
-    clearAuthError();
-    setOtpInput('');
-
-    const res = await resendOtp();
-    if (res.success) {
-      setLocalError(null);
-    } else {
-      setLocalError(res.message);
-    }
-  };
-
-  // 4. Claim Free Report Handler
+  // 4. Claim First Free Report
   const handleClaimFree = async () => {
     setLocalLoading(true);
     setLocalError(null);
     try {
-      await ReportAccessService.claimFreeReport(reportType, profileKey, initialMobile);
-      setStep('SUCCESS');
-      setTimeout(() => {
+      const res = await ReportAccessService.claimFreeReport(reportType, profileKey, phoneInput);
+      if (res.success && res.allowed) {
+        setStep('SUCCESS');
         onAccessGranted();
-      }, 1200);
+      } else {
+        setLocalError('Unable to unlock free report. Please try again.');
+      }
     } catch (e: any) {
-      setLocalError(e.message || 'मुफ़्त रिपोर्ट क्लेम करने में त्रुटि हुई');
+      setLocalError(e?.message || 'Failed to claim free report');
     } finally {
       setLocalLoading(false);
     }
   };
 
-  // 5. Razorpay Payment Handler (₹33)
+  // 5. Razorpay ₹33 Payment Checkout
   const handleInitiatePayment = async () => {
     setLocalLoading(true);
     setLocalError(null);
+
     try {
-      const order = await ReportAccessService.createPaymentOrder(reportType, profileKey, initialMobile);
-      const hasRazorpay = typeof window !== 'undefined' && !!(window as any).Razorpay;
-
-      if (hasRazorpay) {
-        const options: any = {
-          key: order.keyId,
-          amount: order.amountPaise,
-          currency: order.currency || 'INR',
-          name: 'LeoFamily Astro-Numerology',
-          description: `${reportTitle} — Report Unlock`,
-          order_id: order.orderId,
-          prefill: {
-            contact: initialMobile,
-            email: emailInput || appUser?.email || '',
-            name: profileName || 'LeoFamily Client',
-          },
-          theme: {
-            color: '#D97706',
-          },
-          handler: async function (response: any) {
-            try {
-              setLocalLoading(true);
-              setStep('PAYMENT_PROCESSING');
-
-              if (!response.razorpay_payment_id || !response.razorpay_signature) {
-                throw new Error('Payment gateway did not return valid verification credentials.');
-              }
-
-              await ReportAccessService.verifyPayment(
-                response.razorpay_order_id || order.orderId,
-                response.razorpay_payment_id,
-                response.razorpay_signature,
-                reportType,
-                profileKey,
-                initialMobile
-              );
-
-              setStep('SUCCESS');
-              setTimeout(() => {
-                onAccessGranted();
-              }, 1200);
-            } catch (err: any) {
-              setLocalError(err.message || i18n.paymentFailed);
-              setStep('ACCESS_OPTIONS');
-            } finally {
-              setLocalLoading(false);
-            }
-          },
-          modal: {
-            ondismiss: function () {
-              setLocalLoading(false);
-              setStep('ACCESS_OPTIONS');
-              setLocalError(i18n.paymentCancelled);
-            },
-          },
-        };
-
-        const rzp = new (window as any).Razorpay(options);
-        rzp.on('payment.failed', function (response: any) {
-          setLocalLoading(false);
-          setStep('ACCESS_OPTIONS');
-          setLocalError(response?.error?.description || i18n.paymentFailed);
-        });
-        rzp.open();
-      } else {
-        const isProd = typeof window !== 'undefined' && window.location?.hostname !== 'localhost' && window.location?.hostname !== '127.0.0.1';
-        if (isProd) {
-          throw new Error('Payment gateway could not be loaded. Please check your internet connection or disable ad blockers and try again.');
-        }
-
-        // Local development sandbox only
-        setStep('PAYMENT_PROCESSING');
-        const testPaymentId = `pay_sandbox_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-        const testSignature = `sig_sandbox_${Date.now()}`;
-
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-
-        await ReportAccessService.verifyPayment(
-          order.orderId,
-          testPaymentId,
-          testSignature,
-          reportType,
-          profileKey,
-          initialMobile
-        );
-
-        setStep('SUCCESS');
-        setTimeout(() => {
-          onAccessGranted();
-        }, 1200);
+      const isRzpReady = await ReportAccessService.loadRazorpayScript();
+      if (!isRzpReady) {
+        throw new Error("Razorpay payment gateway is not loaded. Please refresh and retry.");
       }
+
+      const orderData = await ReportAccessService.createPaymentOrder(reportType, profileKey, phoneInput);
+
+      if (!orderData?.orderId) {
+        throw new Error("Could not initialize payment order.");
+      }
+
+      setStep('PAYMENT_PROCESSING');
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amountPaise,
+        currency: orderData.currency,
+        name: "LeoFamily Astrological Services",
+        description: `${reportDef.titleEn} (Full Dossier)`,
+        order_id: orderData.orderId,
+        prefill: {
+          contact: phoneInput || appUser?.phone || appUser?.mobile || '',
+          email: appUser?.email || supabaseUser?.email || '',
+        },
+        theme: {
+          color: "#D97706",
+        },
+        modal: {
+          ondismiss: () => {
+            setStep('ACCESS_OPTIONS');
+          },
+        },
+        handler: async (response: any) => {
+          try {
+            setLocalLoading(true);
+            const verifyRes = await ReportAccessService.verifyPayment(
+              response.razorpay_order_id,
+              response.razorpay_payment_id,
+              response.razorpay_signature,
+              reportType,
+              profileKey,
+              phoneInput
+            );
+
+            if (verifyRes.success && verifyRes.accessGranted) {
+              setStep('SUCCESS');
+              onAccessGranted();
+            } else {
+              setStep('ACCESS_OPTIONS');
+              setLocalError("Payment verification failed on server.");
+            }
+          } catch (verErr: any) {
+            setStep('ACCESS_OPTIONS');
+            setLocalError(verErr?.message || "Payment verification failed.");
+          } finally {
+            setLocalLoading(false);
+          }
+        },
+      };
+
+      const rzpInstance = new (window as any).Razorpay(options);
+      rzpInstance.on('payment.failed', (resp: any) => {
+        setStep('ACCESS_OPTIONS');
+        setLocalError(`Payment Failed: ${resp.error?.description || 'Transaction declined'}`);
+      });
+
+      rzpInstance.open();
     } catch (e: any) {
-      setLocalError(e.message || i18n.paymentFailed);
       setStep('ACCESS_OPTIONS');
+      setLocalError(e?.message || 'Failed to start payment');
     } finally {
       setLocalLoading(false);
     }
   };
 
-  if (!isOpen) return null;
-
-  const reportTitle =
-    language === 'hi'
-      ? reportDef.titleHi
-      : language === 'mr'
-      ? reportDef.titleMr
-      : language === 'bn'
-      ? reportDef.titleBn
-      : language === 'gu'
-      ? reportDef.titleGu
-      : reportDef.titleEn;
-
-  const isLoading = isSendingOtp || isVerifyingOtp || localLoading;
-  const verifiedEmail = appUser?.email || supabaseUser?.email || emailInput;
+  const isFreeEligible = accessResult?.canClaimFree ?? true;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#FAF8F5] border-2 border-amber-300 rounded-[32px] shadow-2xl overflow-hidden text-[#1F2937]">
-        {/* Top Gradient Header */}
-        <div className="bg-gradient-to-r from-[#78350F] via-[#92400E] to-[#B45309] text-white p-5 px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BrandLogo size="sm" bordered={false} />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] border-2 border-amber-300/80 rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        
+        {/* Header Ribbon */}
+        <div className="bg-gradient-to-r from-[#78350F] via-[#92400E] to-[#B45309] text-white px-6 py-4 flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2">
+            <BrandLogo size="sm" />
             <div>
-              <span className="text-[10px] font-mono tracking-widest text-amber-200 uppercase font-bold block">
-                LeoFamily Access Guard
-              </span>
-              <h3 className="font-playfair font-bold text-base md:text-lg leading-tight">
-                {reportTitle}
-              </h3>
+              <h2 className="font-playfair text-base font-bold tracking-wide text-amber-100">
+                LeoFamily Report Access
+              </h2>
+              <p className="text-[10px] text-amber-200/80 font-mono">
+                Authoritative Report Entitlement
+              </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-            title="Close"
+            className="p-1.5 rounded-full hover:bg-white/10 text-amber-200 hover:text-white transition-colors cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-5">
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center justify-between text-xs text-red-700 animate-in fade-in">
-              <div className="flex items-center gap-2.5">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-                <span>{error}</span>
+        <div className="p-6 md:p-8 space-y-6 overflow-y-auto">
+          
+          {/* Top Report Info */}
+          <div className="p-4 rounded-2xl bg-white border border-amber-200 shadow-xs flex items-center justify-between">
+            <div>
+              <div className="text-[10px] font-mono uppercase tracking-wider text-amber-700 font-bold">
+                {language === 'hi' ? 'चयनित रिपोर्ट' : 'Selected Report'}
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setLocalError(null);
-                  clearAuthError();
-                }}
-                className="text-red-500 hover:text-red-700 text-xs font-bold px-1.5 cursor-pointer"
-              >
-                ✕
-              </button>
+              <h4 className="font-playfair font-bold text-slate-800 text-sm md:text-base">
+                {language === 'hi' ? reportDef.titleHi : reportDef.titleEn}
+              </h4>
+            </div>
+            <div className="text-right">
+              <div className="text-xs font-bold text-[#D97706] font-playfair text-base">
+                {isFreeEligible ? 'FREE (₹0)' : '₹33 only'}
+              </div>
+            </div>
+          </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-red-500" />
+              <div className="flex-1 leading-relaxed">{error}</div>
             </div>
           )}
 
-          {/* STEP 1: EMAIL ADDRESS INPUT */}
-          {step === 'OTP_REQUEST' && (
-            <form onSubmit={handleRequestOtp} className="space-y-4 text-left">
+          {/* STEP 1: AUTH REQUIRED (Google or WhatsApp) */}
+          {step === 'AUTH_REQUIRED' && (
+            <div className="space-y-5">
               <div className="text-center space-y-1">
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-[#D97706] flex items-center justify-center mx-auto mb-2 shadow-xs">
-                  <Mail className="w-6 h-6" />
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-[#92400E] border border-amber-300 rounded-full font-mono text-[10px] font-bold uppercase tracking-widest">
+                  <Lock className="w-3 h-3 text-[#D97706]" />
+                  {language === 'hi' ? 'लॉगिन आवश्यक' : 'Login Required'}
                 </div>
-                <h4 className="font-playfair font-bold text-lg text-slate-800">
-                  {i18n.verifyEmailTitle}
-                </h4>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  {language === 'hi'
-                    ? 'आपकी प्रथम निःशुल्क रिपोर्ट का लाभ प्राप्त करने हेतु कृपया अपना ईमेल पता सत्यापित करें।'
-                    : 'Verify your email address with a secure passwordless OTP to claim your complimentary specialist report.'}
-                </p>
+                <h3 className="font-playfair text-lg md:text-xl font-bold text-slate-800">
+                  {language === 'hi' ? 'अपनी रिपोर्ट अनलॉक करने के लिए लॉगिन करें' : 'Login to unlock your report'}
+                </h3>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-mono uppercase font-bold text-slate-500">
-                  {i18n.emailAddressLabel}
-                </label>
-                <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-slate-400">
-                    <Mail className="w-4 h-4" />
-                  </span>
-                  <input
-                    type="email"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="user@example.com"
-                    required
-                    autoFocus
-                    className="w-full bg-white border border-slate-300 rounded-2xl pl-10 pr-4 py-3 text-sm font-sans font-medium text-slate-800 focus:outline-none focus:border-[#D97706] focus:ring-1 focus:ring-[#D97706]"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || !emailInput.trim()}
-                className="w-full bg-[#D97706] hover:bg-[#B45309] text-white font-bold py-3.5 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
-                <span>{i18n.getOtpButton}</span>
-              </button>
-
-              <div className="text-[10px] text-center text-slate-400">
-                🔒 {language === 'hi' ? 'मोबाइल अंकशास्त्र हमेशा 100% मुफ़्त है।' : 'Mobile Numerology is permanently 100% Free.'}
-              </div>
-            </form>
-          )}
-
-          {/* STEP 2: EMAIL OTP VERIFICATION */}
-          {step === 'OTP_VERIFY' && (
-            <form onSubmit={handleVerifyOtp} className="space-y-4 text-left">
-              <div className="text-center space-y-1">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 shadow-xs">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <h4 className="font-playfair font-bold text-lg text-slate-800">
-                  {i18n.enterEmailOtpTitle}
-                </h4>
-                <p className="text-xs text-slate-500">
-                  <span className="font-semibold text-slate-700">{targetEmail || emailInput}</span> {i18n.enterOtpSubtitle}
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <input
-                  type="text"
-                  maxLength={16}
-                  value={otpInput}
-                  onChange={(e) => setOtpInput(e.target.value.replace(/[\s-]/g, ''))}
-                  placeholder="------"
-                  autoFocus
-                  required
-                  className="w-full text-center tracking-[0.3em] bg-white border border-slate-300 rounded-2xl py-3 text-lg font-mono font-black text-slate-800 focus:outline-none focus:border-[#D97706]"
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetOtpFlow();
-                    setStep('OTP_REQUEST');
-                  }}
-                  className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl text-xs font-semibold cursor-pointer"
-                >
-                  {i18n.changeEmail}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={!canResend || isLoading}
-                  className="px-4 py-3 bg-amber-50 hover:bg-amber-100 text-[#92400E] border border-amber-200 rounded-2xl text-xs font-semibold cursor-pointer disabled:opacity-50"
-                >
-                  {cooldownSeconds > 0 ? `${i18n.resendOtpButton} (${cooldownSeconds}s)` : i18n.resendOtpButton}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading || otpInput.length < 4}
-                  className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  <span>{i18n.verifyOtpButton}</span>
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* STEP 3: ACCESS OPTIONS (FIRST FREE vs. ₹33 PER-REPORT VIA RAZORPAY) */}
-          {step === 'ACCESS_OPTIONS' && (
-            <div className="space-y-5 text-left">
-              {/* Profile & Verified Email Badge */}
-              <div className="bg-white p-3.5 rounded-2xl border border-slate-200 flex items-center justify-between text-xs">
-                <div>
-                  <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold">Client Profile</span>
-                  <span className="font-bold text-slate-800">{profileName || 'Primary Profile'}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold">Verified Email</span>
-                  <span className="font-mono font-bold text-slate-700">{verifiedEmail}</span>
-                </div>
-              </div>
-
-              {/* CASE A: USER IS ELIGIBLE FOR FIRST FREE REPORT */}
-              {accessResult?.canClaimFree ? (
-                <div className="p-5 bg-gradient-to-br from-emerald-50 via-teal-50/40 to-emerald-50 rounded-3xl border-2 border-emerald-300 shadow-xs space-y-4 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-sm">
-                    <Gift className="w-7 h-7" />
-                  </div>
-                  <div className="space-y-1">
-                    <span className="bg-emerald-200/80 text-emerald-900 font-mono text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                      {i18n.firstReportComplimentary}
-                    </span>
-                    <h4 className="font-playfair font-black text-xl text-emerald-950 mt-1">
-                      {i18n.firstReportFree}
-                    </h4>
-                    <p className="text-xs text-emerald-800 max-w-sm mx-auto">
-                      {language === 'hi'
-                        ? 'लियोफैमिली की ओर से यह विशेष परामर्श रिपोर्ट आपके लिए निःशुल्क अनलॉक की जा रही है।'
-                        : 'LeoFamily is delighted to offer your first comprehensive specialist report as a complimentary gift.'}
-                    </p>
-                  </div>
-
+              {!otpSent ? (
+                <div className="space-y-4">
+                  {/* Google Sign In */}
                   <button
-                    onClick={handleClaimFree}
+                    type="button"
+                    onClick={handleGoogleSignIn}
                     disabled={isLoading}
-                    className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-3.5 px-4 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-amber-400 text-slate-800 font-semibold rounded-2xl text-xs md:text-sm shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60"
                   >
-                    {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Unlock className="w-4 h-4" />}
-                    <span>{i18n.claimFreeReport}</span>
+                    {isGoogleLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin text-amber-600" />
+                    ) : (
+                      <svg className="w-4 h-4" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                      </svg>
+                    )}
+                    <span>{language === 'hi' ? 'Google से जारी रखें (Continue with Google)' : 'Continue with Google'}</span>
                   </button>
-                  <p className="text-[10px] text-emerald-700/80">
-                    * इसके पश्चात आगामी विशेषज्ञ रिपोर्ट्स ₹33 प्रति रिपोर्ट उपलब्ध होंगी।
-                  </p>
+
+                  {/* Divider */}
+                  <div className="relative flex py-1 items-center">
+                    <div className="flex-grow border-t border-amber-200"></div>
+                    <span className="flex-shrink mx-3 text-[11px] font-mono uppercase text-slate-400">
+                      {language === 'hi' ? 'या WhatsApp से' : 'or with WhatsApp'}
+                    </span>
+                    <div className="flex-grow border-t border-amber-200"></div>
+                  </div>
+
+                  {/* WhatsApp Form */}
+                  <form onSubmit={handleSendWhatsAppOtp} className="space-y-4">
+                    <div className="space-y-1.5 text-left">
+                      <label className="block text-xs font-semibold text-slate-700">
+                        {language === 'hi' ? 'मोबाइल नंबर (Mobile Number)' : 'Mobile Number'}
+                      </label>
+                      <div className="relative flex items-center">
+                        <div className="absolute left-3.5 flex items-center gap-1 text-xs font-mono font-bold text-slate-600 pointer-events-none">
+                          <span>🇮🇳</span>
+                          <span>+91</span>
+                        </div>
+                        <input
+                          type="tel"
+                          value={phoneInput}
+                          onChange={(e) => setPhoneInput(e.target.value)}
+                          placeholder="98765 43210"
+                          maxLength={12}
+                          className="w-full pl-20 pr-4 py-3 bg-white border-2 border-amber-200 rounded-2xl text-xs md:text-sm text-slate-800 font-mono tracking-wider focus:border-[#D97706] focus:ring-2 focus:ring-amber-400/20 focus:outline-none transition-all"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full py-3.5 px-4 bg-gradient-to-r from-[#15803D] to-[#16A34A] hover:from-[#166534] hover:to-[#15803D] text-white font-bold rounded-2xl text-xs md:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    >
+                      {isSendingOtp ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <MessageSquare className="w-4 h-4" />
+                      )}
+                      <span>
+                        {language === 'hi'
+                          ? 'WhatsApp कोड भेजें (Send WhatsApp Code)'
+                          : 'Send WhatsApp Code'}
+                      </span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </form>
                 </div>
               ) : (
-                /* CASE B: ₹33 PAID REPORT ACCESS VIA RAZORPAY */
-                <div className="p-5 bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-50 rounded-3xl border-2 border-amber-300 shadow-xs space-y-4">
-                  <div className="flex items-center justify-between border-b border-amber-200 pb-3">
-                    <div>
-                      <span className="text-[10px] font-mono uppercase font-bold text-[#92400E] block">
-                        Specialist Consultation Access
-                      </span>
-                      <h4 className="font-playfair font-bold text-lg text-slate-800">
-                        {reportTitle}
-                      </h4>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-2xl font-black font-playfair text-[#B45309]">₹33</span>
-                      <span className="block text-[9px] font-mono text-slate-500 uppercase">One-time / Report</span>
-                    </div>
+                /* OTP Verification */
+                <form onSubmit={handleVerifyWhatsAppOtp} className="space-y-4 animate-in fade-in">
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-center text-xs text-slate-700">
+                    <div>{language === 'hi' ? 'WhatsApp पर भेजा गया कोड दर्ज करें:' : 'Enter code sent to WhatsApp:'}</div>
+                    <div className="font-mono font-bold text-[#92400E] mt-0.5">{targetPhone || phoneInput}</div>
                   </div>
 
-                  <div className="text-xs text-[#78350F] bg-white p-3 rounded-xl border border-amber-200 space-y-1">
-                    <p className="font-semibold">
-                      {language === 'hi'
-                        ? 'आपकी पहली निःशुल्क रिपोर्ट पहले ही उपयोग हो चुकी है। अतिरिक्त रिपोर्ट्स ₹33 प्रति रिपोर्ट उपलब्ध हैं।'
-                        : 'Your complimentary free report was already consumed. Additional reports are ₹33 each.'}
-                    </p>
-                    <p className="text-[10px] text-slate-500">
-                      ✓ सम्पूर्ण स्क्रीन विश्लेषण &nbsp;•&nbsp; ✓ A4 प्रिंटेबल PDF &nbsp;•&nbsp; ✓ 100% वैदिक सुरक्षा
-                    </p>
+                  <div className="space-y-1 text-left">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={otpInput}
+                      onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="• • • • • •"
+                      maxLength={6}
+                      autoFocus
+                      className="w-full py-3.5 px-4 bg-white border-2 border-amber-300 rounded-2xl text-center text-xl font-mono tracking-[0.4em] font-bold text-slate-800 focus:border-[#D97706] focus:ring-2 focus:ring-amber-400/20 focus:outline-none transition-all shadow-xs"
+                      required
+                    />
                   </div>
 
-                  {/* Payment Method Selector */}
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-mono uppercase font-bold text-slate-500 block">
-                      {i18n.selectPaymentMethod}
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedPaymentMethod('UPI')}
-                        className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                          selectedPaymentMethod === 'UPI'
-                            ? 'bg-[#D97706] text-white border-[#D97706] shadow-xs'
-                            : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50'
-                        }`}
-                      >
-                        <Zap className="w-4 h-4 mx-auto mb-1" />
-                        <span className="text-[10px] font-bold block">{i18n.upiOption}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setSelectedPaymentMethod('QR')}
-                        className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                          selectedPaymentMethod === 'QR'
-                            ? 'bg-[#D97706] text-white border-[#D97706] shadow-xs'
-                            : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50'
-                        }`}
-                      >
-                        <QrCode className="w-4 h-4 mx-auto mb-1" />
-                        <span className="text-[10px] font-bold block">Scan QR</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setSelectedPaymentMethod('CARD')}
-                        className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                          selectedPaymentMethod === 'CARD'
-                            ? 'bg-[#D97706] text-white border-[#D97706] shadow-xs'
-                            : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-50'
-                        }`}
-                      >
-                        <CreditCard className="w-4 h-4 mx-auto mb-1" />
-                        <span className="text-[10px] font-bold block">{i18n.cardOption}</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Pay ₹33 CTA (Razorpay Checkout) */}
                   <button
-                    onClick={handleInitiatePayment}
-                    disabled={isLoading}
-                    className="w-full bg-[#D97706] hover:bg-[#B45309] text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    type="submit"
+                    disabled={isLoading || otpInput.length < 4}
+                    className="w-full py-3.5 px-4 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-2xl text-xs md:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                   >
-                    {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                    <span>{i18n.pay33}</span>
+                    {isVerifyingOtp ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <ShieldCheck className="w-4 h-4" />
+                    )}
+                    <span>{language === 'hi' ? 'सत्यापित करें (Verify Code)' : 'Verify Code'}</span>
                   </button>
 
-                  <div className="text-[10px] text-center text-slate-400 pt-1">
-                    {i18n.secureTransactionNote}
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <button
+                      type="button"
+                      onClick={resetOtpFlow}
+                      className="text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>{language === 'hi' ? 'नंबर बदलें' : 'Change Number'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={resendWhatsAppOtp}
+                      disabled={!canResend || isLoading}
+                      className={`flex items-center gap-1 cursor-pointer ${
+                        canResend ? 'text-[#D97706] font-bold' : 'text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <span>{canResend ? (language === 'hi' ? 'पुनः भेजें' : 'Resend Code') : `Resend (${cooldownSeconds}s)`}</span>
+                    </button>
                   </div>
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* STEP 2: ACCESS OPTIONS (CLAIM FREE OR PAY ₹33) */}
+          {step === 'ACCESS_OPTIONS' && (
+            <div className="space-y-6">
+              {isFreeEligible ? (
+                /* Free Claim Card */
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-300 text-center space-y-4 shadow-xs">
+                  <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                    <Gift className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-playfair text-lg font-bold text-emerald-900">
+                      {language === 'hi' ? '🎉 आपकी पहली रिपोर्ट 100% मुफ़्त है!' : '🎉 Your First Report is 100% FREE!'}
+                    </h4>
+                    <p className="text-xs text-emerald-700 mt-1">
+                      {language === 'hi'
+                        ? 'लियोफैमिली नए पंजीकृत उपयोगकर्ताओं को पहली विशेषज्ञ रिपोर्ट निःशुल्क प्रदान करता है।'
+                        : 'LeoFamily offers your first comprehensive specialist report completely free of cost.'}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleClaimFree}
+                    disabled={isLoading}
+                    className="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold rounded-2xl text-xs md:text-sm uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  >
+                    {localLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Gift className="w-4 h-4" />
+                    )}
+                    <span>
+                      {language === 'hi'
+                        ? 'मुफ़्त रिपोर्ट अभी अनलॉक करें (Unlock Free Report Now)'
+                        : 'Unlock Free Report Now'}
+                    </span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                /* ₹33 Razorpay Payment Card */
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-slate-700 space-y-2">
+                    <div className="flex items-center justify-between font-bold text-slate-800 text-sm">
+                      <span>{language === 'hi' ? 'विशेषज्ञ रिपोर्ट शुल्क' : 'Specialist Report Fee'}</span>
+                      <span className="text-[#D97706] font-playfair text-lg">₹33 only</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      {language === 'hi'
+                        ? 'आपकी पहली निःशुल्क रिपोर्ट का उपयोग हो चुका है। तत्काल 100% सुरक्षित भुगतान के माध्यम से रिपोर्ट अनलॉक करें।'
+                        : 'Your first free report has been claimed. Unlock this specialist report with instant secure payment.'}
+                    </p>
+                    <div className="text-[10px] text-slate-400 font-mono">
+                      ✓ सम्पूर्ण विश्लेषण &nbsp;•&nbsp; ✓ A4 PDF डाउनलोड &nbsp;•&nbsp; ✓ आजीवन पहुंच
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleInitiatePayment}
+                    disabled={isLoading}
+                    className="w-full py-4 px-6 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-2xl text-xs md:text-sm uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  >
+                    {localLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Unlock className="w-4 h-4" />
+                    )}
+                    <span>
+                      {language === 'hi'
+                        ? '₹33 का भुगतान करें एवं रिपोर्ट खोलें'
+                        : 'Pay ₹33 & Unlock Report'}
+                    </span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               )}
             </div>
           )}
 
-          {/* STEP 4: PROCESSING */}
+          {/* STEP 3: PAYMENT PROCESSING */}
           {step === 'PAYMENT_PROCESSING' && (
             <div className="py-8 text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-amber-100 text-[#D97706] flex items-center justify-center mx-auto animate-pulse">
-                <RefreshCw className="w-8 h-8 animate-spin" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-playfair font-bold text-lg text-slate-800">
-                  {i18n.paymentProcessing}
-                </h4>
-                <p className="text-xs text-slate-500">
-                  {language === 'hi'
-                    ? 'कृपया प्रतीक्षा करें। आपकी रिपोर्ट का अधिकार सर्वर पर दर्ज किया जा रहा है।'
-                    : 'Please wait. Your report entitlement is being verified on the server.'}
-                </p>
-              </div>
+              <RefreshCw className="w-10 h-10 animate-spin text-[#D97706] mx-auto" />
+              <h4 className="font-playfair text-lg font-bold text-slate-800">
+                {language === 'hi' ? 'भुगतान प्रक्रियाधीन है...' : 'Processing Payment...'}
+              </h4>
+              <p className="text-xs text-slate-500">
+                {language === 'hi'
+                  ? 'कृपया गेटवे विंडो में भुगतान पूर्ण करें।'
+                  : 'Please complete the transaction in the Razorpay window.'}
+              </p>
             </div>
           )}
 
-          {/* STEP 5: SUCCESS CONFIRMATION */}
+          {/* STEP 4: SUCCESS */}
           {step === 'SUCCESS' && (
-            <div className="py-6 text-center space-y-4 animate-in zoom-in-95 duration-200">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
-                <CheckCircle2 className="w-10 h-10" />
+            <div className="py-6 text-center space-y-4">
+              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
-              <div className="space-y-1">
-                <h4 className="font-playfair font-black text-xl text-emerald-950">
-                  {i18n.reportUnlocked}
-                </h4>
-                <p className="text-xs text-emerald-800">
-                  {language === 'hi'
-                    ? 'आपकी रिपोर्ट स्क्रीन, PDF एक्सपोर्ट एवं प्रिंट हेतु पूर्णतः उपलब्ध है।'
-                    : 'Your report is now fully available for screen viewing, PDF export, and printing.'}
-                </p>
-              </div>
+              <h4 className="font-playfair text-xl font-bold text-emerald-900">
+                {language === 'hi' ? 'रिपोर्ट सफलतापूर्वक अनलॉक हो गई!' : 'Report Successfully Unlocked!'}
+              </h4>
+              <p className="text-xs text-slate-600">
+                {language === 'hi'
+                  ? 'आपकी सम्पूर्ण रिपोर्ट तैयार है।'
+                  : 'Your complete specialist report is now ready for consultation.'}
+              </p>
+
               <button
+                type="button"
                 onClick={() => {
                   onAccessGranted();
                   onClose();
                 }}
-                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3.5 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                className="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs md:text-sm uppercase tracking-wider shadow-md transition-all cursor-pointer"
               >
-                {language === 'hi' ? 'रिपोर्ट देखें (View Report)' : 'Open Report Now'}
+                {language === 'hi' ? 'रिपोर्ट देखें (View Report)' : 'View Report Now'}
               </button>
             </div>
           )}
+
+          {/* Security Assurance */}
+          <div className="pt-2 border-t border-amber-200/60 flex items-center justify-center gap-1.5 text-[10px] font-mono text-slate-500">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#D97706]" />
+            <span>LeoFamily 256-Bit Encrypted Entitlement Security</span>
+          </div>
         </div>
       </div>
     </div>
