@@ -9,12 +9,27 @@ import { GoogleGenAI } from "@google/genai";
 
 const app = express();
 
+// CORS & Preflight middleware (ensures POST/OPTIONS requests with Bearer tokens succeed)
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-razorpay-signature");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
+
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ limit: "15mb", extended: true }));
 
 // Ensure Content-Type is always application/json for API responses
 app.use((req, res, next) => {
   res.setHeader("Content-Type", "application/json");
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[API REQUEST] ${req.method} ${req.originalUrl || req.url}`);
+  }
   next();
 });
 
@@ -127,6 +142,17 @@ router.get("/reports/check-access", async (req, res) => {
 });
 
 // 4. Claim First Free Report
+router.all("/reports/claim-free", (req, res, next) => {
+  if (req.method !== "POST" && req.method !== "OPTIONS") {
+    return res.status(405).json({
+      success: false,
+      error: `Method ${req.method} Not Allowed. Claiming a free report requires a POST request.`,
+      code: "METHOD_NOT_ALLOWED"
+    });
+  }
+  next();
+});
+
 router.post("/reports/claim-free", async (req, res) => {
   try {
     const { reportType, profileKey, email } = req.body || {};
