@@ -1,6 +1,6 @@
 /**
  * LEOFAMILY REPORT ACCESS & ₹33 MONETIZATION CLIENT SERVICE
- * Phase 16C.4: Supabase Auth Email OTP & Centralized Entitlement Integration
+ * Supabase Auth & Centralized Entitlement Integration
  * Hardened with safe JSON response parsing to prevent unexpected HTML/text parse exceptions.
  */
 
@@ -10,51 +10,84 @@ import {
   ReportAccessCheckResult,
   PaymentOrderResponse,
   UserSession,
+  isPublicReport,
 } from '../types/reportAccess';
 import { safeFetchJson } from './safeApiHelper';
-
-const TOKEN_KEY = 'leofamily_auth_token';
-const USER_KEY = 'leofamily_auth_user';
+import { supabase } from '../lib/supabaseClient';
 
 export class ReportAccessService {
-  // Get currently stored user session token
-  public static getToken(): string | null {
-    try {
-      return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
-    } catch {
-      return null;
-    }
+  // Canonical check for public reports
+  public static isPublicReport(reportType: string | CanonicalReportType): boolean {
+    return isPublicReport(reportType);
   }
 
-  // Get currently stored user data
-  public static getStoredUser(): UserSession | null {
+  // Get currently active Supabase session token
+  public static getToken(): string | null {
     try {
-      const raw = localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_KEY);
-      if (raw) return JSON.parse(raw);
+      // Synchronously retrieve active session token from Supabase Auth storage if present
+      if (typeof window !== 'undefined') {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (parsed?.access_token) return parsed.access_token;
+            }
+          }
+        }
+      }
     } catch {
-      // Ignored
+      // Fallback
     }
     return null;
   }
 
-  // Save authenticated session
-  public static saveSession(session: UserSession) {
+  // Get currently active authenticated Supabase user profile
+  public static getStoredUser(): UserSession | null {
     try {
-      localStorage.setItem(TOKEN_KEY, session.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(session));
-    } catch (e) {
-      console.warn("Could not save auth session:", e);
+      if (typeof window !== 'undefined') {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              const user = parsed?.user;
+              if (user) {
+                return {
+                  userId: user.id,
+                  supabaseUserId: user.id,
+                  email: user.email || '',
+                  emailVerified: !!user.email_confirmed_at,
+                  phone: user.phone || '',
+                  phoneVerified: !!user.phone_confirmed_at,
+                  fullName: user.user_metadata?.full_name || '',
+                  avatarUrl: user.user_metadata?.avatar_url || '',
+                  authProvider: user.app_metadata?.provider || 'supabase',
+                  mobile: user.phone || '',
+                  mobileVerified: !!user.phone_confirmed_at,
+                  token: parsed.access_token || '',
+                  hasClaimedFreeReport: false,
+                };
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      // Fallback
     }
+    return null;
   }
 
-  // Clear session
-  public static clearSession() {
-    try {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
-    } catch (e) {
-      // Ignored
-    }
+  // Compatibility no-op methods (Supabase manages session persistence automatically)
+  public static saveSession(_session: UserSession): void {
+    // Supabase Auth handles its own session persistence
+  }
+
+  public static clearSession(): void {
+    // Cleared via supabase.auth.signOut()
   }
 
   // Ensure Razorpay SDK is loaded on client
@@ -86,12 +119,17 @@ export class ReportAccessService {
 
   // 1. Synchronize Supabase Auth session with backend
   public static async syncSession(token?: string, profileData?: any): Promise<{ success: boolean; user?: any; profile?: any }> {
-    const authToken = token || this.getToken();
+    let authToken = token;
     if (!authToken) {
-      throw new Error("No authentication token available to sync");
+      const { data } = await supabase.auth.getSession();
+      authToken = data?.session?.access_token || this.getToken() || undefined;
     }
 
-    const data = await safeFetchJson<{ success: boolean; user?: any; profile?: any; error?: string }>(
+    if (!authToken) {
+      throw new Error("No authenticated Supabase session available to sync");
+    }
+
+    return await safeFetchJson<{ success: boolean; user?: any; profile?: any; error?: string }>(
       '/api/auth/sync-session',
       {
         method: 'POST',
@@ -102,28 +140,6 @@ export class ReportAccessService {
         body: JSON.stringify(profileData || {}),
       }
     );
-
-    if (data.success && data.user) {
-      const appUser: UserSession = {
-        userId: data.user.id,
-        supabaseUserId: data.user.supabaseUserId || data.user.id,
-        email: data.user.email || '',
-        emailVerified: !!data.user.emailVerified,
-        phone: data.user.phone || '',
-        phoneVerified: !!data.user.phoneVerified,
-        fullName: data.user.fullName || '',
-        avatarUrl: data.user.avatarUrl || '',
-        authProvider: data.user.authProvider || 'supabase',
-        mobile: data.user.phone || data.user.mobile || '',
-        mobileVerified: !!(data.user.phoneVerified || data.user.mobileVerified),
-        token: authToken,
-        hasClaimedFreeReport: !!data.user.hasClaimedFreeReport,
-        freeReportDetails: data.user.freeReportDetails,
-      };
-      this.saveSession(appUser);
-    }
-
-    return data;
   }
 
   // 2. Save / Update User Numerology Profile
@@ -210,8 +226,8 @@ export class ReportAccessService {
     profileKey: string,
     mobile?: string
   ): Promise<ReportAccessCheckResult> {
-    // 1. Mobile numerology is always permanently free
-    if (reportType === 'MOBILE_NUMEROLOGY') {
+    // 1. Mobile numerology & Lo Shu are always permanently free
+    if (isPublicReport(reportType)) {
       return {
         allowed: true,
         requiresPayment: false,
@@ -236,7 +252,6 @@ export class ReportAccessService {
     });
     if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
-    if (token) params.append('token', token);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -251,9 +266,9 @@ export class ReportAccessService {
       return {
         allowed: false,
         requiresPayment: true,
-        isFirstFreeReport: !storedUser?.hasClaimedFreeReport,
+        isFirstFreeReport: true,
         isFreeReportType: false,
-        canClaimFree: !storedUser?.hasClaimedFreeReport,
+        canClaimFree: false,
         price: 33,
         reportType,
         profileKey: profileKey || 'default_profile',
@@ -276,7 +291,7 @@ export class ReportAccessService {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const data = await safeFetchJson<{ success: boolean; allowed: boolean; entitlement: any }>(
+    return await safeFetchJson<{ success: boolean; allowed: boolean; entitlement: any }>(
       '/api/reports/claim-free',
       {
         method: 'POST',
@@ -286,23 +301,9 @@ export class ReportAccessService {
           profileKey: profileKey || 'default_profile',
           email: activeEmail,
           mobile: activeMobile,
-          token,
         }),
       }
     );
-
-    // Update stored session if present
-    if (storedUser) {
-      storedUser.hasClaimedFreeReport = true;
-      storedUser.freeReportDetails = {
-        reportType,
-        claimedAt: new Date().toISOString(),
-        profileKey: profileKey || 'default_profile',
-      };
-      this.saveSession(storedUser);
-    }
-
-    return data;
   }
 
   // 5. Create ₹33 Payment Order
@@ -329,7 +330,6 @@ export class ReportAccessService {
           profileKey: profileKey || 'default_profile',
           email: activeEmail,
           mobile: activeMobile,
-          token,
         }),
       }
     );
@@ -365,7 +365,6 @@ export class ReportAccessService {
           profileKey: profileKey || 'default_profile',
           email: activeEmail,
           mobile: activeMobile,
-          token,
         }),
       }
     );
@@ -381,7 +380,6 @@ export class ReportAccessService {
     const params = new URLSearchParams();
     if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
-    if (token) params.append('token', token);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -402,7 +400,6 @@ export class ReportAccessService {
     const params = new URLSearchParams();
     if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
-    if (token) params.append('token', token);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -423,7 +420,6 @@ export class ReportAccessService {
     const params = new URLSearchParams();
     if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
-    if (token) params.append('token', token);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -444,7 +440,6 @@ export class ReportAccessService {
     const params = new URLSearchParams();
     if (activeEmail) params.append('email', activeEmail);
     if (activeMobile) params.append('mobile', activeMobile);
-    if (token) params.append('token', token);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;

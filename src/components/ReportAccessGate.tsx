@@ -1,12 +1,10 @@
 import React from 'react';
-import { Lock, Unlock, Gift, ArrowRight, RefreshCw } from 'lucide-react';
-import { CanonicalReportType, REPORT_REGISTRY } from '../types/reportAccess';
+import { Lock, Unlock, Sparkles, Gift, ShieldCheck, ArrowRight, RefreshCw, FileText } from 'lucide-react';
+import { CanonicalReportType, REPORT_REGISTRY, isPublicReport } from '../types/reportAccess';
 import { useReportAccess } from '../hooks/useReportAccess';
 import { ReportPaywallModal } from './ReportPaywallModal';
 import { useLanguage } from '../i18n';
 import { BrandLogo } from './BrandLogo';
-import { ReportAccessService } from '../services/reportAccessService';
-import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 
 export interface ReportAccessGateProps {
   reportType: CanonicalReportType;
@@ -30,7 +28,6 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
   className = '',
 }) => {
   const { language } = useLanguage();
-  const { isAuthenticated } = useSupabaseAuth();
   const reportDef = REPORT_REGISTRY[reportType] || REPORT_REGISTRY.MASTER_REPORT;
 
   const {
@@ -41,10 +38,10 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
     openAccessModal,
     closeAccessModal,
     handleAccessGranted,
-  } = useReportAccess(reportType, profileKey);
+  } = useReportAccess(reportType, profileKey, mobile);
 
-  // If genuinely public (Mobile Numerology / Lo Shu) or already unlocked, render children directly
-  if (ReportAccessService.isPublicReport(reportType) || isUnlocked || accessStatus?.allowed) {
+  // If permanently free or already unlocked, render children directly
+  if (isPublicReport(reportType) || reportDef.isFree || isUnlocked || accessStatus?.allowed) {
     return <>{children}</>;
   }
 
@@ -64,12 +61,10 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
   const displayDesc =
     language === 'hi' ? reportDef.descriptionHi : reportDef.descriptionEn;
 
-  const isFreeEligible = accessStatus?.canClaimFree ?? !isAuthenticated;
+  const isFreeEligible = accessStatus?.canClaimFree ?? true;
 
   return (
-    <div
-      className={`w-full max-w-4xl mx-auto my-8 p-6 md:p-10 bg-gradient-to-br from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] border-2 border-amber-300/80 rounded-[36px] shadow-lg text-center space-y-6 animate-in fade-in duration-300 ${className}`}
-    >
+    <div className={`w-full max-w-4xl mx-auto my-8 p-6 md:p-10 bg-gradient-to-br from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] border-2 border-amber-300/80 rounded-[36px] shadow-lg text-center space-y-6 animate-in fade-in duration-300 ${className}`}>
       {/* Brand Crest & Lock Badge */}
       <div className="flex flex-col items-center justify-center space-y-3">
         <BrandLogo size="lg" />
@@ -92,14 +87,14 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
       {/* Entitlement Status Banner */}
       <div className="max-w-md mx-auto p-4 rounded-2xl bg-white border border-amber-200 shadow-xs text-left text-xs space-y-1.5">
         <div className="flex items-center justify-between font-semibold text-slate-800">
-          <span>{isFreeEligible ? '🎉 पहली रिपोर्ट 100% मुफ़्त (First Report Free)' : '💰 प्रति रिपोर्ट शुल्क (Report Price)'}</span>
+          <span>{isFreeEligible ? '🎉 पहली रिपोर्ट मुफ़्त (First Report Free)' : '💰 प्रति रिपोर्ट शुल्क (Report Price)'}</span>
           <span className="font-bold font-playfair text-base text-[#D97706]">
             {isFreeEligible ? 'FREE (₹0)' : '₹33 only'}
           </span>
         </div>
         <p className="text-[11px] text-slate-500">
           {isFreeEligible
-            ? 'लियोफैमिली नए पंजीकृत उपयोगकर्ताओं को पहली विशेषज्ञ रिपोर्ट निःशुल्क उपहार प्रदान करता है।'
+            ? 'लियोफैमिली नए उपयोगकर्ताओं को पहली विशेषज्ञ रिपोर्ट निःशुल्क प्रदान करता है।'
             : 'आपकी पहली निःशुल्क रिपोर्ट उपयोग हो चुकी है। अतिरिक्त रिपोर्ट्स मात्र ₹33 प्रति रिपोर्ट उपलब्ध हैं।'}
         </p>
         <div className="pt-1 text-[10px] text-slate-400 font-mono">
@@ -123,11 +118,7 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
             <Unlock className="w-5 h-5 text-amber-200" />
           )}
           <span>
-            {!isAuthenticated
-              ? language === 'hi'
-                ? 'लॉगिन करें एवं रिपोर्ट अनलॉक करें (Sign In & Unlock)'
-                : 'Sign In & Unlock Report'
-              : isFreeEligible
+            {isFreeEligible
               ? language === 'hi'
                 ? 'निःशुल्क रिपोर्ट अनलॉक करें (Unlock Free Report)'
                 : 'Claim & Unlock Free Report'
@@ -140,10 +131,10 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
       </div>
 
       <div className="text-[10px] font-mono text-slate-400">
-        🔒 100% सुरक्षित सर्वर सत्यापन • मोबाइल अंकशास्त्र व लो शू ग्रिड स्थायी रूप से 100% मुफ़्त हैं
+        🔒 100% सुरक्षित सर्वर सत्यापन • मोबाइल अंकशास्त्र स्थायी रूप से 100% मुफ़्त है
       </div>
 
-      {/* Paywall / Auth Modal */}
+      {/* Paywall / Verification Modal */}
       <ReportPaywallModal
         isOpen={isModalOpen}
         onClose={closeAccessModal}
@@ -159,3 +150,5 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
     </div>
   );
 };
+
+export default ReportAccessGate;

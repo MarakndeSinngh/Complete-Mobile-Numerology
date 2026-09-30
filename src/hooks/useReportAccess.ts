@@ -1,12 +1,15 @@
 /**
  * LEOFAMILY REPORT ACCESS HOOK
- * Centralized report access policy & entitlement verification.
+ * Phase 16: Dynamic Access Gate & Entitlement Hook
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import {
   CanonicalReportType,
   ReportAccessCheckResult,
+  UserSession,
+  REPORT_REGISTRY,
+  isPublicReport,
 } from '../types/reportAccess';
 import { ReportAccessService } from '../services/reportAccessService';
 
@@ -16,6 +19,7 @@ export interface UseReportAccessResult {
   isUnlocked: boolean;
   isModalOpen: boolean;
   error: string | null;
+  currentUser: UserSession | null;
   checkAccess: () => Promise<ReportAccessCheckResult>;
   openAccessModal: () => void;
   closeAccessModal: () => void;
@@ -26,20 +30,22 @@ export interface UseReportAccessResult {
 
 export function useReportAccess(
   reportType: CanonicalReportType,
-  profileKey: string = 'default_profile'
+  profileKey: string,
+  mobile?: string
 ): UseReportAccessResult {
   const [accessStatus, setAccessStatus] = useState<ReportAccessCheckResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserSession | null>(() =>
+    ReportAccessService.getStoredUser()
+  );
   const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(null);
 
-  const isPublic = ReportAccessService.isPublicReport(reportType);
-
   const checkAccess = useCallback(async (): Promise<ReportAccessCheckResult> => {
-    // Public reports (Mobile Numerology & Lo Shu Grid) are always unlocked without login
-    if (isPublic) {
+    // 1. Mobile numerology and Lo Shu are always unlocked
+    if (isPublicReport(reportType)) {
       const freeResult: ReportAccessCheckResult = {
         allowed: true,
         requiresPayment: false,
@@ -48,7 +54,7 @@ export function useReportAccess(
         canClaimFree: false,
         price: 0,
         reportType,
-        profileKey,
+        profileKey: profileKey || 'default_profile',
         accessType: 'FREE',
       };
       setAccessStatus(freeResult);
@@ -60,12 +66,13 @@ export function useReportAccess(
     setIsLoading(true);
     setError(null);
     try {
-      const res = await ReportAccessService.checkAccess(reportType, profileKey);
+      const res = await ReportAccessService.checkAccess(reportType, profileKey, mobile);
       setAccessStatus(res);
       setIsUnlocked(res.allowed);
+      setCurrentUser(ReportAccessService.getStoredUser());
       return res;
     } catch (err: any) {
-      console.warn('Report access check notice:', err);
+      console.warn("Report access check error:", err);
       setError(err.message || 'Could not verify report access');
       const fallback: ReportAccessCheckResult = {
         allowed: false,
@@ -75,7 +82,7 @@ export function useReportAccess(
         canClaimFree: false,
         price: 33,
         reportType,
-        profileKey,
+        profileKey: profileKey || 'default_profile',
       };
       setAccessStatus(fallback);
       setIsUnlocked(false);
@@ -83,7 +90,7 @@ export function useReportAccess(
     } finally {
       setIsLoading(false);
     }
-  }, [reportType, profileKey, isPublic]);
+  }, [reportType, profileKey, mobile]);
 
   useEffect(() => {
     checkAccess();
@@ -110,23 +117,26 @@ export function useReportAccess(
 
   const requireAccess = useCallback(
     (onSuccess?: () => void): boolean => {
-      if (isPublic || isUnlocked) {
+      // Mobile Numerology and Lo Shu are ALWAYS allowed
+      if (isPublicReport(reportType) || isUnlocked) {
         onSuccess?.();
         return true;
       }
+
+      // If not unlocked, save callback and open paywall / verification modal
       if (onSuccess) {
         setPendingCallback(() => onSuccess);
       }
       setIsModalOpen(true);
       return false;
     },
-    [isPublic, isUnlocked]
+    [reportType, isUnlocked]
   );
 
   const claimFree = useCallback(async (): Promise<boolean> => {
     try {
       setIsLoading(true);
-      await ReportAccessService.claimFreeReport(reportType, profileKey);
+      await ReportAccessService.claimFreeReport(reportType, profileKey, mobile);
       handleAccessGranted();
       return true;
     } catch (e: any) {
@@ -135,7 +145,7 @@ export function useReportAccess(
     } finally {
       setIsLoading(false);
     }
-  }, [reportType, profileKey, handleAccessGranted]);
+  }, [reportType, profileKey, mobile, handleAccessGranted]);
 
   return {
     accessStatus,
@@ -143,6 +153,7 @@ export function useReportAccess(
     isUnlocked,
     isModalOpen,
     error,
+    currentUser,
     checkAccess,
     openAccessModal,
     closeAccessModal,
