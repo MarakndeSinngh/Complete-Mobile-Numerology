@@ -21,12 +21,43 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: "15mb" }));
-app.use(express.urlencoded({ limit: "15mb", extended: true }));
+// Safe body parser that supports both standalone Express server and pre-parsed Vercel serverless functions
+app.use((req, res, next) => {
+  if (req.body !== undefined && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return next();
+  }
+  express.json({ limit: "15mb" })(req, res, (err) => {
+    if (err) {
+      console.warn("[BodyParser Notice] JSON parse notice:", err?.message || err);
+    }
+    next();
+  });
+});
+
+app.use((req, res, next) => {
+  if (req.body !== undefined && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return next();
+  }
+  express.urlencoded({ limit: "15mb", extended: true })(req, res, (err) => {
+    if (err) {
+      console.warn("[BodyParser Notice] Urlencoded parse notice:", err?.message || err);
+    }
+    next();
+  });
+});
 
 // Ensure Content-Type is always application/json for API responses
 app.use((req, res, next) => {
   res.setHeader("Content-Type", "application/json");
+
+  // If Vercel rewrote the URL to /api, restore full path from x-matched-path or x-vercel-matched-path
+  const matchedPath = (req.headers["x-matched-path"] as string) || 
+                      (req.headers["x-vercel-matched-path"] as string) || 
+                      (req.headers["x-now-route-matches"] as string);
+  if (matchedPath && (req.url === "/api" || req.url === "/" || req.url === "")) {
+    req.url = matchedPath;
+  }
+
   if (process.env.NODE_ENV !== "production") {
     console.log(`[API REQUEST] ${req.method} ${req.originalUrl || req.url}`);
   }
