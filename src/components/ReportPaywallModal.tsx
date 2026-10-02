@@ -14,10 +14,6 @@ import {
   Zap,
   RotateCcw,
   MessageSquare,
-  Copy,
-  Check,
-  ExternalLink,
-  Clock,
 } from 'lucide-react';
 import {
   CanonicalReportType,
@@ -26,7 +22,6 @@ import {
   PAYMENT_I18N,
   PaymentI18nEntry,
 } from '../types/reportAccess';
-import { PAYMENT_CONFIG } from '../config/paymentConfig';
 import { ReportAccessService } from '../services/reportAccessService';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import { useLanguage } from '../i18n';
@@ -76,17 +71,14 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
 
   const [phoneInput, setPhoneInput] = useState<string>(initialMobile || '');
   const [otpInput, setOtpInput] = useState<string>('');
-  const [utrInput, setUtrInput] = useState<string>('');
-  const [submittedUtr, setSubmittedUtr] = useState<string>('');
-  const [upiCopied, setUpiCopied] = useState<boolean>(false);
   const [localLoading, setLocalLoading] = useState<boolean>(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [accessResult, setAccessResult] = useState<ReportAccessCheckResult | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'UPI_QR' | 'GATEWAY'>('UPI_QR');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'UPI' | 'QR' | 'CARD'>('UPI');
 
-  // Step state: 'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PENDING_VERIFICATION' | 'PAYMENT_PROCESSING' | 'SUCCESS'
-  const [step, setStep] = useState<'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PENDING_VERIFICATION' | 'PAYMENT_PROCESSING' | 'SUCCESS'>('AUTH_REQUIRED');
+  // Step state: 'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'
+  const [step, setStep] = useState<'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'>('AUTH_REQUIRED');
 
   const error = localError || authHookError;
   const isLoading = localLoading || isSendingOtp || isVerifyingOtp || isGoogleLoading;
@@ -105,35 +97,23 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
       if (res.allowed) {
         setStep('SUCCESS');
       } else {
-        // Also check if there is an existing pending UPI submission
-        const upiStatus = await ReportAccessService.getUpiPaymentStatus(
-          reportType,
-          profileKey,
-          submittedUtr || undefined,
-          appUser?.email || supabaseUser?.email || undefined
-        );
-        if (upiStatus.success && upiStatus.status === 'PENDING_VERIFICATION') {
-          if (upiStatus.record?.utr) setSubmittedUtr(upiStatus.record.utr);
-          setStep('PENDING_VERIFICATION');
-        } else {
-          setStep('ACCESS_OPTIONS');
-        }
+        setStep('ACCESS_OPTIONS');
       }
     } catch (e: any) {
       setLocalError(e?.message || 'Failed to check report status');
     } finally {
       setLocalLoading(false);
     }
-  }, [reportType, profileKey, initialMobile, submittedUtr, appUser, supabaseUser]);
+  }, [reportType, profileKey, initialMobile]);
 
   // Sync state when modal opens or authentication changes
   useEffect(() => {
     if (isOpen) {
       setLocalError(null);
       clearAuthError();
-      setUpiCopied(false);
 
       if (isAuthenticated) {
+        setStep('ACCESS_OPTIONS');
         fetchAccessDetails();
       } else {
         setStep('AUTH_REQUIRED');
@@ -144,16 +124,6 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
   }, [isOpen, isAuthenticated, reportType, profileKey, fetchAccessDetails, clearAuthError, resetOtpFlow]);
 
   if (!isOpen) return null;
-
-  const handleCopyUpi = () => {
-    try {
-      navigator.clipboard.writeText(PAYMENT_CONFIG.LEOFAMILY_UPI_ID);
-      setUpiCopied(true);
-      setTimeout(() => setUpiCopied(false), 2500);
-    } catch {
-      // Fallback
-    }
-  };
 
   // 1. Google Sign-In
   const handleGoogleSignIn = async () => {
@@ -212,6 +182,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
 
     const res = await verifyWhatsAppOtp(targetPhone || phoneInput, cleanOtp);
     if (res.success) {
+      setStep('ACCESS_OPTIONS');
       await fetchAccessDetails();
     } else {
       setLocalError(res.error || 'Verification failed. Please check the code.');
@@ -237,45 +208,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
     }
   };
 
-  // 5. Submit UPI QR Payment UTR
-  const handleUpiSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocalError(null);
-
-    const cleanUtr = utrInput.trim().toUpperCase();
-    if (!cleanUtr || cleanUtr.length < 6) {
-      setLocalError(
-        language === 'hi'
-          ? 'कृपया मान्य 12-अंकीय UTR / Transaction ID दर्ज करें'
-          : 'Please enter a valid 12-digit UTR / Transaction ID'
-      );
-      return;
-    }
-
-    setLocalLoading(true);
-    try {
-      const res = await ReportAccessService.submitUpiPayment(
-        reportType,
-        profileKey,
-        cleanUtr,
-        phoneInput || appUser?.phone || appUser?.mobile,
-        appUser?.email || supabaseUser?.email
-      );
-
-      if (res.success) {
-        setSubmittedUtr(cleanUtr);
-        setStep('PENDING_VERIFICATION');
-      } else {
-        setLocalError(res.message || 'Payment submission failed.');
-      }
-    } catch (err: any) {
-      setLocalError(err?.message || 'Failed to submit payment UTR.');
-    } finally {
-      setLocalLoading(false);
-    }
-  };
-
-  // 6. Optional Razorpay ₹33 Payment Checkout (preserves existing gateway code)
+  // 5. Razorpay ₹33 Payment Checkout
   const handleInitiatePayment = async () => {
     setLocalLoading(true);
     setLocalError(null);
@@ -599,206 +532,43 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                   </button>
                 </div>
               ) : (
-                /* ₹33 UPI QR Payment Flow (Primary) & Optional Gateway Tab */
+                /* ₹33 Razorpay Payment Card */
                 <div className="space-y-4">
-                  {/* Mode Selector */}
-                  <div className="flex items-center justify-center p-1 bg-amber-100/70 rounded-xl border border-amber-200 text-xs font-bold">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedPaymentMethod('UPI_QR')}
-                      className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                        selectedPaymentMethod === 'UPI_QR'
-                          ? 'bg-amber-700 text-white shadow-xs'
-                          : 'text-amber-900 hover:bg-amber-200/50'
-                      }`}
-                    >
-                      <QrCode className="w-3.5 h-3.5" />
-                      <span>UPI QR Scan (अनुशंसित)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedPaymentMethod('GATEWAY')}
-                      className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                        selectedPaymentMethod === 'GATEWAY'
-                          ? 'bg-amber-700 text-white shadow-xs'
-                          : 'text-amber-900 hover:bg-amber-200/50'
-                      }`}
-                    >
-                      <CreditCard className="w-3.5 h-3.5" />
-                      <span>Online Payment Gateway</span>
-                    </button>
+                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-slate-700 space-y-2">
+                    <div className="flex items-center justify-between font-bold text-slate-800 text-sm">
+                      <span>{language === 'hi' ? 'विशेषज्ञ रिपोर्ट शुल्क' : 'Specialist Report Fee'}</span>
+                      <span className="text-[#D97706] font-playfair text-lg">₹33 only</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      {language === 'hi'
+                        ? 'आपकी पहली निःशुल्क रिपोर्ट का उपयोग हो चुका है। तत्काल 100% सुरक्षित भुगतान के माध्यम से रिपोर्ट अनलॉक करें।'
+                        : 'Your first free report has been claimed. Unlock this specialist report with instant secure payment.'}
+                    </p>
+                    <div className="text-[10px] text-slate-400 font-mono">
+                      ✓ सम्पूर्ण विश्लेषण &nbsp;•&nbsp; ✓ A4 PDF डाउनलोड &nbsp;•&nbsp; ✓ आजीवन पहुंच
+                    </div>
                   </div>
 
-                  {selectedPaymentMethod === 'UPI_QR' ? (
-                    /* UPI QR & UTR Entry Container */
-                    <div className="space-y-4">
-                      {/* Pricing banner */}
-                      <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-slate-700 flex items-center justify-between">
-                        <div>
-                          <div className="font-bold text-slate-900">
-                            {language === 'hi' ? '32-अध्याय सम्पूर्ण मास्टर रिपोर्ट' : '32-Section Master Report'}
-                          </div>
-                          <div className="text-[11px] text-slate-500">
-                            अपने UPI App से QR स्कैन कर ₹33 का Payment करें
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-base font-extrabold text-[#D97706] font-playfair">₹33 only</div>
-                        </div>
-                      </div>
-
-                      {/* QR Display Card */}
-                      <div className="bg-white p-4 rounded-2xl border-2 border-amber-300 shadow-sm flex flex-col items-center justify-center space-y-3">
-                        <div className="w-44 h-44 bg-white rounded-xl p-1.5 border border-amber-200 flex items-center justify-center shadow-inner">
-                          <img
-                            src={PAYMENT_CONFIG.LEOFAMILY_PAYMENT_QR}
-                            alt="LeoFamily UPI QR"
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-
-                        {/* Supported Apps */}
-                        <div className="flex flex-wrap items-center justify-center gap-1 text-[10px] font-medium text-slate-600">
-                          <span className="px-2 py-0.5 rounded-full bg-slate-100">GPay</span>
-                          <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">PhonePe</span>
-                          <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">Paytm</span>
-                          <span className="px-2 py-0.5 rounded-full bg-teal-50 text-teal-700">BHIM</span>
-                        </div>
-
-                        {/* Copy UPI ID */}
-                        <div className="w-full">
-                          <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5">
-                            <div className="text-left font-mono text-[11px] font-bold text-slate-800">
-                              {PAYMENT_CONFIG.LEOFAMILY_UPI_ID}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={handleCopyUpi}
-                              className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium text-[11px] flex items-center gap-1 transition-colors cursor-pointer"
-                            >
-                              {upiCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                              <span>{upiCopied ? 'Copied' : 'Copy ID'}</span>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Mobile Direct App Launch */}
-                        <div className="w-full">
-                          <a
-                            href={PAYMENT_CONFIG.getUpiIntentUrl(33)}
-                            className="w-full py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            <span>Open in UPI App (Mobile)</span>
-                          </a>
-                        </div>
-                      </div>
-
-                      {/* UTR Form */}
-                      <form onSubmit={handleUpiSubmit} className="space-y-2.5 bg-amber-50/80 p-3.5 rounded-2xl border border-amber-200">
-                        <label className="block text-xs font-bold text-slate-800">
-                          Payment करने के बाद नीचे अपना UTR / Transaction ID दर्ज करें:
-                        </label>
-
-                        <input
-                          type="text"
-                          value={utrInput}
-                          onChange={(e) => setUtrInput(e.target.value)}
-                          placeholder="12-digit UTR / Ref Number (e.g. 427819384910)"
-                          required
-                          className="w-full px-3.5 py-2.5 rounded-xl border-2 border-amber-300 focus:border-amber-600 bg-white text-slate-900 font-mono text-xs tracking-wider uppercase font-semibold outline-hidden shadow-xs"
-                        />
-
-                        <button
-                          type="submit"
-                          disabled={localLoading || !utrInput.trim()}
-                          className="w-full py-3 px-4 bg-gradient-to-r from-[#92400E] via-[#B45309] to-[#D97706] hover:from-[#78350F] text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                        >
-                          {localLoading ? (
-                            <RefreshCw className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <ShieldCheck className="w-4 h-4" />
-                          )}
-                          <span>मैंने ₹33 का Payment कर दिया (Submit UTR)</span>
-                        </button>
-                      </form>
-                    </div>
-                  ) : (
-                    /* Optional Razorpay Gateway Fallback */
-                    <div className="space-y-4 pt-2">
-                      <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-slate-700 space-y-2">
-                        <div className="flex items-center justify-between font-bold text-slate-800 text-sm">
-                          <span>{language === 'hi' ? 'विशेषज्ञ रिपोर्ट शुल्क' : 'Specialist Report Fee'}</span>
-                          <span className="text-[#D97706] font-playfair text-lg">₹33 only</span>
-                        </div>
-                        <p className="text-[11px] text-slate-500">
-                          क्रेडिट कार्ड, डेबिट कार्ड, या नेट बैंकिंग द्वारा सुरक्षित भुगतान।
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleInitiatePayment}
-                        disabled={isLoading}
-                        className="w-full py-3.5 px-6 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-2xl text-xs md:text-sm uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
-                      >
-                        {localLoading ? (
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Unlock className="w-4 h-4" />
-                        )}
-                        <span>Pay ₹33 with Gateway</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={handleInitiatePayment}
+                    disabled={isLoading}
+                    className="w-full py-4 px-6 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-2xl text-xs md:text-sm uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  >
+                    {localLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Unlock className="w-4 h-4" />
+                    )}
+                    <span>
+                      {language === 'hi'
+                        ? '₹33 का भुगतान करें एवं रिपोर्ट खोलें'
+                        : 'Pay ₹33 & Unlock Report'}
+                    </span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* STEP 2B: PENDING VERIFICATION */}
-          {step === 'PENDING_VERIFICATION' && (
-            <div className="py-6 text-center space-y-4 bg-white p-5 rounded-3xl border border-amber-200 shadow-sm animate-in fade-in">
-              <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
-                <Clock className="w-7 h-7 animate-pulse" />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="inline-block px-3 py-0.5 rounded-full bg-amber-100 text-amber-800 font-mono text-xs font-bold">
-                  PENDING VERIFICATION
-                </div>
-                <h4 className="font-playfair text-lg font-bold text-slate-900">
-                  Payment Verification Pending
-                </h4>
-                <p className="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto">
-                  आपका UTR <span className="font-mono font-bold text-slate-900">{submittedUtr || utrInput}</span> प्राप्त हो गया है। Verification complete होने के बाद Master Report आपके account में unlock होगा।
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-left text-[11px] text-amber-900 space-y-1">
-                <p>• Verification आमतौर पर 5 से 15 मिनट के भीतर पूर्ण हो जाता है।</p>
-                <p>• Verification के बाद आपका Master Report unlock किया जाएगा।</p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={fetchAccessDetails}
-                  disabled={localLoading}
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${localLoading ? 'animate-spin' : ''}`} />
-                  <span>Check Status (जांचें)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="py-2.5 px-4 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-xs transition-colors cursor-pointer"
-                >
-                  Close
-                </button>
-              </div>
             </div>
           )}
 
