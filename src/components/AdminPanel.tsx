@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { PersonalDetails } from '../types';
 import DateInput from './DateInput';
 import { BrandLogo } from './BrandLogo';
+import { UPIAdminVerificationPanel } from './UPIAdminVerificationPanel';
 import { 
   Compass, User, Calendar, Award, Activity, Heart, Sparkles, 
   AlertTriangle, Check, FileText, Layers, Info, RefreshCw, 
   Star, BookOpen, TrendingUp, ShieldCheck, ChevronRight, 
-  CheckCircle, SlidersHorizontal, Settings, Flame, Droplet, Trees, Hammer, Landmark
+  CheckCircle, SlidersHorizontal, Settings, Flame, Droplet, Trees, Hammer, Landmark, QrCode
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -107,7 +108,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ personalDetails }) => {
 
   // UI Tabs Control
   const [activeTab, setActiveTab] = useState<'FOUR_SYSTEMS' | 'KNOWLEDGE_BASE'>('FOUR_SYSTEMS');
-  const [subSystemTab, setSubSystemTab] = useState<'CHALDEAN' | 'PYTHAGOREAN' | 'VEDIC' | 'LOSHU'>('CHALDEAN');
+  const [subSystemTab, setSubSystemTab] = useState<'CHALDEAN' | 'PYTHAGOREAN' | 'VEDIC' | 'LOSHU' | 'UPI_VERIFICATION'>('CHALDEAN');
 
   // Knowledge base list (original)
   const [knowledgeBooks, setKnowledgeBooks] = useState([
@@ -501,7 +502,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ personalDetails }) => {
                 { id: 'CHALDEAN', label: 'A) Chaldean Frequencies' },
                 { id: 'PYTHAGOREAN', label: 'B) Pythagorean Grid' },
                 { id: 'VEDIC', label: 'C) Vedic Alignment' },
-                { id: 'LOSHU', label: 'D) Lo Shu Grid' }
+                { id: 'LOSHU', label: 'D) Lo Shu Grid' },
+                { id: 'UPI_VERIFICATION', label: 'E) UPI Payment Verification' }
               ].map((subTab) => (
                 <button
                   key={subTab.id}
@@ -930,6 +932,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ personalDetails }) => {
                     </div>
                   </div>
 
+                </div>
+              )}
+
+              {/* SYSTEM E: UPI PAYMENT VERIFICATION VIEW */}
+              {subSystemTab === 'UPI_VERIFICATION' && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <UPIAdminVerificationPanel />
                 </div>
               )}
 

@@ -370,6 +370,104 @@ export class ReportAccessService {
     );
   }
 
+  // 6b. Submit ₹33 UPI QR Payment with UTR
+  public static async submitUpiPayment(
+    reportType: CanonicalReportType,
+    profileKey: string,
+    utr: string,
+    mobile?: string,
+    email?: string
+  ): Promise<{ success: boolean; status: string; paymentId: string; utr: string; message: string }> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const activeMobile = mobile || storedUser?.mobile;
+    const activeEmail = email || storedUser?.email;
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{ success: boolean; status: string; paymentId: string; utr: string; message: string }>(
+      '/api/payments/submit-upi',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reportType: reportType || 'MASTER_REPORT',
+          profileKey: profileKey || 'default_profile',
+          utr,
+          email: activeEmail,
+          mobile: activeMobile,
+          amount: 33
+        }),
+      }
+    );
+  }
+
+  // 6c. Check UPI Payment Status
+  public static async getUpiPaymentStatus(
+    reportType: CanonicalReportType,
+    profileKey: string,
+    utr?: string,
+    email?: string
+  ): Promise<{ success: boolean; status: string; record?: any; isUnlocked: boolean }> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const activeEmail = email || storedUser?.email;
+
+    const params = new URLSearchParams({
+      reportType: reportType || 'MASTER_REPORT',
+      profileKey: profileKey || 'default_profile',
+    });
+    if (utr) params.append('utr', utr);
+    if (activeEmail) params.append('email', activeEmail);
+
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{ success: boolean; status: string; record?: any; isUnlocked: boolean }>(
+      `/api/payments/upi-status?${params.toString()}`,
+      { headers }
+    );
+  }
+
+  // 6d. Admin: Get all UPI payment records
+  public static async getAdminUpiPayments(): Promise<{ success: boolean; payments: any[]; total: number }> {
+    const token = this.getToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{ success: boolean; payments: any[]; total: number }>(
+      '/api/admin/upi-payments',
+      { headers }
+    );
+  }
+
+  // 6e. Admin: Verify or Reject UPI payment
+  public static async verifyAdminUpiPayment(
+    paymentId: string,
+    action: 'VERIFY' | 'REJECT',
+    notes?: string,
+    adminIdentifier?: string
+  ): Promise<{ success: boolean; status: string; message: string; entitlement?: any }> {
+    const token = this.getToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{ success: boolean; status: string; message: string; entitlement?: any }>(
+      '/api/admin/verify-upi-payment',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          paymentId,
+          action,
+          notes,
+          adminIdentifier
+        }),
+      }
+    );
+  }
+
   // 7. Get Customer's Historical Reports (Authoritative Server Query)
   public static async getMyReports(mobile?: string): Promise<any> {
     const token = this.getToken();

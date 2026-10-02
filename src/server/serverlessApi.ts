@@ -1,6 +1,6 @@
 import express from "express";
 import { reportAccessEngine } from "./accessEngine";
-import { CanonicalReportType } from "../types/reportAccess";
+import { CanonicalReportType, REPORT_REGISTRY } from "../types/reportAccess";
 import { generateMedicalNumerologyReport } from "../services/medicalNumerologyEngine";
 import { generateNumeroVaastuReport } from "../services/numeroVaastuEngine";
 import { calculateDashaAndYearForecast } from "../services/dashaEngine";
@@ -289,6 +289,128 @@ router.post("/payments/webhook", async (req, res) => {
     res.json(result);
   } catch (e: any) {
     res.status(400).json({ success: false, error: e?.message || "Webhook verification failed" });
+  }
+});
+
+// 7b. Submit UPI QR Payment with UTR
+router.post("/payments/submit-upi", async (req, res) => {
+  try {
+    const { reportType, profileKey, utr, email, mobile, amount } = req.body || {};
+    const authHeader = req.headers['authorization'];
+
+    // Server-enforced security check: Verify reportType is MASTER_REPORT (or from registry)
+    const canonicalType = (reportType || 'MASTER_REPORT') as CanonicalReportType;
+    if (canonicalType !== 'MASTER_REPORT' && !REPORT_REGISTRY[canonicalType]) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid report type for UPI checkout",
+        code: "INVALID_REPORT_TYPE"
+      });
+    }
+
+    // Server enforces price (disallows client requesting ₹1/₹0)
+    const expectedPrice = REPORT_REGISTRY[canonicalType]?.priceInr ?? 33;
+    if (amount !== undefined && Number(amount) !== expectedPrice) {
+      console.warn(`[UPI Security] Client submitted amount ₹${amount}, server enforcing ₹${expectedPrice}`);
+    }
+
+    if (!utr || typeof utr !== 'string' || utr.trim().length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: "कृपया एक मान्य 12-अंकीय UTR / Transaction ID दर्ज करें",
+        code: "INVALID_UTR"
+      });
+    }
+
+    const result = await reportAccessEngine.submitUpiPayment(
+      canonicalType,
+      profileKey,
+      utr,
+      authHeader,
+      email,
+      mobile
+    );
+
+    res.json(result);
+  } catch (e: any) {
+    console.error("[API:SubmitUpi:Error]", e?.message || e);
+    res.status(400).json({
+      success: false,
+      error: e?.message || "Failed to submit UPI payment for verification",
+      code: "UPI_SUBMISSION_FAILED"
+    });
+  }
+});
+
+// 7c. Check UPI Payment Status
+router.get("/payments/upi-status", async (req, res) => {
+  try {
+    const reportType = (req.query.reportType as CanonicalReportType) || 'MASTER_REPORT';
+    const profileKey = (req.query.profileKey as string) || 'default_profile';
+    const utr = req.query.utr as string | undefined;
+    const email = req.query.email as string | undefined;
+    const authHeader = req.headers['authorization'];
+
+    const result = await reportAccessEngine.getUpiPaymentStatus(
+      reportType,
+      profileKey,
+      authHeader,
+      email,
+      utr
+    );
+
+    res.json(result);
+  } catch (e: any) {
+    res.status(500).json({
+      success: false,
+      error: e?.message || "Failed to retrieve UPI payment status",
+      code: "STATUS_CHECK_FAILED"
+    });
+  }
+});
+
+// 7d. Admin: Get all UPI payment submissions
+router.get("/admin/upi-payments", async (req, res) => {
+  try {
+    const data = await reportAccessEngine.getAdminUpiPayments();
+    res.json(data);
+  } catch (e: any) {
+    res.status(500).json({
+      success: false,
+      error: e?.message || "Failed to fetch UPI payment records",
+      code: "ADMIN_FETCH_FAILED"
+    });
+  }
+});
+
+// 7e. Admin: Verify or Reject UPI Payment and Grant Master Report Entitlement
+router.post("/admin/verify-upi-payment", async (req, res) => {
+  try {
+    const { paymentId, action, notes, adminIdentifier } = req.body || {};
+
+    if (!paymentId || !action || (action !== 'VERIFY' && action !== 'REJECT')) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing or invalid paymentId or action (must be VERIFY or REJECT)",
+        code: "INVALID_ADMIN_ACTION"
+      });
+    }
+
+    const result = await reportAccessEngine.verifyAdminUpiPayment(
+      paymentId,
+      action,
+      adminIdentifier || 'admin_user',
+      notes || ''
+    );
+
+    res.json(result);
+  } catch (e: any) {
+    console.error("[API:AdminVerifyUpi:Error]", e?.message || e);
+    res.status(400).json({
+      success: false,
+      error: e?.message || "Failed to execute admin payment verification",
+      code: "ADMIN_ACTION_FAILED"
+    });
   }
 });
 

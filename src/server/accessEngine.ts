@@ -1143,6 +1143,301 @@ class ReportAccessEngine {
     };
   }
 
+  // 7b. Submit ₹33 UPI QR Payment with UTR for Admin Verification
+  public async submitUpiPayment(
+    reportType: CanonicalReportType,
+    profileKey: string,
+    utr: string,
+    authHeader?: string | null,
+    optionalEmail?: string,
+    optionalMobile?: string
+  ): Promise<{ success: boolean; status: string; paymentId: string; utr: string; message: string }> {
+    await this.ensureDb();
+    const cleanReportType = (reportType || 'MASTER_REPORT') as CanonicalReportType;
+    if (!REPORT_REGISTRY[cleanReportType]) {
+      throw new Error("Invalid report type");
+    }
+
+    const cleanUtr = (utr || '').trim().toUpperCase();
+    if (!cleanUtr || cleanUtr.length < 6) {
+      throw new Error("कृपया एक मान्य UTR / Transaction ID दर्ज करें (कम से कम 6 अक्षर)");
+    }
+
+    const safeKey = profileKey || 'default_profile';
+    const priceInr = REPORT_REGISTRY[cleanReportType]?.priceInr ?? REPORT_PRICE_INR;
+
+    // Resolve or build identity
+    let authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
+      const email = normalizeEmail(optionalEmail) || `upi_user_${cleanUtr.slice(-6).toLowerCase()}@leofamily.com`;
+      const mobile = normalizeIndianMobile(optionalMobile);
+      const generatedId = `usr_${crypto.randomBytes(8).toString('hex')}`;
+      authUser = {
+        id: generatedId,
+        supabaseUserId: generatedId,
+        email,
+        emailVerified: false,
+        mobile
+      };
+    }
+
+    const { id: userId, supabaseUserId, email } = authUser;
+    const paymentId = `tx_upi_${crypto.randomBytes(8).toString('hex')}`;
+    const syntheticOrderId = `upi_${Date.now()}_${cleanUtr.slice(-6)}`;
+    const now = new Date().toISOString();
+
+    if (isDatabaseConfigured()) {
+      try {
+        await query(
+          `INSERT INTO payment_transactions (
+            id, user_id, supabase_user_id, email, mobile, profile_key, report_type,
+            razorpay_order_id, amount, currency, status, payment_method, utr, created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'INR', 'PENDING_VERIFICATION', 'UPI_QR', $10, NOW(), NOW())
+          ON CONFLICT (razorpay_order_id) DO UPDATE SET utr = $10, status = 'PENDING_VERIFICATION', updated_at = NOW()`,
+          [paymentId, userId, supabaseUserId, email, authUser.mobile || optionalMobile || null, safeKey, cleanReportType, syntheticOrderId, priceInr, cleanUtr]
+        );
+      } catch (dbErr: any) {
+        console.warn("[UPI DB Warning]", dbErr?.message || dbErr);
+      }
+    } else {
+      this.localSandbox.payments.set(paymentId, {
+        id: paymentId,
+        userId,
+        supabaseUserId,
+        email,
+        mobile: authUser.mobile || optionalMobile,
+        profileKey: safeKey,
+        reportType: cleanReportType,
+        orderId: syntheticOrderId,
+        amount: priceInr,
+        currency: 'INR',
+        status: 'PENDING_VERIFICATION',
+        paymentMethod: 'UPI_QR',
+        utr: cleanUtr,
+        createdAt: now
+      });
+      this.localSandbox.orders.set(syntheticOrderId, {
+        orderId: syntheticOrderId,
+        paymentId,
+        userId,
+        email,
+        reportType: cleanReportType,
+        profileKey: safeKey,
+        amount: priceInr,
+        status: 'PENDING_VERIFICATION',
+        utr: cleanUtr
+      });
+    }
+
+    return {
+      success: true,
+      status: 'PENDING_VERIFICATION',
+      paymentId,
+      utr: cleanUtr,
+      message: 'आपका payment verification के लिए भेज दिया गया है। Verification के बाद आपका Master Report unlock किया जाएगा।'
+    };
+  }
+
+  // 7c. Check UPI Payment Verification Status
+  public async getUpiPaymentStatus(
+    reportType: CanonicalReportType,
+    profileKey: string,
+    authHeader?: string | null,
+    optionalEmail?: string,
+    optionalUtr?: string
+  ): Promise<{ success: boolean; status: string; record?: any; isUnlocked: boolean }> {
+    await this.ensureDb();
+    const cleanReportType = (reportType || 'MASTER_REPORT') as CanonicalReportType;
+    const safeKey = profileKey || 'default_profile';
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    const cleanUtr = (optionalUtr || '').trim().toUpperCase();
+
+    if (isDatabaseConfigured()) {
+      let queryStr = `SELECT id, user_id, email, report_type, profile_key, amount, status, utr, payment_method, created_at, verified_at, admin_notes
+                      FROM payment_transactions
+                      WHERE report_type = $1 AND profile_key = $2`;
+      const params: any[] = [cleanReportType, safeKey];
+
+      if (authUser) {
+        queryStr += ` AND (user_id = $3 OR supabase_user_id = $3 OR email = $4)`;
+        params.push(authUser.id, authUser.email);
+      } else if (cleanUtr) {
+        queryStr += ` AND utr = $3`;
+        params.push(cleanUtr);
+      } else if (optionalEmail) {
+        queryStr += ` AND email = $3`;
+        params.push(normalizeEmail(optionalEmail));
+      }
+
+      queryStr += ` ORDER BY created_at DESC LIMIT 1`;
+      const res = await query(queryStr, params);
+
+      if (res.rows.length > 0) {
+        const tx = res.rows[0];
+        return {
+          success: true,
+          status: tx.status,
+          record: tx,
+          isUnlocked: tx.status === 'VERIFIED' || tx.status === 'PAID'
+        };
+      }
+    } else {
+      // Sandbox fallback search
+      for (const [_, p] of this.localSandbox.payments.entries()) {
+        if (p.reportType === cleanReportType && p.profileKey === safeKey) {
+          if ((cleanUtr && p.utr === cleanUtr) || (authUser && (p.userId === authUser.id || p.email === authUser.email)) || (optionalEmail && p.email === optionalEmail)) {
+            return {
+              success: true,
+              status: p.status,
+              record: p,
+              isUnlocked: p.status === 'VERIFIED' || p.status === 'PAID'
+            };
+          }
+        }
+      }
+    }
+
+    return {
+      success: true,
+      status: 'NOT_FOUND',
+      isUnlocked: false
+    };
+  }
+
+  // 7d. Get All UPI Payments for Admin Dashboard
+  public async getAdminUpiPayments(): Promise<{ success: boolean; payments: any[]; total: number }> {
+    await this.ensureDb();
+    if (isDatabaseConfigured()) {
+      const res = await query(
+        `SELECT id, user_id, supabase_user_id, email, mobile, profile_key, report_type, razorpay_order_id,
+                amount, currency, status, payment_method, utr, created_at, verified_at, verified_by, admin_notes
+         FROM payment_transactions
+         WHERE payment_method = 'UPI_QR' OR utr IS NOT NULL
+         ORDER BY created_at DESC LIMIT 150`
+      );
+      return { success: true, payments: res.rows, total: res.rows.length };
+    } else {
+      const list: any[] = [];
+      for (const [_, p] of this.localSandbox.payments.entries()) {
+        if (p.paymentMethod === 'UPI_QR' || p.utr) {
+          list.push(p);
+        }
+      }
+      list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return { success: true, payments: list, total: list.length };
+    }
+  }
+
+  // 7e. Admin Verify / Reject UPI Payment & Activate Entitlement
+  public async verifyAdminUpiPayment(
+    paymentId: string,
+    action: 'VERIFY' | 'REJECT',
+    adminIdentifier: string = 'admin_user',
+    notes: string = ''
+  ): Promise<{ success: boolean; status: string; message: string; entitlement?: any }> {
+    await this.ensureDb();
+    const cleanAction = action === 'VERIFY' ? 'VERIFIED' : 'REJECTED';
+    const now = new Date().toISOString();
+
+    if (isDatabaseConfigured()) {
+      return await withTransaction(async (client) => {
+        const txRes = await client.query(
+          `SELECT id, user_id, supabase_user_id, email, mobile, profile_key, report_type, amount, razorpay_order_id, utr
+           FROM payment_transactions WHERE id = $1`,
+          [paymentId]
+        );
+
+        if (txRes.rows.length === 0) {
+          throw new Error("Payment transaction record not found.");
+        }
+
+        const tx = txRes.rows[0];
+
+        // 1. Update transaction status
+        await client.query(
+          `UPDATE payment_transactions
+           SET status = $1, verified_at = NOW(), verified_by = $2, admin_notes = $3, updated_at = NOW()
+           WHERE id = $4`,
+          [cleanAction, adminIdentifier, notes, paymentId]
+        );
+
+        let entitlement: any = null;
+
+        // 2. On VERIFY: Grant and activate MASTER_REPORT entitlement
+        if (cleanAction === 'VERIFIED') {
+          const entId = `ent_upi_${crypto.randomBytes(8).toString('hex')}`;
+          await client.query(
+            `INSERT INTO entitlements (
+              id, user_id, supabase_user_id, email, mobile, report_type, profile_key,
+              access_type, amount, currency, payment_status, razorpay_payment_id, razorpay_order_id, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'PAID', $8, 'INR', 'GRANTED', $9, $10, NOW(), NOW())
+            ON CONFLICT (user_id, profile_key, report_type)
+            DO UPDATE SET payment_status = 'GRANTED', access_type = 'PAID', updated_at = NOW()`,
+            [entId, tx.user_id, tx.supabase_user_id, tx.email, tx.mobile, tx.report_type, tx.profile_key, tx.amount, tx.utr, tx.razorpay_order_id]
+          );
+
+          entitlement = {
+            id: entId,
+            userId: tx.user_id,
+            reportType: tx.report_type,
+            profileKey: tx.profile_key,
+            accessType: 'PAID',
+            paymentStatus: 'GRANTED'
+          };
+        }
+
+        return {
+          success: true,
+          status: cleanAction,
+          message: cleanAction === 'VERIFIED'
+            ? 'भुगतान सफलतापूर्वक सत्यापित कर दिया गया है। रिपोर्ट अनलॉक हो चुकी है।'
+            : 'भुगतान अस्वीकृत कर दिया गया है।',
+          entitlement
+        };
+      });
+    } else {
+      const tx = this.localSandbox.payments.get(paymentId);
+      if (!tx) {
+        throw new Error("Payment transaction not found in sandbox.");
+      }
+
+      tx.status = cleanAction;
+      tx.verifiedAt = now;
+      tx.verifiedBy = adminIdentifier;
+      tx.adminNotes = notes;
+
+      let entitlement: any = null;
+
+      if (cleanAction === 'VERIFIED') {
+        const entKey = `${tx.userId}_${tx.reportType}_${tx.profileKey}`;
+        const entId = `ent_upi_${crypto.randomBytes(8).toString('hex')}`;
+        entitlement = {
+          id: entId,
+          userId: tx.userId,
+          mobile: tx.email,
+          reportType: tx.reportType,
+          profileKey: tx.profileKey,
+          accessType: 'PAID',
+          amount: tx.amount,
+          paymentId: tx.utr,
+          orderId: tx.orderId,
+          paymentStatus: 'GRANTED',
+          createdAt: now
+        };
+        this.localSandbox.entitlements.set(entKey, entitlement);
+      }
+
+      return {
+        success: true,
+        status: cleanAction,
+        message: cleanAction === 'VERIFIED'
+          ? 'भुगतान सफलतापूर्वक सत्यापित कर दिया गया है। रिपोर्ट अनलॉक हो चुकी है।'
+          : 'भुगतान अस्वीकृत कर दिया गया है।',
+        entitlement
+      };
+    }
+  }
+
   // 8. Retrieve All Reports for Authenticated Customer
   public async getUserReports(authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; reports: UserReportItem[]; total: number }> {
     await this.ensureDb();

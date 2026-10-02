@@ -310,9 +310,16 @@ export async function ensureDatabaseSchema(): Promise<void> {
         ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS supabase_user_id VARCHAR(64);
         ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS email VARCHAR(255);
         ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
+        ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS payment_method VARCHAR(32) DEFAULT 'RAZORPAY';
+        ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS utr VARCHAR(128);
+        ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ;
+        ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS verified_by VARCHAR(64);
+        ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS admin_notes TEXT;
         CREATE INDEX IF NOT EXISTS idx_tx_user ON payment_transactions(user_id);
         CREATE INDEX IF NOT EXISTS idx_tx_supabase ON payment_transactions(supabase_user_id);
         CREATE INDEX IF NOT EXISTS idx_tx_email ON payment_transactions(email);
+        CREATE INDEX IF NOT EXISTS idx_tx_utr ON payment_transactions(utr);
+        CREATE INDEX IF NOT EXISTS idx_tx_status ON payment_transactions(status);
         CREATE UNIQUE INDEX IF NOT EXISTS idx_tx_order_id_unique ON payment_transactions(razorpay_order_id);
         CREATE UNIQUE INDEX IF NOT EXISTS idx_tx_payment_id_unique ON payment_transactions(razorpay_payment_id) WHERE razorpay_payment_id IS NOT NULL AND razorpay_payment_id != '';
       `);
