@@ -329,6 +329,34 @@ export async function ensureDatabaseSchema(): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_webhook_event_id ON payment_webhook_events(event_id);
       `);
 
+      // 6. UPI UTR Submissions table for manual / admin QR verification
+      await query(`
+        CREATE TABLE IF NOT EXISTS upi_submissions (
+          id VARCHAR(64) PRIMARY KEY,
+          user_id VARCHAR(64) NOT NULL,
+          supabase_user_id VARCHAR(64),
+          email VARCHAR(255),
+          mobile VARCHAR(20),
+          user_name TEXT,
+          report_type VARCHAR(64) NOT NULL,
+          profile_key VARCHAR(128) NOT NULL,
+          utr_number VARCHAR(64) NOT NULL,
+          upi_id VARCHAR(128),
+          amount INT NOT NULL DEFAULT 33,
+          currency VARCHAR(8) NOT NULL DEFAULT 'INR',
+          status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+          rejection_reason TEXT,
+          verified_by VARCHAR(64),
+          verified_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_upi_sub_user ON upi_submissions(user_id);
+        CREATE INDEX IF NOT EXISTS idx_upi_sub_supabase ON upi_submissions(supabase_user_id);
+        CREATE INDEX IF NOT EXISTS idx_upi_sub_status ON upi_submissions(status);
+        CREATE INDEX IF NOT EXISTS idx_upi_sub_utr ON upi_submissions(utr_number);
+      `);
+
       schemaInitialized = true;
       console.log("[PostgreSQL] Durable database schema initialized successfully.");
     } catch (err: any) {

@@ -1482,6 +1482,7 @@ class ReportAccessEngine {
       const usersCount = await query(`SELECT COUNT(*) as count FROM users`);
       const claimsCount = await query(`SELECT COUNT(*) as count FROM free_claims`);
       const paidCount = await query(`SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total_rev FROM entitlements WHERE access_type = 'PAID'`);
+      const pendingUpi = await query(`SELECT COUNT(*) as count FROM upi_submissions WHERE status = 'PENDING'`);
 
       return {
         storageType: 'SUPABASE_POSTGRESQL',
@@ -1489,6 +1490,7 @@ class ReportAccessEngine {
         totalFreeClaims: Number(claimsCount.rows[0]?.count || 0),
         totalPaidReports: Number(paidCount.rows[0]?.count || 0),
         totalRevenueInr: Number(paidCount.rows[0]?.total_rev || 0),
+        pendingUpiVerifications: Number(pendingUpi.rows[0]?.count || 0),
         configDiagnostics: getSafeConfigAudit(),
       };
     } else {
@@ -1498,8 +1500,172 @@ class ReportAccessEngine {
         totalFreeClaims: this.localSandbox.freeClaims.size,
         totalPaidReports: Array.from(this.localSandbox.entitlements.values()).filter(e => e.accessType === 'PAID').length,
         totalRevenueInr: Array.from(this.localSandbox.entitlements.values()).filter(e => e.accessType === 'PAID').reduce((sum, e) => sum + e.amount, 0),
+        pendingUpiVerifications: 0,
         configDiagnostics: getSafeConfigAudit(),
       };
+    }
+  }
+
+  // 13. Submit UPI QR Payment with UTR for Admin Verification
+  public async submitUpiPayment(
+    reportType: CanonicalReportType,
+    profileKey: string,
+    utrNumber: string,
+    upiId?: string,
+    userName?: string,
+    authHeader?: string | null,
+    optionalEmail?: string
+  ): Promise<{ success: boolean; submissionId: string; status: string; message: string }> {
+    await this.ensureDb();
+    const cleanUtr = String(utrNumber || '').trim();
+    if (!cleanUtr || cleanUtr.length < 6) {
+      throw new Error("कृपया एक मान्य UTR (12-अंकीय लेन-देन संख्या) दर्ज करें।");
+    }
+
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    const userId = authUser?.id || `guest_${crypto.randomBytes(6).toString('hex')}`;
+    const supabaseUserId = authUser?.supabaseUserId || null;
+    const email = authUser?.email || normalizeEmail(optionalEmail) || 'guest@leofamily.online';
+    const mobile = authUser?.mobile || '';
+    const safeKey = profileKey || 'default_profile';
+    const submissionId = `upi_${crypto.randomBytes(8).toString('hex')}`;
+
+    if (isDatabaseConfigured()) {
+      await query(
+        `INSERT INTO upi_submissions (id, user_id, supabase_user_id, email, mobile, user_name, report_type, profile_key, utr_number, upi_id, amount, status, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'PENDING', NOW(), NOW())`,
+        [submissionId, userId, supabaseUserId, email, mobile, userName || 'Aspirant', reportType, safeKey, cleanUtr, upiId || 'leofamily@upi', REPORT_PRICE_INR]
+      );
+    } else {
+      (this.localSandbox as any).upiSubmissions = (this.localSandbox as any).upiSubmissions || new Map();
+      (this.localSandbox as any).upiSubmissions.set(submissionId, {
+        id: submissionId,
+        userId,
+        supabaseUserId,
+        email,
+        mobile,
+        userName: userName || 'Aspirant',
+        reportType,
+        profileKey: safeKey,
+        utrNumber: cleanUtr,
+        upiId: upiId || 'leofamily@upi',
+        amount: REPORT_PRICE_INR,
+        status: 'PENDING',
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    return {
+      success: true,
+      submissionId,
+      status: 'PENDING',
+      message: 'Payment details submitted successfully. Verification pending by admin.'
+    };
+  }
+
+  // 14. Retrieve User's UPI Submissions
+  public async getUserUpiSubmissions(authHeader?: string | null, optionalEmail?: string) {
+    await this.ensureDb();
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    if (!authUser) {
+      return { success: true, submissions: [] };
+    }
+
+    if (isDatabaseConfigured()) {
+      const res = await query(
+        `SELECT * FROM upi_submissions WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3 ORDER BY created_at DESC`,
+        [authUser.id, authUser.supabaseUserId, authUser.email]
+      );
+      return { success: true, submissions: res.rows };
+    } else {
+      const subs = Array.from(((this.localSandbox as any).upiSubmissions || new Map()).values()).filter(
+        (s: any) => s.userId === authUser.id || s.email === authUser.email
+      );
+      return { success: true, submissions: subs };
+    }
+  }
+
+  // 15. Admin: Get all Pending UPI Submissions
+  public async getAdminPendingPayments() {
+    await this.ensureDb();
+    if (isDatabaseConfigured()) {
+      const res = await query(`SELECT * FROM upi_submissions ORDER BY created_at DESC LIMIT 100`);
+      return { success: true, submissions: res.rows };
+    } else {
+      const subs = Array.from(((this.localSandbox as any).upiSubmissions || new Map()).values());
+      return { success: true, submissions: subs };
+    }
+  }
+
+  // 16. Admin: Verify (Approve / Reject) UPI Payment
+  public async verifyAdminUpiPayment(
+    submissionId: string,
+    action: 'APPROVE' | 'REJECT',
+    rejectionReason?: string,
+    verifiedBy?: string
+  ) {
+    await this.ensureDb();
+    if (!submissionId) throw new Error("Missing submissionId");
+
+    if (isDatabaseConfigured()) {
+      return await withTransaction(async (client) => {
+        const subRes = await client.query(`SELECT * FROM upi_submissions WHERE id = $1`, [submissionId]);
+        if (subRes.rows.length === 0) {
+          throw new Error("UPI submission not found");
+        }
+        const sub = subRes.rows[0];
+
+        if (action === 'APPROVE') {
+          await client.query(
+            `UPDATE upi_submissions SET status = 'VERIFIED', verified_by = $1, verified_at = NOW(), updated_at = NOW() WHERE id = $2`,
+            [verifiedBy || 'admin', submissionId]
+          );
+
+          // Create entitlement
+          const entId = `ent_upi_${crypto.randomBytes(8).toString('hex')}`;
+          await client.query(
+            `INSERT INTO entitlements (id, user_id, supabase_user_id, email, mobile, report_type, profile_key, access_type, amount, currency, payment_status, razorpay_payment_id, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, 'PAID', $8, 'INR', 'PAID', $9, NOW(), NOW())
+             ON CONFLICT (user_id, profile_key, report_type)
+             DO UPDATE SET access_type = 'PAID', amount = EXCLUDED.amount, payment_status = 'PAID', razorpay_payment_id = EXCLUDED.razorpay_payment_id, updated_at = NOW()`,
+            [entId, sub.user_id, sub.supabase_user_id, sub.email, sub.mobile, sub.report_type, sub.profile_key, sub.amount, sub.utr_number]
+          );
+
+          return { success: true, status: 'VERIFIED', message: 'Payment verified and report unlocked successfully' };
+        } else {
+          await client.query(
+            `UPDATE upi_submissions SET status = 'REJECTED', rejection_reason = $1, verified_by = $2, verified_at = NOW(), updated_at = NOW() WHERE id = $3`,
+            [rejectionReason || 'UTR verification failed with bank records', verifiedBy || 'admin', submissionId]
+          );
+          return { success: true, status: 'REJECTED', message: 'Payment submission marked as rejected' };
+        }
+      });
+    } else {
+      const map = (this.localSandbox as any).upiSubmissions || new Map();
+      const sub = map.get(submissionId);
+      if (!sub) throw new Error("Submission not found in sandbox");
+
+      if (action === 'APPROVE') {
+        sub.status = 'VERIFIED';
+        sub.verifiedAt = new Date().toISOString();
+        const entId = `ent_upi_${crypto.randomBytes(8).toString('hex')}`;
+        this.localSandbox.entitlements.set(`${sub.userId}_${sub.reportType}_${sub.profileKey}`, {
+          id: entId,
+          userId: sub.userId,
+          reportType: sub.reportType,
+          profileKey: sub.profileKey,
+          accessType: 'PAID',
+          amount: sub.amount,
+          paymentStatus: 'PAID',
+          createdAt: new Date().toISOString(),
+          paymentId: sub.utrNumber
+        });
+        return { success: true, status: 'VERIFIED', message: 'Payment verified and report unlocked' };
+      } else {
+        sub.status = 'REJECTED';
+        sub.rejectionReason = rejectionReason || 'Invalid UTR';
+        return { success: true, status: 'REJECTED', message: 'Payment marked as rejected' };
+      }
     }
   }
 }

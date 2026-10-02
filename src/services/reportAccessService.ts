@@ -449,4 +449,97 @@ export class ReportAccessService {
       { headers }
     );
   }
+
+  // 11. Submit UPI QR Payment UTR
+  public static async submitUpiPayment(
+    reportType: CanonicalReportType,
+    profileKey: string,
+    utrNumber: string,
+    upiId?: string,
+    userName?: string
+  ): Promise<{ success: boolean; submissionId?: string; status?: string; message?: string; error?: string }> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{ success: boolean; submissionId?: string; status?: string; message?: string; error?: string }>(
+      '/api/payments/submit-utr',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reportType,
+          profileKey: profileKey || 'default_profile',
+          utrNumber,
+          upiId: upiId || 'leofamily@upi',
+          userName: userName || storedUser?.fullName || 'Seeker',
+          email: storedUser?.email,
+        }),
+      }
+    );
+  }
+
+  // 12. Get User's UPI Submissions
+  public static async getMyUpiSubmissions(emailOrMobile?: string): Promise<{ success: boolean; submissions: any[] }> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const params = new URLSearchParams();
+    if (emailOrMobile) {
+      if (emailOrMobile.includes('@')) {
+        params.append('email', emailOrMobile);
+      } else {
+        params.append('mobile', emailOrMobile);
+      }
+    } else if (storedUser?.email) {
+      params.append('email', storedUser.email);
+    }
+
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{ success: boolean; submissions: any[] }>(
+      `/api/payments/my-upi-submissions?${params.toString()}`,
+      { headers }
+    );
+  }
+
+  // 13. Admin: Get Pending UPI Payments
+  public static async getAdminPendingPayments(): Promise<{ success: boolean; submissions: any[] }> {
+    return await safeFetchJson<{ success: boolean; submissions: any[] }>('/api/admin/pending-upi-payments');
+  }
+
+  // 14. Admin: Verify (Approve / Reject) UPI Payment
+  public static async adminVerifyPayment(
+    submissionId: string,
+    action: 'APPROVE' | 'REJECT',
+    rejectionReason?: string
+  ): Promise<{ success: boolean; status: string; message: string }> {
+    return await safeFetchJson<{ success: boolean; status: string; message: string }>(
+      '/api/admin/verify-upi-payment',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          submissionId,
+          action,
+          rejectionReason,
+          verifiedBy: 'Admin',
+        }),
+      }
+    );
+  }
+
+  // Alias for backward compatibility
+  public static async verifyUpiPayment(
+    submissionId: string,
+    status: 'APPROVED' | 'REJECTED',
+    adminNotes?: string
+  ): Promise<{ success: boolean; status: string; message: string }> {
+    return this.adminVerifyPayment(
+      submissionId,
+      status === 'APPROVED' ? 'APPROVE' : 'REJECT',
+      adminNotes
+    );
+  }
 }

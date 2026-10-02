@@ -14,6 +14,12 @@ import {
   Zap,
   RotateCcw,
   MessageSquare,
+  Copy,
+  Check,
+  Clock,
+  ExternalLink,
+  ChevronRight,
+  Info
 } from 'lucide-react';
 import {
   CanonicalReportType,
@@ -75,13 +81,21 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
   const [localError, setLocalError] = useState<string | null>(null);
   const [accessResult, setAccessResult] = useState<ReportAccessCheckResult | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState<boolean>(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'UPI' | 'QR' | 'CARD'>('UPI');
+  
+  // Payment methods: 'UPI_QR' (Primary) vs 'RAZORPAY' (Alternate)
+  const [paymentMode, setPaymentMode] = useState<'UPI_QR' | 'RAZORPAY'>('UPI_QR');
+  const [utrInput, setUtrInput] = useState<string>('');
+  const [copiedUpi, setCopiedUpi] = useState<boolean>(false);
+  const [submissionSuccessData, setSubmissionSuccessData] = useState<{ submissionId: string; utr: string } | null>(null);
 
-  // Step state: 'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'
-  const [step, setStep] = useState<'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PAYMENT_PROCESSING' | 'SUCCESS'>('AUTH_REQUIRED');
+  // Step state: 'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PENDING_VERIFICATION' | 'PAYMENT_PROCESSING' | 'SUCCESS'
+  const [step, setStep] = useState<'AUTH_REQUIRED' | 'ACCESS_OPTIONS' | 'PENDING_VERIFICATION' | 'PAYMENT_PROCESSING' | 'SUCCESS'>('AUTH_REQUIRED');
 
   const error = localError || authHookError;
   const isLoading = localLoading || isSendingOtp || isVerifyingOtp || isGoogleLoading;
+
+  const MERCHANT_UPI_ID = 'leofamily@upi';
+  const REPORT_PRICE = reportDef.priceInr || 33;
 
   // Pre-load Razorpay SDK script in background
   useEffect(() => {
@@ -111,6 +125,9 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
     if (isOpen) {
       setLocalError(null);
       clearAuthError();
+      setCopiedUpi(false);
+      setUtrInput('');
+      setSubmissionSuccessData(null);
 
       if (isAuthenticated) {
         setStep('ACCESS_OPTIONS');
@@ -208,8 +225,49 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
     }
   };
 
-  // 5. Razorpay ₹33 Payment Checkout
-  const handleInitiatePayment = async () => {
+  // 5. Submit UPI UTR for Admin Verification (Primary Flow)
+  const handleSubmitUpiUtr = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+    const cleanUtr = utrInput.replace(/\s+/g, '').trim();
+
+    if (!cleanUtr || cleanUtr.length < 6) {
+      setLocalError(
+        language === 'hi'
+          ? 'कृपया 12-अंकीय मान्य UTR / Transaction ID दर्ज करें।'
+          : 'Please enter a valid 12-digit UTR / Transaction ID.'
+      );
+      return;
+    }
+
+    setLocalLoading(true);
+    try {
+      const res = await ReportAccessService.submitUpiPayment(
+        reportType,
+        profileKey,
+        cleanUtr,
+        MERCHANT_UPI_ID,
+        profileName || appUser?.fullName || 'Seeker'
+      );
+
+      if (res.success) {
+        setSubmissionSuccessData({
+          submissionId: res.submissionId || 'upi_submitted',
+          utr: cleanUtr,
+        });
+        setStep('PENDING_VERIFICATION');
+      } else {
+        setLocalError(res.error || res.message || 'UTR verification submission failed. Please try again.');
+      }
+    } catch (err: any) {
+      setLocalError(err?.message || 'Failed to submit payment details.');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
+  // 6. Razorpay ₹33 Payment Checkout (Secondary Option)
+  const handleInitiateRazorpay = async () => {
     setLocalLoading(true);
     setLocalError(null);
 
@@ -289,10 +347,16 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
     }
   };
 
-  const isFreeEligible = accessResult?.canClaimFree ?? true;
+  const handleCopyUpiId = () => {
+    navigator.clipboard.writeText(MERCHANT_UPI_ID);
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
+  };
+
+  const isFreeEligible = accessResult?.canClaimFree ?? false;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div className="relative w-full max-w-lg bg-gradient-to-b from-[#FFFDF9] via-[#FAF6EE] to-[#F5EFE1] border-2 border-amber-300/80 rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* Header Ribbon */}
@@ -301,10 +365,10 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
             <BrandLogo size="sm" />
             <div>
               <h2 className="font-playfair text-base font-bold tracking-wide text-amber-100">
-                LeoFamily Report Access
+                LeoFamily Master Report Unlock
               </h2>
               <p className="text-[10px] text-amber-200/80 font-mono">
-                Authoritative Report Entitlement
+                Official Indian Numerology Consultation
               </p>
             </div>
           </div>
@@ -321,19 +385,20 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
         {/* Modal Body */}
         <div className="p-6 md:p-8 space-y-6 overflow-y-auto">
           
-          {/* Top Report Info */}
+          {/* Top Report Info Bar */}
           <div className="p-4 rounded-2xl bg-white border border-amber-200 shadow-xs flex items-center justify-between">
             <div>
               <div className="text-[10px] font-mono uppercase tracking-wider text-amber-700 font-bold">
-                {language === 'hi' ? 'चयनित रिपोर्ट' : 'Selected Report'}
+                {language === 'hi' ? 'चयनित रिपोर्ट (Report)' : 'Selected Report'}
               </div>
               <h4 className="font-playfair font-bold text-slate-800 text-sm md:text-base">
                 {language === 'hi' ? reportDef.titleHi : reportDef.titleEn}
               </h4>
             </div>
             <div className="text-right">
-              <div className="text-xs font-bold text-[#D97706] font-playfair text-base">
-                {isFreeEligible ? 'FREE (₹0)' : '₹33 only'}
+              <span className="text-[10px] text-slate-400 block font-mono">Unlock Fee</span>
+              <div className="text-sm md:text-base font-extrabold text-[#D97706] font-playfair">
+                {isFreeEligible ? 'FREE (₹0)' : `₹${REPORT_PRICE} only`}
               </div>
             </div>
           </div>
@@ -355,8 +420,11 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                   {language === 'hi' ? 'लॉगिन आवश्यक' : 'Login Required'}
                 </div>
                 <h3 className="font-playfair text-lg md:text-xl font-bold text-slate-800">
-                  {language === 'hi' ? 'अपनी रिपोर्ट अनलॉक करने के लिए लॉगिन करें' : 'Login to unlock your report'}
+                  {language === 'hi' ? 'अपनी रिपोर्ट सुरक्षित रखने हेतु लॉगिन करें' : 'Login to secure your report'}
                 </h3>
+                <p className="text-xs text-slate-500">
+                  लॉगिन करने से आपकी रिपोर्ट आपके खाते (My Reports) में आजीवन सुरक्षित रहेगी।
+                </p>
               </div>
 
               {!otpSent ? (
@@ -433,7 +501,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                   </form>
                 </div>
               ) : (
-                /* OTP Verification */
+                /* OTP Verification Form */
                 <form onSubmit={handleVerifyWhatsAppOtp} className="space-y-4 animate-in fade-in">
                   <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-center text-xs text-slate-700">
                     <div>{language === 'hi' ? 'WhatsApp पर भेजा गया कोड दर्ज करें:' : 'Enter code sent to WhatsApp:'}</div>
@@ -492,11 +560,12 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
             </div>
           )}
 
-          {/* STEP 2: ACCESS OPTIONS (CLAIM FREE OR PAY ₹33) */}
+          {/* STEP 2: ACCESS & PAYMENT OPTIONS */}
           {step === 'ACCESS_OPTIONS' && (
             <div className="space-y-6">
+              
               {isFreeEligible ? (
-                /* Free Claim Card */
+                /* Free Claim Option */
                 <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-300 text-center space-y-4 shadow-xs">
                   <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                     <Gift className="w-6 h-6" />
@@ -507,8 +576,8 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                     </h4>
                     <p className="text-xs text-emerald-700 mt-1">
                       {language === 'hi'
-                        ? 'लियोफैमिली नए पंजीकृत उपयोगकर्ताओं को पहली विशेषज्ञ रिपोर्ट निःशुल्क प्रदान करता है।'
-                        : 'LeoFamily offers your first comprehensive specialist report completely free of cost.'}
+                        ? 'लियोफैमिली नए उपयोगकर्ताओं को प्रथम संपूर्ण मास्टर रिपोर्ट निःशुल्क प्रदान करता है।'
+                        : 'LeoFamily offers your first comprehensive master consultation dossier completely free.'}
                     </p>
                   </div>
 
@@ -525,54 +594,292 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
                     )}
                     <span>
                       {language === 'hi'
-                        ? 'मुफ़्त रिपोर्ट अभी अनलॉक करें (Unlock Free Report Now)'
+                        ? 'मुफ़्त रिपोर्ट अभी अनलॉक करें (Unlock Free Report)'
                         : 'Unlock Free Report Now'}
                     </span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
-                /* ₹33 Razorpay Payment Card */
-                <div className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-slate-700 space-y-2">
-                    <div className="flex items-center justify-between font-bold text-slate-800 text-sm">
-                      <span>{language === 'hi' ? 'विशेषज्ञ रिपोर्ट शुल्क' : 'Specialist Report Fee'}</span>
-                      <span className="text-[#D97706] font-playfair text-lg">₹33 only</span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">
-                      {language === 'hi'
-                        ? 'आपकी पहली निःशुल्क रिपोर्ट का उपयोग हो चुका है। तत्काल 100% सुरक्षित भुगतान के माध्यम से रिपोर्ट अनलॉक करें।'
-                        : 'Your first free report has been claimed. Unlock this specialist report with instant secure payment.'}
-                    </p>
-                    <div className="text-[10px] text-slate-400 font-mono">
-                      ✓ सम्पूर्ण विश्लेषण &nbsp;•&nbsp; ✓ A4 PDF डाउनलोड &nbsp;•&nbsp; ✓ आजीवन पहुंच
-                    </div>
+                /* UPI QR PAYMENT FLOW (PRIMARY) */
+                <div className="space-y-6">
+                  
+                  {/* Payment Mode Selector Tabs */}
+                  <div className="flex p-1 bg-stone-100 rounded-2xl border border-stone-200 text-xs font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMode('UPI_QR')}
+                      className={`flex-1 py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer ${
+                        paymentMode === 'UPI_QR'
+                          ? 'bg-white text-[#D97706] shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      <QrCode className="w-4 h-4" />
+                      <span>UPI QR & UTR (Recommended)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMode('RAZORPAY')}
+                      className={`flex-1 py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer ${
+                        paymentMode === 'RAZORPAY'
+                          ? 'bg-white text-blue-700 shadow-xs'
+                          : 'text-stone-600 hover:text-stone-900'
+                      }`}
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      <span>Razorpay (Instant)</span>
+                    </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleInitiatePayment}
-                    disabled={isLoading}
-                    className="w-full py-4 px-6 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-2xl text-xs md:text-sm uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
-                  >
-                    {localLoading ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Unlock className="w-4 h-4" />
-                    )}
-                    <span>
-                      {language === 'hi'
-                        ? '₹33 का भुगतान करें एवं रिपोर्ट खोलें'
-                        : 'Pay ₹33 & Unlock Report'}
-                    </span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  {paymentMode === 'UPI_QR' ? (
+                    <div className="space-y-5 animate-in fade-in">
+                      
+                      {/* UPI QR Visual Card */}
+                      <div className="bg-white p-5 rounded-2xl border-2 border-amber-300 shadow-sm text-center space-y-4">
+                        
+                        <div className="flex items-center justify-between border-b border-amber-100 pb-3">
+                          <div className="text-left">
+                            <span className="text-[10px] font-mono uppercase text-amber-700 font-bold block">Scan & Pay</span>
+                            <span className="text-xs font-bold text-stone-800">LeoFamily UPI QR</span>
+                          </div>
+                          <span className="text-base font-extrabold text-[#D97706] font-playfair bg-amber-50 px-3 py-1 rounded-xl border border-amber-200">
+                            ₹{REPORT_PRICE}
+                          </span>
+                        </div>
+
+                        {/* Generated Clean Scalable UPI QR Visual */}
+                        <div className="w-48 h-48 mx-auto bg-stone-950 p-3 rounded-2xl shadow-md flex flex-col items-center justify-center relative group">
+                          {/* Stylized QR Code Matrix SVG */}
+                          <svg viewBox="0 0 100 100" className="w-full h-full text-white fill-current">
+                            {/* Outer boundary squares */}
+                            <rect x="5" y="5" width="28" height="28" fill="white" />
+                            <rect x="9" y="9" width="20" height="20" fill="black" />
+                            <rect x="13" y="13" width="12" height="12" fill="#D97706" />
+
+                            <rect x="67" y="5" width="28" height="28" fill="white" />
+                            <rect x="71" y="9" width="20" height="20" fill="black" />
+                            <rect x="75" y="13" width="12" height="12" fill="#D97706" />
+
+                            <rect x="5" y="67" width="28" height="28" fill="white" />
+                            <rect x="9" y="71" width="20" height="20" fill="black" />
+                            <rect x="13" y="75" width="12" height="12" fill="#D97706" />
+
+                            {/* Data grid patterns */}
+                            <rect x="38" y="8" width="6" height="6" fill="white" />
+                            <rect x="48" y="8" width="6" height="6" fill="white" />
+                            <rect x="58" y="8" width="5" height="6" fill="white" />
+                            <rect x="38" y="20" width="6" height="12" fill="white" />
+                            <rect x="48" y="20" width="16" height="6" fill="white" />
+
+                            <rect x="8" y="38" width="18" height="6" fill="white" />
+                            <rect x="8" y="48" width="6" height="14" fill="white" />
+                            <rect x="18" y="48" width="8" height="6" fill="white" />
+
+                            <rect x="38" y="38" width="24" height="24" fill="#F59E0B" />
+                            <rect x="44" y="44" width="12" height="12" fill="black" />
+                            <circle cx="50" cy="50" r="3" fill="#D97706" />
+
+                            <rect x="68" y="38" width="14" height="8" fill="white" />
+                            <rect x="86" y="38" width="6" height="20" fill="white" />
+                            <rect x="68" y="50" width="12" height="12" fill="white" />
+
+                            <rect x="38" y="68" width="12" height="6" fill="white" />
+                            <rect x="56" y="68" width="18" height="6" fill="white" />
+                            <rect x="38" y="80" width="24" height="6" fill="white" />
+                            <rect x="68" y="80" width="24" height="12" fill="white" />
+                            <rect x="48" y="88" width="12" height="6" fill="white" />
+                          </svg>
+                          <div className="absolute inset-0 bg-stone-900/60 rounded-2xl opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-[10px] text-amber-200 font-bold p-2 text-center">
+                            GPay • PhonePe • Paytm • BHIM
+                          </div>
+                        </div>
+
+                        {/* Merchant UPI ID Box with 1-Click Copy */}
+                        <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex items-center justify-between text-xs">
+                          <div className="text-left">
+                            <span className="text-[10px] text-stone-500 block">UPI ID:</span>
+                            <span className="font-mono font-bold text-stone-900">{MERCHANT_UPI_ID}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleCopyUpiId}
+                            className="bg-white hover:bg-amber-100 border border-amber-300 text-[#D97706] font-bold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
+                          >
+                            {copiedUpi ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                <span className="text-emerald-700">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5" />
+                                <span>Copy ID</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        {/* 3 Step Instructions */}
+                        <div className="text-left text-[11px] text-stone-600 space-y-1.5 pt-1">
+                          <div className="flex items-start gap-2">
+                            <span className="w-4 h-4 rounded-full bg-amber-200 text-[#78350F] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                            <span>किसी भी UPI ऐप से ऊपर दिए QR को स्कैन करें या UPI ID पर <strong>₹{REPORT_PRICE}</strong> भेजें।</span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="w-4 h-4 rounded-full bg-amber-200 text-[#78350F] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                            <span>सफल भुगतान के बाद 12-अंकीय <strong>UTR / UPI Ref Number</strong> कॉपी करें।</span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="w-4 h-4 rounded-full bg-amber-200 text-[#78350F] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                            <span>नीचे UTR दर्ज करके <strong>Submit Verification</strong> पर क्लिक करें।</span>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      {/* UTR Submission Form */}
+                      <form onSubmit={handleSubmitUpiUtr} className="space-y-4">
+                        <div className="space-y-1.5 text-left">
+                          <label className="block text-xs font-bold text-stone-800">
+                            12-अंकीय UTR / Transaction Reference ID *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={utrInput}
+                            onChange={(e) => setUtrInput(e.target.value.trim())}
+                            placeholder="उदा. 408212345678"
+                            maxLength={24}
+                            className="w-full px-4 py-3 bg-white border-2 border-amber-300 rounded-xl text-sm font-mono font-bold tracking-wider text-stone-900 focus:border-[#D97706] focus:outline-none shadow-xs"
+                          />
+                          <span className="text-[10px] text-stone-500 block">
+                            GPay, PhonePe या Paytm के पेमेंट रिसीट से 12 अंकों का UTR नंबर देखें।
+                          </span>
+                        </div>
+
+                        {/* Critical Communication Banner */}
+                        <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-[11px] text-[#92400E] flex items-start gap-2">
+                          <Info className="w-4 h-4 shrink-0 text-[#D97706] mt-0.5" />
+                          <span>
+                            <strong>महत्वपूर्ण सूचना:</strong> Payment submit होने के बाद report verification complete होने तक locked रहेगा।
+                          </span>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={localLoading || !utrInput.trim()}
+                          className="w-full bg-[#D97706] hover:bg-[#B45309] disabled:opacity-50 text-white font-bold py-4 px-6 rounded-2xl text-xs md:text-sm uppercase tracking-wider transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          {localLoading ? (
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <ShieldCheck className="w-5 h-5" />
+                          )}
+                          <span>Submit Verification (सत्यापन हेतु भेजें)</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </form>
+
+                    </div>
+                  ) : (
+                    /* RAZORPAY INSTANT CARD FLOW */
+                    <div className="space-y-4 animate-in fade-in">
+                      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-slate-700 space-y-2">
+                        <div className="flex items-center justify-between font-bold text-slate-800 text-sm">
+                          <span>Razorpay Instant Payment Gateway</span>
+                          <span className="text-blue-700 font-playfair text-lg">₹{REPORT_PRICE}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          डेबिट/क्रेडिट कार्ड, नेट बैंकिंग या तत्काल ऑनलाइन भुगतान के माध्यम से रिपोर्ट तुरंत अनलॉक करें।
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleInitiateRazorpay}
+                        disabled={isLoading}
+                        className="w-full py-4 px-6 bg-[#1E3A8A] hover:bg-[#1e293b] text-white font-bold rounded-2xl text-xs md:text-sm uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                      >
+                        {localLoading ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <CreditCard className="w-4 h-4" />
+                        )}
+                        <span>Pay ₹{REPORT_PRICE} via Razorpay (Instant Unlock)</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
                 </div>
               )}
+
             </div>
           )}
 
-          {/* STEP 3: PAYMENT PROCESSING */}
+          {/* STEP 3: PENDING VERIFICATION STATE (NO FALSE SUCCESS, PROPER COMMUNICATION) */}
+          {step === 'PENDING_VERIFICATION' && submissionSuccessData && (
+            <div className="py-6 text-center space-y-5 animate-in fade-in">
+              <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 text-[#D97706] flex items-center justify-center">
+                <Clock className="w-8 h-8 animate-pulse" />
+              </div>
+              
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 bg-amber-100 text-[#92400E] border border-amber-300 px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider">
+                  ⏳ Verification Pending
+                </div>
+                <h4 className="font-playfair text-xl font-bold text-stone-900">
+                  भुगतान विवरण सफलतापूर्वक प्राप्त हुआ
+                </h4>
+                <p className="text-xs text-stone-600 max-w-sm mx-auto leading-relaxed">
+                  आपका UTR सत्यापन व्यवस्थापक (Admin) को भेज दिया गया है। बैंक मिलान पूर्ण होते ही रिपोर्ट स्वतः अनलॉक हो जाएगी।
+                </p>
+              </div>
+
+              {/* Submission Summary Box */}
+              <div className="p-4 rounded-2xl bg-white border border-stone-200 text-left text-xs font-mono space-y-1.5 shadow-xs">
+                <div className="flex justify-between">
+                  <span className="text-stone-400">Submission ID:</span>
+                  <span className="font-bold text-stone-800">{submissionSuccessData.submissionId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-400">UTR / Ref:</span>
+                  <span className="font-bold text-[#D97706]">{submissionSuccessData.utr}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-400">Status:</span>
+                  <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    Payment Verification Pending
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-[#92400E]">
+                Payment submit होने के बाद report verification complete होने तक locked रहेगा।
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 py-3 px-4 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
+                >
+                  बंद करें (Close)
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 py-3 px-4 bg-[#D97706] hover:bg-[#B45309] text-white font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>My Reports में स्थिति देखें</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: PAYMENT PROCESSING (RAZORPAY) */}
           {step === 'PAYMENT_PROCESSING' && (
             <div className="py-8 text-center space-y-4">
               <RefreshCw className="w-10 h-10 animate-spin text-[#D97706] mx-auto" />
@@ -587,7 +894,7 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
             </div>
           )}
 
-          {/* STEP 4: SUCCESS */}
+          {/* STEP 5: VERIFIED SUCCESS */}
           {step === 'SUCCESS' && (
             <div className="py-6 text-center space-y-4">
               <div className="w-14 h-14 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
@@ -598,8 +905,8 @@ export const ReportPaywallModal: React.FC<ReportPaywallModalProps> = ({
               </h4>
               <p className="text-xs text-slate-600">
                 {language === 'hi'
-                  ? 'आपकी सम्पूर्ण रिपोर्ट तैयार है।'
-                  : 'Your complete specialist report is now ready for consultation.'}
+                  ? 'आपकी सम्पूर्ण 32-अध्यायों की मास्टर रिपोर्ट तैयार है।'
+                  : 'Your complete 32-section master report is now ready for consultation.'}
               </p>
 
               <button

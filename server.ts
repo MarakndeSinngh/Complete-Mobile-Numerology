@@ -256,6 +256,70 @@ async function startServer() {
     }
   });
 
+  // 12a. Submit UPI QR Payment UTR
+  app.post("/api/payments/submit-utr", async (req, res) => {
+    try {
+      const { reportType, profileKey, utrNumber, upiId, userName, email } = req.body || {};
+      const authHeader = req.headers['authorization'];
+      if (!reportType || !utrNumber) {
+        return res.status(400).json({ error: "Missing reportType or utrNumber" });
+      }
+      const result = await reportAccessEngine.submitUpiPayment(
+        reportType,
+        profileKey || 'default_profile',
+        utrNumber,
+        upiId,
+        userName,
+        authHeader,
+        email
+      );
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Failed to submit UPI verification" });
+    }
+  });
+
+  // 12b. Get User's UPI Submissions
+  app.get("/api/payments/my-upi-submissions", async (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const email = req.query.email as string | undefined;
+      const data = await reportAccessEngine.getUserUpiSubmissions(authHeader, email);
+      res.json(data);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Failed to fetch UPI submissions" });
+    }
+  });
+
+  // 12c. Admin: Get Pending UPI Payments
+  app.get("/api/admin/pending-upi-payments", async (req, res) => {
+    try {
+      const data = await reportAccessEngine.getAdminPendingPayments();
+      res.json(data);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Failed to fetch pending payments" });
+    }
+  });
+
+  // 12d. Admin: Verify (Approve/Reject) UPI Payment
+  app.post("/api/admin/verify-upi-payment", async (req, res) => {
+    try {
+      const { submissionId, action, rejectionReason, verifiedBy } = req.body || {};
+      if (!submissionId || !action) {
+        return res.status(400).json({ error: "Missing submissionId or action" });
+      }
+      const result = await reportAccessEngine.verifyAdminUpiPayment(
+        submissionId,
+        action,
+        rejectionReason,
+        verifiedBy || 'Admin'
+      );
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Failed to verify UPI payment" });
+    }
+  });
+
   // 13. OTP & Gateway Environment Diagnostics (Restricted in production)
   app.get("/api/otp-debug", (req, res) => {
     res.setHeader("Cache-Control", "no-store, max-age=0");

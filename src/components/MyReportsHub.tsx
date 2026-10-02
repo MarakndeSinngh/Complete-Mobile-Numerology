@@ -58,6 +58,7 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
   const [activeTab, setActiveTab] = useState<'REPORTS' | 'PAYMENTS' | 'ENTITLEMENTS'>('REPORTS');
   const [reports, setReports] = useState<UserReportItem[]>([]);
   const [payments, setPayments] = useState<PaymentHistoryItem[]>([]);
+  const [upiSubmissions, setUpiSubmissions] = useState<any[]>([]);
   const [summary, setSummary] = useState<UserAccessSummary | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -76,10 +77,11 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
     setIsLoading(true);
     setError(null);
     try {
-      const [reportsRes, paymentsRes, summaryRes] = await Promise.all([
+      const [reportsRes, paymentsRes, summaryRes, upiRes] = await Promise.all([
         ReportAccessService.getMyReports(userMobile),
         ReportAccessService.getPaymentHistory(userMobile),
         ReportAccessService.getAccessSummary(userMobile),
+        ReportAccessService.getMyUpiSubmissions(userEmail || userMobile),
       ]);
 
       if (reportsRes && Array.isArray(reportsRes.reports)) {
@@ -90,6 +92,9 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
       }
       if (summaryRes && summaryRes.summary) {
         setSummary(summaryRes.summary);
+      }
+      if (upiRes && Array.isArray(upiRes.submissions)) {
+        setUpiSubmissions(upiRes.submissions);
       }
     } catch (err: any) {
       console.warn("Notice: Error fetching customer reports from server:", err);
@@ -351,6 +356,132 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Pending & Rejected UPI Submissions Section */}
+          {upiSubmissions.filter((s: any) => s.status === 'PENDING' || s.status === 'REJECTED').length > 0 && (
+            <div className="space-y-4">
+              <h3 className="font-playfair text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-amber-600" />
+                <span>
+                  {language === 'hi' ? 'UPI पेमेंट सत्यापन स्थिति' : 'UPI Payment Verification Status'}
+                </span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {upiSubmissions
+                  .filter((s: any) => s.status === 'PENDING' || s.status === 'REJECTED')
+                  .map((sub: any) => {
+                    const isPending = sub.status === 'PENDING';
+                    const def = REPORT_REGISTRY[sub.report_type as CanonicalReportType];
+                    const reportTitle =
+                      language === 'hi' ? def?.titleHi : def?.titleEn || sub.report_type;
+
+                    return (
+                      <div
+                        key={sub.id}
+                        className={`p-5 rounded-3xl border-2 transition-all space-y-4 ${
+                          isPending
+                            ? 'bg-gradient-to-br from-amber-50/90 to-amber-100/40 border-amber-300 shadow-sm'
+                            : 'bg-gradient-to-br from-red-50/90 to-red-100/40 border-red-300 shadow-sm'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-mono font-bold px-3 py-1 rounded-full border ${
+                              isPending
+                                ? 'text-amber-900 bg-amber-200/80 border-amber-400'
+                                : 'text-red-900 bg-red-200/80 border-red-400'
+                            }`}
+                          >
+                            {isPending ? (
+                              <>
+                                <Clock className="w-3.5 h-3.5 text-amber-700 animate-pulse" />
+                                <span>
+                                  {language === 'hi'
+                                    ? 'पेमेंट सत्यापन लंबित (Pending)'
+                                    : 'Payment Verification Pending'}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle className="w-3.5 h-3.5 text-red-700" />
+                                <span>
+                                  {language === 'hi'
+                                    ? 'सत्यापन आवश्यक (Verification Required)'
+                                    : 'Verification Required'}
+                                </span>
+                              </>
+                            )}
+                          </span>
+
+                          <span className="text-[10px] font-mono text-slate-500 font-bold">
+                            ₹{sub.amount}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-playfair font-bold text-base text-slate-900">
+                            {reportTitle}
+                          </h4>
+                          <p className="text-xs text-slate-600 mt-0.5">
+                            {sub.user_name || 'Seeker'} • Profile: {sub.profile_key}
+                          </p>
+                        </div>
+
+                        <div className="p-3 bg-white/90 rounded-2xl border border-amber-200/80 text-xs space-y-1.5 font-sans">
+                          <div className="flex justify-between font-mono text-[11px]">
+                            <span className="text-slate-500">UTR Number:</span>
+                            <span className="font-bold text-slate-900">{sub.utr_number}</span>
+                          </div>
+                          <div className="flex justify-between font-mono text-[11px]">
+                            <span className="text-slate-500">Submitted:</span>
+                            <span className="text-slate-700">
+                              {formatLocalizedDate(new Date(sub.created_at), language)}
+                            </span>
+                          </div>
+                          {sub.admin_notes && (
+                            <div className="pt-1.5 border-t border-slate-100 text-[11px] text-red-700">
+                              <span className="font-bold">Admin Note: </span>
+                              <span>{sub.admin_notes}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {isPending ? (
+                          <div className="space-y-2">
+                            <p className="text-[11px] text-amber-900/90 leading-relaxed font-medium">
+                              {language === 'hi'
+                                ? 'Payment submit होने के बाद report verification complete होने तक locked रहेगा।'
+                                : 'Your report remains locked while payment verification is underway. It unlocks automatically once verified.'}
+                            </p>
+                            <button
+                              onClick={fetchUserData}
+                              className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                              <span>{language === 'hi' ? 'स्थिति जांचें (Check Status)' : 'Check Verification Status'}</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => {
+                                const portalId = getPortalIdForReport(sub.report_type);
+                                onNavigatePortal(portalId);
+                              }}
+                              className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                              <span>{language === 'hi' ? 'UTR पुनः दर्ज करें' : 'Resubmit Valid UTR'}</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
 
           {/* Loading State */}
           {isLoading ? (

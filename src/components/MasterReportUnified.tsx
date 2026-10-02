@@ -3,6 +3,7 @@ import { useLanguage } from '../i18n';
 import { CompleteNumerologyProfile } from '../core/types';
 import { calculateKuaNumber, KuaProfile } from '../core/kuaEngine';
 import { deriveExpertConsultationDossier, ExpertConsultationDossier } from '../core/expertConsultationEngine';
+import { analyzeCrossPatterns, PersonalizedPatternDossier } from '../core/crossPatternEngine';
 import { buildLocalizedExpertDossier, getPlanetName, getLocalizedNumberMeaning, getLocalized81Yoga, getLocalizedPlane, getLocalizedPersonalYear, LocalizedPersonalYear } from '../i18n/dynamicContent';
 import { calculatePersonalYearNumber } from '../core/luckyDatesEngine';
 import { sumDigits, reduceToDigit } from '../core/numerologyEngine';
@@ -172,6 +173,11 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     return buildLocalizedExpertDossier(profile, language);
   }, [profile, language]);
 
+  // Derived cross-pattern analysis from unified profile
+  const patternDossier: PersonalizedPatternDossier = React.useMemo(() => {
+    return analyzeCrossPatterns(profile);
+  }, [profile]);
+
   // Saved Signature, Vehicle, Business, Marriage & Child Audit state from localStorage
   const [savedSigAudit, setSavedSigAudit] = useState<any>(null);
   const [savedVehicleAudit, setSavedVehicleAudit] = useState<any>(null);
@@ -271,29 +277,46 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
 
   const [savedLuckyDatesReport, setSavedLuckyDatesReport] = useState<any>(null);
 
-  // Quick navigation menu items
-  const navItems = [
-    { id: 'sec-cover', label: '00. Cover Page & Snapshot', icon: <Sparkles className="w-3.5 h-3.5" /> },
-    { id: 'sec-01', label: '01. Executive Summary', icon: <Sparkles className="w-3.5 h-3.5" /> },
-    { id: 'sec-02', label: '02. Core Numbers & Synthesis', icon: <User className="w-3.5 h-3.5" /> },
-    { id: 'sec-03', label: '03-07. Lo Shu & Grids', icon: <Compass className="w-3.5 h-3.5" /> },
-    { id: 'sec-08', label: '08-09. Planes & Arrows', icon: <Layers className="w-3.5 h-3.5" /> },
-    { id: 'sec-10', label: '10-12. 81 Yogas & Archetype', icon: <Award className="w-3.5 h-3.5" /> },
-    { id: 'sec-13', label: '13-17. Psychological & Life Domains', icon: <Briefcase className="w-3.5 h-3.5" /> },
-    { id: 'sec-18', label: '18. Mobile Numerology', icon: <Phone className="w-3.5 h-3.5" /> },
-    { id: 'sec-19', label: '19-21. Name (Chaldean & Pythagorean)', icon: <FileText className="w-3.5 h-3.5" /> },
-    { id: 'sec-22', label: '22-24. Numero Vastu & Kua', icon: <Home className="w-3.5 h-3.5" /> },
-    { id: 'sec-25', label: '25-27. Personal Year & Vedic Dasha', icon: <Calendar className="w-3.5 h-3.5" /> },
-    { id: 'sec-28', label: '28. Traditional Wellness', icon: <Activity className="w-3.5 h-3.5" /> },
-    { id: 'sec-29', label: '29. LeoFamily Signature Audit Pro', icon: <PenTool className="w-3.5 h-3.5" /> },
-    { id: 'sec-29b', label: '29B. Vehicle Numerology Pro', icon: <Car className="w-3.5 h-3.5" /> },
-    { id: 'sec-29c', label: '29C. Business Numerology Pro', icon: <Briefcase className="w-3.5 h-3.5" /> },
-    { id: 'sec-29d', label: '29D. Marriage Synastry Pro', icon: <Heart className="w-3.5 h-3.5" /> },
-    { id: 'sec-29e', label: '29E. Child Lucky Names Pro', icon: <Baby className="w-3.5 h-3.5" /> },
-    { id: 'sec-29f', label: '29F. Lucky Dates Finder Pro', icon: <Calendar className="w-3.5 h-3.5" /> },
-    { id: 'sec-30', label: '30. Consolidated Remedies & 90-Day Plan', icon: <Shield className="w-3.5 h-3.5" /> },
-    { id: 'sec-31', label: '31. Final Consultation Summary', icon: <Target className="w-3.5 h-3.5" /> }
+  // 5-Pillar Structured Category Definition for 32 Master Chapters
+  const [selectedPillar, setSelectedPillar] = useState<'ALL' | 'CORE' | 'CAREER' | 'RELATIONSHIPS' | 'VASTU' | 'ACTION'>('ALL');
+
+  const reportPillars = [
+    { id: 'ALL', label: 'All Chapters (सम्पूर्ण 32)', range: '01–32' },
+    { id: 'CORE', label: '1. Core Foundation', range: '01–09', targetId: 'sec-01' },
+    { id: 'CAREER', label: '2. Career & Finance', range: '10–15', targetId: 'sec-10' },
+    { id: 'RELATIONSHIPS', label: '3. Relationships & Personal', range: '16–21', targetId: 'sec-13' },
+    { id: 'VASTU', label: '4. Occult, Vastu & Dasha', range: '22–28', targetId: 'sec-22' },
+    { id: 'ACTION', label: '5. Action Plan & Remedies', range: '29–32', targetId: 'sec-30' },
   ];
+
+  // Quick navigation menu items mapped to 5 pillars
+  const navItems = [
+    { id: 'sec-cover', pillar: 'CORE', label: '00. Cover Page & Snapshot', icon: <Sparkles className="w-3.5 h-3.5" /> },
+    { id: 'sec-01', pillar: 'CORE', label: '01. Executive Summary', icon: <Sparkles className="w-3.5 h-3.5" /> },
+    { id: 'sec-02', pillar: 'CORE', label: '02. Core Numbers & Synthesis', icon: <User className="w-3.5 h-3.5" /> },
+    { id: 'sec-03', pillar: 'CORE', label: '03-07. Lo Shu & Grids', icon: <Compass className="w-3.5 h-3.5" /> },
+    { id: 'sec-08', pillar: 'CORE', label: '08-09. Planes & Arrows', icon: <Layers className="w-3.5 h-3.5" /> },
+    { id: 'sec-10', pillar: 'CAREER', label: '10-12. 81 Yogas & Archetype', icon: <Award className="w-3.5 h-3.5" /> },
+    { id: 'sec-13', pillar: 'CAREER', label: '13-17. Psychological & Life Domains', icon: <Briefcase className="w-3.5 h-3.5" /> },
+    { id: 'sec-18', pillar: 'RELATIONSHIPS', label: '18. Mobile Numerology (81 Pairs)', icon: <Phone className="w-3.5 h-3.5" /> },
+    { id: 'sec-19', pillar: 'RELATIONSHIPS', label: '19-21. Name (Chaldean & Pythagorean)', icon: <FileText className="w-3.5 h-3.5" /> },
+    { id: 'sec-22', pillar: 'VASTU', label: '22-24. Numero Vastu & Kua', icon: <Home className="w-3.5 h-3.5" /> },
+    { id: 'sec-25', pillar: 'VASTU', label: '25-27. Personal Year & Vedic Dasha', icon: <Calendar className="w-3.5 h-3.5" /> },
+    { id: 'sec-28', pillar: 'VASTU', label: '28. Traditional Wellness', icon: <Activity className="w-3.5 h-3.5" /> },
+    { id: 'sec-29', pillar: 'ACTION', label: '29. LeoFamily Signature Audit Pro', icon: <PenTool className="w-3.5 h-3.5" /> },
+    { id: 'sec-29b', pillar: 'ACTION', label: '29B. Vehicle Numerology Pro', icon: <Car className="w-3.5 h-3.5" /> },
+    { id: 'sec-29c', pillar: 'ACTION', label: '29C. Business Numerology Pro', icon: <Briefcase className="w-3.5 h-3.5" /> },
+    { id: 'sec-29d', pillar: 'ACTION', label: '29D. Marriage Synastry Pro', icon: <Heart className="w-3.5 h-3.5" /> },
+    { id: 'sec-29e', pillar: 'ACTION', label: '29E. Child Lucky Names Pro', icon: <Baby className="w-3.5 h-3.5" /> },
+    { id: 'sec-29f', pillar: 'ACTION', label: '29F. Lucky Dates Finder Pro', icon: <Calendar className="w-3.5 h-3.5" /> },
+    { id: 'sec-30', pillar: 'ACTION', label: '30. Consolidated Remedies & 90-Day Plan', icon: <Shield className="w-3.5 h-3.5" /> },
+    { id: 'sec-31', pillar: 'ACTION', label: '31. Final Consultation Summary', icon: <Target className="w-3.5 h-3.5" /> }
+  ];
+
+  const filteredNavItems = navItems.filter(item => {
+    if (selectedPillar === 'ALL') return true;
+    return item.pillar === selectedPillar;
+  });
 
   const scrollToSection = (id: string) => {
     setActiveSection(id);
@@ -405,16 +428,61 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         </div>
       </div>
 
-      {/* Quick Jump Navigation Bar */}
-      <div className="bg-white border border-[#E5E7EB] rounded-2xl p-3 shadow-xs overflow-x-auto quick-jump-nav no-print">
-        <div className="flex gap-2 min-w-max">
-          {navItems.map((item) => (
+      {/* 5-Pillar Category & Quick Jump Navigation Bar */}
+      <div className="bg-white border border-[#E5E7EB] rounded-3xl p-4 shadow-sm space-y-3 no-print">
+        {/* Top: 5 Pillar Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {reportPillars.map((pillar) => (
+            <button
+              key={pillar.id}
+              onClick={() => {
+                setSelectedPillar(pillar.id as any);
+                if (pillar.targetId) {
+                  scrollToSection(pillar.targetId);
+                }
+              }}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                selectedPillar === pillar.id
+                  ? 'bg-stone-900 text-amber-300 shadow-xs'
+                  : 'bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200/80'
+              }`}
+            >
+              <span>{pillar.label}</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                selectedPillar === pillar.id ? 'bg-amber-400/20 text-amber-200' : 'bg-stone-200/60 text-stone-500'
+              }`}>
+                {pillar.range}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile: Fast Chapter Select Dropdown */}
+        <div className="md:hidden pt-1">
+          <label htmlFor="mobile-chapter-select" className="sr-only">Jump to Chapter</label>
+          <select
+            id="mobile-chapter-select"
+            value={activeSection}
+            onChange={(e) => scrollToSection(e.target.value)}
+            className="w-full bg-amber-50/60 border border-amber-300 rounded-xl px-3 py-2.5 text-xs font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#D97706]"
+          >
+            {navItems.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Desktop: Chapter Jump Pills */}
+        <div className="hidden md:flex gap-1.5 overflow-x-auto pt-1 quick-jump-nav">
+          {filteredNavItems.map((item) => (
             <button
               key={item.id}
               onClick={() => scrollToSection(item.id)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
                 activeSection === item.id
-                  ? 'bg-[#D97706] text-white shadow-xs'
+                  ? 'bg-[#D97706] text-white shadow-xs font-bold'
                   : 'bg-[#F8F4EF] hover:bg-[#F2E8DC] text-[#4B5563]'
               }`}
             >
@@ -637,12 +705,31 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             </span>
           </div>
 
-          {/* 1. Consultant Snapshot Card */}
+          {/* 1. Methodology Transparency Legend Bar */}
+          <div className="p-3.5 bg-white rounded-2xl border border-stone-200/90 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-[#D97706]" />
+              <span className="font-bold text-stone-800 text-[11px]">LeoFamily परामर्श पारदर्शिता मानक (Trust & Methodology Framework):</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono">
+              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded font-bold">
+                [CALCULATED] प्रत्यक्ष गणितीय तथ्य
+              </span>
+              <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-bold">
+                [INTERPRETED] वैदिक व चाल्डियन पद्धति
+              </span>
+              <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded font-bold">
+                [RECOMMENDED] व्यवहारिक मार्गदर्शन
+              </span>
+            </div>
+          </div>
+
+          {/* 2. Consultant Snapshot Card */}
           <div className="p-5 bg-gradient-to-r from-amber-500/10 via-[#FAF5EE] to-amber-500/5 rounded-2xl border-2 border-[#D97706]/30 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/80 pb-2.5">
               <span className="font-playfair font-bold text-sm text-[#92400E] flex items-center gap-2">
                 <Star className="w-4 h-4 text-[#D97706] fill-amber-400" />
-                1. मुख्य परामर्शदाता स्नैपशॉट (Consultant Snapshot)
+                मुख्य परामर्शदाता स्नैपशॉट (Consultant Executive Snapshot)
               </span>
               <span className="text-[10px] font-mono font-bold bg-[#D97706] text-white px-2.5 py-0.5 rounded-full w-fit">
                 Vedic + Chaldean Harmonized
@@ -664,6 +751,74 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
                 <strong className="text-[#92400E] block font-bold text-[10px] uppercase">रणनीतिक सावधानी (Strategic Caution):</strong>
                 <span className="text-[#4B5563]">{localizedDossier.consultantSnapshot.strategicCaution || expertDossier.consultantSnapshot.strategicCautionHi}</span>
               </div>
+            </div>
+          </div>
+
+          {/* 3. YOUR KEY PATTERNS & CROSS-ANALYSIS (5 Dedicated Personalized Findings) */}
+          <div className="space-y-3 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-amber-200/80 pb-2">
+              <h4 className="text-sm font-bold uppercase tracking-wider text-[#92400E] font-playfair flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#D97706]" />
+                आपके 5 प्रमुख व्यक्तिगत पैटर्न (Your Key Cross-Patterns Analysis)
+              </h4>
+              <span className="text-[10px] font-mono text-stone-500">
+                Calculated Across All 32 Analytical Dimensions
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+              {patternDossier.allDetectedPatterns.map((pat, idx) => (
+                <div
+                  key={pat.id}
+                  className={`p-4 rounded-2xl border-2 space-y-2.5 transition-all ${
+                    pat.category === 'CONTRASTING_TENSION'
+                      ? 'bg-amber-50/70 border-amber-300'
+                      : pat.category === 'KARMIC_LESSON'
+                      ? 'bg-rose-50/60 border-rose-200'
+                      : 'bg-white border-amber-200 shadow-xs'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-1.5">
+                    <span className="font-mono font-bold text-[10px] text-[#D97706] bg-amber-100/80 px-2 py-0.5 rounded">
+                      PATTERN 0{idx + 1}
+                    </span>
+                    <span className="text-[10px] font-mono text-stone-400 font-semibold">
+                      {pat.category.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h5 className="font-bold text-sm text-stone-900 font-playfair">
+                      {pat.titleHi}
+                    </h5>
+                    <p className="text-[11px] text-stone-600 mt-1 leading-relaxed">
+                      {pat.descriptionHi}
+                    </p>
+                  </div>
+
+                  {/* Why This Matters Box */}
+                  <div className="p-2.5 bg-[#FAF8F5] rounded-xl border border-stone-200 text-[10px] space-y-1">
+                    <strong className="text-amber-900 block font-bold">💡 Why This Matters (यह क्यों महत्वपूर्ण है):</strong>
+                    <p className="text-stone-600 leading-relaxed">{pat.whyThisMattersHi}</p>
+                  </div>
+
+                  {/* Practical Guidance & Quick Jump Anchor */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-stone-100 text-[10px]">
+                    <span className="text-emerald-800 font-medium">
+                      <strong>कार्य बिंदु: </strong> {pat.practicalFocusHi}
+                    </span>
+                    {pat.relatedChapterIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => scrollToSection(pat.relatedChapterIds[0])}
+                        className="text-[#D97706] hover:underline font-bold whitespace-nowrap flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>अध्याय देखें →</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -1139,14 +1294,30 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* 13-17. PSYCHOLOGICAL, CAREER, WEALTH & RELATIONSHIP MATRICES */}
         {/* ========================================================================= */}
         <section id="sec-13" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
-          <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 13 – 17</span>
-            <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Psychological, Education, Career, Wealth & Family Matrices</h3>
+          <div className="border-b border-[#F3F4F6] pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 13 – 17</span>
+              <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Psychological, Education, Career, Wealth & Family Matrices</h3>
+            </div>
+            <div className="flex items-center gap-1 text-[10px] font-mono">
+              <span className="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded font-semibold">
+                [INTERPRETED] Multi-Layer Analysis
+              </span>
+            </div>
           </div>
 
           {/* 3. Characteristics Profile */}
           <div className="p-4 bg-[#FAF5EE] rounded-2xl border border-[#FDE68A] space-y-2 text-xs">
-            <strong className="text-[#92400E] block font-bold uppercase text-xs">3. चारित्रिक विश्लेषण (Characteristics Profile)</strong>
+            <div className="flex items-center justify-between">
+              <strong className="text-[#92400E] block font-bold uppercase text-xs">3. चारित्रिक विश्लेषण (Characteristics Profile)</strong>
+              <button
+                type="button"
+                onClick={() => scrollToSection('sec-02')}
+                className="text-[10px] text-[#D97706] hover:underline font-mono font-bold"
+              >
+                मूलांक विवरण देखें (Ch. 02) →
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-[11px] text-[#4B5563]">
               <div className="p-2.5 bg-white rounded-xl border border-amber-200">
                 <strong>विचार शैली (Thinking):</strong> {localizedDossier.characteristicsProfile?.thinkingStyle || expertDossier.characteristicsProfile.thinkingStyle}
@@ -1179,7 +1350,16 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
 
           {/* 11 & 12. Career Analysis & Most Suitable Work Domains */}
           <div className="p-4 bg-[#FAF5EE] rounded-2xl border border-[#FDE68A] space-y-2 text-xs">
-            <strong className="text-[#92400E] block font-bold uppercase text-xs">11-12. करियर विश्लेषण एवं उपयुक्त कार्यक्षेत्र (Career Deep-Dive)</strong>
+            <div className="flex items-center justify-between">
+              <strong className="text-[#92400E] block font-bold uppercase text-xs">11-12. करियर विश्लेषण एवं उपयुक्त कार्यक्षेत्र (Career Deep-Dive)</strong>
+              <button
+                type="button"
+                onClick={() => scrollToSection('sec-10')}
+                className="text-[10px] text-[#D97706] hover:underline font-mono font-bold"
+              >
+                81 युति फल देखें (Ch. 10) →
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] text-[#4B5563]">
               <div className="p-3 bg-white rounded-xl border border-amber-200 space-y-1">
                 <strong>सर्वोत्तम व्यावसायिक क्षेत्र (Primary Avenues):</strong>
@@ -1199,7 +1379,16 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
 
           {/* 13 & 18. Finance & Money Behaviour & Guidance */}
           <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 space-y-2 text-xs">
-            <strong className="text-emerald-900 block font-bold uppercase text-xs">13 & 18. धन व्यवहार एवं वित्तीय मार्गदर्शन (Finance & Wealth Management)</strong>
+            <div className="flex items-center justify-between">
+              <strong className="text-emerald-900 block font-bold uppercase text-xs">13 & 18. धन व्यवहार एवं वित्तीय मार्गदर्शन (Finance & Wealth Management)</strong>
+              <button
+                type="button"
+                onClick={() => scrollToSection('sec-08')}
+                className="text-[10px] text-emerald-800 hover:underline font-mono font-bold"
+              >
+                समृद्धि तल 4-5-6 देखें (Ch. 08) →
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] text-[#4B5563]">
               <div className="p-2.5 bg-white rounded-xl border border-emerald-200">
                 <strong>पूंजी संचय पैटर्न:</strong> {localizedDossier.financeBehaviour?.wealthAccumulationPattern || expertDossier.financeBehaviour.wealthAccumulationPattern}
@@ -1215,7 +1404,16 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
 
           {/* 8 & 9. Relationship Pattern & Family Dynamics */}
           <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-200 space-y-2 text-xs">
-            <strong className="text-rose-900 block font-bold uppercase text-xs">8-9. संबंध एवं पारिवारिक गतिशीलता (Relationships & Family Dynamics)</strong>
+            <div className="flex items-center justify-between">
+              <strong className="text-rose-900 block font-bold uppercase text-xs">8-9. संबंध एवं पारिवारिक गतिशीलता (Relationships & Family Dynamics)</strong>
+              <button
+                type="button"
+                onClick={() => scrollToSection('sec-29d')}
+                className="text-[10px] text-rose-800 hover:underline font-mono font-bold"
+              >
+                विवाह गुण मिलान देखें (Ch. 29D) →
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] text-[#4B5563]">
               <div className="p-2.5 bg-white rounded-xl border border-rose-200">
                 <strong>संबंध पैटर्न:</strong> {localizedDossier.relationshipFamilyDynamics?.relationshipPattern || expertDossier.relationshipFamilyDynamics.relationshipPattern}
@@ -2586,33 +2784,135 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           </div>
 
           {/* 90-Day Action Plan */}
-          <div className="space-y-3 pt-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#92400E]">
-              90-Day Step-by-Step Strategic Roadmap
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-              <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200">
-                <span className="text-[9px] font-mono text-[#92400E] uppercase font-bold block mb-1">DAYS 1 – 30</span>
-                <strong className="font-bold text-sm text-[#92400E] block mb-1">Foundation Phase (नींव)</strong>
-                <p className="text-[#4B5563] text-[11px] leading-relaxed">
-                  हस्ताक्षर में सुधार करें, कार्यस्थल की दिशा ठीक करें और दैनिक समय-सारणी में अनुशासन लाएं।
-                </p>
+          <div className="space-y-4 pt-3 border-t border-amber-200/80">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-[10px] font-mono text-[#D97706] font-bold uppercase tracking-wider block">
+                  Actionable Numerological Strategy
+                </span>
+                <h4 className="text-base sm:text-lg font-bold text-[#92400E] font-playfair">
+                  90-दिवसीय व्यक्तिगत कार्य योजना (90-Day Step-by-Step Strategic Roadmap)
+                </h4>
+              </div>
+              <span className="text-[11px] font-mono font-bold text-amber-900 bg-amber-100/90 border border-amber-300 px-3 py-1 rounded-full">
+                Phase-by-Phase Blueprint
+              </span>
+            </div>
+
+            {/* Immediate First 7 Days Quick Wins */}
+            <div className="p-4 bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-amber-500/10 border border-amber-300 rounded-2xl space-y-2">
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-[#D97706]" />
+                <strong className="text-xs font-bold text-stone-900 font-playfair">
+                  प्रथम 7 दिन: त्वरित प्राथमिकताएं (Immediate Priorities - Days 1 to 7)
+                </strong>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
+                <div className="p-3 bg-white/95 rounded-xl border border-amber-200">
+                  <span className="font-bold text-amber-800 block text-[11px]">1. हस्ताक्षर अलाइनमेंट</span>
+                  <p className="text-[10px] text-stone-600 mt-0.5 leading-relaxed">
+                    हस्ताक्षर को 15° ऊपर की ओर उठाएं और नीचे एक स्पष्ट, बिना कटे अधोरेखा लगाएं।
+                  </p>
+                </div>
+                <div className="p-3 bg-white/95 rounded-xl border border-amber-200">
+                  <span className="font-bold text-amber-800 block text-[11px]">2. बैठक व वास्तु दिशा</span>
+                  <p className="text-[10px] text-stone-600 mt-0.5 leading-relaxed">
+                    कार्यक्षेत्र में बैठते समय अपना मुख {kuaProfile.favourableDirections?.shengChi || 'शुभ दिशा'} की ओर रखें।
+                  </p>
+                </div>
+                <div className="p-3 bg-white/95 rounded-xl border border-amber-200">
+                  <span className="font-bold text-amber-800 block text-[11px]">3. मोबाइल वॉलपेपर</span>
+                  <p className="text-[10px] text-stone-600 mt-0.5 leading-relaxed">
+                    फोन स्क्रीन पर सूर्योदय या शुभ हरियाली का वॉलपेपर सेट करें ताकि सकारात्मक तरंगें सक्रिय हों।
+                  </p>
+                </div>
+                <div className="p-3 bg-white/95 rounded-xl border border-amber-200">
+                  <span className="font-bold text-amber-800 block text-[11px]">4. मंत्र साधना शुरुआत</span>
+                  <p className="text-[10px] text-stone-600 mt-0.5 leading-relaxed">
+                    दैनिक 108 बार अपने मूल स्वामी ग्रह के वैदिक मंत्र का शांत मन से प्रातःकाल जप करें।
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3 Main 30-Day Chronological Pillars */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+              <div className="p-5 bg-white rounded-2xl border-2 border-amber-200/90 space-y-2.5 shadow-xs">
+                <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+                  <span className="text-[10px] font-mono text-[#92400E] uppercase font-black bg-amber-100 px-2 py-0.5 rounded">
+                    DAYS 1 – 30
+                  </span>
+                  <span className="text-[10px] font-bold text-stone-500">माह 1: नींव स्थापन</span>
+                </div>
+                <strong className="font-bold text-sm text-[#92400E] block font-playfair">
+                  Foundation Phase (ऊर्जा शुद्धिकरण)
+                </strong>
+                <ul className="space-y-1.5 text-[11px] text-stone-600 leading-relaxed">
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>घर के ईशान कोण (North-East) में जल पात्र व स्वच्छता सुनिश्चित करें।</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>दैनिक परिधान में अनुकूल शुभ रंगों ({remedies?.colors.join(', ') || 'सफेद, हरा, पीला'}) का 60% उपयोग करें।</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>अनावश्यक बिखराव व बंद घड़ियां/खराब इलेक्ट्रॉनिक सामान घर से हटाएं।</span>
+                  </li>
+                </ul>
               </div>
 
-              <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200">
-                <span className="text-[9px] font-mono text-[#92400E] uppercase font-bold block mb-1">DAYS 31 – 60</span>
-                <strong className="font-bold text-sm text-[#92400E] block mb-1">Remediation Phase (उपाय)</strong>
-                <p className="text-[#4B5563] text-[11px] leading-relaxed">
-                  नाम एवं मोबाइल ऊर्जा को सक्रिय रखें, उपयुक्त रंगों का प्रयोग बढ़ाएं और नए संपर्कों पर काम करें।
-                </p>
+              <div className="p-5 bg-white rounded-2xl border-2 border-amber-200/90 space-y-2.5 shadow-xs">
+                <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+                  <span className="text-[10px] font-mono text-[#92400E] uppercase font-black bg-amber-100 px-2 py-0.5 rounded">
+                    DAYS 31 – 60
+                  </span>
+                  <span className="text-[10px] font-bold text-stone-500">माह 2: सक्रियता व उपाय</span>
+                </div>
+                <strong className="font-bold text-sm text-[#92400E] block font-playfair">
+                  Remediation Phase (व्यावसायिक सामंजस्य)
+                </strong>
+                <ul className="space-y-1.5 text-[11px] text-stone-600 leading-relaxed">
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>करियर में नए प्रस्तावों का विश्लेषण अपनी अनुकूल मित्र संख्या अनुसार करें।</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>सुझाए गए यंत्र अथवा क्रिस्टल को कार्यस्थल की शुभ दिशा में स्थापित करें।</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>साप्ताहिक ग्रह दान (बुधवार/गुरुवार) नियमित रूप से जरूरतमंदों को करें।</span>
+                  </li>
+                </ul>
               </div>
 
-              <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200">
-                <span className="text-[9px] font-mono text-[#92400E] uppercase font-bold block mb-1">DAYS 61 – 90</span>
-                <strong className="font-bold text-sm text-[#92400E] block mb-1">Observation Phase (अवलोकन)</strong>
-                <p className="text-[#4B5563] text-[11px] leading-relaxed">
-                  सकारात्मक परिणामों की समीक्षा करें, ऊर्जा प्रवाह बनाए रखें और दीर्घकालिक लक्ष्यों को गति दें।
-                </p>
+              <div className="p-5 bg-white rounded-2xl border-2 border-amber-200/90 space-y-2.5 shadow-xs">
+                <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+                  <span className="text-[10px] font-mono text-[#92400E] uppercase font-black bg-amber-100 px-2 py-0.5 rounded">
+                    DAYS 61 – 90
+                  </span>
+                  <span className="text-[10px] font-bold text-stone-500">माह 3: फल प्राप्ति व स्थिरता</span>
+                </div>
+                <strong className="font-bold text-sm text-[#92400E] block font-playfair">
+                  Observation Phase (समीक्षा एवं विस्तार)
+                </strong>
+                <ul className="space-y-1.5 text-[11px] text-stone-600 leading-relaxed">
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>वित्तीय व पारिवारिक जीवन में आए सकारात्मक बदलावों का आकलन करें।</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>वर्तमान व्यक्तिगत वर्ष ({personalYearVal}) के अनुकूल बड़े निवेश को अंतिम रूप दें।</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>दीर्घकालिक 1-वर्षीय कार्ययोजना को नए ऊर्जा स्तर के साथ जारी रखें।</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>

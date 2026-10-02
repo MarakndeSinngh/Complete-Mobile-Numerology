@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PersonalDetails } from '../types';
 import DateInput from './DateInput';
 import { BrandLogo } from './BrandLogo';
+import { ReportAccessService } from '../services/reportAccessService';
 import { 
   Compass, User, Calendar, Award, Activity, Heart, Sparkles, 
   AlertTriangle, Check, FileText, Layers, Info, RefreshCw, 
@@ -106,8 +107,63 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ personalDetails }) => {
   const [gender, setGender] = useState<'MALE' | 'FEMALE' | 'OTHER'>('MALE');
 
   // UI Tabs Control
-  const [activeTab, setActiveTab] = useState<'FOUR_SYSTEMS' | 'KNOWLEDGE_BASE'>('FOUR_SYSTEMS');
+  const [activeTab, setActiveTab] = useState<'FOUR_SYSTEMS' | 'KNOWLEDGE_BASE' | 'UPI_VERIFICATIONS'>('UPI_VERIFICATIONS');
   const [subSystemTab, setSubSystemTab] = useState<'CHALDEAN' | 'PYTHAGOREAN' | 'VEDIC' | 'LOSHU'>('CHALDEAN');
+
+  // UPI Submissions Admin State
+  const [pendingPayments, setPendingPayments] = useState<any[]>([]);
+  const [isFetchingPayments, setIsFetchingPayments] = useState<boolean>(false);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [adminNoteInputs, setAdminNoteInputs] = useState<Record<string, string>>({});
+  const [adminStatusFilter, setAdminStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
+
+  const fetchPendingPayments = async () => {
+    setIsFetchingPayments(true);
+    try {
+      const res = await ReportAccessService.getAdminPendingPayments();
+      if (res && Array.isArray(res.submissions)) {
+        setPendingPayments(res.submissions);
+      }
+    } catch (e) {
+      console.error('Failed to fetch pending payments:', e);
+    } finally {
+      setIsFetchingPayments(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingPayments();
+  }, []);
+
+  const handleApprovePayment = async (sub: any) => {
+    if (!confirm(`Are you sure you want to APPROVE UTR ${sub.utr_number} and unlock report access for ${sub.user_name || sub.user_email || sub.profile_key}?`)) {
+      return;
+    }
+    setActionLoadingId(sub.id);
+    try {
+      const note = adminNoteInputs[sub.id] || 'Verified via Admin Panel UPI Check';
+      await ReportAccessService.verifyUpiPayment(sub.id, 'APPROVED', note);
+      await fetchPendingPayments();
+    } catch (e: any) {
+      alert(`Approval error: ${e.message || 'Failed to approve'}`);
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleRejectPayment = async (sub: any) => {
+    const note = prompt('Please enter reason for rejection (e.g., Invalid UTR / Amount Mismatch):', adminNoteInputs[sub.id] || 'Invalid UTR reference number');
+    if (note === null) return; // cancelled
+    setActionLoadingId(sub.id);
+    try {
+      await ReportAccessService.verifyUpiPayment(sub.id, 'REJECTED', note);
+      await fetchPendingPayments();
+    } catch (e: any) {
+      alert(`Rejection error: ${e.message || 'Failed to reject'}`);
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
 
   // Knowledge base list (original)
   const [knowledgeBooks, setKnowledgeBooks] = useState([
@@ -392,31 +448,246 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ personalDetails }) => {
           </div>
         </div>
 
-        <div className="flex bg-[#F8F4EF] p-1 rounded-2xl border border-[#E5E7EB] w-full sm:w-auto">
+        <div className="flex bg-[#F8F4EF] p-1 rounded-2xl border border-[#E5E7EB] w-full sm:w-auto flex-wrap gap-1">
+          <button
+            onClick={() => setActiveTab('UPI_VERIFICATIONS')}
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              activeTab === 'UPI_VERIFICATIONS'
+                ? 'bg-[#10B981] text-white shadow-sm'
+                : 'text-[#6B7280] hover:text-[#1F2937]'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>UPI Verification Console</span>
+            {pendingPayments.filter(p => p.status === 'PENDING').length > 0 && (
+              <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                {pendingPayments.filter(p => p.status === 'PENDING').length}
+              </span>
+            )}
+          </button>
           <button
             onClick={() => setActiveTab('FOUR_SYSTEMS')}
-            className={`flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'FOUR_SYSTEMS'
                 ? 'bg-[#D97706] text-white shadow-sm'
                 : 'text-[#6B7280] hover:text-[#1F2937]'
             }`}
           >
-            <Compass className="w-4 h-4 animate-spin-slow" /> Independent Calculators
+            <Compass className="w-4 h-4" /> Independent Calculators
           </button>
           <button
             onClick={() => setActiveTab('KNOWLEDGE_BASE')}
-            className={`flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'KNOWLEDGE_BASE'
                 ? 'bg-[#1E3A8A] text-white shadow-sm'
                 : 'text-[#6B7280] hover:text-[#1F2937]'
             }`}
           >
-            <Settings className="w-4 h-4" /> Systems Administration
+            <Settings className="w-4 h-4" /> Systems Admin
           </button>
         </div>
       </div>
 
-      {activeTab === 'FOUR_SYSTEMS' ? (
+      {activeTab === 'UPI_VERIFICATIONS' ? (
+        <div className="space-y-6">
+          {/* Header Card */}
+          <div className="bg-white p-6 md:p-8 rounded-[36px] border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" /> Real-Time UPI UTR Verifier
+                </div>
+                <h3 className="font-playfair text-2xl font-bold text-slate-800 mt-2">
+                  UPI QR & UTR Payment Approval Console
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Review customer UPI QR payments, verify bank UTR reference numbers, and unlock Master Reports with one click.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={fetchPendingPayments}
+                  disabled={isFetchingPayments}
+                  className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isFetchingPayments ? 'animate-spin' : ''}`} />
+                  <span>Refresh Submissions</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Bar */}
+            <div className="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap">
+              <span className="text-xs font-bold text-slate-400 font-mono uppercase">Filter Status:</span>
+              {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as const).map((st) => (
+                <button
+                  key={st}
+                  onClick={() => setAdminStatusFilter(st)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                    adminStatusFilter === st
+                      ? 'bg-slate-900 text-amber-400 shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {st}
+                  {st === 'PENDING' && pendingPayments.filter(p => p.status === 'PENDING').length > 0 && (
+                    <span className="ml-1.5 bg-amber-500 text-slate-950 px-1.5 py-0.2 rounded-full text-[10px]">
+                      {pendingPayments.filter(p => p.status === 'PENDING').length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Submissions List */}
+          {isFetchingPayments ? (
+            <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 space-y-3">
+              <RefreshCw className="w-8 h-8 text-amber-600 animate-spin mx-auto" />
+              <p className="text-xs text-slate-500 font-mono">Loading payment submissions from database...</p>
+            </div>
+          ) : pendingPayments.filter(p => adminStatusFilter === 'ALL' || p.status === adminStatusFilter).length === 0 ? (
+            <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 space-y-2">
+              <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto" />
+              <h4 className="font-bold text-slate-800 text-base">No Submissions Matching Filter</h4>
+              <p className="text-xs text-slate-400">All customer UPI payments in this category have been processed.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {pendingPayments
+                .filter(p => adminStatusFilter === 'ALL' || p.status === adminStatusFilter)
+                .map((sub: any) => {
+                  const isPending = sub.status === 'PENDING';
+                  const isApproved = sub.status === 'APPROVED';
+                  const isRejected = sub.status === 'REJECTED';
+
+                  return (
+                    <div
+                      key={sub.id}
+                      className={`p-6 rounded-3xl border-2 transition-all space-y-4 ${
+                        isPending
+                          ? 'bg-white border-amber-300 shadow-sm'
+                          : isApproved
+                          ? 'bg-emerald-50/40 border-emerald-200'
+                          : 'bg-red-50/40 border-red-200'
+                      }`}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs font-mono font-bold px-3 py-1 rounded-full border ${
+                              isPending
+                                ? 'text-amber-900 bg-amber-100 border-amber-300'
+                                : isApproved
+                                ? 'text-emerald-900 bg-emerald-100 border-emerald-300'
+                                : 'text-red-900 bg-red-100 border-red-300'
+                            }`}
+                          >
+                            {isPending ? '⏳ PENDING REVIEW' : isApproved ? '✓ APPROVED & UNLOCKED' : '❌ REJECTED'}
+                          </span>
+
+                          <span className="font-mono text-xs text-slate-400">
+                            ID: {sub.id.slice(0, 12)}...
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-extrabold font-mono text-slate-900">
+                            ₹{sub.amount} {sub.currency || 'INR'}
+                          </span>
+                          <span className="text-xs font-mono text-slate-400">
+                            {new Date(sub.created_at).toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Customer Details Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div className="p-3 bg-slate-50 rounded-xl">
+                          <span className="text-slate-400 block text-[10px] font-mono uppercase">User Name</span>
+                          <span className="font-bold text-slate-800">{sub.user_name || 'Guest Seeker'}</span>
+                        </div>
+
+                        <div className="p-3 bg-slate-50 rounded-xl">
+                          <span className="text-slate-400 block text-[10px] font-mono uppercase">Email / Phone</span>
+                          <span className="font-bold text-slate-800 truncate block">{sub.user_email || sub.user_phone || '—'}</span>
+                        </div>
+
+                        <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl">
+                          <span className="text-amber-800 block text-[10px] font-mono uppercase font-bold">UTR Reference No.</span>
+                          <span className="font-mono font-black text-sm text-slate-900 select-all">{sub.utr_number}</span>
+                        </div>
+
+                        <div className="p-3 bg-slate-50 rounded-xl">
+                          <span className="text-slate-400 block text-[10px] font-mono uppercase">Report Target</span>
+                          <span className="font-bold text-amber-800">{sub.report_type}</span>
+                        </div>
+                      </div>
+
+                      {/* Notes / Action Area */}
+                      {isPending ? (
+                        <div className="pt-2 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                          <div className="flex-1">
+                            <input
+                              type="text"
+                              placeholder="Admin note (e.g. Verified HDFC statement)"
+                              value={adminNoteInputs[sub.id] || ''}
+                              onChange={(e) =>
+                                setAdminNoteInputs({
+                                  ...adminNoteInputs,
+                                  [sub.id]: e.target.value,
+                                })
+                              }
+                              className="w-full px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-amber-500"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleRejectPayment(sub)}
+                              disabled={actionLoadingId === sub.id}
+                              className="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold rounded-xl text-xs transition cursor-pointer"
+                            >
+                              Reject UTR
+                            </button>
+
+                            <button
+                              onClick={() => handleApprovePayment(sub)}
+                              disabled={actionLoadingId === sub.id}
+                              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+                            >
+                              {actionLoadingId === sub.id ? (
+                                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <CheckCircle className="w-3.5 h-3.5" />
+                              )}
+                              <span>Approve & Unlock Report</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-slate-500 font-mono">
+                          {sub.admin_notes && (
+                            <div>
+                              <span className="font-bold">Verification Note: </span>
+                              <span>{sub.admin_notes}</span>
+                            </div>
+                          )}
+                          {sub.verified_at && (
+                            <div className="text-[11px] text-slate-400 mt-0.5">
+                              Processed on: {new Date(sub.verified_at).toLocaleString('en-IN')}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      ) : activeTab === 'FOUR_SYSTEMS' ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Dynamic Configuration Form Panel */}
