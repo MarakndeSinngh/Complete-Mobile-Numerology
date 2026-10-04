@@ -313,7 +313,7 @@ export interface ReportAccessCheckResult {
   reportType: CanonicalReportType;
   profileKey: string;
   reason?: string;
-  accessType?: 'FREE' | 'PAID';
+  accessType?: 'FREE' | 'PAID' | 'ALWAYS_FREE' | 'ADMIN_TEST' | 'PUBLIC';
   entitlementId?: string;
 }
 
@@ -323,7 +323,7 @@ export interface ReportEntitlementRecord {
   mobile: string;
   reportType: CanonicalReportType;
   profileKey: string;
-  accessType: 'FREE' | 'PAID';
+  accessType: 'FREE' | 'PAID' | 'ALWAYS_FREE' | 'ADMIN_TEST';
   amount: number; // in INR (0 or 33)
   paymentId?: string;
   orderId?: string;
@@ -594,7 +594,7 @@ export interface UserReportItem {
   titleMr: string;
   titleBn: string;
   titleGu: string;
-  accessType: 'FREE' | 'PAID' | 'ALWAYS_FREE';
+  accessType: 'FREE' | 'PAID' | 'ALWAYS_FREE' | 'ADMIN_TEST';
   amount: number;
   currency: string;
   status: 'UNLOCKED' | 'PENDING' | 'FAILED';
@@ -636,6 +636,7 @@ export interface UserAccessSummary {
   };
   totalReportsUnlocked: number;
   totalPaidAmountInr: number;
+  adminTestAccess?: boolean;
 }
 
 export interface MyReportsI18nEntry {

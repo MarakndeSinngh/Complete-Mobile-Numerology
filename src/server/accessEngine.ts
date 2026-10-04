@@ -92,6 +92,48 @@ export interface AuthenticatedUserIdentity {
 }
 
 /**
+ * CANONICAL SERVER-SIDE ADMIN / INTERNAL TEST ALLOWLIST (Pre-Phase 10.5)
+ * Strictly server-side; NEVER exposed to client bundles or public APIs.
+ * Supports environment variable override via ADMIN_TEST_EMAILS.
+ */
+const CANONICAL_ADMIN_TEST_EMAILS = [
+  'affectioncosmos@gmail.com',
+  'attractabundance909@gmail.com'
+];
+
+export function getAdminTestEmails(): string[] {
+  const envVal = process.env.ADMIN_TEST_EMAILS;
+  if (envVal && typeof envVal === 'string') {
+    return envVal
+      .split(',')
+      .map(e => e.trim().toLowerCase())
+      .filter(Boolean);
+  }
+  return CANONICAL_ADMIN_TEST_EMAILS;
+}
+
+export function isInternalAdminTestEmail(rawEmail: string | undefined | null): boolean {
+  if (!rawEmail || typeof rawEmail !== 'string') return false;
+  const normalized = normalizeEmail(rawEmail);
+  const allowlist = getAdminTestEmails();
+  return allowlist.includes(normalized);
+}
+
+export function evaluateAdminTestAccess(user: AuthenticatedUserIdentity | null): {
+  isAdminTest: boolean;
+  accessType?: 'ADMIN_TEST';
+} {
+  if (!user || !user.email) {
+    return { isAdminTest: false };
+  }
+  const isMatch = isInternalAdminTestEmail(user.email);
+  return {
+    isAdminTest: isMatch,
+    accessType: isMatch ? 'ADMIN_TEST' : undefined
+  };
+}
+
+/**
  * Local Sandbox In-Memory Cache (Only active in local dev when PostgreSQL is not configured)
  */
 class LocalSandboxFallback {
@@ -521,6 +563,35 @@ class ReportAccessEngine {
     const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
 
     if (authUser) {
+      // 2b. ADMIN / INTERNAL TEST ACCESS CHECK (Pre-Phase 10.5)
+      // Strictly server-authorized: must be authenticated user matching server-only allowlist
+      const adminEval = evaluateAdminTestAccess(authUser);
+      if (adminEval.isAdminTest) {
+        try {
+          await this.logUserActivity(authHeader, 'ADMIN_TEST_ACCESS', {
+            reportType,
+            profileKey: safeKey,
+            accessType: 'ADMIN_TEST',
+            email: authUser.email
+          });
+        } catch {
+          // best-effort telemetry logging
+        }
+
+        return {
+          allowed: true,
+          requiresPayment: false,
+          isFirstFreeReport: false,
+          isFreeReportType: false,
+          canClaimFree: false,
+          price: 0,
+          reportType,
+          profileKey: safeKey,
+          accessType: 'ADMIN_TEST',
+          reason: 'Internal Test Access — Authorized test account (No payment required)'
+        };
+      }
+
       if (isDatabaseConfigured()) {
         // Strict Entitlement check: tied to authenticated user ID + profileKey + reportType
         const entRes = await query(
@@ -1212,6 +1283,30 @@ class ReportAccessEngine {
       });
     }
 
+    // For authenticated admin test users, inject Master Report internal test item without creating fake payments
+    if (isInternalAdminTestEmail(authUser.email)) {
+      const masterDef = REPORT_REGISTRY.MASTER_REPORT;
+      const alreadyHasMaster = reportItems.some(r => r.reportType === 'MASTER_REPORT');
+      if (!alreadyHasMaster) {
+        reportItems.unshift({
+          id: `admin_test_master_${authUser.id}`,
+          userId: authUser.id,
+          profileKey: 'default_profile',
+          reportType: 'MASTER_REPORT',
+          titleHi: `${masterDef.titleHi} (आंतरिक टेस्ट एक्सेस)`,
+          titleEn: `${masterDef.titleEn} (Internal Test Access)`,
+          titleMr: `${masterDef.titleMr} (प्रशासकीय चाचणी)`,
+          titleBn: `${masterDef.titleBn} (অ্যাডমিন টেস্ট অ্যাক্সেস)`,
+          titleGu: `${masterDef.titleGu} (એડમિન ટેસ્ટ એક્સેસ)`,
+          accessType: 'ADMIN_TEST',
+          amount: 0,
+          currency: 'INR',
+          status: 'UNLOCKED',
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
+
     reportItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return {
@@ -1357,6 +1452,7 @@ class ReportAccessEngine {
           additionalReports: { priceInr: REPORT_PRICE_INR, pricePaise: REPORT_PRICE_PAISE },
           totalReportsUnlocked: entitlements.length + 1, // +1 for Mobile Numerology
           totalPaidAmountInr: totalPaidAmount,
+          adminTestAccess: isInternalAdminTestEmail(authUser.email),
         }
       };
     } else {
@@ -1380,6 +1476,7 @@ class ReportAccessEngine {
           additionalReports: { priceInr: REPORT_PRICE_INR, pricePaise: REPORT_PRICE_PAISE },
           totalReportsUnlocked: userEntitlements.length + 1,
           totalPaidAmountInr: totalPaidAmount,
+          adminTestAccess: isInternalAdminTestEmail(authUser.email),
         }
       };
     }
@@ -1391,6 +1488,33 @@ class ReportAccessEngine {
     const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
     if (!authUser) {
       throw new Error("Authentication required to access report");
+    }
+
+    if (reportId.startsWith('admin_test_')) {
+      if (!isInternalAdminTestEmail(authUser.email)) {
+        throw new Error("Unauthorized: Admin test access required");
+      }
+      const def = REPORT_REGISTRY.MASTER_REPORT;
+      return {
+        success: true,
+        allowed: true,
+        report: {
+          id: reportId,
+          userId: authUser.id,
+          profileKey: 'default_profile',
+          reportType: 'MASTER_REPORT',
+          titleHi: `${def.titleHi} (आंतरिक टेस्ट एक्सेस)`,
+          titleEn: `${def.titleEn} (Internal Test Access)`,
+          titleMr: `${def.titleMr} (प्रशासकीय चाचणी)`,
+          titleBn: `${def.titleBn} (অ্যাডমিন টেস্ট অ্যাক্সেস)`,
+          titleGu: `${def.titleGu} (એડમિન ટેસ્ટ એક્સેસ)`,
+          accessType: 'ADMIN_TEST',
+          amount: 0,
+          currency: 'INR',
+          status: 'UNLOCKED',
+          createdAt: new Date().toISOString(),
+        },
+      };
     }
 
     if (reportId.startsWith('perm_mobile_')) {
@@ -1492,6 +1616,42 @@ class ReportAccessEngine {
         },
       };
     }
+  }
+
+  // 11b. Authorize PDF Generation (Server-Authoritative)
+  public async authorizePdf(
+    reportType: CanonicalReportType,
+    profileKey: string,
+    authHeader?: string | null,
+    optionalEmail?: string
+  ): Promise<{ success: boolean; allowed: boolean; accessType?: string; message?: string }> {
+    await this.ensureDb();
+    const access = await this.checkReportAccess(reportType, profileKey, authHeader, optionalEmail);
+    if (!access.allowed) {
+      return {
+        success: false,
+        allowed: false,
+        message: "PDF export requires a verified paid entitlement or authorized admin test access."
+      };
+    }
+
+    if (access.accessType === 'ADMIN_TEST') {
+      try {
+        await this.logUserActivity(authHeader, 'ADMIN_TEST_PDF_ACCESS', {
+          reportType,
+          profileKey
+        });
+      } catch {
+        // best-effort logging
+      }
+    }
+
+    return {
+      success: true,
+      allowed: true,
+      accessType: access.accessType,
+      message: "PDF generation authorized."
+    };
   }
 
   // 12. Admin Audit Data
