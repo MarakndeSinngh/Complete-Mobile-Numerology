@@ -4,6 +4,7 @@ import { CompleteNumerologyProfile } from '../core/types';
 import { calculateKuaNumber, KuaProfile } from '../core/kuaEngine';
 import { deriveExpertConsultationDossier, ExpertConsultationDossier } from '../core/expertConsultationEngine';
 import { analyzeCrossPatterns, PersonalizedPatternDossier } from '../core/crossPatternEngine';
+import { AdvancedInsightEngine, AdvancedInsightDossier, AdvancedInsight } from '../core/advancedInsightEngine';
 import { buildLocalizedExpertDossier, getPlanetName, getLocalizedNumberMeaning, getLocalized81Yoga, getLocalizedPlane, getLocalizedPersonalYear, LocalizedPersonalYear } from '../i18n/dynamicContent';
 import { calculatePersonalYearNumber } from '../core/luckyDatesEngine';
 import { sumDigits, reduceToDigit } from '../core/numerologyEngine';
@@ -37,7 +38,10 @@ import {
   TrendingUp,
   Star,
   Car,
-  Baby
+  Baby,
+  MessageSquare,
+  Send,
+  ThumbsUp
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -45,6 +49,7 @@ import { BrandLogo } from './BrandLogo';
 import { useReportAccess } from '../hooks/useReportAccess';
 import { ReportPaywallModal } from './ReportPaywallModal';
 import { ReportAccessGate } from './ReportAccessGate';
+import { ReportAccessService } from '../services/reportAccessService';
 import { Lock, Unlock, Gift } from 'lucide-react';
 
 interface MasterReportUnifiedProps {
@@ -177,6 +182,54 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
   const patternDossier: PersonalizedPatternDossier = React.useMemo(() => {
     return analyzeCrossPatterns(profile);
   }, [profile]);
+
+  // Phase 7: Advanced Insight Dossier & Explainability Engine
+  const advancedInsightDossier: AdvancedInsightDossier = React.useMemo(() => {
+    return AdvancedInsightEngine.generateDossier(profile);
+  }, [profile]);
+
+  const [selectedProvenanceInsight, setSelectedProvenanceInsight] = useState<AdvancedInsight | null>(null);
+  const [showDebugProvenanceModal, setShowDebugProvenanceModal] = useState<boolean>(false);
+
+  // Phase 10: Feedback & Quality Rating Loop State
+  const [feedbackRating, setFeedbackRating] = useState<number>(5);
+  const [feedbackClarity, setFeedbackClarity] = useState<string>('crystal_clear');
+  const [feedbackActionability, setFeedbackActionability] = useState<string>('highly_actionable');
+  const [feedbackText, setFeedbackText] = useState<string>('');
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState<boolean>(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedbackSubmitting(true);
+    setFeedbackError(null);
+    try {
+      const isolationKey = getProfileIsolationKey({
+        name: personalDetails?.name || profile?.identity?.fullName || '',
+        dob: personalDetails?.dob || profile?.identity?.dob || '',
+        mobile: personalDetails?.mobile || profile?.identity?.mobile || ''
+      });
+      const res = await ReportAccessService.submitFeedback({
+        reportType: 'MASTER_REPORT',
+        profileKey: isolationKey,
+        rating: feedbackRating,
+        clarity: feedbackClarity,
+        actionability: feedbackActionability,
+        feedbackText: feedbackText.trim()
+      });
+      if (res.success) {
+        setFeedbackSubmitted(true);
+      } else {
+        setFeedbackError(res.error || 'Feedback recorded');
+        setFeedbackSubmitted(true);
+      }
+    } catch {
+      setFeedbackSubmitted(true);
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
 
   // Saved Signature, Vehicle, Business, Marriage & Child Audit state from localStorage
   const [savedSigAudit, setSavedSigAudit] = useState<any>(null);
@@ -754,6 +807,22 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             </div>
           </div>
 
+          {/* Standout Profile Narrative */}
+          <div className="p-4 bg-amber-500/10 rounded-2xl border border-amber-300/80 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-playfair font-bold text-xs text-[#92400E] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#D97706]" />
+                {language === 'hi' ? 'आपकी जन्म कुंडली में क्या विशिष्ट है? (Key Takeaway)' : 'What Stands Out in Your Profile?'}
+              </span>
+              <span className="text-[10px] font-mono text-amber-800 font-bold bg-amber-200/70 px-2 py-0.5 rounded">
+                Tier-1 Prioritized
+              </span>
+            </div>
+            <p className="text-xs text-[#78350F] leading-relaxed font-medium">
+              {language === 'hi' ? advancedInsightDossier.standoutProfileNarrative.hi : advancedInsightDossier.standoutProfileNarrative.en}
+            </p>
+          </div>
+
           {/* 3. YOUR KEY PATTERNS & CROSS-ANALYSIS (5 Dedicated Personalized Findings) */}
           <div className="space-y-3 pt-2">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-amber-200/80 pb-2">
@@ -767,58 +836,76 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
-              {patternDossier.allDetectedPatterns.map((pat, idx) => (
-                <div
-                  key={pat.id}
-                  className={`p-4 rounded-2xl border-2 space-y-2.5 transition-all ${
-                    pat.category === 'CONTRASTING_TENSION'
-                      ? 'bg-amber-50/70 border-amber-300'
-                      : pat.category === 'KARMIC_LESSON'
-                      ? 'bg-rose-50/60 border-rose-200'
-                      : 'bg-white border-amber-200 shadow-xs'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-1.5">
-                    <span className="font-mono font-bold text-[10px] text-[#D97706] bg-amber-100/80 px-2 py-0.5 rounded">
-                      PATTERN 0{idx + 1}
-                    </span>
-                    <span className="text-[10px] font-mono text-stone-400 font-semibold">
-                      {pat.category.replace(/_/g, ' ')}
-                    </span>
-                  </div>
+              {patternDossier.allDetectedPatterns.map((pat, idx) => {
+                const matchingAdvanced = advancedInsightDossier.allValidatedInsights.find(
+                  (ai) => ai.id.toLowerCase().includes(pat.id.replace(/-/g, '_').toLowerCase()) || (ai.type as string) === (pat.category as string)
+                ) || advancedInsightDossier.primaryInsights[idx % advancedInsightDossier.primaryInsights.length];
 
-                  <div>
-                    <h5 className="font-bold text-sm text-stone-900 font-playfair">
-                      {pat.titleHi}
-                    </h5>
-                    <p className="text-[11px] text-stone-600 mt-1 leading-relaxed">
-                      {pat.descriptionHi}
-                    </p>
-                  </div>
+                return (
+                  <div
+                    key={pat.id}
+                    className={`p-4 rounded-2xl border-2 space-y-2.5 transition-all ${
+                      pat.category === 'CONTRASTING_TENSION'
+                        ? 'bg-amber-50/70 border-amber-300'
+                        : pat.category === 'KARMIC_LESSON'
+                        ? 'bg-rose-50/60 border-rose-200'
+                        : 'bg-white border-amber-200 shadow-xs'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-1.5">
+                      <span className="font-mono font-bold text-[10px] text-[#D97706] bg-amber-100/80 px-2 py-0.5 rounded">
+                        PATTERN 0{idx + 1}
+                      </span>
+                      <span className="text-[10px] font-mono text-stone-400 font-semibold">
+                        {pat.category.replace(/_/g, ' ')}
+                      </span>
+                    </div>
 
-                  {/* Why This Matters Box */}
-                  <div className="p-2.5 bg-[#FAF8F5] rounded-xl border border-stone-200 text-[10px] space-y-1">
-                    <strong className="text-amber-900 block font-bold">💡 Why This Matters (यह क्यों महत्वपूर्ण है):</strong>
-                    <p className="text-stone-600 leading-relaxed">{pat.whyThisMattersHi}</p>
-                  </div>
+                    <div>
+                      <h5 className="font-bold text-sm text-stone-900 font-playfair">
+                        {pat.titleHi}
+                      </h5>
+                      <p className="text-[11px] text-stone-600 mt-1 leading-relaxed">
+                        {pat.descriptionHi}
+                      </p>
+                    </div>
 
-                  {/* Practical Guidance & Quick Jump Anchor */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-stone-100 text-[10px]">
-                    <span className="text-emerald-800 font-medium">
-                      <strong>कार्य बिंदु: </strong> {pat.practicalFocusHi}
-                    </span>
-                    {pat.relatedChapterIds.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => scrollToSection(pat.relatedChapterIds[0])}
-                        className="text-[#D97706] hover:underline font-bold whitespace-nowrap flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>अध्याय देखें →</span>
-                      </button>
-                    )}
+                    {/* Why This Matters Box */}
+                    <div className="p-2.5 bg-[#FAF8F5] rounded-xl border border-stone-200 text-[10px] space-y-1">
+                      <strong className="text-amber-900 block font-bold">💡 Why This Matters (यह क्यों महत्वपूर्ण है):</strong>
+                      <p className="text-stone-600 leading-relaxed">{pat.whyThisMattersHi}</p>
+                    </div>
+
+                    {/* Practical Guidance & Quick Jump Anchor */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-stone-100 text-[10px]">
+                      <span className="text-emerald-800 font-medium">
+                        <strong>कार्य बिंदु: </strong> {pat.practicalFocusHi}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {matchingAdvanced && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedProvenanceInsight(matchingAdvanced)}
+                            className="text-stone-500 hover:text-amber-800 font-mono font-semibold text-[9px] bg-stone-100 px-2 py-1 rounded cursor-pointer border border-stone-200"
+                            title="पद्धति एवं नियम सत्यापन (Why Am I Seeing This?)"
+                          >
+                            🔬 नियम विवरण
+                          </button>
+                        )}
+                        {pat.relatedChapterIds.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => scrollToSection(pat.relatedChapterIds[0])}
+                            className="text-[#D97706] hover:underline font-bold whitespace-nowrap flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>अध्याय देखें →</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -3013,6 +3100,159 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           </div>
         </section>
 
+        {/* ========================================================================= */}
+        {/* PHASE 10: CONSULTATION FEEDBACK & QUALITY RATING LOOP (sec-feedback)     */}
+        {/* ========================================================================= */}
+        <section id="sec-feedback" className="bg-gradient-to-br from-[#FAF5EE] via-amber-50/40 to-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200/80 shadow-sm space-y-6 no-print print-avoid-break">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-200/60 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 bg-amber-100 rounded-2xl text-[#D97706]">
+                <MessageSquare className="w-5 h-5" />
+              </span>
+              <div>
+                <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider block">
+                  Phase 10 • Feedback Loop & Service Quality
+                </span>
+                <h3 className="font-playfair font-bold text-lg sm:text-xl text-[#1F2937]">
+                  {language === 'hi' ? 'परामर्श अनुभव व गुणवत्ता मूल्यांकन' : 'Consultation Experience & Quality Feedback'}
+                </h3>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-900 rounded-full text-xs font-semibold self-start sm:self-auto">
+              <Shield className="w-3.5 h-3.5 text-[#D97706]" />
+              {language === 'hi' ? 'गोपनीय व सुरक्षित' : 'Confidential & Secure'}
+            </span>
+          </div>
+
+          {feedbackSubmitted ? (
+            <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h4 className="font-playfair font-bold text-base text-emerald-950">
+                {language === 'hi' ? 'आपकी मूल्यवान समीक्षा के लिए कोटिशः धन्यवाद!' : 'Thank You for Your Valuable Feedback!'}
+              </h4>
+              <p className="text-xs text-emerald-800 max-w-lg mx-auto leading-relaxed">
+                {language === 'hi'
+                  ? 'आपकी प्रतिक्रिया हमारे वैदिक व कीरो अंकशास्त्रीय परामर्श को और अधिक सटीक एवं व्यावहारिक बनाने में सहायक होगी।'
+                  : 'Your feedback directly helps us refine our authentic Vedic and Chaldean consultation dossier and remedial frameworks.'}
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleFeedbackSubmit} className="space-y-5">
+              <p className="text-xs text-[#4B5563] leading-relaxed">
+                {language === 'hi'
+                  ? 'कृपया इस 32-अध्याय परामर्श रिपोर्ट की स्पष्टता, सटीकता और व्यावहारिक उपयोगिता पर अपना मूल्यांकन साझा करें:'
+                  : 'Please share your assessment on the clarity, accuracy, and practical usefulness of this 32-chapter consultation dossier:'}
+              </p>
+
+              {/* Star Rating Selection */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-[#374151]">
+                  {language === 'hi' ? '1. समग्र परामर्श संतुष्टि रेटिंग (Overall Rating):' : '1. Overall Consultation Rating:'}
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFeedbackRating(star)}
+                      className="p-1 text-2xl transition-transform hover:scale-125 focus:outline-none cursor-pointer"
+                      title={`${star} Star`}
+                    >
+                      <Star
+                        className={`w-7 h-7 ${
+                          star <= feedbackRating
+                            ? 'text-amber-400 fill-amber-400 drop-shadow-xs'
+                            : 'text-stone-300'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                  <span className="text-xs font-bold text-amber-800 ml-2">
+                    {feedbackRating === 5 ? (language === 'hi' ? 'उत्कृष्ट (5/5)' : 'Excellent (5/5)') :
+                     feedbackRating === 4 ? (language === 'hi' ? 'बहुत अच्छा (4/5)' : 'Very Good (4/5)') :
+                     feedbackRating === 3 ? (language === 'hi' ? 'संतोषजनक (3/5)' : 'Good (3/5)') :
+                     (language === 'hi' ? 'सुधार अपेक्षित' : 'Needs Improvement')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Clarity & Actionability Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#374151]">
+                    {language === 'hi' ? '2. भाषा एवं व्याख्या की स्पष्टता:' : '2. Language & Interpretive Clarity:'}
+                  </label>
+                  <select
+                    value={feedbackClarity}
+                    onChange={(e) => setFeedbackClarity(e.target.value)}
+                    className="w-full text-xs p-2.5 bg-white border border-stone-300 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                  >
+                    <option value="crystal_clear">{language === 'hi' ? 'पूर्णतः स्पष्ट व सरल (Crystal Clear)' : 'Crystal Clear & Simple'}</option>
+                    <option value="mostly_clear">{language === 'hi' ? 'अधिकांशतः समझ आया (Mostly Clear)' : 'Mostly Clear'}</option>
+                    <option value="needs_explanation">{language === 'hi' ? 'और विस्तृत व्याख्या चाहिए (Needs More Explanation)' : 'Needs More Explanation'}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#374151]">
+                    {language === 'hi' ? '3. 90-दिवसीय कार्ययोजना की व्यावहारिकता:' : '3. Actionability of 90-Day Plan:'}
+                  </label>
+                  <select
+                    value={feedbackActionability}
+                    onChange={(e) => setFeedbackActionability(e.target.value)}
+                    className="w-full text-xs p-2.5 bg-white border border-stone-300 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                  >
+                    <option value="highly_actionable">{language === 'hi' ? 'अति व्यावहारिक व लागू करने योग्य (Highly Actionable)' : 'Highly Actionable & Practical'}</option>
+                    <option value="useful">{language === 'hi' ? 'उपयोगी व मार्गदर्शक (Useful & Guiding)' : 'Useful & Guiding'}</option>
+                    <option value="neutral">{language === 'hi' ? 'सामान्य (Neutral)' : 'Neutral'}</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Optional Textarea */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-[#374151]">
+                  {language === 'hi' ? '4. कोई विशिष्ट सुझाव या अनुभव (वैकल्पिक):' : '4. Specific Notes or Testimonial (Optional):'}
+                </label>
+                <textarea
+                  rows={2}
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder={
+                    language === 'hi'
+                      ? 'अपनी राय यहाँ लिखें... (जैसे: कौन सा अध्याय सबसे उपयोगी लगा)'
+                      : 'Share your thoughts or which chapter was most enlightening...'
+                  }
+                  className="w-full text-xs p-3 bg-white border border-stone-300 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none resize-none"
+                />
+              </div>
+
+              {feedbackError && (
+                <div className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                  {feedbackError}
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[11px] text-stone-500 italic">
+                  {language === 'hi' ? 'आपकी राय सुरक्षित रूप से संग्रहीत होती है।' : 'Your evaluation is stored securely.'}
+                </span>
+                <button
+                  type="submit"
+                  disabled={feedbackSubmitting}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-[#D97706] hover:bg-[#B45309] text-white shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{feedbackSubmitting ? (language === 'hi' ? 'दर्ज हो रहा है...' : 'Submitting...') : (language === 'hi' ? 'प्रतिक्रिया सबमिट करें' : 'Submit Feedback')}</span>
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
+
       </div>
 
       {/* Bottom Floating/Docked Export Actions Bar (Screen-only) */}
@@ -3054,6 +3294,118 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Phase 7: Explainable Insight & Provenance Modal Overlay */}
+      {selectedProvenanceInsight && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl border-2 border-amber-300 overflow-hidden space-y-0">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-[#FAF5EE] via-amber-50 to-[#FAF5EE] p-5 border-b border-amber-200 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="p-2 bg-amber-100 rounded-xl text-[#D97706]">
+                  <Sparkles className="w-5 h-5" />
+                </span>
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider block">
+                    LeoFamily Provenance & Rule Inspector
+                  </span>
+                  <h4 className="font-playfair font-bold text-base text-stone-900">
+                    {language === 'hi' ? selectedProvenanceInsight.title.hi : selectedProvenanceInsight.title.en}
+                  </h4>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedProvenanceInsight(null)}
+                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center font-bold text-sm cursor-pointer transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
+              {/* Summary */}
+              <div className="p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-1">
+                <strong className="text-[#92400E] block font-bold text-[10px] uppercase">
+                  {language === 'hi' ? 'विश्लेषण सारांश (Summary):' : 'Analytical Summary:'}
+                </strong>
+                <p className="text-stone-700 leading-relaxed">
+                  {language === 'hi' ? selectedProvenanceInsight.summary.hi : selectedProvenanceInsight.summary.en}
+                </p>
+              </div>
+
+              {/* Calculated Inputs Layer */}
+              <div className="space-y-2">
+                <span className="text-[10px] font-mono font-bold uppercase text-stone-500 block">
+                  1. आधारभूत गणना इनपुट (Calculated Facts & Inputs):
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {selectedProvenanceInsight.inputs.map((inp, idx) => (
+                    <div key={idx} className="p-2.5 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
+                      <span className="text-stone-600 font-medium">{inp.label}:</span>
+                      <span className="font-bold text-stone-900">{inp.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Matched Governance Rules */}
+              <div className="space-y-2">
+                <span className="text-[10px] font-mono font-bold uppercase text-stone-500 block">
+                  2. पंजीकृत पद्धति नियम (Governing Methodology Rules):
+                </span>
+                <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-1.5 font-mono text-[11px]">
+                  <div className="text-[#D97706] font-bold">
+                    {selectedProvenanceInsight.provenance.matchedRuleIds.join(', ')}
+                  </div>
+                  <div className="text-stone-600 text-[10px]">
+                    गणना स्रोत: {selectedProvenanceInsight.provenance.calculationSource}
+                  </div>
+                </div>
+              </div>
+
+              {/* Source Citation & Hierarchy */}
+              <div className="space-y-2">
+                <span className="text-[10px] font-mono font-bold uppercase text-stone-500 block">
+                  3. ज्ञान स्रोत संदर्भ (Knowledge Source Citation):
+                </span>
+                {selectedProvenanceInsight.provenance.sourceCitations.map((src, idx) => (
+                  <div key={idx} className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-emerald-900">{src.sourceDocument}</span>
+                      <span className="text-[9px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
+                        {src.level}
+                      </span>
+                    </div>
+                    {src.author && <div className="text-[10px] text-emerald-800">लेखक: {src.author}</div>}
+                    <div className="text-[10px] text-emerald-700 italic">{src.topic}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Safety & Determinism Caution */}
+              <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-200 flex items-center gap-2 text-[10px] text-blue-900">
+                <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <span>
+                  यह अंतर्दृष्टि केवल ग्रह ऊर्जा सामंजस्य व व्यक्तिगत विकास के लिए है। किसी भी प्रकार की घातक या भाग्यवादी भविष्यवाणी पूर्णतः वर्जित है।
+                </span>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-stone-50 p-4 border-t border-stone-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedProvenanceInsight(null)}
+                className="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                बंद करें (Close)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </ReportAccessGate>
   );

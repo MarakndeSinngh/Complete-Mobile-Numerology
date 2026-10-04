@@ -101,7 +101,9 @@ body {
   }
 
   /* Expand main container to full printable width */
-  #report-unified-container {
+  #master-report-container,
+  #report-unified-container,
+  .master-report-dossier {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;

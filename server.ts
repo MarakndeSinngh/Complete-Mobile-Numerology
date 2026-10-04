@@ -304,19 +304,46 @@ async function startServer() {
   // 12d. Admin: Verify (Approve/Reject) UPI Payment
   app.post("/api/admin/verify-upi-payment", async (req, res) => {
     try {
-      const { submissionId, action, rejectionReason, verifiedBy } = req.body || {};
-      if (!submissionId || !action) {
+      const { submissionId, paymentId, action, rejectionReason, notes, verifiedBy, adminIdentifier } = req.body || {};
+      const targetId = submissionId || paymentId;
+      const targetAction = action;
+      const targetReason = rejectionReason || notes;
+      const targetAdmin = verifiedBy || adminIdentifier || 'Admin';
+
+      if (!targetId || !targetAction) {
         return res.status(400).json({ error: "Missing submissionId or action" });
       }
       const result = await reportAccessEngine.verifyAdminUpiPayment(
-        submissionId,
-        action,
-        rejectionReason,
-        verifiedBy || 'Admin'
+        targetId,
+        targetAction,
+        targetReason,
+        targetAdmin
       );
       res.json(result);
     } catch (e: any) {
       res.status(400).json({ error: e.message || "Failed to verify UPI payment" });
+    }
+  });
+
+  // 12e. Submit Consultation Feedback (Phase 10 Operating Loop)
+  app.post("/api/feedback/submit", async (req, res) => {
+    try {
+      const authHeader = req.headers['authorization'];
+      const email = req.query.email as string | undefined;
+      const result = await reportAccessEngine.submitConsultationFeedback(req.body, authHeader, email);
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message || "Failed to submit consultation feedback" });
+    }
+  });
+
+  // 12f. Admin: Get Consultation Feedback (Phase 10)
+  app.get("/api/admin/feedback", async (req, res) => {
+    try {
+      const result = await reportAccessEngine.getAdminFeedback();
+      res.json(result);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || "Failed to fetch consultation feedback" });
     }
   });
 

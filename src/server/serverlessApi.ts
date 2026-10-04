@@ -386,21 +386,25 @@ router.get("/admin/upi-payments", async (req, res) => {
 // 7e. Admin: Verify or Reject UPI Payment and Grant Master Report Entitlement
 router.post("/admin/verify-upi-payment", async (req, res) => {
   try {
-    const { paymentId, action, notes, adminIdentifier } = req.body || {};
+    const { submissionId, paymentId, action, rejectionReason, notes, verifiedBy, adminIdentifier } = req.body || {};
+    const targetId = submissionId || paymentId;
+    const targetAction = action === 'APPROVED' ? 'APPROVE' : action === 'REJECTED' ? 'REJECT' : (action as 'APPROVE' | 'REJECT');
+    const targetReason = rejectionReason || notes || '';
+    const targetAdmin = verifiedBy || adminIdentifier || 'Admin';
 
-    if (!paymentId || !action || (action !== 'VERIFY' && action !== 'REJECT')) {
+    if (!targetId || !targetAction || (targetAction !== 'APPROVE' && targetAction !== 'REJECT')) {
       return res.status(400).json({
         success: false,
-        error: "Missing or invalid paymentId or action (must be VERIFY or REJECT)",
+        error: "Missing or invalid paymentId/submissionId or action (must be APPROVE or REJECT)",
         code: "INVALID_ADMIN_ACTION"
       });
     }
 
     const result = await reportAccessEngine.verifyAdminUpiPayment(
-      paymentId,
-      action,
-      adminIdentifier || 'admin_user',
-      notes || ''
+      targetId,
+      targetAction,
+      targetReason,
+      targetAdmin
     );
 
     res.json(result);
@@ -411,6 +415,28 @@ router.post("/admin/verify-upi-payment", async (req, res) => {
       error: e?.message || "Failed to execute admin payment verification",
       code: "ADMIN_ACTION_FAILED"
     });
+  }
+});
+
+// 7f. Submit Consultation Feedback & Quality Ratings (Phase 10)
+router.post("/feedback/submit", async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const email = req.query.email as string | undefined;
+    const result = await reportAccessEngine.submitConsultationFeedback(req.body, authHeader, email);
+    res.json(result);
+  } catch (e: any) {
+    res.status(400).json({ success: false, error: e?.message || "Failed to submit consultation feedback" });
+  }
+});
+
+// 7g. Admin: Get Consultation Feedback (Phase 10)
+router.get("/admin/feedback", async (req, res) => {
+  try {
+    const result = await reportAccessEngine.getAdminFeedback();
+    res.json(result);
+  } catch (e: any) {
+    res.status(500).json({ success: false, error: e?.message || "Failed to fetch consultation feedback" });
   }
 });
 

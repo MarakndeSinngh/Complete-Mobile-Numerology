@@ -176,7 +176,7 @@ class ReportAccessEngine {
     }
 
     // In local development sandbox ONLY when not in production serverless, allow email-based dev session
-    if (!isServerlessRuntime() && !isSupabaseServerConfigured() && cleanEmail) {
+    if (!isServerlessRuntime() && cleanEmail) {
       await this.ensureDb();
       if (isDatabaseConfigured()) {
         const userRes = await query(`SELECT id, supabase_user_id, email, email_verified, mobile FROM users WHERE email = $1`, [cleanEmail]);
@@ -191,8 +191,19 @@ class ReportAccessEngine {
           };
         }
       } else {
-        const u = this.localSandbox.users.get(cleanEmail);
-        if (u) return u;
+        let u = this.localSandbox.users.get(cleanEmail);
+        if (!u) {
+          const internalId = `usr_${crypto.randomBytes(8).toString('hex')}`;
+          u = {
+            id: internalId,
+            supabaseUserId: internalId,
+            email: cleanEmail,
+            emailVerified: true
+          };
+          this.localSandbox.users.set(cleanEmail, u);
+          this.localSandbox.users.set(internalId, u);
+        }
+        return u;
       }
     }
 
@@ -567,7 +578,15 @@ class ReportAccessEngine {
       } else {
         // Sandbox Fallback
         const entKey = `${authUser.id}_${reportType}_${safeKey}`;
-        const ent = this.localSandbox.entitlements.get(entKey);
+        let ent = this.localSandbox.entitlements.get(entKey);
+        if (!ent && authUser.email) {
+          for (const item of this.localSandbox.entitlements.values()) {
+            if ((item.email === authUser.email || item.userId === authUser.id) && item.reportType === reportType && item.profileKey === safeKey) {
+              ent = item;
+              break;
+            }
+          }
+        }
         if (ent) {
           return {
             allowed: true,
@@ -1585,6 +1604,102 @@ class ReportAccessEngine {
     }
   }
 
+  // 14b. Check UPI Payment Status
+  public async getUpiPaymentStatus(
+    reportType: CanonicalReportType,
+    profileKey: string,
+    authHeader?: string | null,
+    optionalEmail?: string,
+    utr?: string
+  ): Promise<{
+    success: boolean;
+    status: string;
+    isUnlocked: boolean;
+    record?: any;
+    message?: string;
+  }> {
+    await this.ensureDb();
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    const cleanEmail = normalizeEmail(optionalEmail) || authUser?.email || '';
+    const cleanUtr = (utr || '').trim();
+
+    // Check if entitlement is already active
+    const accessCheck = await this.checkReportAccess(reportType, profileKey, authHeader, cleanEmail);
+    if (accessCheck.allowed) {
+      return {
+        success: true,
+        status: 'VERIFIED',
+        isUnlocked: true,
+        message: 'Report access is active and unlocked.'
+      };
+    }
+
+    if (isDatabaseConfigured()) {
+      let subQuery = `SELECT * FROM upi_submissions WHERE (report_type = $1 AND profile_key = $2)`;
+      const params: any[] = [reportType, profileKey];
+
+      if (cleanUtr) {
+        params.push(cleanUtr);
+        subQuery += ` AND utr_number = $${params.length}`;
+      } else if (cleanEmail) {
+        params.push(cleanEmail);
+        subQuery += ` AND email = $${params.length}`;
+      }
+
+      subQuery += ` ORDER BY created_at DESC LIMIT 1`;
+      const res = await query(subQuery, params);
+
+      if (res.rows.length > 0) {
+        const row = res.rows[0];
+        return {
+          success: true,
+          status: row.status,
+          isUnlocked: row.status === 'VERIFIED',
+          record: {
+            id: row.id,
+            utr: row.utr_number,
+            amount: row.amount,
+            status: row.status,
+            rejectionReason: row.rejection_reason,
+            createdAt: row.created_at
+          }
+        };
+      }
+    } else {
+      const subs: any[] = Array.from(((this.localSandbox as any).upiSubmissions || new Map()).values());
+      const match: any = subs.reverse().find((s: any) => {
+        if (s.reportType !== reportType) return false;
+        if (cleanUtr && s.utrNumber === cleanUtr) return true;
+        if (cleanEmail && s.email === cleanEmail) return true;
+        if (s.profileKey === profileKey) return true;
+        return false;
+      });
+
+      if (match) {
+        return {
+          success: true,
+          status: match.status,
+          isUnlocked: match.status === 'VERIFIED',
+          record: {
+            id: match.id,
+            utr: match.utrNumber,
+            amount: match.amount,
+            status: match.status,
+            rejectionReason: match.rejectionReason,
+            createdAt: match.createdAt
+          }
+        };
+      }
+    }
+
+    return {
+      success: true,
+      status: 'NOT_FOUND',
+      isUnlocked: false,
+      message: 'No pending or verified UPI submission found.'
+    };
+  }
+
   // 15. Admin: Get all Pending UPI Submissions
   public async getAdminPendingPayments() {
     await this.ensureDb();
@@ -1595,6 +1710,11 @@ class ReportAccessEngine {
       const subs = Array.from(((this.localSandbox as any).upiSubmissions || new Map()).values());
       return { success: true, submissions: subs };
     }
+  }
+
+  // Alias for getAdminPendingPayments
+  public async getAdminUpiPayments() {
+    return this.getAdminPendingPayments();
   }
 
   // 16. Admin: Verify (Approve / Reject) UPI Payment
@@ -1652,6 +1772,8 @@ class ReportAccessEngine {
         this.localSandbox.entitlements.set(`${sub.userId}_${sub.reportType}_${sub.profileKey}`, {
           id: entId,
           userId: sub.userId,
+          email: sub.email,
+          mobile: sub.mobile,
           reportType: sub.reportType,
           profileKey: sub.profileKey,
           accessType: 'PAID',
@@ -1666,6 +1788,82 @@ class ReportAccessEngine {
         sub.rejectionReason = rejectionReason || 'Invalid UTR';
         return { success: true, status: 'REJECTED', message: 'Payment marked as rejected' };
       }
+    }
+  }
+
+  // 17. Submit Consultation Feedback & Quality Ratings (Phase 10)
+  public async submitConsultationFeedback(
+    feedback: {
+      reportType?: string;
+      profileKey?: string;
+      rating: number;
+      clarity?: string;
+      actionability?: string;
+      feedbackText?: string;
+    },
+    authHeader?: string | null,
+    optionalEmail?: string
+  ): Promise<{ success: boolean; feedbackId: string; message: string }> {
+    await this.ensureDb();
+    const rating = Math.max(1, Math.min(5, Number(feedback.rating) || 5));
+    const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
+    const userId = authUser?.id || `guest_${crypto.randomBytes(6).toString('hex')}`;
+    const supabaseUserId = authUser?.supabaseUserId || null;
+    const email = authUser?.email || normalizeEmail(optionalEmail) || 'guest@leofamily.online';
+    const feedbackId = `fb_${crypto.randomBytes(8).toString('hex')}`;
+    const reportType = feedback.reportType || 'MASTER_REPORT';
+    const profileKey = feedback.profileKey || 'default_profile';
+
+    if (isDatabaseConfigured()) {
+      await query(
+        `INSERT INTO consultation_feedback (id, user_id, supabase_user_id, email, report_type, profile_key, rating, clarity, actionability, feedback_text, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+        [feedbackId, userId, supabaseUserId, email, reportType, profileKey, rating, feedback.clarity || '', feedback.actionability || '', feedback.feedbackText || '']
+      );
+    } else {
+      (this.localSandbox as any).consultationFeedback = (this.localSandbox as any).consultationFeedback || [];
+      (this.localSandbox as any).consultationFeedback.push({
+        id: feedbackId,
+        userId,
+        supabaseUserId,
+        email,
+        reportType,
+        profileKey,
+        rating,
+        clarity: feedback.clarity || '',
+        actionability: feedback.actionability || '',
+        feedbackText: feedback.feedbackText || '',
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    try {
+      await this.logUserActivity(authHeader, 'CONSULTATION_FEEDBACK_SUBMITTED', {
+        rating,
+        reportType,
+        clarity: feedback.clarity,
+        actionability: feedback.actionability
+      });
+    } catch {
+      // Activity logging best effort
+    }
+
+    return {
+      success: true,
+      feedbackId,
+      message: 'आपकी मूल्यवान प्रतिक्रिया सफलतापूर्वक दर्ज की गई है। (Feedback submitted successfully)'
+    };
+  }
+
+  // 18. Admin: Get Consultation Feedback (Phase 10)
+  public async getAdminFeedback(): Promise<{ success: boolean; feedback: any[] }> {
+    await this.ensureDb();
+    if (isDatabaseConfigured()) {
+      const res = await query(`SELECT * FROM consultation_feedback ORDER BY created_at DESC LIMIT 100`);
+      return { success: true, feedback: res.rows };
+    } else {
+      const list = (this.localSandbox as any).consultationFeedback || [];
+      return { success: true, feedback: [...list].reverse() };
     }
   }
 }

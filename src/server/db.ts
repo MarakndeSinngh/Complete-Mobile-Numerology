@@ -355,6 +355,23 @@ export async function ensureDatabaseSchema(): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_upi_sub_supabase ON upi_submissions(supabase_user_id);
         CREATE INDEX IF NOT EXISTS idx_upi_sub_status ON upi_submissions(status);
         CREATE INDEX IF NOT EXISTS idx_upi_sub_utr ON upi_submissions(utr_number);
+
+        -- 7. Consultation Feedback & Quality Ratings (Phase 10)
+        CREATE TABLE IF NOT EXISTS consultation_feedback (
+          id VARCHAR(64) PRIMARY KEY,
+          user_id VARCHAR(64),
+          supabase_user_id VARCHAR(64),
+          email VARCHAR(255),
+          report_type VARCHAR(64) NOT NULL DEFAULT 'MASTER_REPORT',
+          profile_key VARCHAR(128) NOT NULL DEFAULT 'default_profile',
+          rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+          clarity VARCHAR(64),
+          actionability VARCHAR(64),
+          feedback_text TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON consultation_feedback(created_at);
+        CREATE INDEX IF NOT EXISTS idx_feedback_report_type ON consultation_feedback(report_type);
       `);
 
       schemaInitialized = true;

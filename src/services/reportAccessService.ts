@@ -504,16 +504,61 @@ export class ReportAccessService {
     );
   }
 
+  // 12c. Get UPI Payment Status
+  public static async getUpiPaymentStatus(
+    reportType: CanonicalReportType | string,
+    profileKey: string,
+    utr?: string,
+    emailOrMobile?: string
+  ): Promise<{
+    success: boolean;
+    status: string;
+    isUnlocked?: boolean;
+    record?: any;
+    message?: string;
+  }> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const params = new URLSearchParams({
+      reportType,
+      profileKey: profileKey || 'default_profile'
+    });
+    if (utr) params.append('utr', utr);
+    const email = emailOrMobile?.includes('@') ? emailOrMobile : storedUser?.email;
+    if (email) params.append('email', email);
+
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    return await safeFetchJson<{
+      success: boolean;
+      status: string;
+      isUnlocked?: boolean;
+      record?: any;
+      message?: string;
+    }>(`/api/payments/upi-status?${params.toString()}`, { headers });
+  }
+
   // 13. Admin: Get Pending UPI Payments
-  public static async getAdminPendingPayments(): Promise<{ success: boolean; submissions: any[] }> {
-    return await safeFetchJson<{ success: boolean; submissions: any[] }>('/api/admin/pending-upi-payments');
+  public static async getAdminPendingPayments(): Promise<{ success: boolean; submissions: any[]; payments?: any[] }> {
+    const res = await safeFetchJson<{ success: boolean; submissions?: any[]; payments?: any[] }>('/api/admin/pending-upi-payments');
+    const items = res.submissions || res.payments || [];
+    return { success: res.success, submissions: items, payments: items };
+  }
+
+  // 13b. Admin: Get All UPI Payments (Alias)
+  public static async getAdminUpiPayments(): Promise<{ success: boolean; payments: any[]; submissions: any[] }> {
+    const res = await safeFetchJson<{ success: boolean; submissions?: any[]; payments?: any[] }>('/api/admin/pending-upi-payments');
+    const items = res.payments || res.submissions || [];
+    return { success: res.success, payments: items, submissions: items };
   }
 
   // 14. Admin: Verify (Approve / Reject) UPI Payment
   public static async adminVerifyPayment(
     submissionId: string,
     action: 'APPROVE' | 'REJECT',
-    rejectionReason?: string
+    rejectionReason?: string,
+    verifiedBy: string = 'Admin'
   ): Promise<{ success: boolean; status: string; message: string }> {
     return await safeFetchJson<{ success: boolean; status: string; message: string }>(
       '/api/admin/verify-upi-payment',
@@ -522,12 +567,26 @@ export class ReportAccessService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           submissionId,
+          paymentId: submissionId,
           action,
           rejectionReason,
-          verifiedBy: 'Admin',
+          notes: rejectionReason,
+          verifiedBy,
+          adminIdentifier: verifiedBy
         }),
       }
     );
+  }
+
+  // Alias for verifyAdminUpiPayment
+  public static async verifyAdminUpiPayment(
+    submissionId: string,
+    action: 'VERIFY' | 'REJECT' | 'APPROVE',
+    rejectionReason?: string,
+    verifiedBy: string = 'Admin'
+  ): Promise<{ success: boolean; status: string; message: string }> {
+    const canonicalAction = action === 'VERIFY' || action === 'APPROVE' ? 'APPROVE' : 'REJECT';
+    return this.adminVerifyPayment(submissionId, canonicalAction, rejectionReason, verifiedBy);
   }
 
   // Alias for backward compatibility
@@ -541,5 +600,37 @@ export class ReportAccessService {
       status === 'APPROVED' ? 'APPROVE' : 'REJECT',
       adminNotes
     );
+  }
+
+  // 15. Submit Consultation Quality Feedback (Phase 10)
+  public static async submitFeedback(feedbackData: {
+    reportType?: string;
+    profileKey?: string;
+    rating: number;
+    clarity?: string;
+    actionability?: string;
+    feedbackText?: string;
+  }): Promise<{ success: boolean; message: string; feedbackId?: string; error?: string }> {
+    const token = this.getToken();
+    const storedUser = this.getStoredUser();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const params = new URLSearchParams();
+    if (storedUser?.email) params.append('email', storedUser.email);
+
+    return await safeFetchJson<{ success: boolean; message: string; feedbackId?: string; error?: string }>(
+      `/api/feedback/submit?${params.toString()}`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(feedbackData),
+      }
+    );
+  }
+
+  // 16. Admin: Get Consultation Feedback (Phase 10)
+  public static async getAdminFeedback(): Promise<{ success: boolean; feedback: any[] }> {
+    return await safeFetchJson<{ success: boolean; feedback: any[] }>('/api/admin/feedback');
   }
 }
