@@ -102,14 +102,16 @@ const CANONICAL_ADMIN_TEST_EMAILS = [
 ];
 
 export function getAdminTestEmails(): string[] {
+  const set = new Set(CANONICAL_ADMIN_TEST_EMAILS.map(e => e.trim().toLowerCase()));
   const envVal = process.env.ADMIN_TEST_EMAILS;
   if (envVal && typeof envVal === 'string') {
-    return envVal
+    envVal
       .split(',')
       .map(e => e.trim().toLowerCase())
-      .filter(Boolean);
+      .filter(Boolean)
+      .forEach(e => set.add(e));
   }
-  return CANONICAL_ADMIN_TEST_EMAILS;
+  return Array.from(set);
 }
 
 export function isInternalAdminTestEmail(rawEmail: string | undefined | null): boolean {
@@ -178,27 +180,39 @@ class ReportAccessEngine {
         }
 
         if (isDatabaseConfigured()) {
-          const generatedId = `usr_${crypto.randomBytes(8).toString('hex')}`;
-          // Atomic UPSERT using ON CONFLICT (supabase_user_id) to eliminate concurrency race conditions
-          const upsertRes = await query(
-            `INSERT INTO users (id, supabase_user_id, email, email_verified, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, NOW(), NOW())
-             ON CONFLICT (supabase_user_id) WHERE supabase_user_id IS NOT NULL
-             DO UPDATE SET email = EXCLUDED.email, email_verified = EXCLUDED.email_verified, updated_at = NOW()
-             RETURNING id, supabase_user_id, email, email_verified, mobile`,
-            [generatedId, supabaseId, userEmail, isVerified]
-          );
+          try {
+            const generatedId = `usr_${crypto.randomBytes(8).toString('hex')}`;
+            // Atomic UPSERT using ON CONFLICT (supabase_user_id) to eliminate concurrency race conditions
+            const upsertRes = await query(
+              `INSERT INTO users (id, supabase_user_id, email, email_verified, created_at, updated_at)
+               VALUES ($1, $2, $3, $4, NOW(), NOW())
+               ON CONFLICT (supabase_user_id) WHERE supabase_user_id IS NOT NULL
+               DO UPDATE SET email = EXCLUDED.email, email_verified = EXCLUDED.email_verified, updated_at = NOW()
+               RETURNING id, supabase_user_id, email, email_verified, mobile`,
+              [generatedId, supabaseId, userEmail, isVerified]
+            );
 
-          if (upsertRes.rows.length > 0) {
-            const row = upsertRes.rows[0];
-            return {
-              id: row.id,
-              supabaseUserId: row.supabase_user_id || supabaseId,
-              email: row.email || userEmail,
-              emailVerified: row.email_verified ?? isVerified,
-              mobile: row.mobile || undefined
-            };
+            if (upsertRes.rows.length > 0) {
+              const row = upsertRes.rows[0];
+              return {
+                id: row.id,
+                supabaseUserId: row.supabase_user_id || supabaseId,
+                email: row.email || userEmail,
+                emailVerified: row.email_verified ?? isVerified,
+                mobile: row.mobile || undefined
+              };
+            }
+          } catch (dbErr) {
+            console.warn('[AuthEngine:ResolveUser] DB user upsert notice:', dbErr);
           }
+
+          // Fallback return for authenticated Supabase user even if DB write was delayed
+          return {
+            id: `usr_${supabaseId.slice(0, 16)}`,
+            supabaseUserId: supabaseId,
+            email: userEmail,
+            emailVerified: isVerified
+          };
         } else {
           let user = this.localSandbox.users.get(supabaseId) || this.localSandbox.users.get(userEmail);
           if (!user) {

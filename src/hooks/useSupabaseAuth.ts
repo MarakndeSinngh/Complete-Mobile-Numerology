@@ -135,6 +135,7 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
           if (mounted && initialSession) {
             setSession(initialSession);
             setUser(initialSession.user);
+            ReportAccessService.setCurrentSession(initialSession);
             await syncWithBackend(initialSession);
           }
         }
@@ -155,6 +156,7 @@ export function useSupabaseAuth(): UseSupabaseAuthReturn {
         if (!mounted) return;
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        ReportAccessService.setCurrentSession(currentSession);
 
         if (event === 'SIGNED_OUT') {
           setAppUser(null);

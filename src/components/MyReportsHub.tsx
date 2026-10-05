@@ -185,7 +185,7 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
       if (filterType === 'FREE') {
         matchesType = item.accessType === 'FREE' || item.accessType === 'ALWAYS_FREE';
       } else if (filterType === 'PAID') {
-        matchesType = item.accessType === 'PAID';
+        matchesType = item.accessType === 'PAID' || item.accessType === 'ADMIN_TEST';
       }
 
       return matchesSearch && matchesType;
@@ -545,7 +545,12 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
                     <div className="space-y-3">
                       {/* Badge Header */}
                       <div className="flex items-center justify-between gap-2">
-                        {isAlwaysFree ? (
+                        {item.accessType === 'ADMIN_TEST' ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-purple-900 bg-purple-100 border border-purple-300 px-2.5 py-0.5 rounded-full">
+                            <ShieldCheck className="w-3 h-3 text-purple-600" />
+                            {language === 'hi' ? 'आंतरिक टेस्ट (Admin Test)' : 'Internal Test Access'}
+                          </span>
+                        ) : isAlwaysFree ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
                             <Sparkles className="w-3 h-3 text-blue-600" />
                             {i18n.alwaysFreeBadge}

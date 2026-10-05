@@ -12,6 +12,7 @@ import {
   isPublicReport,
 } from '../types/reportAccess';
 import { ReportAccessService } from '../services/reportAccessService';
+import { supabase } from '../lib/supabaseClient';
 
 export interface UseReportAccessResult {
   accessStatus: ReportAccessCheckResult | null;
@@ -31,7 +32,8 @@ export interface UseReportAccessResult {
 export function useReportAccess(
   reportType: CanonicalReportType,
   profileKey: string,
-  mobile?: string
+  mobile?: string,
+  email?: string
 ): UseReportAccessResult {
   const [accessStatus, setAccessStatus] = useState<ReportAccessCheckResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -90,10 +92,20 @@ export function useReportAccess(
     } finally {
       setIsLoading(false);
     }
-  }, [reportType, profileKey, mobile]);
+  }, [reportType, profileKey, mobile, email]);
 
   useEffect(() => {
     checkAccess();
+  }, [checkAccess]);
+
+  // Re-check automatically when user signs in or auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkAccess();
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [checkAccess]);
 
   const openAccessModal = useCallback(() => {

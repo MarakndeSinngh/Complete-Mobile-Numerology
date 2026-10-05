@@ -11,6 +11,7 @@ export interface ReportAccessGateProps {
   profileKey: string;
   profileName?: string;
   mobile?: string;
+  email?: string;
   children: React.ReactNode;
   onUnlock?: () => void;
   title?: string;
@@ -22,6 +23,7 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
   profileKey,
   profileName,
   mobile,
+  email,
   children,
   onUnlock,
   title,
@@ -38,10 +40,10 @@ export const ReportAccessGate: React.FC<ReportAccessGateProps> = ({
     openAccessModal,
     closeAccessModal,
     handleAccessGranted,
-  } = useReportAccess(reportType, profileKey, mobile);
+  } = useReportAccess(reportType, profileKey, mobile, email);
 
-  // If permanently free or already unlocked, render children directly
-  if (isPublicReport(reportType) || reportDef.isFree || isUnlocked || accessStatus?.allowed) {
+  // If permanently free, already unlocked, or authorized via ADMIN_TEST / PAID, render children directly
+  if (isPublicReport(reportType) || reportDef.isFree || isUnlocked || accessStatus?.allowed || accessStatus?.accessType === 'ADMIN_TEST') {
     return <>{children}</>;
   }
 

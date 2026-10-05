@@ -16,6 +16,37 @@ import { safeFetchJson } from './safeApiHelper';
 import { supabase } from '../lib/supabaseClient';
 
 export class ReportAccessService {
+  private static _currentSession: any = null;
+  private static _currentUser: UserSession | null = null;
+
+  public static setCurrentSession(session: any): void {
+    this._currentSession = session;
+    if (session?.user) {
+      const u = session.user;
+      this._currentUser = {
+        userId: u.id,
+        supabaseUserId: u.id,
+        email: u.email || '',
+        emailVerified: !!u.email_confirmed_at,
+        phone: u.phone || '',
+        phoneVerified: !!u.phone_confirmed_at,
+        fullName: u.user_metadata?.full_name || u.user_metadata?.name || '',
+        avatarUrl: u.user_metadata?.avatar_url || '',
+        authProvider: u.app_metadata?.provider || 'supabase',
+        mobile: u.phone || '',
+        mobileVerified: !!u.phone_confirmed_at,
+        token: session.access_token || '',
+        hasClaimedFreeReport: false,
+      };
+    } else {
+      this._currentUser = null;
+    }
+  }
+
+  public static setCurrentUser(user: UserSession | null): void {
+    this._currentUser = user;
+  }
+
   // Canonical check for public reports
   public static isPublicReport(reportType: string | CanonicalReportType): boolean {
     return isPublicReport(reportType);
@@ -23,16 +54,26 @@ export class ReportAccessService {
 
   // Get currently active Supabase session token
   public static getToken(): string | null {
+    if (this._currentSession?.access_token) {
+      return this._currentSession.access_token;
+    }
+    if (this._currentUser?.token) {
+      return this._currentUser.token;
+    }
     try {
       // Synchronously retrieve active session token from Supabase Auth storage if present
       if (typeof window !== 'undefined') {
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
-          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          if (key && (key.includes('auth-token') || key.startsWith('sb-') || key.includes('supabase'))) {
             const raw = localStorage.getItem(key);
             if (raw) {
-              const parsed = JSON.parse(raw);
-              if (parsed?.access_token) return parsed.access_token;
+              try {
+                const parsed = JSON.parse(raw);
+                if (parsed?.access_token) return parsed.access_token;
+                if (parsed?.token) return parsed.token;
+                if (parsed?.currentSession?.access_token) return parsed.currentSession.access_token;
+              } catch {}
             }
           }
         }
@@ -45,32 +86,55 @@ export class ReportAccessService {
 
   // Get currently active authenticated Supabase user profile
   public static getStoredUser(): UserSession | null {
+    if (this._currentUser) {
+      return this._currentUser;
+    }
+    if (this._currentSession?.user) {
+      const u = this._currentSession.user;
+      return {
+        userId: u.id,
+        supabaseUserId: u.id,
+        email: u.email || '',
+        emailVerified: !!u.email_confirmed_at,
+        phone: u.phone || '',
+        phoneVerified: !!u.phone_confirmed_at,
+        fullName: u.user_metadata?.full_name || u.user_metadata?.name || '',
+        avatarUrl: u.user_metadata?.avatar_url || '',
+        authProvider: u.app_metadata?.provider || 'supabase',
+        mobile: u.phone || '',
+        mobileVerified: !!u.phone_confirmed_at,
+        token: this._currentSession.access_token || '',
+        hasClaimedFreeReport: false,
+      };
+    }
     try {
       if (typeof window !== 'undefined') {
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
-          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          if (key && (key.includes('auth-token') || key.startsWith('sb-') || key.includes('supabase'))) {
             const raw = localStorage.getItem(key);
             if (raw) {
-              const parsed = JSON.parse(raw);
-              const user = parsed?.user;
-              if (user) {
-                return {
-                  userId: user.id,
-                  supabaseUserId: user.id,
-                  email: user.email || '',
-                  emailVerified: !!user.email_confirmed_at,
-                  phone: user.phone || '',
-                  phoneVerified: !!user.phone_confirmed_at,
-                  fullName: user.user_metadata?.full_name || '',
-                  avatarUrl: user.user_metadata?.avatar_url || '',
-                  authProvider: user.app_metadata?.provider || 'supabase',
-                  mobile: user.phone || '',
-                  mobileVerified: !!user.phone_confirmed_at,
-                  token: parsed.access_token || '',
-                  hasClaimedFreeReport: false,
-                };
-              }
+              try {
+                const parsed = JSON.parse(raw);
+                const user = parsed?.user || parsed?.currentSession?.user;
+                if (user) {
+                  return {
+                    userId: user.id,
+                    supabaseUserId: user.id,
+                    email: user.email || '',
+                    emailVerified: !!user.email_confirmed_at,
+                    phone: user.phone || '',
+                    phoneVerified: !!user.phone_confirmed_at,
+                    fullName: user.user_metadata?.full_name || user.user_metadata?.name || '',
+                    avatarUrl: user.user_metadata?.avatar_url || '',
+                    authProvider: user.app_metadata?.provider || 'supabase',
+                    mobile: user.phone || '',
+                    mobileVerified: !!user.phone_confirmed_at,
+                    token: parsed.access_token || parsed?.currentSession?.access_token || '',
+                    hasClaimedFreeReport: false,
+                  };
+                }
+              } catch {}
             }
           }
         }
@@ -87,7 +151,8 @@ export class ReportAccessService {
   }
 
   public static clearSession(): void {
-    // Cleared via supabase.auth.signOut()
+    this._currentSession = null;
+    this._currentUser = null;
   }
 
   // Ensure Razorpay SDK is loaded on client
