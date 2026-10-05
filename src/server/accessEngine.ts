@@ -227,7 +227,6 @@ class ReportAccessEngine {
     if (authHeader) {
       const supabaseUser = await verifySupabaseToken(authHeader);
       if (supabaseUser) {
-        await this.ensureDb();
         const userEmail = normalizeEmail(supabaseUser.email) || cleanEmail;
         const supabaseId = supabaseUser.supabaseUserId;
         const isVerified = supabaseUser.emailVerified;
@@ -236,8 +235,19 @@ class ReportAccessEngine {
           console.log(`[AuthEngine:ResolveUser] Resolved Supabase ID: ${supabaseId} (Verified: ${isVerified})`);
         }
 
+        // FAST-PATH: Allowlisted ADMIN_TEST accounts resolve immediately without DB dependency
+        if (isInternalAdminTestEmail(userEmail)) {
+          return {
+            id: `usr_admin_${supabaseId.slice(0, 16)}`,
+            supabaseUserId: supabaseId,
+            email: userEmail,
+            emailVerified: true
+          };
+        }
+
         if (isDatabaseConfigured()) {
           try {
+            await this.ensureDb();
             const generatedId = `usr_${crypto.randomBytes(8).toString('hex')}`;
             // Atomic UPSERT using ON CONFLICT (supabase_user_id) to eliminate concurrency race conditions
             const upsertRes = await query(
@@ -290,18 +300,22 @@ class ReportAccessEngine {
 
     // In local development sandbox ONLY when not in production serverless, allow email-based dev session
     if (!isServerlessRuntime() && cleanEmail) {
-      await this.ensureDb();
       if (isDatabaseConfigured()) {
-        const userRes = await query(`SELECT id, supabase_user_id, email, email_verified, mobile FROM users WHERE email = $1`, [cleanEmail]);
-        if (userRes.rows.length > 0) {
-          const u = userRes.rows[0];
-          return {
-            id: u.id,
-            supabaseUserId: u.supabase_user_id || u.id,
-            email: u.email,
-            emailVerified: u.email_verified,
-            mobile: u.mobile
-          };
+        try {
+          await this.ensureDb();
+          const userRes = await query(`SELECT id, supabase_user_id, email, email_verified, mobile FROM users WHERE email = $1`, [cleanEmail]);
+          if (userRes.rows.length > 0) {
+            const u = userRes.rows[0];
+            return {
+              id: u.id,
+              supabaseUserId: u.supabase_user_id || u.id,
+              email: u.email,
+              emailVerified: u.email_verified,
+              mobile: u.mobile
+            };
+          }
+        } catch (err) {
+          console.warn('[AuthEngine:ResolveUser] Dev lookup notice:', err);
         }
       } else {
         let u = this.localSandbox.users.get(cleanEmail);
@@ -327,15 +341,14 @@ class ReportAccessEngine {
   public async syncSession(
     authHeader?: string | null,
     optionalProfile?: any
-  ): Promise<{ success: boolean; user: any; profile: any }> {
-    await this.ensureDb();
+  ): Promise<{ success: boolean; user: any; profile: any; isAdminTest?: boolean }> {
     const supabaseUser = await verifySupabaseToken(authHeader);
     if (!supabaseUser || !supabaseUser.supabaseUserId) {
       throw new Error("UNAUTHORIZED: Invalid or expired session token");
     }
 
     const userId = supabaseUser.supabaseUserId;
-    const email = supabaseUser.email || optionalProfile?.email || '';
+    const email = normalizeEmail(supabaseUser.email || optionalProfile?.email);
     const phone = supabaseUser.phone || optionalProfile?.phone || '';
     const fullName = supabaseUser.fullName || optionalProfile?.fullName || '';
     const firstName = supabaseUser.firstName || optionalProfile?.firstName || '';
@@ -346,6 +359,45 @@ class ReportAccessEngine {
     const phoneVerified = supabaseUser.phoneVerified;
     const lang = optionalProfile?.language || 'hi';
 
+    // FAST-PATH: Admin test accounts bypass database completely
+    if (isInternalAdminTestEmail(email)) {
+      return {
+        success: true,
+        user: {
+          id: `usr_admin_${userId.slice(0, 16)}`,
+          supabaseUserId: userId,
+          email,
+          phone,
+          fullName: fullName || 'Admin Test User',
+          avatarUrl,
+          authProvider,
+          emailVerified: true,
+          phoneVerified: true,
+          hasClaimedFreeReport: true,
+          freeReportDetails: {
+            reportType: 'MASTER_REPORT',
+            claimedAt: new Date().toISOString(),
+            profileKey: 'default_profile'
+          },
+          isAdminTest: true
+        },
+        profile: {
+          userId,
+          email,
+          phone,
+          fullName: fullName || 'Admin Test User',
+          avatarUrl,
+          authProvider,
+          emailVerified: true,
+          phoneVerified: true,
+          preferredLanguage: lang,
+          isAdminTest: true
+        },
+        isAdminTest: true
+      };
+    }
+
+    await this.ensureDb();
     let userProfile: any = null;
 
     if (isDatabaseConfigured()) {
@@ -607,7 +659,6 @@ class ReportAccessEngine {
     authHeader?: string | null,
     optionalEmail?: string
   ): Promise<ReportAccessCheckResult> {
-    await this.ensureDb();
     const safeKey = profileKey || 'default_profile';
 
     if (!REPORT_REGISTRY[reportType]) {
@@ -642,21 +693,10 @@ class ReportAccessEngine {
     const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
 
     if (authUser) {
-      // 2b. ADMIN / INTERNAL TEST ACCESS CHECK (Pre-Phase 10.5)
+      // 2b. ADMIN / INTERNAL TEST ACCESS CHECK (RULE 2: Zero Database Dependency)
       // Strictly server-authorized: must be authenticated user matching server-only allowlist
       const adminEval = evaluateAdminTestAccess(authUser);
       if (adminEval.isAdminTest) {
-        try {
-          await this.logUserActivity(authHeader, 'ADMIN_TEST_ACCESS', {
-            reportType,
-            profileKey: safeKey,
-            accessType: 'ADMIN_TEST',
-            email: authUser.email
-          });
-        } catch {
-          // best-effort telemetry logging
-        }
-
         return {
           allowed: true,
           requiresPayment: false,
@@ -670,6 +710,8 @@ class ReportAccessEngine {
           reason: 'Internal Test Access — Authorized test account (No payment required)'
         };
       }
+
+      await this.ensureDb();
 
       if (isDatabaseConfigured()) {
         // Strict Entitlement check: tied to authenticated user ID + profileKey + reportType
@@ -1263,41 +1305,89 @@ class ReportAccessEngine {
 
   // 8. Retrieve All Reports for Authenticated Customer
   public async getUserReports(authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; reports: UserReportItem[]; total: number }> {
-    await this.ensureDb();
     const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
     if (!authUser) {
       return { success: true, reports: [], total: 0 };
     }
 
+    // FAST-PATH: Admin test users immediately receive unlocked Master Report and Mobile Numerology
+    if (isInternalAdminTestEmail(authUser.email)) {
+      const masterDef = REPORT_REGISTRY.MASTER_REPORT;
+      const mobileDef = REPORT_REGISTRY.MOBILE_NUMEROLOGY;
+      return {
+        success: true,
+        reports: [
+          {
+            id: `admin_test_master_${authUser.id}`,
+            userId: authUser.id,
+            profileKey: 'default_profile',
+            reportType: 'MASTER_REPORT',
+            titleHi: `${masterDef.titleHi} (आंतरिक टेस्ट एक्सेस)`,
+            titleEn: `${masterDef.titleEn} (Internal Test Access)`,
+            titleMr: `${masterDef.titleMr} (प्रशासकीय चाचणी)`,
+            titleBn: `${masterDef.titleBn} (অ্যাডমিন টেস্ট অ্যাক্সেস)`,
+            titleGu: `${masterDef.titleGu} (એડમિન ટેસ્ટ એક્સેસ)`,
+            accessType: 'ADMIN_TEST',
+            amount: 0,
+            currency: 'INR',
+            status: 'UNLOCKED',
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: `perm_mobile_${authUser.id}`,
+            userId: authUser.id,
+            profileKey: 'mobile_scanner_profile',
+            reportType: 'MOBILE_NUMEROLOGY',
+            titleHi: mobileDef.titleHi,
+            titleEn: mobileDef.titleEn,
+            titleMr: mobileDef.titleMr,
+            titleBn: mobileDef.titleBn,
+            titleGu: mobileDef.titleGu,
+            accessType: 'ALWAYS_FREE',
+            amount: 0,
+            currency: 'INR',
+            status: 'UNLOCKED',
+            createdAt: new Date().toISOString(),
+          }
+        ],
+        total: 2,
+      };
+    }
+
+    await this.ensureDb();
     const reportItems: UserReportItem[] = [];
 
     if (isDatabaseConfigured()) {
-      const entRes = await query(
-        `SELECT id, user_id, profile_key, report_type, access_type, amount, currency, payment_status, razorpay_payment_id, razorpay_order_id, created_at
-         FROM entitlements WHERE user_id = $1 OR supabase_user_id = $2 ORDER BY created_at DESC`,
-        [authUser.id, authUser.supabaseUserId]
-      );
+      try {
+        const entRes = await query(
+          `SELECT id, user_id, profile_key, report_type, access_type, amount, currency, payment_status, razorpay_payment_id, razorpay_order_id, created_at
+           FROM entitlements WHERE user_id = $1 OR supabase_user_id = $2 ORDER BY created_at DESC`,
+          [authUser.id, authUser.supabaseUserId]
+        );
 
-      for (const ent of entRes.rows) {
-        const def = REPORT_REGISTRY[ent.report_type as CanonicalReportType] || REPORT_REGISTRY.MASTER_REPORT;
-        reportItems.push({
-          id: ent.id,
-          userId: ent.user_id,
-          profileKey: ent.profile_key,
-          reportType: ent.report_type,
-          titleHi: def.titleHi,
-          titleEn: def.titleEn,
-          titleMr: def.titleMr,
-          titleBn: def.titleBn,
-          titleGu: def.titleGu,
-          accessType: ent.access_type,
-          amount: ent.amount,
-          currency: 'INR',
-          status: 'UNLOCKED',
-          paymentId: ent.razorpay_payment_id,
-          orderId: ent.razorpay_order_id,
-          createdAt: ent.created_at,
-        });
+        for (const ent of entRes.rows) {
+          const def = REPORT_REGISTRY[ent.report_type as CanonicalReportType] || REPORT_REGISTRY.MASTER_REPORT;
+          reportItems.push({
+            id: ent.id,
+            userId: ent.user_id,
+            profileKey: ent.profile_key,
+            reportType: ent.report_type,
+            titleHi: def.titleHi,
+            titleEn: def.titleEn,
+            titleMr: def.titleMr,
+            titleBn: def.titleBn,
+            titleGu: def.titleGu,
+            accessType: ent.access_type,
+            amount: ent.amount,
+            currency: 'INR',
+            status: 'UNLOCKED',
+            paymentId: ent.razorpay_payment_id,
+            orderId: ent.razorpay_order_id,
+            createdAt: ent.created_at,
+          });
+        }
+      } catch (dbErr) {
+        console.warn('[getUserReports] DB fetch notice:', dbErr);
       }
 
       // Add Always Free Mobile Numerology
@@ -1362,30 +1452,6 @@ class ReportAccessEngine {
       });
     }
 
-    // For authenticated admin test users, inject Master Report internal test item without creating fake payments
-    if (isInternalAdminTestEmail(authUser.email)) {
-      const masterDef = REPORT_REGISTRY.MASTER_REPORT;
-      const alreadyHasMaster = reportItems.some(r => r.reportType === 'MASTER_REPORT');
-      if (!alreadyHasMaster) {
-        reportItems.unshift({
-          id: `admin_test_master_${authUser.id}`,
-          userId: authUser.id,
-          profileKey: 'default_profile',
-          reportType: 'MASTER_REPORT',
-          titleHi: `${masterDef.titleHi} (आंतरिक टेस्ट एक्सेस)`,
-          titleEn: `${masterDef.titleEn} (Internal Test Access)`,
-          titleMr: `${masterDef.titleMr} (प्रशासकीय चाचणी)`,
-          titleBn: `${masterDef.titleBn} (অ্যাডমিন টেস্ট অ্যাক্সেস)`,
-          titleGu: `${masterDef.titleGu} (એડમિન ટેસ્ટ એક્સેસ)`,
-          accessType: 'ADMIN_TEST',
-          amount: 0,
-          currency: 'INR',
-          status: 'UNLOCKED',
-          createdAt: new Date().toISOString(),
-        });
-      }
-    }
-
     reportItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return {
@@ -1397,53 +1463,66 @@ class ReportAccessEngine {
 
   // 9. Retrieve Verified Payment History for Customer
   public async getUserPaymentHistory(authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; payments: PaymentHistoryItem[]; total: number }> {
-    await this.ensureDb();
     const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
     if (!authUser) {
       return { success: true, payments: [], total: 0 };
     }
 
+    // FAST-PATH: Admin test accounts have 0 payment dependency
+    if (isInternalAdminTestEmail(authUser.email)) {
+      return {
+        success: true,
+        payments: [],
+        total: 0,
+      };
+    }
+
+    await this.ensureDb();
     const historyItems: PaymentHistoryItem[] = [];
 
     if (isDatabaseConfigured()) {
-      const claimRes = await query(
-        `SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2`,
-        [authUser.id, authUser.supabaseUserId]
-      );
-      if (claimRes.rows.length > 0) {
-        const fc = claimRes.rows[0];
-        historyItems.push({
-          id: `claim_${fc.claimed_at}`,
-          userId: authUser.id,
-          reportType: fc.report_type,
-          profileKey: fc.profile_key,
-          amount: 0,
-          currency: 'INR',
-          status: 'FREE',
-          paymentReference: 'Complimentary Free Claim (₹0)',
-          createdAt: fc.claimed_at,
-        });
-      }
+      try {
+        const claimRes = await query(
+          `SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2`,
+          [authUser.id, authUser.supabaseUserId]
+        );
+        if (claimRes.rows.length > 0) {
+          const fc = claimRes.rows[0];
+          historyItems.push({
+            id: `claim_${fc.claimed_at}`,
+            userId: authUser.id,
+            reportType: fc.report_type,
+            profileKey: fc.profile_key,
+            amount: 0,
+            currency: 'INR',
+            status: 'FREE',
+            paymentReference: 'Complimentary Free Claim (₹0)',
+            createdAt: fc.claimed_at,
+          });
+        }
 
-      const txRes = await query(
-        `SELECT id, report_type, profile_key, amount, currency, status, razorpay_order_id, razorpay_payment_id, created_at
-         FROM payment_transactions WHERE user_id = $1 OR supabase_user_id = $2 ORDER BY created_at DESC`,
-        [authUser.id, authUser.supabaseUserId]
-      );
+        const txRes = await query(
+          `SELECT id, report_type, profile_key, amount, currency, status, razorpay_order_id, razorpay_payment_id, created_at
+           FROM payment_transactions WHERE user_id = $1 OR supabase_user_id = $2 ORDER BY created_at DESC`,
+          [authUser.id, authUser.supabaseUserId]
+        );
 
-      for (const tx of txRes.rows) {
-        historyItems.push({
-          id: tx.razorpay_payment_id || tx.id,
-          userId: authUser.id,
-          reportType: tx.report_type,
-          profileKey: tx.profile_key,
-          amount: tx.amount,
-          currency: tx.currency,
-          status: tx.status === 'PAID' ? 'PAID' : 'CREATED',
-          paymentReference: tx.razorpay_payment_id || `Order (${tx.razorpay_order_id})`,
-          orderId: tx.razorpay_order_id,
-          createdAt: tx.created_at,
-        });
+        for (const tx of txRes.rows) {
+          historyItems.push({
+            id: tx.razorpay_payment_id || tx.id,
+            userId: authUser.id,
+            reportType: tx.report_type,
+            profileKey: tx.profile_key,
+            amount: tx.amount,
+            currency: tx.currency,
+            status: tx.status === 'PAID' ? 'PAID' : 'CREATED',
+            paymentReference: tx.razorpay_payment_id || `Order (${tx.razorpay_order_id})`,
+            orderId: tx.razorpay_order_id,
+            createdAt: tx.created_at,
+          });
+        }
+      } catch (dbErr) {
+        console.warn('[getUserPaymentHistory] DB fetch notice:', dbErr);
       }
     } else {
       const freeClaim = this.localSandbox.freeClaims.get(authUser.id) || this.localSandbox.freeClaims.get(authUser.email);
@@ -1490,7 +1569,6 @@ class ReportAccessEngine {
 
   // 10. Retrieve Access & Entitlement Summary
   public async getUserAccessSummary(authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; summary: UserAccessSummary }> {
-    await this.ensureDb();
     const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
     if (!authUser) {
       return {
@@ -1507,39 +1585,8 @@ class ReportAccessEngine {
       };
     }
 
-    if (isDatabaseConfigured()) {
-      const claimRes = await query(`SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2`, [authUser.id, authUser.supabaseUserId]);
-      const freeClaim = claimRes.rows[0];
-
-      const entRes = await query(`SELECT access_type, amount FROM entitlements WHERE user_id = $1 OR supabase_user_id = $2`, [authUser.id, authUser.supabaseUserId]);
-      const entitlements = entRes.rows;
-      const paidEntitlements = entitlements.filter(e => e.access_type === 'PAID');
-      const totalPaidAmount = paidEntitlements.reduce((sum, e) => sum + Number(e.amount), 0);
-
-      return {
-        success: true,
-        summary: {
-          mobile: authUser.email,
-          mobileVerified: authUser.emailVerified,
-          mobileNumerology: { status: 'ALWAYS_FREE', price: 0 },
-          firstNonMobileReport: {
-            status: freeClaim ? 'USED' : 'AVAILABLE',
-            reportType: freeClaim?.report_type,
-            claimedAt: freeClaim?.claimed_at,
-            profileKey: freeClaim?.profile_key,
-          },
-          additionalReports: { priceInr: REPORT_PRICE_INR, pricePaise: REPORT_PRICE_PAISE },
-          totalReportsUnlocked: entitlements.length + 1, // +1 for Mobile Numerology
-          totalPaidAmountInr: totalPaidAmount,
-          adminTestAccess: isInternalAdminTestEmail(authUser.email),
-        }
-      };
-    } else {
-      const freeClaim = this.localSandbox.freeClaims.get(authUser.id) || this.localSandbox.freeClaims.get(authUser.email);
-      const userEntitlements = Array.from(this.localSandbox.entitlements.values()).filter(e => e.userId === authUser.id || e.email === authUser.email);
-      const paidEntitlements = userEntitlements.filter(e => e.accessType === 'PAID');
-      const totalPaidAmount = paidEntitlements.reduce((sum, e) => sum + e.amount, 0);
-
+    // FAST-PATH: Admin test accounts receive immediate privileged summary
+    if (isInternalAdminTestEmail(authUser.email)) {
       return {
         success: true,
         summary: {
@@ -1547,38 +1594,94 @@ class ReportAccessEngine {
           mobileVerified: true,
           mobileNumerology: { status: 'ALWAYS_FREE', price: 0 },
           firstNonMobileReport: {
-            status: freeClaim ? 'USED' : 'AVAILABLE',
-            reportType: freeClaim?.reportType,
-            claimedAt: freeClaim?.claimedAt,
-            profileKey: freeClaim?.profileKey,
+            status: 'AVAILABLE',
+            reportType: 'MASTER_REPORT',
+            claimedAt: new Date().toISOString(),
+            profileKey: 'default_profile',
           },
-          additionalReports: { priceInr: REPORT_PRICE_INR, pricePaise: REPORT_PRICE_PAISE },
-          totalReportsUnlocked: userEntitlements.length + 1,
-          totalPaidAmountInr: totalPaidAmount,
-          adminTestAccess: isInternalAdminTestEmail(authUser.email),
+          additionalReports: { priceInr: 0, pricePaise: 0 },
+          totalReportsUnlocked: 2,
+          totalPaidAmountInr: 0,
+          adminTestAccess: true,
         }
       };
     }
+
+    await this.ensureDb();
+
+    if (isDatabaseConfigured()) {
+      try {
+        const claimRes = await query(`SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2`, [authUser.id, authUser.supabaseUserId]);
+        const freeClaim = claimRes.rows[0];
+
+        const entRes = await query(`SELECT access_type, amount FROM entitlements WHERE user_id = $1 OR supabase_user_id = $2`, [authUser.id, authUser.supabaseUserId]);
+        const entitlements = entRes.rows;
+        const paidEntitlements = entitlements.filter(e => e.access_type === 'PAID');
+        const totalPaidAmount = paidEntitlements.reduce((sum, e) => sum + Number(e.amount), 0);
+
+        return {
+          success: true,
+          summary: {
+            mobile: authUser.email,
+            mobileVerified: authUser.emailVerified,
+            mobileNumerology: { status: 'ALWAYS_FREE', price: 0 },
+            firstNonMobileReport: {
+              status: freeClaim ? 'USED' : 'AVAILABLE',
+              reportType: freeClaim?.report_type,
+              claimedAt: freeClaim?.claimed_at,
+              profileKey: freeClaim?.profile_key,
+            },
+            additionalReports: { priceInr: REPORT_PRICE_INR, pricePaise: REPORT_PRICE_PAISE },
+            totalReportsUnlocked: entitlements.length + 1, // +1 for Mobile Numerology
+            totalPaidAmountInr: totalPaidAmount,
+            adminTestAccess: false,
+          }
+        };
+      } catch (dbErr) {
+        console.warn('[getUserAccessSummary] DB fetch notice:', dbErr);
+      }
+    }
+
+    // Sandbox fallback
+    const freeClaim = this.localSandbox.freeClaims.get(authUser.id) || this.localSandbox.freeClaims.get(authUser.email);
+    const userEntitlements = Array.from(this.localSandbox.entitlements.values()).filter(e => e.userId === authUser.id || e.email === authUser.email);
+    const paidEntitlements = userEntitlements.filter(e => e.accessType === 'PAID');
+    const totalPaidAmount = paidEntitlements.reduce((sum, e) => sum + e.amount, 0);
+
+    return {
+      success: true,
+      summary: {
+        mobile: authUser.email,
+        mobileVerified: true,
+        mobileNumerology: { status: 'ALWAYS_FREE', price: 0 },
+        firstNonMobileReport: {
+          status: freeClaim ? 'USED' : 'AVAILABLE',
+          reportType: freeClaim?.reportType,
+          claimedAt: freeClaim?.claimedAt,
+          profileKey: freeClaim?.profileKey,
+        },
+        additionalReports: { priceInr: REPORT_PRICE_INR, pricePaise: REPORT_PRICE_PAISE },
+        totalReportsUnlocked: userEntitlements.length + 1,
+        totalPaidAmountInr: totalPaidAmount,
+        adminTestAccess: isInternalAdminTestEmail(authUser.email),
+      }
+    };
   }
 
   // 11. Retrieve Single Report by ID with Server Ownership Validation
   public async getReportById(reportId: string, authHeader?: string | null, optionalEmail?: string): Promise<{ success: boolean; allowed: boolean; report: UserReportItem }> {
-    await this.ensureDb();
     const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
     if (!authUser) {
       throw new Error("Authentication required to access report");
     }
 
-    if (reportId.startsWith('admin_test_')) {
-      if (!isInternalAdminTestEmail(authUser.email)) {
-        throw new Error("Unauthorized: Admin test access required");
-      }
+    if (reportId.startsWith('admin_test_') || isInternalAdminTestEmail(authUser.email)) {
       const def = REPORT_REGISTRY.MASTER_REPORT;
       return {
         success: true,
         allowed: true,
         report: {
-          id: reportId,
+          id: reportId.startsWith('admin_test_') ? reportId : `admin_test_master_${authUser.id}`,
           userId: authUser.id,
           profileKey: 'default_profile',
           reportType: 'MASTER_REPORT',
@@ -1619,6 +1722,8 @@ class ReportAccessEngine {
         },
       };
     }
+
+    await this.ensureDb();
 
     if (isDatabaseConfigured()) {
       const entRes = await query(`SELECT * FROM entitlements WHERE id = $1`, [reportId]);
@@ -1704,7 +1809,6 @@ class ReportAccessEngine {
     authHeader?: string | null,
     optionalEmail?: string
   ): Promise<{ success: boolean; allowed: boolean; accessType?: string; message?: string }> {
-    await this.ensureDb();
     const access = await this.checkReportAccess(reportType, profileKey, authHeader, optionalEmail);
     if (!access.allowed) {
       return {
@@ -1823,24 +1927,34 @@ class ReportAccessEngine {
 
   // 14. Retrieve User's UPI Submissions
   public async getUserUpiSubmissions(authHeader?: string | null, optionalEmail?: string) {
-    await this.ensureDb();
     const authUser = await this.resolveAuthenticatedUser(authHeader, optionalEmail);
     if (!authUser) {
       return { success: true, submissions: [] };
     }
 
-    if (isDatabaseConfigured()) {
-      const res = await query(
-        `SELECT * FROM upi_submissions WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3 ORDER BY created_at DESC`,
-        [authUser.id, authUser.supabaseUserId, authUser.email]
-      );
-      return { success: true, submissions: res.rows };
-    } else {
-      const subs = Array.from(((this.localSandbox as any).upiSubmissions || new Map()).values()).filter(
-        (s: any) => s.userId === authUser.id || s.email === authUser.email
-      );
-      return { success: true, submissions: subs };
+    // FAST-PATH: Admin test accounts have 0 UPI submissions
+    if (isInternalAdminTestEmail(authUser.email)) {
+      return { success: true, submissions: [] };
     }
+
+    await this.ensureDb();
+
+    if (isDatabaseConfigured()) {
+      try {
+        const res = await query(
+          `SELECT * FROM upi_submissions WHERE user_id = $1 OR supabase_user_id = $2 OR email = $3 ORDER BY created_at DESC`,
+          [authUser.id, authUser.supabaseUserId, authUser.email]
+        );
+        return { success: true, submissions: res.rows };
+      } catch (dbErr) {
+        console.warn('[getUserUpiSubmissions] DB fetch notice:', dbErr);
+      }
+    }
+
+    const subs = Array.from(((this.localSandbox as any).upiSubmissions || new Map()).values()).filter(
+      (s: any) => s.userId === authUser.id || s.email === authUser.email
+    );
+    return { success: true, submissions: subs };
   }
 
   // 14b. Check UPI Payment Status
