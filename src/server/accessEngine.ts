@@ -349,37 +349,41 @@ class ReportAccessEngine {
     let userProfile: any = null;
 
     if (isDatabaseConfigured()) {
-      // 1. Upsert users table
-      await query(
-        `INSERT INTO users (id, supabase_user_id, email, email_verified, mobile, mobile_verified, created_at, updated_at)
-         VALUES ($1, $1, $2, $3, $4, $5, NOW(), NOW())
-         ON CONFLICT (supabase_user_id) WHERE supabase_user_id IS NOT NULL
-         DO UPDATE SET email = EXCLUDED.email, email_verified = EXCLUDED.email_verified, mobile = COALESCE(EXCLUDED.mobile, users.mobile), mobile_verified = COALESCE(EXCLUDED.mobile_verified, users.mobile_verified), updated_at = NOW()`,
-        [userId, email, emailVerified, phone, phoneVerified]
-      );
+      try {
+        // 1. Upsert users table
+        await query(
+          `INSERT INTO users (id, supabase_user_id, email, email_verified, mobile, mobile_verified, created_at, updated_at)
+           VALUES ($1, $1, $2, $3, $4, $5, NOW(), NOW())
+           ON CONFLICT (supabase_user_id) WHERE supabase_user_id IS NOT NULL
+           DO UPDATE SET email = EXCLUDED.email, email_verified = EXCLUDED.email_verified, mobile = COALESCE(EXCLUDED.mobile, users.mobile), mobile_verified = COALESCE(EXCLUDED.mobile_verified, users.mobile_verified), updated_at = NOW()`,
+          [userId, email, emailVerified, phone, phoneVerified]
+        );
 
-      // 2. Upsert profiles table
-      const profRes = await query(
-        `INSERT INTO profiles (id, user_id, email, phone, full_name, first_name, last_name, avatar_url, preferred_language, auth_provider, email_verified, phone_verified, last_login_at, created_at, updated_at)
-         VALUES ($1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW(), NOW())
-         ON CONFLICT (user_id)
-         DO UPDATE SET
-           email = COALESCE(EXCLUDED.email, profiles.email),
-           phone = COALESCE(EXCLUDED.phone, profiles.phone),
-           full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
-           avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url),
-           auth_provider = COALESCE(EXCLUDED.auth_provider, profiles.auth_provider),
-           email_verified = EXCLUDED.email_verified OR profiles.email_verified,
-           phone_verified = EXCLUDED.phone_verified OR profiles.phone_verified,
-           last_login_at = NOW(),
-           updated_at = NOW()
-         RETURNING *`,
-        [userId, email, phone, fullName, firstName, lastName, avatarUrl, lang, authProvider, emailVerified, phoneVerified]
-      );
-      userProfile = profRes.rows[0];
+        // 2. Upsert profiles table
+        const profRes = await query(
+          `INSERT INTO profiles (id, user_id, email, phone, full_name, first_name, last_name, avatar_url, preferred_language, auth_provider, email_verified, phone_verified, last_login_at, created_at, updated_at)
+           VALUES ($1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW(), NOW())
+           ON CONFLICT (user_id)
+           DO UPDATE SET
+             email = COALESCE(EXCLUDED.email, profiles.email),
+             phone = COALESCE(EXCLUDED.phone, profiles.phone),
+             full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
+             avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url),
+             auth_provider = COALESCE(EXCLUDED.auth_provider, profiles.auth_provider),
+             email_verified = EXCLUDED.email_verified OR profiles.email_verified,
+             phone_verified = EXCLUDED.phone_verified OR profiles.phone_verified,
+             last_login_at = NOW(),
+             updated_at = NOW()
+           RETURNING *`,
+          [userId, email, phone, fullName, firstName, lastName, avatarUrl, lang, authProvider, emailVerified, phoneVerified]
+        );
+        userProfile = profRes.rows[0];
 
-      // 3. Log user activity
-      await this.logUserActivity(authHeader, 'login', { provider: authProvider });
+        // 3. Log user activity
+        await this.logUserActivity(authHeader, 'login', { provider: authProvider });
+      } catch (dbErr: any) {
+        console.warn('[syncSession] Database synchronization notice:', dbErr?.message || dbErr);
+      }
     }
 
     // Check free claims status
@@ -387,17 +391,21 @@ class ReportAccessEngine {
     let freeReportDetails: any = undefined;
 
     if (isDatabaseConfigured()) {
-      const claimRes = await query(
-        `SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $1`,
-        [userId]
-      );
-      if (claimRes.rows.length > 0) {
-        hasClaimedFreeReport = true;
-        freeReportDetails = {
-          reportType: claimRes.rows[0].report_type,
-          claimedAt: claimRes.rows[0].claimed_at,
-          profileKey: claimRes.rows[0].profile_key,
-        };
+      try {
+        const claimRes = await query(
+          `SELECT report_type, profile_key, claimed_at FROM free_claims WHERE user_id = $1 OR supabase_user_id = $1`,
+          [userId]
+        );
+        if (claimRes.rows.length > 0) {
+          hasClaimedFreeReport = true;
+          freeReportDetails = {
+            reportType: claimRes.rows[0].report_type,
+            claimedAt: claimRes.rows[0].claimed_at,
+            profileKey: claimRes.rows[0].profile_key,
+          };
+        }
+      } catch (dbErr: any) {
+        console.warn('[syncSession] Free claims lookup notice:', dbErr?.message || dbErr);
       }
     }
 

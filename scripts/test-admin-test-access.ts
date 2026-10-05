@@ -323,6 +323,19 @@ async function runAdminTestAccessSuite() {
     `Feedback recorded successfully (ID: ${feedbackRes.feedbackId})`
   );
 
+  console.log('\n--- 11. Auth Session Synchronization (POST /api/auth/sync-session) ---');
+  const syncRes = await reportAccessEngine.syncSession(tokenA, {
+    email: 'affectioncosmos@gmail.com',
+    fullName: 'Markandey Singh',
+    language: 'hi'
+  });
+
+  assert(
+    syncRes.success === true && syncRes.user?.email === 'affectioncosmos@gmail.com',
+    '[AUTH_SYNC] Session Synchronization Success',
+    `User session synchronized successfully for ${syncRes.user?.email}`
+  );
+
   console.log('\n============================================================');
   console.log('ADMIN_TEST ACCESS & ISOLATION SUITE RESULTS');
   console.log('============================================================');

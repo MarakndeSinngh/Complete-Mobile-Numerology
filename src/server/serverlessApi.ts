@@ -83,12 +83,30 @@ const router = express.Router();
 
 // 1. Synchronize Authenticated Supabase Session & Upsert Profile
 router.post("/auth/sync-session", async (req, res) => {
+  const requestId = `sync_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   try {
     const authHeader = req.headers['authorization'] || (req.body?.accessToken ? `Bearer ${req.body.accessToken}` : null);
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        error: "UNAUTHORIZED: Missing authorization header",
+        code: "UNAUTHORIZED",
+        requestId
+      });
+    }
+
     const result = await reportAccessEngine.syncSession(authHeader, req.body);
-    res.json(result);
+    res.json({ ...result, requestId });
   } catch (e: any) {
-    res.status(401).json({ success: false, error: e?.message || "Unauthorized session" });
+    const msg = e?.message || "Failed to synchronize session";
+    const isAuth = msg.includes("UNAUTHORIZED") || msg.includes("Invalid or expired");
+    console.error(`[AUTH_SYNC_SESSION_ERROR] [${requestId}]`, msg);
+    res.status(isAuth ? 401 : 500).json({
+      success: false,
+      error: msg,
+      code: isAuth ? "UNAUTHORIZED" : "AUTH_SYNC_FAILED",
+      requestId
+    });
   }
 });
 
