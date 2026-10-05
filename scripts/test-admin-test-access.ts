@@ -166,7 +166,7 @@ async function runAdminTestAccessSuite() {
     'Logged out anonymous visitor is blocked from Master Report'
   );
 
-  console.log('\n--- 6. Client Parameter Bypass Resistance ---');
+  console.log('\n--- 6. Client Parameter Bypass & Fabricated Token Resistance ---');
   const spoofCheck = await reportAccessEngine.checkReportAccess(
     'MASTER_REPORT',
     'profile_spoofed',
@@ -178,6 +178,42 @@ async function runAdminTestAccessSuite() {
     spoofCheck.allowed === false,
     '[SECURITY] No Email Spoofing Bypass in Serverless',
     'Unverified client email cannot grant admin or master report access'
+  );
+
+  // Expired token rejection
+  const expiredPayload = Buffer.from(
+    JSON.stringify({
+      sub: 'usr_attacker',
+      email: 'affectioncosmos@gmail.com',
+      role: 'authenticated',
+      aud: 'authenticated',
+      exp: Math.floor(Date.now() / 1000) - 3600, // expired 1 hour ago
+      user_metadata: { email: 'affectioncosmos@gmail.com' }
+    })
+  ).toString('base64url');
+  const expiredToken = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${expiredPayload}.sig`;
+  const expiredCheck = await reportAccessEngine.checkReportAccess(
+    'MASTER_REPORT',
+    'profile_expired',
+    expiredToken
+  );
+  assert(
+    expiredCheck.allowed === false,
+    '[SECURITY] Expired Token Rejected',
+    'Expired JWT cannot grant access to Master Report'
+  );
+
+  // Corrupted / malformed token rejection
+  const malformedToken = 'Bearer invalid.corrupted-jwt-token';
+  const malformedCheck = await reportAccessEngine.checkReportAccess(
+    'MASTER_REPORT',
+    'profile_malformed',
+    malformedToken
+  );
+  assert(
+    malformedCheck.allowed === false,
+    '[SECURITY] Malformed Token Rejected',
+    'Malformed JWT safely rejected without granting access'
   );
 
   console.log('\n--- 7. Profile Data Collision & Isolation Test (Same Profile Data) ---');
