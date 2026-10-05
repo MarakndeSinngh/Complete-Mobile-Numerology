@@ -85,6 +85,12 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
         ReportAccessService.getMyUpiSubmissions(activeIdentifier),
       ]);
 
+      // Diagnostics logging for browser verification
+      console.log(`[MyReportsHub] getMyReports: ${reportsOutcome.status === 'fulfilled' ? 'SUCCESS' : 'FAIL'}`, reportsOutcome.status === 'fulfilled' ? reportsOutcome.value : reportsOutcome.reason);
+      console.log(`[MyReportsHub] getAccessSummary: ${summaryOutcome.status === 'fulfilled' ? 'SUCCESS' : 'FAIL'}`, summaryOutcome.status === 'fulfilled' ? summaryOutcome.value : summaryOutcome.reason);
+      console.log(`[MyReportsHub] getPaymentHistory: ${paymentsOutcome.status === 'fulfilled' ? 'SUCCESS' : 'FAIL'}`, paymentsOutcome.status === 'fulfilled' ? paymentsOutcome.value : paymentsOutcome.reason);
+      console.log(`[MyReportsHub] getMyUpiSubmissions: ${upiOutcome.status === 'fulfilled' ? 'SUCCESS' : 'FAIL'}`, upiOutcome.status === 'fulfilled' ? upiOutcome.value : upiOutcome.reason);
+
       if (reportsOutcome.status === 'fulfilled' && reportsOutcome.value?.reports) {
         setReports(reportsOutcome.value.reports);
       }
@@ -99,11 +105,12 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
       }
 
       if (reportsOutcome.status === 'rejected' && summaryOutcome.status === 'rejected') {
-        setError(i18n.errorLoading);
+        const errorDetail = (reportsOutcome.reason?.message || summaryOutcome.reason?.message || '');
+        setError(errorDetail ? `${i18n.errorLoading} (${errorDetail})` : i18n.errorLoading);
       }
     } catch (err: any) {
       console.warn("Notice: Error fetching customer reports from server:", err);
-      setError(i18n.errorLoading);
+      setError(err?.message ? `${i18n.errorLoading} (${err.message})` : i18n.errorLoading);
     } finally {
       setIsLoading(false);
     }

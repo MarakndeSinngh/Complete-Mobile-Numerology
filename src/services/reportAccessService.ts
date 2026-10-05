@@ -47,6 +47,42 @@ export class ReportAccessService {
     this._currentUser = user;
   }
 
+  // Resolve email and mobile from passed identifier or active session user
+  private static resolveIdentifiers(emailOrMobile?: string): { email?: string; mobile?: string } {
+    const storedUser = this.getStoredUser();
+    let email = storedUser?.email || undefined;
+    let mobile = storedUser?.mobile || storedUser?.phone || undefined;
+
+    if (emailOrMobile && typeof emailOrMobile === 'string') {
+      const trimmed = emailOrMobile.trim();
+      if (trimmed.includes('@')) {
+        email = trimmed;
+      } else if (trimmed.length > 0) {
+        mobile = trimmed;
+      }
+    }
+
+    return { email, mobile };
+  }
+
+  // Asynchronously or synchronously get valid Supabase session token
+  public static async getValidToken(): Promise<string | null> {
+    const syncToken = this.getToken();
+    if (syncToken) return syncToken;
+
+    try {
+      if (typeof window !== 'undefined') {
+        const { data } = await supabase.auth.getSession();
+        if (data?.session) {
+          this.setCurrentSession(data.session);
+          return data.session.access_token || null;
+        }
+      }
+    } catch {}
+
+    return null;
+  }
+
   // Canonical check for public reports
   public static isPublicReport(reportType: string | CanonicalReportType): boolean {
     return isPublicReport(reportType);
@@ -186,8 +222,7 @@ export class ReportAccessService {
   public static async syncSession(token?: string, profileData?: any): Promise<{ success: boolean; user?: any; profile?: any }> {
     let authToken = token;
     if (!authToken) {
-      const { data } = await supabase.auth.getSession();
-      authToken = data?.session?.access_token || this.getToken() || undefined;
+      authToken = (await this.getValidToken()) || undefined;
     }
 
     if (!authToken) {
@@ -219,7 +254,7 @@ export class ReportAccessService {
     bhagyank?: number;
     kuaNumber?: number;
   }): Promise<{ success: boolean; profile?: any }> {
-    const token = this.getToken();
+    const token = await this.getValidToken();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -235,7 +270,7 @@ export class ReportAccessService {
 
   // 3. Get Current User's Saved Numerology Profile
   public static async getCurrentNumerologyProfile(): Promise<{ success: boolean; profile?: any }> {
-    const token = this.getToken();
+    const token = await this.getValidToken();
     if (!token) return { success: true, profile: null };
 
     const headers: Record<string, string> = { 'Authorization': `Bearer ${token}` };
@@ -254,7 +289,7 @@ export class ReportAccessService {
     language?: string;
     metadata?: any;
   }): Promise<{ success: boolean; reportRunId?: string }> {
-    const token = this.getToken();
+    const token = await this.getValidToken();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -270,7 +305,7 @@ export class ReportAccessService {
 
   // 5. Log User Activity
   public static async logActivity(eventType: string, metadata: any = {}): Promise<void> {
-    const token = this.getToken();
+    const token = await this.getValidToken();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -289,7 +324,7 @@ export class ReportAccessService {
   public static async checkAccess(
     reportType: CanonicalReportType,
     profileKey: string,
-    mobile?: string
+    emailOrMobile?: string
   ): Promise<ReportAccessCheckResult> {
     // 1. Mobile numerology & Lo Shu are always permanently free
     if (isPublicReport(reportType)) {
@@ -306,17 +341,15 @@ export class ReportAccessService {
       };
     }
 
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
-    const activeMobile = mobile || storedUser?.mobile;
-    const activeEmail = storedUser?.email;
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
 
     const params = new URLSearchParams({
       reportType,
       profileKey: profileKey || 'default_profile',
     });
-    if (activeEmail) params.append('email', activeEmail);
-    if (activeMobile) params.append('mobile', activeMobile);
+    if (email) params.append('email', email);
+    if (mobile) params.append('mobile', mobile);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -346,12 +379,10 @@ export class ReportAccessService {
   public static async claimFreeReport(
     reportType: CanonicalReportType,
     profileKey: string,
-    mobile?: string
+    emailOrMobile?: string
   ): Promise<{ success: boolean; allowed: boolean; entitlement: any }> {
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
-    const activeMobile = mobile || storedUser?.mobile;
-    const activeEmail = storedUser?.email;
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -364,8 +395,8 @@ export class ReportAccessService {
         body: JSON.stringify({
           reportType,
           profileKey: profileKey || 'default_profile',
-          email: activeEmail,
-          mobile: activeMobile,
+          email,
+          mobile,
         }),
       }
     );
@@ -375,12 +406,10 @@ export class ReportAccessService {
   public static async createPaymentOrder(
     reportType: CanonicalReportType,
     profileKey: string,
-    mobile?: string
+    emailOrMobile?: string
   ): Promise<PaymentOrderResponse> {
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
-    const activeMobile = mobile || storedUser?.mobile;
-    const activeEmail = storedUser?.email;
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -393,8 +422,8 @@ export class ReportAccessService {
         body: JSON.stringify({
           reportType,
           profileKey: profileKey || 'default_profile',
-          email: activeEmail,
-          mobile: activeMobile,
+          email,
+          mobile,
         }),
       }
     );
@@ -407,12 +436,10 @@ export class ReportAccessService {
     signature: string,
     reportType: CanonicalReportType,
     profileKey: string,
-    mobile?: string
+    emailOrMobile?: string
   ): Promise<{ success: boolean; accessGranted: boolean; entitlement: any }> {
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
-    const activeMobile = mobile || storedUser?.mobile;
-    const activeEmail = storedUser?.email;
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -428,23 +455,21 @@ export class ReportAccessService {
           signature,
           reportType,
           profileKey: profileKey || 'default_profile',
-          email: activeEmail,
-          mobile: activeMobile,
+          email,
+          mobile,
         }),
       }
     );
   }
 
   // 7. Get Customer's Historical Reports (Authoritative Server Query)
-  public static async getMyReports(mobile?: string): Promise<any> {
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
-    const activeMobile = mobile || storedUser?.mobile;
-    const activeEmail = storedUser?.email;
+  public static async getMyReports(emailOrMobile?: string): Promise<any> {
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
 
     const params = new URLSearchParams();
-    if (activeEmail) params.append('email', activeEmail);
-    if (activeMobile) params.append('mobile', activeMobile);
+    if (email) params.append('email', email);
+    if (mobile) params.append('mobile', mobile);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -456,15 +481,13 @@ export class ReportAccessService {
   }
 
   // 8. Get Customer's Verified Payment History
-  public static async getPaymentHistory(mobile?: string): Promise<any> {
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
-    const activeMobile = mobile || storedUser?.mobile;
-    const activeEmail = storedUser?.email;
+  public static async getPaymentHistory(emailOrMobile?: string): Promise<any> {
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
 
     const params = new URLSearchParams();
-    if (activeEmail) params.append('email', activeEmail);
-    if (activeMobile) params.append('mobile', activeMobile);
+    if (email) params.append('email', email);
+    if (mobile) params.append('mobile', mobile);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -476,15 +499,13 @@ export class ReportAccessService {
   }
 
   // 9. Get Entitlement Access Summary
-  public static async getAccessSummary(mobile?: string): Promise<any> {
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
-    const activeMobile = mobile || storedUser?.mobile;
-    const activeEmail = storedUser?.email;
+  public static async getAccessSummary(emailOrMobile?: string): Promise<any> {
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
 
     const params = new URLSearchParams();
-    if (activeEmail) params.append('email', activeEmail);
-    if (activeMobile) params.append('mobile', activeMobile);
+    if (email) params.append('email', email);
+    if (mobile) params.append('mobile', mobile);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -496,15 +517,13 @@ export class ReportAccessService {
   }
 
   // 10. Get Single Report by ID with Server Entitlement Check
-  public static async getReportById(reportId: string, mobile?: string): Promise<any> {
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
-    const activeMobile = mobile || storedUser?.mobile;
-    const activeEmail = storedUser?.email;
+  public static async getReportById(reportId: string, emailOrMobile?: string): Promise<any> {
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
 
     const params = new URLSearchParams();
-    if (activeEmail) params.append('email', activeEmail);
-    if (activeMobile) params.append('mobile', activeMobile);
+    if (email) params.append('email', email);
+    if (mobile) params.append('mobile', mobile);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -523,7 +542,7 @@ export class ReportAccessService {
     upiId?: string,
     userName?: string
   ): Promise<{ success: boolean; submissionId?: string; status?: string; message?: string; error?: string }> {
-    const token = this.getToken();
+    const token = await this.getValidToken();
     const storedUser = this.getStoredUser();
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -547,18 +566,12 @@ export class ReportAccessService {
 
   // 12. Get User's UPI Submissions
   public static async getMyUpiSubmissions(emailOrMobile?: string): Promise<{ success: boolean; submissions: any[] }> {
-    const token = this.getToken();
-    const storedUser = this.getStoredUser();
+    const token = await this.getValidToken();
+    const { email, mobile } = this.resolveIdentifiers(emailOrMobile);
+
     const params = new URLSearchParams();
-    if (emailOrMobile) {
-      if (emailOrMobile.includes('@')) {
-        params.append('email', emailOrMobile);
-      } else {
-        params.append('mobile', emailOrMobile);
-      }
-    } else if (storedUser?.email) {
-      params.append('email', storedUser.email);
-    }
+    if (email) params.append('email', email);
+    if (mobile) params.append('mobile', mobile);
 
     const headers: Record<string, string> = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
