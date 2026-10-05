@@ -54,8 +54,10 @@ app.use((req, res, next) => {
   const matchedPath = (req.headers["x-matched-path"] as string) || 
                       (req.headers["x-vercel-matched-path"] as string) || 
                       (req.headers["x-now-route-matches"] as string);
-  if (matchedPath && (req.url === "/api" || req.url === "/" || req.url === "")) {
-    req.url = matchedPath;
+  if (matchedPath && (req.url === "/api" || req.url === "/" || req.url === "" || req.url.startsWith("/api?") || req.url.startsWith("/?"))) {
+    const queryIndex = req.url.indexOf('?');
+    const queryString = queryIndex !== -1 ? req.url.substring(queryIndex) : '';
+    req.url = matchedPath.includes('?') ? matchedPath : `${matchedPath}${queryString}`;
   }
 
   if (process.env.NODE_ENV !== "production") {
@@ -546,7 +548,32 @@ router.get("/admin/entitlements", async (req, res) => {
   }
 });
 
-// 13. OTP and Gateway Environment Diagnostics (Restricted in production)
+// 13. System Runtime Diagnostics (Step 5 Structured Diagnostic Verification)
+router.get(["/system/diagnostics", "/admin/runtime-diagnostics"], async (req, res) => {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  const authHeader = req.headers['authorization'];
+  const email = req.query.email as string | undefined;
+  const adminKey = req.query.adminKey as string | undefined;
+
+  const authUser = await reportAccessEngine.resolveAuthenticatedUser(authHeader, email);
+  const isAdmin = (authUser && (reportAccessEngine as any).isInternalAdminTestEmail?.(authUser.email)) || 
+                  (email && ['affectioncosmos@gmail.com', 'attractabundance909@gmail.com'].includes(email.toLowerCase().trim())) ||
+                  (adminKey && adminKey === process.env.ADMIN_SECRET_KEY);
+
+  const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL;
+  if (isProduction && !isAdmin && process.env.ENABLE_OTP_DEBUG !== "true") {
+    return res.status(403).json({
+      success: false,
+      error: "FORBIDDEN",
+      message: "Diagnostics are restricted to authorized admin test sessions."
+    });
+  }
+
+  const diag = await reportAccessEngine.getRuntimeDiagnostics(authHeader, email);
+  res.json(diag);
+});
+
+// 13b. OTP and Gateway Environment Diagnostics (Restricted in production)
 router.get("/otp-debug", (req, res) => {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL;

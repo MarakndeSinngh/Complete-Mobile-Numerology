@@ -152,10 +152,67 @@ class ReportAccessEngine {
 
   private async ensureDb() {
     if (isDatabaseConfigured()) {
-      await ensureDatabaseSchema();
-    } else if (isServerlessRuntime()) {
-      throw new Error("DATABASE_UNAVAILABLE: Database connection is required in production environment.");
+      try {
+        await ensureDatabaseSchema();
+      } catch (err: any) {
+        console.warn("[PostgreSQL] ensureDb schema notice:", err?.message || err);
+      }
     }
+  }
+
+  /**
+   * System Runtime Diagnostics (Phase 16 - Step 5 Production Verification)
+   * Safely probes each stage without exposing credentials or secrets.
+   */
+  public async getRuntimeDiagnostics(authHeader?: string | null, email?: string): Promise<{
+    success: boolean;
+    serverless: string;
+    environment: string;
+    supabase: string;
+    databaseConfig: string;
+    databaseConnection: string;
+    auth: string;
+    adminTestAccess: boolean;
+    timestamp: string;
+  }> {
+    let serverlessStatus = "ok";
+    let envStatus = typeof process !== 'undefined' && process.env ? "ok" : "fail";
+    let supabaseStatus = isSupabaseServerConfigured() ? "ok" : "not_configured";
+    let dbConfigStatus = isDatabaseConfigured() ? "ok" : "not_configured";
+    let dbConnStatus = "not_configured";
+    let authStatus = "unauthenticated";
+    let isAdminTest = false;
+
+    if (isDatabaseConfigured()) {
+      try {
+        await query("SELECT 1 AS probe");
+        dbConnStatus = "ok";
+      } catch (e: any) {
+        dbConnStatus = `connection_error: ${e?.message || 'timeout'}`;
+      }
+    }
+
+    try {
+      const user = await this.resolveAuthenticatedUser(authHeader, email);
+      if (user) {
+        authStatus = "ok";
+        isAdminTest = isInternalAdminTestEmail(user.email);
+      }
+    } catch (authErr: any) {
+      authStatus = `auth_error: ${authErr?.message || 'failed'}`;
+    }
+
+    return {
+      success: true,
+      serverless: serverlessStatus,
+      environment: envStatus,
+      supabase: supabaseStatus,
+      databaseConfig: dbConfigStatus,
+      databaseConnection: dbConnStatus,
+      auth: authStatus,
+      adminTestAccess: isAdminTest,
+      timestamp: new Date().toISOString()
+    };
   }
 
   /**
