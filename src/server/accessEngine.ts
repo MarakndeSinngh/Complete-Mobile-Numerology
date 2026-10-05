@@ -25,6 +25,12 @@ import {
   getServerSupabaseClient,
   verifySupabaseToken
 } from './supabaseServer';
+import {
+  isAdminEmail,
+  isInternalAdminTestEmail,
+  normalizeEmail,
+  getAdminEmails
+} from './adminAllowlist';
 
 export const REPORT_PRICE_INR = 33;
 export const REPORT_PRICE_PAISE = 3300;
@@ -67,10 +73,7 @@ export function getRazorpayWebhookSecret(): string {
   return (typeof process !== 'undefined' && process.env?.RAZORPAY_WEBHOOK_SECRET) || 'sandbox_webhook_secret_leofamily_2026';
 }
 
-export function normalizeEmail(rawEmail: string | undefined | null): string {
-  if (!rawEmail || typeof rawEmail !== 'string') return '';
-  return rawEmail.trim().toLowerCase();
-}
+export { normalizeEmail, isAdminEmail, isInternalAdminTestEmail, getAdminEmails as getAdminTestEmails };
 
 // Normalize Indian 10-digit mobile number for numerology profile calculations
 export function normalizeIndianMobile(rawMobile: string | undefined | null): string {
@@ -91,36 +94,6 @@ export interface AuthenticatedUserIdentity {
   mobile?: string;
 }
 
-/**
- * CANONICAL SERVER-SIDE ADMIN / INTERNAL TEST ALLOWLIST (Pre-Phase 10.5)
- * Strictly server-side; NEVER exposed to client bundles or public APIs.
- * Supports environment variable override via ADMIN_TEST_EMAILS.
- */
-const CANONICAL_ADMIN_TEST_EMAILS = [
-  'affectioncosmos@gmail.com',
-  'attractabundance909@gmail.com'
-];
-
-export function getAdminTestEmails(): string[] {
-  const set = new Set(CANONICAL_ADMIN_TEST_EMAILS.map(e => e.trim().toLowerCase()));
-  const envVal = process.env.ADMIN_TEST_EMAILS;
-  if (envVal && typeof envVal === 'string') {
-    envVal
-      .split(',')
-      .map(e => e.trim().toLowerCase())
-      .filter(Boolean)
-      .forEach(e => set.add(e));
-  }
-  return Array.from(set);
-}
-
-export function isInternalAdminTestEmail(rawEmail: string | undefined | null): boolean {
-  if (!rawEmail || typeof rawEmail !== 'string') return false;
-  const normalized = normalizeEmail(rawEmail);
-  const allowlist = getAdminTestEmails();
-  return allowlist.includes(normalized);
-}
-
 export function evaluateAdminTestAccess(user: AuthenticatedUserIdentity | null): {
   isAdminTest: boolean;
   accessType?: 'ADMIN_TEST';
@@ -128,7 +101,7 @@ export function evaluateAdminTestAccess(user: AuthenticatedUserIdentity | null):
   if (!user || !user.email) {
     return { isAdminTest: false };
   }
-  const isMatch = isInternalAdminTestEmail(user.email);
+  const isMatch = isAdminEmail(user.email);
   return {
     isAdminTest: isMatch,
     accessType: isMatch ? 'ADMIN_TEST' : undefined
@@ -695,8 +668,7 @@ class ReportAccessEngine {
     if (authUser) {
       // 2b. ADMIN / INTERNAL TEST ACCESS CHECK (RULE 2: Zero Database Dependency)
       // Strictly server-authorized: must be authenticated user matching server-only allowlist
-      const adminEval = evaluateAdminTestAccess(authUser);
-      if (adminEval.isAdminTest) {
+      if (isAdminEmail(authUser.email)) {
         return {
           allowed: true,
           requiresPayment: false,
@@ -707,119 +679,152 @@ class ReportAccessEngine {
           reportType,
           profileKey: safeKey,
           accessType: 'ADMIN_TEST',
-          reason: 'Internal Test Access — Authorized test account (No payment required)'
+          reason: 'Internal Test Access — Authorized test account (Free access to all reports)'
         };
       }
 
       await this.ensureDb();
 
       if (isDatabaseConfigured()) {
-        // Strict Entitlement check: tied to authenticated user ID + profileKey + reportType
-        const entRes = await query(
-          `SELECT id, access_type, amount FROM entitlements WHERE (user_id = $1 OR supabase_user_id = $2) AND profile_key = $3 AND report_type = $4`,
-          [authUser.id, authUser.supabaseUserId, safeKey, reportType]
-        );
+        try {
+          // Strict Entitlement check: tied to authenticated user ID + profileKey + reportType
+          const entRes = await query(
+            `SELECT id, access_type, amount FROM entitlements WHERE (user_id = $1 OR supabase_user_id = $2) AND profile_key = $3 AND report_type = $4`,
+            [authUser.id, authUser.supabaseUserId, safeKey, reportType]
+          );
 
-        if (entRes.rows.length > 0) {
-          const ent = entRes.rows[0];
-          return {
-            allowed: true,
-            requiresPayment: false,
-            isFirstFreeReport: false,
-            isFreeReportType: false,
-            canClaimFree: false,
-            price: ent.amount,
-            reportType,
-            profileKey: safeKey,
-            accessType: ent.access_type,
-            entitlementId: ent.id
-          };
-        }
+          if (entRes.rows.length > 0) {
+            const ent = entRes.rows[0];
+            return {
+              allowed: true,
+              requiresPayment: false,
+              isFirstFreeReport: false,
+              isFreeReportType: false,
+              canClaimFree: false,
+              price: ent.amount,
+              reportType,
+              profileKey: safeKey,
+              accessType: ent.access_type,
+              entitlementId: ent.id
+            };
+          }
 
-        // Strict Free claim check: tied to authenticated user
-        const claimRes = await query(
-          `SELECT id, report_type FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2`,
-          [authUser.id, authUser.supabaseUserId]
-        );
+          // Strict Free claim check: tied to authenticated user
+          const claimRes = await query(
+            `SELECT id, report_type FROM free_claims WHERE user_id = $1 OR supabase_user_id = $2`,
+            [authUser.id, authUser.supabaseUserId]
+          );
 
-        if (claimRes.rows.length === 0) {
-          return {
-            allowed: false,
-            requiresPayment: false,
-            isFirstFreeReport: true,
-            isFreeReportType: false,
-            canClaimFree: true,
-            price: 0,
-            reportType,
-            profileKey: safeKey,
-            reason: 'Your first specialist report is 100% FREE. Click Claim Free Report to generate.'
-          };
-        } else {
-          return {
-            allowed: false,
-            requiresPayment: true,
-            isFirstFreeReport: false,
-            isFreeReportType: false,
-            canClaimFree: false,
-            price: REPORT_PRICE_INR,
-            reportType,
-            profileKey: safeKey,
-            reason: 'Free report entitlement already consumed. ₹33 required per additional report.'
-          };
-        }
-      } else {
-        // Sandbox Fallback
-        const entKey = `${authUser.id}_${reportType}_${safeKey}`;
-        let ent = this.localSandbox.entitlements.get(entKey);
-        if (!ent && authUser.email) {
-          for (const item of this.localSandbox.entitlements.values()) {
-            if ((item.email === authUser.email || item.userId === authUser.id) && item.reportType === reportType && item.profileKey === safeKey) {
-              ent = item;
-              break;
-            }
+          if (claimRes.rows.length === 0) {
+            return {
+              allowed: false,
+              requiresPayment: false,
+              isFirstFreeReport: true,
+              isFreeReportType: false,
+              canClaimFree: true,
+              price: 0,
+              reportType,
+              profileKey: safeKey,
+              reason: 'Your first specialist report is 100% FREE. Click Claim Free Report to generate.'
+            };
+          } else {
+            return {
+              allowed: false,
+              requiresPayment: true,
+              isFirstFreeReport: false,
+              isFreeReportType: false,
+              canClaimFree: false,
+              price: REPORT_PRICE_INR,
+              reportType,
+              profileKey: safeKey,
+              reason: 'Free report entitlement already consumed. ₹33 required per additional report.'
+            };
+          }
+        } catch (dbErr) {
+          console.warn('[checkReportAccess] Database query notice:', dbErr);
+          // In production serverless: Fail Closed on database error
+          if (isServerlessRuntime()) {
+            return {
+              allowed: false,
+              requiresPayment: true,
+              isFirstFreeReport: false,
+              isFreeReportType: false,
+              canClaimFree: false,
+              price: REPORT_PRICE_INR,
+              reportType,
+              profileKey: safeKey,
+              reason: 'Database is currently unavailable. Access requires database verification.'
+            };
           }
         }
-        if (ent) {
-          return {
-            allowed: true,
-            requiresPayment: false,
-            isFirstFreeReport: false,
-            isFreeReportType: false,
-            canClaimFree: false,
-            price: ent.amount,
-            reportType,
-            profileKey: safeKey,
-            accessType: ent.accessType,
-            entitlementId: ent.id
-          };
-        }
+      }
 
-        const freeClaim = this.localSandbox.freeClaims.get(authUser.id) || this.localSandbox.freeClaims.get(authUser.email);
-        if (!freeClaim) {
-          return {
-            allowed: false,
-            requiresPayment: false,
-            isFirstFreeReport: true,
-            isFreeReportType: false,
-            canClaimFree: true,
-            price: 0,
-            reportType,
-            profileKey: safeKey,
-            reason: 'Your first specialist report is 100% FREE. Click Claim Free Report to generate.'
-          };
-        } else {
-          return {
-            allowed: false,
-            requiresPayment: true,
-            isFirstFreeReport: false,
-            isFreeReportType: false,
-            canClaimFree: false,
-            price: REPORT_PRICE_INR,
-            reportType,
-            profileKey: safeKey,
-            reason: 'Free report entitlement already consumed. ₹33 required per additional report.'
-          };
+      // In production serverless without configured database: FAIL CLOSED
+      if (isServerlessRuntime()) {
+        return {
+          allowed: false,
+          requiresPayment: true,
+          isFirstFreeReport: false,
+          isFreeReportType: false,
+          canClaimFree: false,
+          price: REPORT_PRICE_INR,
+          reportType,
+          profileKey: safeKey,
+          reason: 'Database is required in production environment.'
+        };
+      }
+
+      // Local Dev Sandbox Fallback (Only in non-production local development)
+      const entKey = `${authUser.id}_${reportType}_${safeKey}`;
+      let ent = this.localSandbox.entitlements.get(entKey);
+      if (!ent && authUser.email) {
+        for (const item of this.localSandbox.entitlements.values()) {
+          if ((item.email === authUser.email || item.userId === authUser.id) && item.reportType === reportType && item.profileKey === safeKey) {
+            ent = item;
+            break;
+          }
         }
+      }
+      if (ent) {
+        return {
+          allowed: true,
+          requiresPayment: false,
+          isFirstFreeReport: false,
+          isFreeReportType: false,
+          canClaimFree: false,
+          price: ent.amount,
+          reportType,
+          profileKey: safeKey,
+          accessType: ent.accessType,
+          entitlementId: ent.id
+        };
+      }
+
+      const freeClaim = this.localSandbox.freeClaims.get(authUser.id) || this.localSandbox.freeClaims.get(authUser.email);
+      if (!freeClaim) {
+        return {
+          allowed: false,
+          requiresPayment: false,
+          isFirstFreeReport: true,
+          isFreeReportType: false,
+          canClaimFree: true,
+          price: 0,
+          reportType,
+          profileKey: safeKey,
+          reason: 'Your first specialist report is 100% FREE. Click Claim Free Report to generate.'
+        };
+      } else {
+        return {
+          allowed: false,
+          requiresPayment: true,
+          isFirstFreeReport: false,
+          isFreeReportType: false,
+          canClaimFree: false,
+          price: REPORT_PRICE_INR,
+          reportType,
+          profileKey: safeKey,
+          reason: 'Free report entitlement already consumed. ₹33 required per additional report.'
+        };
       }
     }
 
@@ -1310,47 +1315,50 @@ class ReportAccessEngine {
       return { success: true, reports: [], total: 0 };
     }
 
-    // FAST-PATH: Admin test users immediately receive unlocked Master Report and Mobile Numerology
-    if (isInternalAdminTestEmail(authUser.email)) {
-      const masterDef = REPORT_REGISTRY.MASTER_REPORT;
-      const mobileDef = REPORT_REGISTRY.MOBILE_NUMEROLOGY;
+    // FAST-PATH: Admin test users immediately receive all registered report types unlocked
+    if (isAdminEmail(authUser.email)) {
+      const allReportTypes: CanonicalReportType[] = [
+        'MASTER_REPORT',
+        'MOBILE_NUMEROLOGY',
+        'LOSHU',
+        'NAME_NUMEROLOGY',
+        'MARRIAGE',
+        'VEHICLE',
+        'HOUSE_FLAT',
+        'BUSINESS',
+        'SIGNATURE_AUDIT',
+        'CHILD_NAMES',
+        'LUCKY_DATES',
+        'MEDICAL_NUMEROLOGY',
+        'VASTU',
+        'DASHA',
+        'YEAR_FORECAST'
+      ];
+
+      const reportItems: UserReportItem[] = allReportTypes.map((rType) => {
+        const def = REPORT_REGISTRY[rType] || REPORT_REGISTRY.MASTER_REPORT;
+        return {
+          id: `admin_test_${rType.toLowerCase()}_${authUser.id}`,
+          userId: authUser.id,
+          profileKey: 'default_profile',
+          reportType: rType,
+          titleHi: `${def.titleHi} (आंतरिक टेस्ट एक्सेस)`,
+          titleEn: `${def.titleEn} (Internal Test Access)`,
+          titleMr: `${def.titleMr} (प्रशासकीय चाचणी)`,
+          titleBn: `${def.titleBn} (অ্যাডমিন টেস্ট অ্যাক্সেস)`,
+          titleGu: `${def.titleGu} (એડમિન ટેસ્ટ એક્સેસ)`,
+          accessType: 'ADMIN_TEST',
+          amount: 0,
+          currency: 'INR',
+          status: 'UNLOCKED',
+          createdAt: new Date().toISOString(),
+        };
+      });
+
       return {
         success: true,
-        reports: [
-          {
-            id: `admin_test_master_${authUser.id}`,
-            userId: authUser.id,
-            profileKey: 'default_profile',
-            reportType: 'MASTER_REPORT',
-            titleHi: `${masterDef.titleHi} (आंतरिक टेस्ट एक्सेस)`,
-            titleEn: `${masterDef.titleEn} (Internal Test Access)`,
-            titleMr: `${masterDef.titleMr} (प्रशासकीय चाचणी)`,
-            titleBn: `${masterDef.titleBn} (অ্যাডমিন টেস্ট অ্যাক্সেস)`,
-            titleGu: `${masterDef.titleGu} (એડમિન ટેસ્ટ એક્સેસ)`,
-            accessType: 'ADMIN_TEST',
-            amount: 0,
-            currency: 'INR',
-            status: 'UNLOCKED',
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: `perm_mobile_${authUser.id}`,
-            userId: authUser.id,
-            profileKey: 'mobile_scanner_profile',
-            reportType: 'MOBILE_NUMEROLOGY',
-            titleHi: mobileDef.titleHi,
-            titleEn: mobileDef.titleEn,
-            titleMr: mobileDef.titleMr,
-            titleBn: mobileDef.titleBn,
-            titleGu: mobileDef.titleGu,
-            accessType: 'ALWAYS_FREE',
-            amount: 0,
-            currency: 'INR',
-            status: 'UNLOCKED',
-            createdAt: new Date().toISOString(),
-          }
-        ],
-        total: 2,
+        reports: reportItems,
+        total: reportItems.length,
       };
     }
 
@@ -1469,7 +1477,7 @@ class ReportAccessEngine {
     }
 
     // FAST-PATH: Admin test accounts have 0 payment dependency
-    if (isInternalAdminTestEmail(authUser.email)) {
+    if (isAdminEmail(authUser.email)) {
       return {
         success: true,
         payments: [],
@@ -1586,7 +1594,7 @@ class ReportAccessEngine {
     }
 
     // FAST-PATH: Admin test accounts receive immediate privileged summary
-    if (isInternalAdminTestEmail(authUser.email)) {
+    if (isAdminEmail(authUser.email)) {
       return {
         success: true,
         summary: {
@@ -1600,7 +1608,7 @@ class ReportAccessEngine {
             profileKey: 'default_profile',
           },
           additionalReports: { priceInr: 0, pricePaise: 0 },
-          totalReportsUnlocked: 2,
+          totalReportsUnlocked: Object.keys(REPORT_REGISTRY).length,
           totalPaidAmountInr: 0,
           adminTestAccess: true,
         }
@@ -1675,16 +1683,17 @@ class ReportAccessEngine {
       throw new Error("Authentication required to access report");
     }
 
-    if (reportId.startsWith('admin_test_') || isInternalAdminTestEmail(authUser.email)) {
-      const def = REPORT_REGISTRY.MASTER_REPORT;
+    if (reportId.startsWith('admin_test_') || isAdminEmail(authUser.email)) {
+      const matchedType = (Object.keys(REPORT_REGISTRY).find(k => reportId.toLowerCase().includes(k.toLowerCase())) as CanonicalReportType) || 'MASTER_REPORT';
+      const def = REPORT_REGISTRY[matchedType] || REPORT_REGISTRY.MASTER_REPORT;
       return {
         success: true,
         allowed: true,
         report: {
-          id: reportId.startsWith('admin_test_') ? reportId : `admin_test_master_${authUser.id}`,
+          id: reportId.startsWith('admin_test_') ? reportId : `admin_test_${matchedType.toLowerCase()}_${authUser.id}`,
           userId: authUser.id,
           profileKey: 'default_profile',
-          reportType: 'MASTER_REPORT',
+          reportType: matchedType,
           titleHi: `${def.titleHi} (आंतरिक टेस्ट एक्सेस)`,
           titleEn: `${def.titleEn} (Internal Test Access)`,
           titleMr: `${def.titleMr} (प्रशासकीय चाचणी)`,

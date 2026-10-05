@@ -336,6 +336,45 @@ async function runAdminTestAccessSuite() {
     `User session synchronized successfully for ${syncRes.user?.email}`
   );
 
+  console.log('\n--- 12. All Report Types Free Unlocked for Admin ---');
+  const allTypes = Object.keys(REPORT_REGISTRY);
+  for (const rType of allTypes) {
+    const check = await reportAccessEngine.checkReportAccess(rType as any, 'default_profile', tokenA);
+    assert(
+      check.allowed === true && (check.accessType === 'ADMIN_TEST' || check.accessType === 'FREE'),
+      `[ADMIN_ALL_REPORTS] Report ${rType}`,
+      `Allowed: true, accessType: ${check.accessType}, price: ${check.price}`
+    );
+  }
+
+  console.log('\n--- 13. Production DB-Down Resilience & Fail-Closed Validation ---');
+  // Set production serverless environment flag temporarily
+  const originalVercel = process.env.VERCEL;
+  process.env.VERCEL = '1';
+
+  // 1. Admin must succeed with zero DB dependency
+  const dbDownAdminCheck = await reportAccessEngine.checkReportAccess('MASTER_REPORT', 'prof_admin', tokenA);
+  assert(
+    dbDownAdminCheck.allowed === true && dbDownAdminCheck.accessType === 'ADMIN_TEST',
+    '[DB_DOWN_RESILIENCE] Admin Zero-DB Access in Production',
+    'Admin user gets immediate access with zero database dependency'
+  );
+
+  // 2. Normal unpaid user in production without DB must FAIL CLOSED (deny)
+  const dbDownNormalCheck = await reportAccessEngine.checkReportAccess('MASTER_REPORT', 'prof_norm', normalToken);
+  assert(
+    dbDownNormalCheck.allowed === false && dbDownNormalCheck.requiresPayment === true,
+    '[DB_DOWN_RESILIENCE] Normal User Fails Closed (Denied)',
+    'Normal user is denied access when database is unavailable in production'
+  );
+
+  // Restore env
+  if (originalVercel) {
+    process.env.VERCEL = originalVercel;
+  } else {
+    delete process.env.VERCEL;
+  }
+
   console.log('\n============================================================');
   console.log('ADMIN_TEST ACCESS & ISOLATION SUITE RESULTS');
   console.log('============================================================');

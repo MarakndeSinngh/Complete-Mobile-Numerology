@@ -78,30 +78,42 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
     setError(null);
     try {
       const activeIdentifier = userEmail || userMobile;
-      const [reportsOutcome, paymentsOutcome, summaryOutcome, upiOutcome] = await Promise.allSettled([
+      const [reportsOutcome, summaryOutcome] = await Promise.allSettled([
         ReportAccessService.getMyReports(activeIdentifier),
-        ReportAccessService.getPaymentHistory(activeIdentifier),
         ReportAccessService.getAccessSummary(activeIdentifier),
-        ReportAccessService.getMyUpiSubmissions(activeIdentifier),
       ]);
 
-      // Diagnostics logging for browser verification
-      console.log(`[MyReportsHub] getMyReports: ${reportsOutcome.status === 'fulfilled' ? 'SUCCESS' : 'FAIL'}`, reportsOutcome.status === 'fulfilled' ? reportsOutcome.value : reportsOutcome.reason);
-      console.log(`[MyReportsHub] getAccessSummary: ${summaryOutcome.status === 'fulfilled' ? 'SUCCESS' : 'FAIL'}`, summaryOutcome.status === 'fulfilled' ? summaryOutcome.value : summaryOutcome.reason);
-      console.log(`[MyReportsHub] getPaymentHistory: ${paymentsOutcome.status === 'fulfilled' ? 'SUCCESS' : 'FAIL'}`, paymentsOutcome.status === 'fulfilled' ? paymentsOutcome.value : paymentsOutcome.reason);
-      console.log(`[MyReportsHub] getMyUpiSubmissions: ${upiOutcome.status === 'fulfilled' ? 'SUCCESS' : 'FAIL'}`, upiOutcome.status === 'fulfilled' ? upiOutcome.value : upiOutcome.reason);
+      let isAdmin = false;
+      if (summaryOutcome.status === 'fulfilled' && summaryOutcome.value?.summary?.adminTestAccess) {
+        isAdmin = true;
+      }
+      if (reportsOutcome.status === 'fulfilled' && reportsOutcome.value?.reports?.some(r => r.accessType === 'ADMIN_TEST')) {
+        isAdmin = true;
+      }
 
       if (reportsOutcome.status === 'fulfilled' && reportsOutcome.value?.reports) {
         setReports(reportsOutcome.value.reports);
       }
-      if (paymentsOutcome.status === 'fulfilled' && paymentsOutcome.value?.payments) {
-        setPayments(paymentsOutcome.value.payments);
-      }
       if (summaryOutcome.status === 'fulfilled' && summaryOutcome.value?.summary) {
         setSummary(summaryOutcome.value.summary);
       }
-      if (upiOutcome.status === 'fulfilled' && upiOutcome.value?.submissions) {
-        setUpiSubmissions(upiOutcome.value.submissions);
+
+      // For allowlisted admin accounts, do not call or depend on payments/history or my-upi-submissions
+      if (!isAdmin) {
+        const [paymentsOutcome, upiOutcome] = await Promise.allSettled([
+          ReportAccessService.getPaymentHistory(activeIdentifier),
+          ReportAccessService.getMyUpiSubmissions(activeIdentifier),
+        ]);
+
+        if (paymentsOutcome.status === 'fulfilled' && paymentsOutcome.value?.payments) {
+          setPayments(paymentsOutcome.value.payments);
+        }
+        if (upiOutcome.status === 'fulfilled' && upiOutcome.value?.submissions) {
+          setUpiSubmissions(upiOutcome.value.submissions);
+        }
+      } else {
+        setPayments([]);
+        setUpiSubmissions([]);
       }
 
       if (reportsOutcome.status === 'rejected' && summaryOutcome.status === 'rejected') {
@@ -742,58 +754,81 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
               </p>
             </div>
 
-            {/* 3 Core Rules Matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Card 1: Mobile Numerology Always Free */}
-              <div className="p-5 bg-gradient-to-br from-blue-50 via-sky-50/50 to-blue-50 rounded-2xl border border-blue-200 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
-                  <Phone className="w-5 h-5" />
+            {summary?.adminTestAccess ? (
+              <div className="p-6 bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 rounded-3xl border-2 border-emerald-300 space-y-3">
+                <div className="inline-flex items-center gap-2 bg-emerald-200/80 text-emerald-900 border border-emerald-400 px-3 py-1 rounded-full font-mono text-xs font-bold uppercase tracking-wider">
+                  <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                  ADMIN_TEST Account Mode
                 </div>
-                <h4 className="font-bold text-sm text-blue-950 font-playfair">
-                  {i18n.mobileNumerologyStatus}
+                <h4 className="font-bold text-lg text-emerald-950 font-playfair">
+                  आंतरिक टेस्ट एक्सेस — सभी रिपोर्ट अनलॉक (₹0)
                 </h4>
-                <p className="text-[11px] text-blue-800 leading-relaxed">
-                  100% permanently free for all seekers. Never consumes your complimentary gift or requires billing.
+                <p className="text-xs text-emerald-800 leading-relaxed max-w-2xl">
+                  This account is verified as an internal administrator test profile. All 15+ consultation dossiers, 32-chapter Master Report, and PDF exports are unlocked with full free access without payment, UPI, or billing checkpoints.
                 </p>
-                <div className="pt-2">
-                  <span className="text-xs font-mono font-black text-blue-700">₹0 (Always Free)</span>
-                </div>
-              </div>
-
-              {/* Card 2: First Non-Mobile Free */}
-              <div className="p-5 bg-gradient-to-br from-emerald-50 via-teal-50/50 to-emerald-50 rounded-2xl border border-emerald-200 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
-                  <Gift className="w-5 h-5" />
-                </div>
-                <h4 className="font-bold text-sm text-emerald-950 font-playfair">
-                  {i18n.firstReportStatus}
-                </h4>
-                <p className="text-[11px] text-emerald-800 leading-relaxed">
-                  Your very first specialist consultation dossier (Lo Shu, Marriage, Vehicle, Vastu, etc.) is complimentary.
-                </p>
-                <div className="pt-2">
-                  <span className="text-xs font-mono font-black text-emerald-700">
-                    Status: {summary?.firstNonMobileReport?.status === 'USED' ? i18n.firstReportUsed : i18n.firstReportAvailable}
+                <div className="pt-2 flex items-center gap-4">
+                  <span className="text-xs font-mono font-black text-emerald-900 bg-white/80 px-3 py-1.5 rounded-xl border border-emerald-200">
+                    Status: UNLOCKED (FREE ₹0)
+                  </span>
+                  <span className="text-xs font-mono font-bold text-emerald-800">
+                    Total Reports: {reports.length} Unlocked
                   </span>
                 </div>
               </div>
-
-              {/* Card 3: Additional Reports ₹33 */}
-              <div className="p-5 bg-gradient-to-br from-amber-50 via-orange-50/50 to-amber-50 rounded-2xl border border-amber-200 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-[#D97706] text-white flex items-center justify-center">
-                  <CreditCard className="w-5 h-5" />
+            ) : (
+              /* 3 Core Rules Matrix */
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Card 1: Mobile Numerology Always Free */}
+                <div className="p-5 bg-gradient-to-br from-blue-50 via-sky-50/50 to-blue-50 rounded-2xl border border-blue-200 space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-sm text-blue-950 font-playfair">
+                    {i18n.mobileNumerologyStatus}
+                  </h4>
+                  <p className="text-[11px] text-blue-800 leading-relaxed">
+                    100% permanently free for all seekers. Never consumes your complimentary gift or requires billing.
+                  </p>
+                  <div className="pt-2">
+                    <span className="text-xs font-mono font-black text-blue-700">₹0 (Always Free)</span>
+                  </div>
                 </div>
-                <h4 className="font-bold text-sm text-[#78350F] font-playfair">
-                  {i18n.additionalReportsRate}
-                </h4>
-                <p className="text-[11px] text-[#92400E] leading-relaxed">
-                  Nominal dakshina of ₹33 (3300 paise) per additional report. Unlocks screen report, A4 printable PDF & updates.
-                </p>
-                <div className="pt-2">
-                  <span className="text-xs font-mono font-black text-[#B45309]">₹33 INR / Report</span>
+
+                {/* Card 2: First Non-Mobile Free */}
+                <div className="p-5 bg-gradient-to-br from-emerald-50 via-teal-50/50 to-emerald-50 rounded-2xl border border-emerald-200 space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                    <Gift className="w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-sm text-emerald-950 font-playfair">
+                    {i18n.firstReportStatus}
+                  </h4>
+                  <p className="text-[11px] text-emerald-800 leading-relaxed">
+                    Your very first specialist consultation dossier (Lo Shu, Marriage, Vehicle, Vastu, etc.) is complimentary.
+                  </p>
+                  <div className="pt-2">
+                    <span className="text-xs font-mono font-black text-emerald-700">
+                      Status: {summary?.firstNonMobileReport?.status === 'USED' ? i18n.firstReportUsed : i18n.firstReportAvailable}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card 3: Additional Reports ₹33 */}
+                <div className="p-5 bg-gradient-to-br from-amber-50 via-orange-50/50 to-amber-50 rounded-2xl border border-amber-200 space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-[#D97706] text-white flex items-center justify-center">
+                    <CreditCard className="w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-sm text-[#78350F] font-playfair">
+                    {i18n.additionalReportsRate}
+                  </h4>
+                  <p className="text-[11px] text-[#92400E] leading-relaxed">
+                    Nominal dakshina of ₹33 (3300 paise) per additional report. Unlocks screen report, A4 printable PDF & updates.
+                  </p>
+                  <div className="pt-2">
+                    <span className="text-xs font-mono font-black text-[#B45309]">₹33 INR / Report</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Client Account Metrics */}
             <div className="pt-4 border-t border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
