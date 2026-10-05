@@ -77,24 +77,29 @@ export const MyReportsHub: React.FC<MyReportsHubProps> = ({
     setIsLoading(true);
     setError(null);
     try {
-      const [reportsRes, paymentsRes, summaryRes, upiRes] = await Promise.all([
-        ReportAccessService.getMyReports(userMobile),
-        ReportAccessService.getPaymentHistory(userMobile),
-        ReportAccessService.getAccessSummary(userMobile),
-        ReportAccessService.getMyUpiSubmissions(userEmail || userMobile),
+      const activeIdentifier = userEmail || userMobile;
+      const [reportsOutcome, paymentsOutcome, summaryOutcome, upiOutcome] = await Promise.allSettled([
+        ReportAccessService.getMyReports(activeIdentifier),
+        ReportAccessService.getPaymentHistory(activeIdentifier),
+        ReportAccessService.getAccessSummary(activeIdentifier),
+        ReportAccessService.getMyUpiSubmissions(activeIdentifier),
       ]);
 
-      if (reportsRes && Array.isArray(reportsRes.reports)) {
-        setReports(reportsRes.reports);
+      if (reportsOutcome.status === 'fulfilled' && reportsOutcome.value?.reports) {
+        setReports(reportsOutcome.value.reports);
       }
-      if (paymentsRes && Array.isArray(paymentsRes.payments)) {
-        setPayments(paymentsRes.payments);
+      if (paymentsOutcome.status === 'fulfilled' && paymentsOutcome.value?.payments) {
+        setPayments(paymentsOutcome.value.payments);
       }
-      if (summaryRes && summaryRes.summary) {
-        setSummary(summaryRes.summary);
+      if (summaryOutcome.status === 'fulfilled' && summaryOutcome.value?.summary) {
+        setSummary(summaryOutcome.value.summary);
       }
-      if (upiRes && Array.isArray(upiRes.submissions)) {
-        setUpiSubmissions(upiRes.submissions);
+      if (upiOutcome.status === 'fulfilled' && upiOutcome.value?.submissions) {
+        setUpiSubmissions(upiOutcome.value.submissions);
+      }
+
+      if (reportsOutcome.status === 'rejected' && summaryOutcome.status === 'rejected') {
+        setError(i18n.errorLoading);
       }
     } catch (err: any) {
       console.warn("Notice: Error fetching customer reports from server:", err);

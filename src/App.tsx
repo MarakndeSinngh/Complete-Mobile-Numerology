@@ -78,6 +78,19 @@ const App: React.FC = () => {
 
       if (profileToLoad && profileToLoad.dob) {
         applyProfile(profileToLoad);
+      } else {
+        // Attempt to load authenticated user's remote numerology profile if available
+        ReportAccessService.getCurrentNumerologyProfile().then(res => {
+          if (res?.success && res.profile && (res.profile.dob_string || res.profile.date_of_birth)) {
+            applyProfile({
+              name: res.profile.full_name || '',
+              dob: res.profile.dob_string || res.profile.date_of_birth,
+              gender: res.profile.gender || 'MALE',
+              mobile: res.profile.mobile_number || '',
+              email: res.profile.email || ''
+            });
+          }
+        }).catch(() => {});
       }
     } catch (e) {
       console.error("Error loading saved profile in App:", e);

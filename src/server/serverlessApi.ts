@@ -369,8 +369,51 @@ router.get("/payments/upi-status", async (req, res) => {
   }
 });
 
-// 7d. Admin: Get all UPI payment submissions
-router.get("/admin/upi-payments", async (req, res) => {
+// 7c-2. Retrieve Authenticated User's UPI Submissions
+router.get("/payments/my-upi-submissions", async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const email = req.query.email as string | undefined;
+
+    const data = await reportAccessEngine.getUserUpiSubmissions(authHeader, email);
+    res.json(data);
+  } catch (e: any) {
+    res.status(500).json({
+      success: false,
+      error: e?.message || "Failed to fetch user UPI submissions",
+      code: "SUBMISSIONS_FETCH_FAILED"
+    });
+  }
+});
+
+// 7c-3. Submit UTR (Alias for submit-upi)
+router.post("/payments/submit-utr", async (req, res) => {
+  try {
+    const { reportType, profileKey, utr, email, mobile, amount } = req.body || {};
+    const authHeader = req.headers['authorization'];
+    const canonicalType = (reportType || 'MASTER_REPORT') as CanonicalReportType;
+
+    const result = await reportAccessEngine.submitUpiPayment(
+      canonicalType,
+      profileKey,
+      utr,
+      authHeader,
+      email,
+      mobile
+    );
+
+    res.json(result);
+  } catch (e: any) {
+    res.status(400).json({
+      success: false,
+      error: e?.message || "Failed to submit UTR",
+      code: "UTR_SUBMISSION_FAILED"
+    });
+  }
+});
+
+// 7d. Admin: Get all UPI payment submissions (including alias pending-upi-payments)
+router.get(["/admin/upi-payments", "/admin/pending-upi-payments"], async (req, res) => {
   try {
     const data = await reportAccessEngine.getAdminUpiPayments();
     res.json(data);
@@ -378,7 +421,7 @@ router.get("/admin/upi-payments", async (req, res) => {
     res.status(500).json({
       success: false,
       error: e?.message || "Failed to fetch UPI payment records",
-      code: "ADMIN_FETCH_FAILED"
+      code: "ADMIN_UPI_FETCH_FAILED"
     });
   }
 });
