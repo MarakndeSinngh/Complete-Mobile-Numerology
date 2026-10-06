@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs && esbuild src/server/vercelEntry.ts --bundle --platform=node --format=esm --packages=external --outfile=api/index.js",
     "lint": "tsc --noEmit",
     "test": "tsx scripts/test-phase9-suite.ts && tsx scripts/test-phase10-production-funnel.ts && tsx scripts/test-admin-test-access.ts",
     "start": "node dist/server.cjs"

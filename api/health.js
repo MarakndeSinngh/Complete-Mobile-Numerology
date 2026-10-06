@@ -1,5 +1,5 @@
 // Zero-import minimal health check for Vercel Serverless runtime
-export default function handler(req: any, res: any) {
+export default function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 'no-store, max-age=0');
   res.status(200).json({
