@@ -1488,7 +1488,7 @@ const ReportTab: React.FC<ReportTabProps> = ({ personalDetails, dobData, nameDat
             }`}
           >
             <FileText className="w-4 h-4" />
-            <span>LeoFamily 31-Section Master Report</span>
+            <span>LeoFamily 32-Chapter Master Report</span>
           </button>
           <button
             onClick={() => setReportMode('AI_NARRATIVE')}

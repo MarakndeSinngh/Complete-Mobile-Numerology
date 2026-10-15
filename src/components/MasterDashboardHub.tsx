@@ -17,6 +17,8 @@ import { calculateKuaNumber } from '../core/kuaEngine';
 import { buildBirthGrid } from '../core/loshuEngine';
 import { calculatePersonalYearNumber } from '../core/luckyDatesEngine';
 import { REPORT_REGISTRY } from '../types/reportAccess';
+import { FreeNumerologyReport } from './FreeNumerologyReport';
+import { generateCompleteNumerologyProfile } from '../core/calculationEngine';
 
 interface MasterDashboardHubProps {
   personalDetails: PersonalDetails | null;
@@ -305,6 +307,17 @@ export const MasterDashboardHub: React.FC<MasterDashboardHubProps> = ({
     return null;
   });
 
+  const effectiveFreeProfile = React.useMemo(() => {
+    if (profile) return profile;
+    if (!localResult) return null;
+    return generateCompleteNumerologyProfile({
+      dob: localResult.dob,
+      name: localResult.name || 'Seeker',
+      mobile: calcMobile || personalDetails?.mobile || '',
+      gender: (calcGender as any) || personalDetails?.gender || 'MALE'
+    });
+  }, [profile, localResult, calcMobile, personalDetails?.mobile, calcGender, personalDetails?.gender]);
+
   const handleInstantCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!calcDob) return;
@@ -515,145 +528,22 @@ export const MasterDashboardHub: React.FC<MasterDashboardHubProps> = ({
       {localResult && (
         <div id="free-result-container" className="space-y-10 scroll-mt-20">
           
-          {/* LAYER 1: FREE RESULT DASHBOARD */}
-          <div className="bg-[#FAF8F5] border-2 border-amber-300/80 rounded-[36px] p-6 sm:p-8 md:p-10 shadow-md space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            
-            {/* Header with Clear FREE Badge */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-amber-200/80 pb-6">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">
-                  <Check className="w-3.5 h-3.5" /> 100% Free Analysis Ready
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-extrabold font-playfair text-stone-900">
-                  आपका Free Analysis तैयार है
-                </h2>
-                <p className="text-xs sm:text-sm text-stone-600">
-                  {localResult.name} के लिए प्रामाणिक वैदिक एवं चाल्डियन प्रारंभिक गणना
-                </p>
-              </div>
-
-              <div className="bg-white px-4 py-2 rounded-2xl border border-amber-200 shadow-xs text-right text-xs">
-                <span className="text-stone-400 block text-[10px] font-mono uppercase">Date of Birth</span>
-                <span className="font-bold text-stone-800">{formatDateIndian(localResult.dob)}</span>
-              </div>
-            </div>
-
-            {/* "आपको अभी क्या पता चला" - Section 1 */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#D97706]" />
-                <h3 className="font-bold text-base sm:text-lg text-stone-900 font-playfair">
-                  आपको अभी क्या पता चला (Free Key Insights)
-                </h3>
-              </div>
-
-              {/* 5 Core Metrics */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-                <div className="bg-white border border-amber-200/80 rounded-2xl p-4 text-center shadow-xs">
-                  <span className="text-xs text-stone-500 font-medium block">मूलांक (Driver)</span>
-                  <span className="text-3xl font-extrabold text-[#D97706] block my-1">{localResult.mulank}</span>
-                  <span className="text-[10px] text-stone-400 font-medium">आत्म चेतना व स्वभाव</span>
-                </div>
-
-                <div className="bg-white border border-blue-200/80 rounded-2xl p-4 text-center shadow-xs">
-                  <span className="text-xs text-stone-500 font-medium block">भाग्यांक (Conductor)</span>
-                  <span className="text-3xl font-extrabold text-[#1E3A8A] block my-1">{localResult.bhagyank}</span>
-                  <span className="text-[10px] text-stone-400 font-medium">कर्म व जीवन दिशा</span>
-                </div>
-
-                <div className="bg-white border border-emerald-200/80 rounded-2xl p-4 text-center shadow-xs">
-                  <span className="text-xs text-stone-500 font-medium block">कुआ अंक (Kua)</span>
-                  <span className="text-3xl font-extrabold text-emerald-700 block my-1">{localResult.kua}</span>
-                  <span className="text-[10px] text-stone-400 font-medium">वास्तु व अनुकूल दिशा</span>
-                </div>
-
-                <div className="bg-white border border-purple-200/80 rounded-2xl p-4 text-center shadow-xs">
-                  <span className="text-xs text-stone-500 font-medium block">मोबाइल वाइब्रेशन</span>
-                  <span className="text-3xl font-extrabold text-purple-700 block my-1">
-                    {localResult.mobileSingle || '—'}
-                  </span>
-                  <span className="text-[10px] text-stone-400 font-medium">चाल्डियन ध्वनि तरंग</span>
-                </div>
-
-                <div className="bg-white border border-amber-200/80 rounded-2xl p-4 text-center shadow-xs col-span-2 sm:col-span-1">
-                  <span className="text-xs text-stone-500 font-medium block">व्यक्तिगत वर्ष (PY)</span>
-                  <span className="text-3xl font-extrabold text-amber-700 block my-1">{localResult.personalYear}</span>
-                  <span className="text-[10px] text-stone-400 font-medium">{new Date().getFullYear()} की सक्रिय ऊर्जा</span>
-                </div>
-              </div>
-
-              {/* Lo Shu Grid Mini Preview */}
-              <div className="bg-white border border-stone-200 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
-                <div className="space-y-1 text-left max-w-md">
-                  <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#D97706] uppercase tracking-wider">
-                    <Compass className="w-3.5 h-3.5" /> 3x3 Natal Birth Kundali
-                  </div>
-                  <h4 className="font-bold text-base text-stone-900 font-playfair">
-                    लो शू ग्रिड जन्म चक्र (Lo Shu Grid)
-                  </h4>
-                  <p className="text-xs text-stone-600 leading-relaxed">
-                    आपके जन्म अंकों के आधार पर 8 विशेष योगों (मानसिक, भावनात्मक, व्यावहारिक, सफलता, इच्छा शक्ति) का प्रारंभिक नक्शा तैयार है।
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1.5 bg-stone-900 p-2 rounded-xl border border-stone-800 shadow-inner">
-                  {[
-                    [4, 9, 2],
-                    [3, 5, 7],
-                    [8, 1, 6],
-                  ].flat().map((num) => {
-                    const count = localResult.grid?.[num] || 0;
-                    const isPresent = count > 0;
-                    return (
-                      <div
-                        key={num}
-                        className={`w-11 h-11 flex flex-col items-center justify-center rounded-lg text-xs font-bold ${
-                          isPresent
-                            ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-stone-950 shadow-xs'
-                            : 'bg-stone-800 text-stone-500 border border-stone-700/50'
-                        }`}
-                      >
-                        <span>{num}</span>
-                        {isPresent && count > 1 && (
-                          <span className="text-[9px] font-mono opacity-80 leading-none">x{count}</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <button
-                    onClick={() => onNavigate('CORE_LOSHU')}
-                    className="whitespace-nowrap bg-stone-900 hover:bg-stone-800 text-amber-400 font-bold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <span>लो शू ग्रिड पूरा देखें (FREE)</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Strategic CTA 1 */}
-            <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-amber-500/10 border border-amber-300 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="space-y-0.5 text-center sm:text-left">
-                <span className="text-xs font-bold text-stone-800">
-                  क्या आप इन अंकों के पीछे का सम्पूर्ण 360° विश्लेषण देखना चाहते हैं?
-                </span>
-                <p className="text-[11px] text-stone-600">
-                  करियर, धन, विवाह, 81 ग्रहीय युति, महादशा और सिद्ध उपायों का 32-अध्यायों का मास्टर दस्तावेज।
-                </p>
-              </div>
-              <button
-                onClick={() => onNavigate('MASTER_REPORT')}
-                className="whitespace-nowrap bg-[#D97706] hover:bg-[#B45309] text-white font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2 cursor-pointer"
-              >
-                <span>Complete Report देखें</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-          </div>
+          {effectiveFreeProfile && (
+            <FreeNumerologyReport
+              profile={effectiveFreeProfile}
+              personalDetails={personalDetails || {
+                name: localResult.name,
+                dob: localResult.dob,
+                gender: calcGender,
+                mobile: calcMobile || ''
+              }}
+              dobData={dobData}
+              nameData={nameData}
+              mobileData={mobileData}
+              remedies={remedies}
+              onUpgradeToPremium={() => onNavigate('MASTER_REPORT')}
+            />
+          )}
 
           {/* LAYER 2: "आपकी Complete Report में क्या और जानने को मिलेगा?" */}
           <div className="bg-white border border-[#E7E5E4] rounded-[36px] p-6 sm:p-8 md:p-10 shadow-sm space-y-8">

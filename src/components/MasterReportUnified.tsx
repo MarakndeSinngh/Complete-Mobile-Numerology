@@ -747,10 +747,13 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 01. EXECUTIVE SUMMARY */}
         {/* ========================================================================= */}
-        <section id="sec-01" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-01" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-4 flex justify-between items-center">
             <div>
-              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Section 01</span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapter 01</span>
+                <span className="text-[10px] font-mono text-stone-600 bg-stone-100 px-2 py-0.5 rounded font-bold border border-stone-200">Sample Section 3 & 8: Executive Core</span>
+              </div>
               <h3 className="font-playfair text-xl md:text-2xl font-bold text-[#1F2937]">Executive Summary & Consultant Snapshot (कार्यकारी सारांश)</h3>
             </div>
             <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full font-semibold flex items-center gap-1">
@@ -983,9 +986,12 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 02. CORE NUMBERS & SYNTHESIS */}
         {/* ========================================================================= */}
-        <section id="sec-02" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-02" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Section 02</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapter 02</span>
+              <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">Sample Section 1: Driver & Conductor Analysis</span>
+            </div>
             <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Core Numbers, Tithi Frequency & Planetary Aspect (मूलांक, भाग्यांक एवं ग्रह दृष्टि)</h3>
           </div>
 
@@ -1075,9 +1081,12 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 03-07. LOSHU BIRTH GRID, ENHANCED GRID & NUMERICAL PARAMETERS */}
         {/* ========================================================================= */}
-        <section id="sec-03" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-03" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 03 – 07</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapters 03 – 07</span>
+              <span className="text-[10px] font-mono text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-bold">Sample Section 4 & 5: Lo Shu Natal Matrix & Number Frequencies</span>
+            </div>
             <h3 className="font-playfair text-xl font-bold text-[#1F2937]">
               Birth Lo Shu Grid vs. Enhanced LeoFamily Grid
             </h3>
@@ -1196,9 +1205,12 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 08-09. PLANES & MASTER ARROWS */}
         {/* ========================================================================= */}
-        <section id="sec-08" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-08" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 08 & 09</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapters 08 & 09</span>
+              <span className="text-[10px] font-mono text-blue-800 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded font-bold">Sample Section 5: Planes & Arrows of Pythagoras</span>
+            </div>
             <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Planes of Expression & Master Arrows</h3>
           </div>
 
@@ -1254,7 +1266,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               2. Master Arrows Analysis (तीरों का प्रभाव)
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              {arrows.slice(0, 4).map((arrow, idx) => (
+              {arrows.map((arrow, idx) => (
                 <div key={idx} className="p-4 bg-[#FAF5EE] rounded-2xl border border-[#FDE68A]">
                   <div className="flex justify-between items-center mb-1">
                     <strong className="text-sm font-bold text-[#92400E]">{arrow.name}</strong>
@@ -1274,9 +1286,12 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 10-12. 81 YOGAS, KARMIC LESSONS & DOMINANT ARCHETYPE */}
         {/* ========================================================================= */}
-        <section id="sec-10" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-10" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 10 – 12</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapters 10 – 12</span>
+              <span className="text-[10px] font-mono text-purple-800 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded font-bold">Sample Section 2: Core Traits & 81 Vedic Planetary Yogas</span>
+            </div>
             <h3 className="font-playfair text-xl font-bold text-[#1F2937]">81 Combinations, Karmic Matrix, Life Challenges & Archetype</h3>
           </div>
 
@@ -1287,16 +1302,17 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
                 <span className="text-xs font-mono font-bold uppercase bg-[#D97706] text-white px-2.5 py-0.5 rounded-full">
                   81 Yoga Code: {combination81.code}
                 </span>
-                <span className="font-playfair font-bold text-[#92400E] text-sm">{combination81.name}</span>
+                <span className="font-playfair font-bold text-[#92400E] text-sm">{combination81.title}</span>
               </div>
               <p className="text-xs text-[#78350F] leading-relaxed mb-3">
-                {combination81.meaningHi || combination81.meaning || 'यह योग बुद्धिमत्ता, सामाजिक प्रभाव और व्यापारिक विस्तार का शुभ संयोजन है।'}
+                {combination81.positiveMeaning}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-2 border-t border-amber-200/60">
-                <div><strong>Career:</strong> <span className="text-gray-700">{combination81.career || 'Consulting & Business'}</span></div>
-                <div><strong>Money:</strong> <span className="text-gray-700">{combination81.money || 'Steady Expansion'}</span></div>
-                <div><strong>Relationship:</strong> <span className="text-gray-700">{combination81.relationship || 'Intellectual Bond'}</span></div>
-                <div><strong>Remedy:</strong> <span className="text-gray-700">{combination81.remedy || 'Light oil lamp on Wednesdays'}</span></div>
+                <div><strong>Career:</strong> <span className="text-gray-700">{combination81.careerMeaning}</span></div>
+                <div><strong>Wealth:</strong> <span className="text-gray-700">{combination81.wealthMeaning}</span></div>
+                <div><strong>Relationship:</strong> <span className="text-gray-700">{combination81.relationshipMeaning}</span></div>
+                <div><strong>Challenges:</strong> <span className="text-gray-700">{combination81.negativeMeaning}</span></div>
+                <div className="sm:col-span-2"><strong>Traditional practice:</strong> <span className="text-gray-700">{combination81.remedy}</span></div>
               </div>
             </div>
           )}
@@ -1380,10 +1396,13 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 13-17. PSYCHOLOGICAL, CAREER, WEALTH & RELATIONSHIP MATRICES */}
         {/* ========================================================================= */}
-        <section id="sec-13" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-13" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 13 – 17</span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapters 13 – 17</span>
+                <span className="text-[10px] font-mono text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-bold">Sample Section 3 & 8: Life Domains & Professional Aptitude</span>
+              </div>
               <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Psychological, Education, Career, Wealth & Family Matrices</h3>
             </div>
             <div className="flex items-center gap-1 text-[10px] font-mono">
@@ -1518,9 +1537,12 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 18. MOBILE NUMEROLOGY */}
         {/* ========================================================================= */}
-        <section id="sec-18" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-5">
+        <section id="sec-18" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-5 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Section 18</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapter 18</span>
+              <span className="text-[10px] font-mono text-purple-800 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded font-bold">Sample Section 7: Mobile Numerology & 81-Pair Matrix</span>
+            </div>
             <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Mobile Numerology Diagnostics (मोबाइल अंक विश्लेषण)</h3>
           </div>
 
@@ -1532,19 +1554,19 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             <div className="p-3 bg-[#FAF5EE] rounded-2xl border border-[#FDE68A]">
               <span className="text-[9px] font-mono text-[#92400E] block uppercase font-bold">Total Compound</span>
               <span className="font-playfair text-xl font-bold text-[#B45309] block">
-                {mobileAnalysis?.compoundTotal || mobileData?.compoundTotal || 41}
+                {mobileAnalysis?.compoundTotal ?? mobileData?.compoundTotal ?? '—'}
               </span>
             </div>
             <div className="p-3 bg-[#FAF5EE] rounded-2xl border border-[#FDE68A]">
               <span className="text-[9px] font-mono text-[#92400E] block uppercase font-bold">Single Root</span>
               <span className="font-playfair text-xl font-bold text-[#B45309] block">
-                #{mobileAnalysis?.rootNumber || mobileData?.reducedTotal || 5}
+                #{mobileAnalysis?.rootNumber ?? mobileData?.reducedTotal ?? '—'}
               </span>
             </div>
             <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200">
               <span className="text-[9px] font-mono text-emerald-800 block uppercase font-bold">DOB Harmony</span>
               <span className="text-xs font-bold text-emerald-700 block mt-1.5">
-                {mobileAnalysis?.dobCompatibility?.status || 'Harmonious'}
+                {mobileAnalysis?.dobCompatibility?.status || 'गणना उपलब्ध नहीं'}
               </span>
             </div>
           </div>
@@ -1552,19 +1574,38 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           <div className="p-4 bg-[#FAF5EE] rounded-2xl border border-[#FDE68A] text-xs space-y-1">
             <strong className="text-[#92400E] block font-bold">मोबाइल अंक का प्रभाव:</strong>
             <p className="text-[#4B5563] leading-relaxed">
-              {mobileAnalysis?.compoundClassification?.meaning ||
-                mobileAnalysis?.recommendation ||
-                'यह मोबाइल नंबर आपके व्यापारिक संचार, सामाजिक संपर्कों और दैनिक बातचीत में अनुकूल तरंगें उत्पन्न करता है।'}
+              {mobileAnalysis?.compoundClassification?.meaning || mobileAnalysis?.recommendation || 'इस प्रोफ़ाइल के लिए मोबाइल कम्पाउंड की व्याख्या उपलब्ध नहीं है।'}
             </p>
           </div>
+
+          {mobileAnalysis?.pairsAnalysis?.length ? (
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold text-[#92400E]">Adjacent Pair Analysis (क्रमागत अंक-जोड़े)</h4>
+              <p className="text-[11px] text-gray-500">ये व्याख्याएँ पंजीकृत LeoFamily pair rules से ली गई हैं; इन्हें पारंपरिक अंकशास्त्रीय दृष्टिकोण समझें, निश्चित भविष्यवाणी नहीं।</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {mobileAnalysis.pairsAnalysis.map((pair, idx) => (
+                  <div key={`${pair.rawPair}-${idx}`} className="p-3 rounded-xl border border-amber-100 bg-amber-50/50 space-y-1">
+                    <div className="flex items-center justify-between gap-2"><strong className="font-mono text-base text-amber-900">{pair.rawPair}</strong><span className="text-[10px] text-gray-500">स्थान {idx + 1}</span></div>
+                    <p className="text-xs font-semibold text-gray-800">{pair.meaning}</p>
+                    <p className="text-[11px] text-gray-600">सकारात्मक पक्ष: {pair.positive}</p>
+                    {pair.negative && <p className="text-[11px] text-gray-600">सावधानी: {pair.negative}</p>}
+                    <p className="text-[10px] text-gray-500">क्षेत्र: {pair.area}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </section>
 
         {/* ========================================================================= */}
         {/* 19-21. NAME NUMEROLOGY (CHALDEAN & PYTHAGOREAN) */}
         {/* ========================================================================= */}
-        <section id="sec-19" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-5">
+        <section id="sec-19" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-5 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 19 – 21</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapters 19 – 21</span>
+              <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">Sample Section 6: Name Numerology & Spelling Balance</span>
+            </div>
             <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Name Numerology (Chaldean & Pythagorean Engines)</h3>
           </div>
 
@@ -1605,14 +1646,38 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               </p>
             </div>
           </div>
+
+          {nameNumerology?.recommendations && (
+            <div className="p-4 rounded-2xl border border-indigo-100 bg-indigo-50/50 space-y-2 text-xs">
+              <h4 className="font-bold text-indigo-900">Spelling Balance Review (नाम-वर्तनी संतुलन)</h4>
+              <p className="text-gray-700">{nameNumerology.recommendations.spellingAssessmentHi}</p>
+              {nameNumerology.recommendations.suggestedAdjustments?.length ? (
+                <div className="space-y-2">
+                  <p className="font-semibold text-gray-800">Engine द्वारा सुझाए गए विकल्प — इन्हें बदलने से पहले स्वयं जाँचें:</p>
+                  {nameNumerology.recommendations.suggestedAdjustments.map((suggestion, idx) => (
+                    <div key={`${suggestion.suggestedName}-${idx}`} className="rounded-lg bg-white border border-indigo-100 p-3">
+                      <div className="font-semibold">{suggestion.suggestedName}</div>
+                      <div className="text-gray-600">Chaldean compound {suggestion.suggestedChaldeanCompound} → root {suggestion.suggestedChaldeanRoot}</div>
+                      <p className="text-gray-600 mt-1">{suggestion.benefitsDescriptionHi}</p>
+                      <p className="text-gray-500 mt-1">मूलांक तालमेल: {suggestion.mulankCompatibility} · भाग्यांक तालमेल: {suggestion.bhagyankCompatibility}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : <p className="text-gray-600">इस विश्लेषण में कोई spelling adjustment उपलब्ध नहीं है।</p>}
+              <p className="text-[10px] text-gray-500">{nameNumerology.recommendations.disclaimer || nameNumerology.recommendations.suggestedAdjustments?.[0]?.standardDisclaimer}</p>
+            </div>
+          )}
         </section>
 
         {/* ========================================================================= */}
         {/* 22-24. NUMERO VASTU, KUA & RESIDENCE ANALYSIS */}
         {/* ========================================================================= */}
-        <section id="sec-22" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-22" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 22 – 24</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapters 22 – 24</span>
+              <span className="text-[10px] font-mono text-teal-800 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded font-bold">Sample Section 10: Numero Vastu & Spatial Orientation</span>
+            </div>
             <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Numero Vastu, Kua & Directional Alignment</h3>
           </div>
 
@@ -1674,9 +1739,12 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 25-27. PERSONAL YEAR, VEDIC MAHADASHA, PINNACLES & MONTHLY FORECAST */}
         {/* ========================================================================= */}
-        <section id="sec-25" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-25" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3">
-            <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Sections 25 – 27</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapters 25 – 27</span>
+              <span className="text-[10px] font-mono text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-bold">Sample Section 11: Personal Year & Vedic Timing Analysis</span>
+            </div>
             <h3 className="font-playfair text-xl font-bold text-[#1F2937]">Time Cycles, Pinnacles, Event Windows & Monthly Forecast</h3>
           </div>
 
@@ -2795,10 +2863,13 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 30. CONSOLIDATED TRADITIONAL & BALANCING REMEDIES & 90-DAY ACTION PLAN */}
         {/* ========================================================================= */}
-        <section id="sec-30" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6">
+        <section id="sec-30" className="bg-white rounded-3xl p-6 md:p-8 border border-[#E5E7EB] shadow-sm space-y-6 print-avoid-break">
           <div className="border-b border-[#F3F4F6] pb-3 flex justify-between items-center">
             <div>
-              <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Section 30</span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-mono uppercase text-[#D97706] font-bold tracking-wider">Chapter 30</span>
+                <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">Sample Section 9: Consolidated Remedies & Harmonization</span>
+              </div>
               <h3 className="font-playfair text-xl font-bold text-[#1F2937]">21–22. Consolidated Traditional Remedies & Action Plan</h3>
             </div>
             <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full font-semibold">
@@ -3008,10 +3079,13 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
         {/* ========================================================================= */}
         {/* 31. FINAL LEOFAMILY CONSULTATION SUMMARY */}
         {/* ========================================================================= */}
-        <section id="sec-31" className="bg-gradient-to-br from-[#1E3A8A] to-[#0F172A] text-white rounded-3xl p-6 md:p-8 shadow-md space-y-6">
+        <section id="sec-31" className="bg-gradient-to-br from-[#1E3A8A] to-[#0F172A] text-white rounded-3xl p-6 md:p-8 shadow-md space-y-6 print-avoid-break">
           <div className="border-b border-blue-400/20 pb-3 flex justify-between items-center">
             <div>
-              <span className="text-[10px] font-mono uppercase text-amber-400 font-bold tracking-wider">Section 31</span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-mono uppercase text-amber-400 font-bold tracking-wider">Chapters 31 – 32</span>
+                <span className="text-[10px] font-mono text-amber-200 bg-white/10 px-2 py-0.5 rounded font-bold">Sample Section 9: 90-Day Action Roadmap & Executive Guidance</span>
+              </div>
               <h3 className="font-playfair text-xl md:text-2xl font-bold text-white">
                 23. LeoFamily Final Expert Consultation Summary (अंतिम परामर्श निष्कर्ष)
               </h3>
