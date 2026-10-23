@@ -140,29 +140,34 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
       nameNumerology?.chaldean?.nameBreakdown?.length
   );
   const rawMobileStr = (personalDetails?.mobile || identity?.mobile || '').replace(/\D/g, '');
-  const hasProvidedMobile = Boolean(rawMobileStr.length >= 7 && mobileAnalysis);
+  const isValidTenDigitMobile = rawMobileStr.length === 10 && rawMobileStr !== '0000000000';
+  const hasPartialOrInvalidMobile = rawMobileStr.length > 0 && !isValidTenDigitMobile;
+  const hasProvidedMobile = Boolean(isValidTenDigitMobile && mobileAnalysis);
 
-  // Active Personal Year & Multi-Year Calculations
+  // Active Personal Year & Multi-Year Calculations (strictly validated; no synthetic date fallbacks)
   const [activePyTab, setActivePyTab] = useState<'CURRENT' | 'UPCOMING' | 'NEXT_2' | 'TIMELINE'>('CURRENT');
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
   const next2Year = currentYear + 2;
   const prevYear = currentYear - 1;
 
-  const dobStr = personalDetails?.dob || profile?.identity?.dob || `${new Date().getFullYear()}-01-01`;
-  const parsedDob = parseIndianDate(dobStr);
-  const birthDay = parsedDob?.day || 1;
-  const birthMonth = parsedDob?.month || 1;
-  const birthDaySum = sumDigits(birthDay);
-  const birthMonthSum = sumDigits(birthMonth);
+  const rawDobInput = (personalDetails?.dob || profile?.identity?.dob || profile?.identity?.standardDOB || '').trim();
+  const parsedDob = parseIndianDate(rawDobInput);
+  const hasValidDob = Boolean(parsedDob && parsedDob.isValid);
+  const dobStr = hasValidDob ? rawDobInput : '';
+  const birthDay = hasValidDob && parsedDob ? parsedDob.day : 0;
+  const birthMonth = hasValidDob && parsedDob ? parsedDob.month : 0;
+  const birthDaySum = hasValidDob ? sumDigits(birthDay) : 0;
+  const birthMonthSum = hasValidDob ? sumDigits(birthMonth) : 0;
 
-  const currentPY = calculatePersonalYearNumber(dobStr, currentYear);
-  const nextPY = calculatePersonalYearNumber(dobStr, nextYear);
-  const next2PY = calculatePersonalYearNumber(dobStr, next2Year);
-  const prevPY = calculatePersonalYearNumber(dobStr, prevYear);
+  const currentPY = hasValidDob ? calculatePersonalYearNumber(dobStr, currentYear) : 0;
+  const nextPY = hasValidDob ? calculatePersonalYearNumber(dobStr, nextYear) : 0;
+  const next2PY = hasValidDob ? calculatePersonalYearNumber(dobStr, next2Year) : 0;
+  const prevPY = hasValidDob ? calculatePersonalYearNumber(dobStr, prevYear) : 0;
   const personalYearVal = currentPY;
 
   const dynamicLuckyDatesReport = React.useMemo(() => {
+    if (!hasValidDob) return null;
     try {
       return scanLuckyDates(dobStr, 'GENERAL', {
         userName: rawNameStr || undefined
@@ -170,38 +175,49 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     } catch {
       return null;
     }
-  }, [dobStr, rawNameStr]);
+  }, [hasValidDob, dobStr, rawNameStr]);
 
   const currentPYForecast = React.useMemo(() => {
-    return getLocalizedPersonalYear(currentPY, currentYear, language);
+    return getLocalizedPersonalYear(currentPY || 1, currentYear, language);
   }, [currentPY, currentYear, language]);
 
   const nextPYForecast = React.useMemo(() => {
-    return getLocalizedPersonalYear(nextPY, nextYear, language);
+    return getLocalizedPersonalYear(nextPY || 1, nextYear, language);
   }, [nextPY, nextYear, language]);
 
   const next2PYForecast = React.useMemo(() => {
-    return getLocalizedPersonalYear(next2PY, next2Year, language);
+    return getLocalizedPersonalYear(next2PY || 1, next2Year, language);
   }, [next2PY, next2Year, language]);
 
   const prevPYForecast = React.useMemo(() => {
-    return getLocalizedPersonalYear(prevPY, prevYear, language);
+    return getLocalizedPersonalYear(prevPY || 1, prevYear, language);
   }, [prevPY, prevYear, language]);
 
-  // Resolve Kua profile safely from unified profile or existing core Kua engine
+  // Resolve Kua profile safely from unified profile or existing core Kua engine (only when DOB is valid)
   const kuaProfile: KuaProfile = React.useMemo(() => {
+    if (!hasValidDob || !parsedDob) {
+      return {
+        kuaNumber: 0,
+        gender: ((personalDetails?.gender || profile?.identity?.gender || 'MALE') as 'MALE' | 'FEMALE' | 'OTHER'),
+        group: 'EAST_GROUP',
+        element: '—',
+        trigram: '—',
+        favourableDirections: { shengChi: '—', tianYi: '—', yanNian: '—', fuWei: '—' },
+        unfavourableDirections: { huoHai: '—', wuGui: '—', liuSha: '—', jueMing: '—' },
+        favorableDirections: [],
+        unfavorableDirections: [],
+        summary: 'कुआ अंक एवं दिशात्मक गणना के लिए मान्य जन्मतिथि (DD/MM/YYYY) आवश्यक है।'
+      };
+    }
     if (profile?.kua && typeof profile.kua === 'object' && (profile.kua as any).kuaNumber) {
       return profile.kua as KuaProfile;
     }
     if ((profile?.vastu as any)?.kua && typeof (profile.vastu as any).kua === 'object') {
       return (profile.vastu as any).kua as KuaProfile;
     }
-    const safeDobStr = personalDetails?.dob || profile?.identity?.dob || `${new Date().getFullYear()}-01-01`;
-    const parsed = parseIndianDate(safeDobStr);
-    const birthYear = parsed?.year || (safeDobStr ? new Date(safeDobStr).getFullYear() : new Date().getFullYear());
     const gender = (personalDetails?.gender || profile?.identity?.gender || 'MALE') as 'MALE' | 'FEMALE' | 'OTHER';
-    return calculateKuaNumber(birthYear, gender);
-  }, [profile?.kua, profile?.vastu, personalDetails?.dob, personalDetails?.gender, profile?.identity]);
+    return calculateKuaNumber(parsedDob.year, gender);
+  }, [hasValidDob, parsedDob, profile?.kua, profile?.vastu, personalDetails?.gender, profile?.identity]);
 
   // Derived expert consultation sections from single source of truth profile
   const expertDossier: ExpertConsultationDossier = React.useMemo(() => {
@@ -413,42 +429,220 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     }
   };
 
-  // Upgraded High-Resolution Multi-Page PDF Export
+  // Page-Aware Multi-Page A4 PDF Export (prevents mid-card/mid-paragraph cuts & keeps headings attached)
   const handleExportPDF = async () => {
     if (!reportRef.current) return;
     setPdfGenerating(true);
+    const element = reportRef.current;
+    element.classList.add('pdf-exporting');
     try {
-      const element = reportRef.current;
-      
-      // Smooth scroll to top to ensure complete render
       window.scrollTo({ top: 0, behavior: 'instant' as any });
 
-      const canvas = await html2canvas(element, {
-        scale: 2, // High resolution crisp text rendering for print quality
+      // Ensure brand logo and embedded images are loaded before layout measurement & capture
+      const imgs = Array.from(element.querySelectorAll('img'));
+      await Promise.all(
+        imgs.map((img) => {
+          if (img.complete && img.naturalHeight > 0) return Promise.resolve();
+          return new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            setTimeout(resolve, 1500);
+          });
+        })
+      );
+
+      const pageWidthMm = 210;
+      const pageHeightMm = 297;
+      const marginXMm = 10;
+      const marginTopMm = 11;
+      const marginBottomMm = 13;
+      const contentWidthMm = pageWidthMm - marginXMm * 2;
+      const maxContentHeightMm = pageHeightMm - marginTopMm - marginBottomMm;
+
+      const rootRect = element.getBoundingClientRect();
+      const domWidth = element.scrollWidth || rootRect.width || 1100;
+      const domHeight = element.scrollHeight || rootRect.height;
+      const maxPageDomHeight = (maxContentHeightMm / contentWidthMm) * domWidth;
+
+      // Measure cover section so Page 1 is always the complete standalone Cover Page
+      const coverEl = element.querySelector('#sec-cover') as HTMLElement | null;
+      let coverBottomDom = 0;
+      if (coverEl) {
+        const coverRect = coverEl.getBoundingClientRect();
+        coverBottomDom = Math.max(0, Math.ceil(coverRect.bottom - rootRect.top + 8));
+      }
+
+      // Collect atomic blocks (cards, paragraphs, grids, tables) and heading keep-with-next zones
+      const atomicCandidates = Array.from(
+        element.querySelectorAll(
+          '.rounded-xl, .rounded-2xl, .grid > div, p, li, tr, blockquote, .border-l-4, h1, h2, h3, h4'
+        )
+      ) as HTMLElement[];
+
+      const atomicIntervals: Array<{ top: number; bottom: number }> = [];
+      for (const node of atomicCandidates) {
+        if (node.closest('.no-print, .print\\:hidden, button, #sec-feedback, #sec-cover')) continue;
+        const rect = node.getBoundingClientRect();
+        if (rect.height <= 0 || rect.width <= 0) continue;
+        const top = Math.max(0, rect.top - rootRect.top);
+        let bottom = Math.min(domHeight, rect.bottom - rootRect.top);
+        const height = bottom - top;
+
+        if (/^H[1-4]$/.test(node.tagName)) {
+          bottom = Math.min(domHeight, bottom + 95);
+          atomicIntervals.push({ top: Math.max(0, top - 6), bottom });
+          continue;
+        }
+
+        if (height > 6 && height <= maxPageDomHeight * 0.86) {
+          atomicIntervals.push({ top: Math.max(0, top - 3), bottom: Math.min(domHeight, bottom + 3) });
+        }
+      }
+
+      // Compute safe page break Y coordinates in DOM pixels
+      const pageBreaks: number[] = [0];
+      let currentStart = 0;
+
+      if (coverBottomDom > 50 && coverBottomDom < domHeight - 20) {
+        pageBreaks.push(coverBottomDom);
+        currentStart = coverBottomDom;
+      }
+
+      while (currentStart + maxPageDomHeight < domHeight - 8) {
+        const targetEnd = currentStart + maxPageDomHeight;
+        let bestBreak = targetEnd;
+
+        let adjusted = true;
+        let guard = 0;
+        while (adjusted && guard < 35) {
+          adjusted = false;
+          guard++;
+          for (const interval of atomicIntervals) {
+            if (interval.top < bestBreak && interval.bottom > bestBreak) {
+              if (interval.top > currentStart + maxPageDomHeight * 0.22) {
+                bestBreak = Math.floor(interval.top - 4);
+                adjusted = true;
+                break;
+              }
+            }
+          }
+        }
+
+        if (bestBreak <= currentStart + 80) {
+          bestBreak = Math.floor(targetEnd);
+        }
+
+        pageBreaks.push(bestBreak);
+        currentStart = bestBreak;
+      }
+      pageBreaks.push(domHeight);
+
+      const scale = 2;
+      const fullCanvas = await html2canvas(element, {
+        scale,
         useCORS: true,
         logging: false,
         backgroundColor: '#FAF8F5',
-        windowWidth: 1200
+        windowWidth: 1200,
+        ignoreElements: (el) => {
+          if (!(el instanceof HTMLElement)) return false;
+          return (
+            el.classList.contains('no-print') ||
+            el.classList.contains('print:hidden') ||
+            el.id === 'sec-feedback' ||
+            el.tagName === 'BUTTON'
+          );
+        }
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+      const totalPages = pageBreaks.length - 1;
+      const ratio = fullCanvas.height / domHeight;
 
-      // First Page
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-      heightLeft -= pageHeight;
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) pdf.addPage();
 
-      // Loop for subsequent pages
-      while (heightLeft > 0) {
-        position = -(imgHeight - heightLeft);
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-        heightLeft -= pageHeight;
+        const domSliceStart = pageBreaks[i];
+        const domSliceEnd = pageBreaks[i + 1];
+        const srcY = Math.max(0, Math.floor(domSliceStart * ratio));
+        const srcEnd = Math.min(fullCanvas.height, Math.ceil(domSliceEnd * ratio));
+        const srcH = Math.max(1, srcEnd - srcY);
+
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = fullCanvas.width;
+        pageCanvas.height = srcH;
+
+        const ctx = pageCanvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#FAF8F5';
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(
+            fullCanvas,
+            0,
+            srcY,
+            fullCanvas.width,
+            srcH,
+            0,
+            0,
+            fullCanvas.width,
+            srcH
+          );
+        }
+
+        const sliceImgData = pageCanvas.toDataURL('image/jpeg', 0.94);
+        let renderWidthMm = contentWidthMm;
+        let sliceHeightMm = (srcH * renderWidthMm) / fullCanvas.width;
+        let renderXMm = marginXMm;
+
+        // If a single slice (such as the Cover Page) slightly exceeds maxContentHeightMm, scale proportionally to fit cleanly
+        if (sliceHeightMm > maxContentHeightMm) {
+          const fitScale = maxContentHeightMm / sliceHeightMm;
+          sliceHeightMm = maxContentHeightMm;
+          renderWidthMm = contentWidthMm * fitScale;
+          renderXMm = marginXMm + (contentWidthMm - renderWidthMm) / 2;
+        }
+
+        // Page background fill
+        pdf.setFillColor(250, 248, 245);
+        pdf.rect(0, 0, pageWidthMm, pageHeightMm, 'F');
+
+        // Running Header
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(146, 64, 14);
+        pdf.text('LEOFAMILY ASTRO-NUMEROLOGY • 32-CHAPTER MASTER CONSULTATION DOSSIER', marginXMm, 7.5);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(107, 114, 128);
+        pdf.text(hasValidDob ? `DOB: ${formattedDOB}` : 'DOB: Not Validated', pageWidthMm - marginXMm, 7.5, { align: 'right' });
+
+        pdf.setDrawColor(245, 208, 138);
+        pdf.setLineWidth(0.2);
+        pdf.line(marginXMm, 9, pageWidthMm - marginXMm, 9);
+
+        // Slice Image
+        pdf.addImage(
+          sliceImgData,
+          'JPEG',
+          renderXMm,
+          marginTopMm,
+          renderWidthMm,
+          sliceHeightMm,
+          undefined,
+          'FAST'
+        );
+
+        // Running Footer & Page Number
+        const footerY = pageHeightMm - 5.5;
+        pdf.setDrawColor(229, 231, 235);
+        pdf.setLineWidth(0.2);
+        pdf.line(marginXMm, footerY - 3.5, pageWidthMm - marginXMm, footerY - 3.5);
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(107, 114, 128);
+        pdf.text('LeoFamily Vedic & Chaldean Systems • Confidential Client Dossier', marginXMm, footerY);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`Page ${i + 1} of ${totalPages}`, pageWidthMm - marginXMm, footerY, { align: 'right' });
       }
 
       const safeName = (identity.fullName || 'Consultation').replace(/[^a-zA-Z0-9]/g, '_');
@@ -457,6 +651,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     } catch (err) {
       console.error('PDF generation error:', err);
     } finally {
+      element.classList.remove('pdf-exporting');
       setPdfGenerating(false);
     }
   };
@@ -591,7 +786,22 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               LeoFamily Unified Cosmic Synthesis (संयुक्त ऊर्जा सामंजस्य)
             </h4>
             <p className="text-xs text-[#78350F] mt-1 leading-relaxed">
-              आपके प्रोफाइल में मूलांक <strong>#{coreNumbers.mulank} ({coreNumbers.mulankGraha})</strong> और भाग्यांक <strong>#{coreNumbers.bhagyank} ({coreNumbers.bhagyankGraha})</strong> के साथ नाम अंक <strong>#{nameNumerology?.chaldean.rootNumber || 5}</strong> एवं मोबाइल कम्पाउंड <strong>#{mobileAnalysis?.compoundTotal || 41}</strong> का एक मजबूत तालमेल दिखाई दे रहा है। जीवन के निर्णय लेते समय बुध, सूर्य एवं गुरु की सकारात्मक ऊर्जा का उपयोग करना आपके लिए अत्यंत फलदायी रहेगा।
+              {hasValidDob ? (
+                <>
+                  आपके प्रोफाइल में मूलांक <strong>#{coreNumbers.mulank} ({coreNumbers.mulankGraha})</strong> और भाग्यांक <strong>#{coreNumbers.bhagyank} ({coreNumbers.bhagyankGraha})</strong>
+                  {hasProvidedName ? (
+                    <> के साथ नाम अंक <strong>#{nameNumerology?.chaldean.rootNumber}</strong></>
+                  ) : null}
+                  {hasProvidedMobile ? (
+                    <> एवं मोबाइल कम्पाउंड <strong>#{mobileAnalysis?.compoundTotal} (मूलांक #{mobileAnalysis?.rootNumber})</strong></>
+                  ) : null}{' '}
+                  का ऊर्जा समीकरण सक्रिय है। जीवन के निर्णय लेते समय अपने स्वामी ग्रहों की सकारात्मक ऊर्जा का उपयोग करना आपके लिए अत्यंत फलदायी रहेगा।
+                </>
+              ) : (
+                <>
+                  जन्मतिथि आधारित गणनाओं (मूलांक, भाग्यांक, लो-शू ग्रिड, पर्सनल ईयर और वैदिक दशा) को सक्रिय करने के लिए कृपया मान्य जन्मतिथि (DD/MM/YYYY) दर्ज करें। किसी काल्पनिक या डिफ़ॉल्ट तिथि का उपयोग नहीं किया गया है।
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -647,15 +857,21 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                 <div>
                   <span className="text-[10px] text-[#6B7280] block uppercase font-mono font-semibold">Client Name</span>
-                  <span className="text-sm font-bold text-[#1F2937] block mt-0.5">{identity.fullName}</span>
+                  <span className="text-sm font-bold text-[#1F2937] block mt-0.5">{hasProvidedName ? rawNameStr : (identity.fullName || 'दर्ज नहीं (Not Provided)')}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-[#6B7280] block uppercase font-mono font-semibold">Date of Birth</span>
-                  <span className="text-sm font-bold text-[#92400E] block mt-0.5">{formattedDOB}</span>
+                  <span className="text-sm font-bold text-[#92400E] block mt-0.5">{hasValidDob ? formattedDOB : 'अमान्य / अपूर्ण (Invalid DOB)'}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-[#6B7280] block uppercase font-mono font-semibold">Mobile Number</span>
-                  <span className="text-sm font-bold text-[#1F2937] block mt-0.5">{identity.mobile || '9876543210'}</span>
+                  <span className="text-sm font-bold text-[#1F2937] block mt-0.5">
+                    {hasProvidedMobile
+                      ? rawMobileStr
+                      : hasPartialOrInvalidMobile
+                        ? `${rawMobileStr} (अपूर्ण - 10 अंक आवश्यक)`
+                        : 'दर्ज नहीं (Not Provided)'}
+                  </span>
                 </div>
                 <div>
                   <span className="text-[10px] text-[#6B7280] block uppercase font-mono font-semibold">Gender / Energy</span>
@@ -683,42 +899,64 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <div className="p-3.5 bg-white rounded-2xl border-2 border-amber-300 text-center shadow-xs">
                   <span className="text-[10px] font-mono text-[#92400E] uppercase block font-bold">मूलांक (Driver)</span>
-                  <span className="text-2xl font-playfair font-black text-[#B45309] block">#{coreNumbers.mulank}</span>
-                  <span className="text-[10px] text-[#78350F] font-medium">{coreNumbers.mulankGraha}</span>
+                  <span className="text-2xl font-playfair font-black text-[#B45309] block">
+                    {hasValidDob ? `#${coreNumbers.mulank}` : '—'}
+                  </span>
+                  <span className="text-[10px] text-[#78350F] font-medium">
+                    {hasValidDob ? coreNumbers.mulankGraha : 'DOB आवश्यक'}
+                  </span>
                 </div>
                 <div className="p-3.5 bg-white rounded-2xl border-2 border-amber-300 text-center shadow-xs">
                   <span className="text-[10px] font-mono text-[#92400E] uppercase block font-bold">भाग्यांक (Destiny)</span>
-                  <span className="text-2xl font-playfair font-black text-[#B45309] block">#{coreNumbers.bhagyank}</span>
-                  <span className="text-[10px] text-[#78350F] font-medium">{coreNumbers.bhagyankGraha}</span>
+                  <span className="text-2xl font-playfair font-black text-[#B45309] block">
+                    {hasValidDob ? `#${coreNumbers.bhagyank}` : '—'}
+                  </span>
+                  <span className="text-[10px] text-[#78350F] font-medium">
+                    {hasValidDob ? coreNumbers.bhagyankGraha : 'DOB आवश्यक'}
+                  </span>
                 </div>
                 <div className="p-3.5 bg-white rounded-2xl border-2 border-amber-300 text-center shadow-xs">
                   <span className="text-[10px] font-mono text-[#92400E] uppercase block font-bold">Name Number</span>
                   <span className="text-2xl font-playfair font-black text-[#B45309] block">
-                    #{nameNumerology?.chaldean.rootNumber || 5}
+                    {hasProvidedName && nameNumerology?.chaldean?.rootNumber ? `#${nameNumerology.chaldean.rootNumber}` : '—'}
                   </span>
                   <span className="text-[10px] text-[#78350F] font-medium">
-                    Chaldean {nameNumerology?.chaldean.compoundNumber || 32}
+                    {hasProvidedName && nameNumerology?.chaldean?.compoundNumber
+                      ? `Chaldean ${nameNumerology.chaldean.compoundNumber}`
+                      : 'नाम दर्ज नहीं'}
                   </span>
                 </div>
                 <div className="p-3.5 bg-white rounded-2xl border-2 border-amber-300 text-center shadow-xs">
                   <span className="text-[10px] font-mono text-[#92400E] uppercase block font-bold">Mobile Root</span>
                   <span className="text-2xl font-playfair font-black text-[#B45309] block">
-                    #{mobileAnalysis?.rootNumber || 5}
+                    {hasProvidedMobile && mobileAnalysis?.rootNumber ? `#${mobileAnalysis.rootNumber}` : '—'}
                   </span>
                   <span className="text-[10px] text-[#78350F] font-medium">
-                    Total {mobileAnalysis?.compoundTotal || 41}
+                    {hasProvidedMobile && mobileAnalysis?.compoundTotal
+                      ? `Total ${mobileAnalysis.compoundTotal}`
+                      : hasPartialOrInvalidMobile
+                        ? '10 अंक आवश्यक'
+                        : 'मोबाइल दर्ज नहीं'}
                   </span>
                 </div>
                 <div className="p-3.5 bg-white rounded-2xl border-2 border-amber-300 text-center shadow-xs">
                   <span className="text-[10px] font-mono text-[#92400E] uppercase block font-bold">Personal Year</span>
-                  <span className="text-2xl font-playfair font-black text-[#B45309] block">#{personalYearVal}</span>
+                  <span className="text-2xl font-playfair font-black text-[#B45309] block">
+                    {hasValidDob && personalYearVal ? `#${personalYearVal}` : '—'}
+                  </span>
                   <span className="text-[10px] text-[#78350F] font-medium">{currentYear} Cycle</span>
                 </div>
                 <div className="p-3.5 bg-white rounded-2xl border-2 border-amber-300 text-center shadow-xs">
                   <span className="text-[10px] font-mono text-[#92400E] uppercase block font-bold">Kua Number</span>
-                  <span className="text-2xl font-playfair font-black text-[#B45309] block">#{kuaProfile.kuaNumber}</span>
+                  <span className="text-2xl font-playfair font-black text-[#B45309] block">
+                    {hasValidDob && kuaProfile.kuaNumber ? `#${kuaProfile.kuaNumber}` : '—'}
+                  </span>
                   <span className="text-[10px] text-[#78350F] font-medium">
-                    {kuaProfile.group === 'WEST_GROUP' ? 'पश्चिम समूह' : 'पूर्व समूह'}
+                    {hasValidDob
+                      ? kuaProfile.group === 'WEST_GROUP'
+                        ? 'पश्चिम समूह'
+                        : 'पूर्व समूह'
+                      : 'DOB आवश्यक'}
                   </span>
                 </div>
               </div>
@@ -748,7 +986,9 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
                 <div className="p-3.5 bg-white/90 rounded-xl border border-amber-200 space-y-1">
                   <strong className="text-[#92400E] block font-bold text-[10px] uppercase">3. मुख्य सामर्थ्य (Key Strengths):</strong>
                   <p className="text-[#4B5563] text-xs leading-relaxed">
-                    {interpretations.career.strengths.slice(0, 3).join(', ') || localizedDossier.consultantSnapshot.bestAvenue || 'बौद्धिक स्पष्टता, कूटनीतिक संवाद, रणनीतिक प्रबंधन एवं त्वरित निर्णय क्षमता'}
+                    {hasValidDob
+                      ? (interpretations.career.strengths.slice(0, 3).join(', ') || localizedDossier.consultantSnapshot.bestAvenue || 'बौद्धिक स्पष्टता, कूटनीतिक संवाद, रणनीतिक प्रबंधन एवं त्वरित निर्णय क्षमता')
+                      : 'मान्य जन्मतिथि उपलब्ध होने पर आपके मूलांक-भाग्यांक एवं लो-शू ग्रिड के प्रमुख सामर्थ्य यहाँ प्रदर्शित किए जाएंगे।'}
                   </p>
                 </div>
                 <div className="p-3.5 bg-white/90 rounded-xl border border-amber-200 space-y-1">
@@ -760,7 +1000,10 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
               <div className="p-3.5 bg-amber-100/70 rounded-xl border border-amber-300 text-xs text-[#78350F] flex items-start gap-2.5">
                 <Target className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong>वर्तमान रणनीतिक ध्यान (Current Focus):</strong> {localizedDossier.expertSummary.timeCycleGuidance || expertDossier.expertSummary.timeCycleGuidance || 'व्यक्तिगत वर्ष एवं महादशा के अनुसार नए अवसरों की योजना बनाएं और निरंतर कर्म पर एकाग्र रहें।'}
+                  <strong>वर्तमान रणनीतिक ध्यान (Current Focus):</strong>{' '}
+                  {hasValidDob
+                    ? (localizedDossier.expertSummary.timeCycleGuidance || expertDossier.expertSummary.timeCycleGuidance || 'व्यक्तिगत वर्ष एवं महादशा के अनुसार नए अवसरों की योजना बनाएं और निरंतर कर्म पर एकाग्र रहें।')
+                    : 'कृपया पूर्ण जन्मतिथि (DD/MM/YYYY) दर्ज करें ताकि वर्तमान पर्सनल ईयर और महादशा का सटीक विश्लेषण किया जा सके।'}
                 </div>
               </div>
             </div>
@@ -778,6 +1021,34 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           </div>
         </section>
 
+        {!hasValidDob ? (
+          <section
+            id="sec-dob-validation-notice"
+            className="bg-amber-50/90 rounded-3xl p-6 md:p-8 border-2 border-amber-300 shadow-sm space-y-4 text-xs text-[#78350F]"
+          >
+            <div className="flex items-center gap-2.5 text-[#92400E] font-bold text-base">
+              <AlertTriangle className="w-5 h-5 text-[#D97706] flex-shrink-0" />
+              <span>जन्मतिथि अनुपलब्ध या अमान्य — जन्मतिथि-आधारित 32-अध्याय गणनाएं स्थगित (Valid Date of Birth Required)</span>
+            </div>
+            <p className="leading-relaxed">
+              आपकी प्रोफ़ाइल में मान्य जन्मतिथि (<strong>DD/MM/YYYY</strong> या <strong>YYYY-MM-DD</strong>) उपलब्ध नहीं है। LeoFamily की सटीकता नीति के अनुसार किसी काल्पनिक या डिफ़ॉल्ट तिथि (जैसे आज की तारीख, 1 जनवरी, या अनुमानित जन्म वर्ष) का उपयोग करके कृत्रिम गणना नहीं की जाती है।
+            </p>
+            <p className="leading-relaxed">
+              कृपया अपनी पूर्ण और सही जन्मतिथि दर्ज करें ताकि मूलांक (Driver), भाग्यांक (Conductor), 81-संयोजन फलित, लो-शू ग्रिड, कुआ अंक (Kua Number), पर्सनल ईयर (Personal Year), वैदिक महादशा और शुभ तिथियों के सभी 32 अध्यायों का प्रामाणिक विश्लेषण प्रस्तुत किया जा सके।
+            </p>
+            {hasPartialOrInvalidMobile && (
+              <div className="p-4 bg-white rounded-2xl border border-amber-200 space-y-1">
+                <strong className="text-[#92400E] block font-bold">
+                  मोबाइल नंबर सत्यापन सूचना (Incomplete Mobile Number: {rawMobileStr.length} Digits):
+                </strong>
+                <p className="leading-relaxed text-gray-700">
+                  भारतीय मोबाइल अंकशास्त्र एवं 81-पेयर ऑडिट के लिए पूर्ण <strong>10-अंकीय मोबाइल नंबर</strong> आवश्यक है। आंशिक ({rawMobileStr.length} अंक) मोबाइल नंबर पर व्यक्तिगत युग्म विश्लेषण लागू नहीं किया गया है।
+                </p>
+              </div>
+            )}
+          </section>
+        ) : (
+          <>
         {/* ========================================================================= */}
         {/* 01. EXECUTIVE SUMMARY */}
         {/* ========================================================================= */}
@@ -1889,14 +2160,18 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           ) : (
             <div className="p-5 bg-[#FAF5EE] rounded-2xl border border-[#FDE68A] space-y-2 text-xs text-[#4B5563]">
               <strong className="text-[#92400E] block font-bold text-sm">
-                इस प्रोफ़ाइल में मोबाइल नंबर दर्ज नहीं किया गया है (Mobile Number Not Provided)
+                {hasPartialOrInvalidMobile
+                  ? `अपूर्ण या अमान्य मोबाइल नंबर (${rawMobileStr.length} अंक दर्ज — भारतीय मोबाइल विश्लेषण हेतु पूर्ण 10 अंक आवश्यक)`
+                  : 'इस प्रोफ़ाइल में मोबाइल नंबर दर्ज नहीं किया गया है (Mobile Number Not Provided)'}
               </strong>
               <p className="leading-relaxed">
-                आपने इस रिपोर्ट के लिए केवल जन्मतिथि दर्ज की है, इसलिए किसी काल्पनिक या डिफ़ॉल्ट मोबाइल नंबर का विश्लेषण नहीं दिखाया गया है।
+                {hasPartialOrInvalidMobile
+                  ? `आपने "${rawMobileStr}" (${rawMobileStr.length} अंक) दर्ज किया है। भारतीय मोबाइल अंकशास्त्र एवं 81-पेयर ऑडिट नियम केवल पूर्ण 10-अंकीय मोबाइल नंबर पर ही लागू होते हैं, इसलिए आंशिक नंबर के आधार पर कोई कृत्रिम या गलत पेयर ऑडिट नहीं दिखाया गया है। कृपया अपना पूर्ण 10-अंकीय मोबाइल नंबर दर्ज करें।`
+                  : 'आपने इस रिपोर्ट के लिए 10-अंकीय मोबाइल नंबर दर्ज नहीं किया है, इसलिए किसी काल्पनिक या डिफ़ॉल्ट मोबाइल नंबर का विश्लेषण नहीं दिखाया गया है।'}
               </p>
               <p className="leading-relaxed text-[#78350F]">
                 <strong>आपके मूलांक #{coreNumbers.mulank} एवं भाग्यांक #{coreNumbers.bhagyank} हेतु शुभ मोबाइल कुल योग (Recommended Mobile Root):</strong>{' '}
-                पारंपरिक अंकशास्त्र के अनुसार आपके लिए वे मोबाइल नंबर सर्वाधिक अनुकूल रहते हैं जिनका कुल एकल अंक (Single Digit Root){' '}
+                पारंपरिक अंकशास्त्र के अनुसार आपके लिए वे 10-अंकीय मोबाइल नंबर सर्वाधिक अनुकूल रहते हैं जिनका कुल एकल अंक (Single Digit Root){' '}
                 <strong>#{Array.from(new Set([...mPlanet.friendlyNumbers, ...bPlanet.friendlyNumbers])).join(', #')}</strong> पर आता हो और जिनमें शत्रु अंकों ({Array.from(new Set([...mPlanet.enemyNumbers, ...bPlanet.enemyNumbers])).join(', ') || 'विरोधी युग्मों'}) की पुनरावृत्ति न हो।
               </p>
             </div>
@@ -3559,6 +3834,8 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
             </p>
           </div>
         </section>
+          </>
+        )}
 
         {/* ========================================================================= */}
         {/* PHASE 10: CONSULTATION FEEDBACK & QUALITY RATING LOOP (sec-feedback)     */}

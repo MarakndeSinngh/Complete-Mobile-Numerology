@@ -71,30 +71,42 @@ body {
 }
 
 /* ==========================================================================
-   PRINT STYLES FOR PDF / PRINT DOSSIER EXPORT
+   PDF EXPORT HELPER & PRINT STYLES FOR A4 DOSSIER EXPORT
    ========================================================================== */
+.pdf-exporting .no-print,
+.pdf-exporting .print\:hidden,
+.pdf-exporting #sec-feedback,
+.pdf-exporting button {
+  display: none !important;
+}
+
+.pdf-exporting #sec-cover {
+  min-height: 0 !important;
+}
+
 @media print {
   @page {
-    size: A4;
-    margin: 12mm 10mm 12mm 10mm;
+    size: A4 portrait;
+    margin: 12mm 10mm 14mm 10mm;
   }
 
   html, body {
     background: #ffffff !important;
     background-color: #ffffff !important;
     color: #111827 !important;
-    font-size: 11pt;
+    font-size: 10.5pt;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     overflow: visible !important;
   }
 
-  /* Force hide screen-only navigation, headers, footers and jump bars */
+  /* Force hide screen-only navigation, headers, footers, feedback form and action buttons */
   .no-print,
   .print\:hidden,
   #main-header,
   #main-footer,
   #seo-authority-centre,
+  #sec-feedback,
   .quick-jump-nav,
   button {
     display: none !important;
@@ -114,13 +126,42 @@ body {
     border: none !important;
   }
 
-  /* Prevent awkward page breaks inside major report sections & cards */
-  .print-avoid-break,
-  section,
-  .rounded-3xl,
-  .rounded-2xl {
+  /* Keep cover page fit on first sheet */
+  #sec-cover {
+    min-height: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+
+  /* Allow large chapter sections to flow across pages while keeping inner cards, tables & paragraphs intact */
+  section {
+    page-break-inside: auto;
+    break-inside: auto;
+    margin-bottom: 14pt;
+  }
+
+  /* Keep headings attached to their immediately following content */
+  h1, h2, h3, h4 {
+    page-break-after: avoid !important;
+    break-after: avoid-page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Prevent awkward mid-element breaks inside atomic cards, callouts, and paragraphs */
+  .rounded-2xl,
+  .rounded-xl,
+  .border-l-4,
+  blockquote,
+  tr,
+  p,
+  li {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    orphans: 3;
+    widows: 3;
   }
 
   /* Explicit page break markers */
@@ -137,4 +178,5 @@ body {
     text-shadow: none !important;
   }
 }
+
 

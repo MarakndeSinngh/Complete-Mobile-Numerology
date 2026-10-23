@@ -82,22 +82,29 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
   const mPlanet = PLANET_DEFINITIONS[mulank] || PLANET_DEFINITIONS[1];
   const bPlanet = PLANET_DEFINITIONS[bhagyank] || PLANET_DEFINITIONS[1];
 
-  const dobStr = personalDetails?.dob || identity?.dob || '';
+  const dobStr = (personalDetails?.dob || identity?.dob || identity?.standardDOB || '').trim();
   const parsedDob = parseIndianDate(dobStr);
-  const formattedDob = parsedDob.isValid ? formatDateIndian(dobStr) : (identity.standardDOB || '—');
+  const hasValidDob = Boolean(parsedDob && parsedDob.isValid);
+  const formattedDob = hasValidDob ? formatDateIndian(dobStr) : 'अमान्य / अनुपस्थित जन्मतिथि (Valid DOB Required)';
   const reportDate = formatDateIndian(new Date());
 
   // Expert Consultation Dossier
   const expertDossier = useMemo(() => deriveExpertConsultationDossier(profile), [profile]);
 
-  // Personal Year
+  // Personal Year (Authoritative single-source calculation; suppressed when DOB is invalid)
   const currentYear = new Date().getFullYear();
-  const personalYear = calculatePersonalYearNumber(dobStr, currentYear);
+  const personalYear = hasValidDob ? calculatePersonalYearNumber(dobStr, currentYear) : 0;
   const pyNarrative = expertDossier.personalYearNarrative;
 
-  // Kua Number
+  // Kua Number (Strictly requires valid birth year; never substitute currentYear - 30)
   const gender = (personalDetails?.gender || identity?.gender || 'MALE') as 'MALE' | 'FEMALE' | 'OTHER';
-  const kuaProfile = profile.kua || calculateKuaNumber(parsedDob.isValid ? parsedDob.year : currentYear - 30, gender);
+  const kuaProfile = useMemo(() => {
+    if (!hasValidDob || !parsedDob) return null;
+    if (profile.kua && typeof profile.kua === 'object' && profile.kua.kuaNumber) {
+      return profile.kua;
+    }
+    return calculateKuaNumber(parsedDob.year, gender);
+  }, [hasValidDob, parsedDob, profile.kua, gender]);
 
   // 81 Combination details
   const comb81 = getCombination81(mulank, bhagyank);
@@ -135,39 +142,158 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
   );
 
   const rawMobile = (personalDetails?.mobile || identity?.mobile || '').replace(/\D/g, '');
-  const hasProvidedMobile = Boolean(rawMobile.length >= 10 && mobileAnalysis);
+  const isValidTenDigitMobile = rawMobile.length === 10 && rawMobile !== '0000000000';
+  const hasPartialOrInvalidMobile = rawMobile.length > 0 && !isValidTenDigitMobile;
+  const hasProvidedMobile = Boolean(isValidTenDigitMobile && mobileAnalysis);
 
-  // PDF Export
+  // Page-Aware A4 PDF Export (prevents cutting cards, text lines, or detaching headings)
   const handleExportPDF = async () => {
     if (!reportRef.current) return;
     setPdfGenerating(true);
+    const element = reportRef.current;
     try {
       window.scrollTo({ top: 0, behavior: 'instant' as any });
-      const element = reportRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
+      element.classList.add('pdf-exporting');
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      // Ensure all images (including BrandLogo /logo.jpg) are loaded
+      const imgs = Array.from(element.querySelectorAll('img'));
+      await Promise.all(
+        imgs.map((img) =>
+          img.complete
+            ? Promise.resolve()
+            : new Promise<void>((res) => {
+                img.onload = () => res();
+                img.onerror = () => res();
+              })
+        )
+      );
+
+      const rootRect = element.getBoundingClientRect();
+      const domWidth = rootRect.width || 1000;
+      const domHeight = element.scrollHeight;
+
+      // A4 geometry in mm: 210 x 297, margins: 10mm left/right, 13mm top, 15mm bottom
+      const pageWidthMm = 210;
+      const pageHeightMm = 297;
+      const marginX = 10;
+      const marginTop = 13;
+      const marginBottom = 15;
+      const contentWidthMm = pageWidthMm - marginX * 2; // 190mm
+      const maxContentHeightMm = pageHeightMm - marginTop - marginBottom; // 269mm
+      const maxPageDomHeight = (maxContentHeightMm / contentWidthMm) * domWidth;
+
+      // Collect indivisible atomic blocks and heading keep-with-next zones in DOM coordinates
+      const atomicIntervals: Array<{ top: number; bottom: number }> = [];
+      const atomicNodes = element.querySelectorAll(
+        'p, li, tr, blockquote, .rounded-xl, .rounded-2xl, .grid > div'
+      );
+      atomicNodes.forEach((node) => {
+        const el = node as HTMLElement;
+        if (el.offsetParent === null) return;
+        const r = el.getBoundingClientRect();
+        const top = r.top - rootRect.top;
+        const bottom = r.bottom - rootRect.top;
+        const h = bottom - top;
+        if (h > 4 && h <= maxPageDomHeight * 0.72) {
+          atomicIntervals.push({ top, bottom });
+        }
+      });
+
+      const headingNodes = element.querySelectorAll('h1, h2, h3, h4, section > div:first-child');
+      headingNodes.forEach((node) => {
+        const el = node as HTMLElement;
+        if (el.offsetParent === null) return;
+        const r = el.getBoundingClientRect();
+        const top = r.top - rootRect.top;
+        const bottom = r.bottom - rootRect.top;
+        if (bottom - top > 4 && bottom - top <= 180) {
+          atomicIntervals.push({ top: Math.max(0, top - 8), bottom: Math.min(domHeight, bottom + 110) });
+        }
+      });
+
+      // Compute safe page break Y coordinates in DOM pixels
+      const pageBreaks: number[] = [0];
+      let curY = 0;
+      while (curY + maxPageDomHeight < domHeight - 8) {
+        let candidateY = curY + maxPageDomHeight;
+        const minAllowedY = curY + maxPageDomHeight * 0.35;
+
+        let adjusted = true;
+        let guard = 0;
+        while (adjusted && guard < 60) {
+          adjusted = false;
+          guard++;
+          for (const box of atomicIntervals) {
+            if (box.top + 2 < candidateY && box.bottom - 2 > candidateY) {
+              if (box.top - 6 >= minAllowedY) {
+                candidateY = box.top - 6;
+                adjusted = true;
+                break;
+              }
+            }
+          }
+        }
+        pageBreaks.push(candidateY);
+        curY = candidateY;
+      }
+      pageBreaks.push(domHeight);
+
+      const scale = 2;
+      const fullCanvas = await html2canvas(element, {
+        scale,
         useCORS: true,
         logging: false,
         backgroundColor: '#FAF8F5',
-        windowWidth: 1200
+        ignoreElements: (el) =>
+          el.classList?.contains('no-print') || el.tagName === 'BUTTON'
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const ratio = fullCanvas.width / domWidth;
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+      const totalPages = pageBreaks.length - 1;
 
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-      heightLeft -= pageHeight;
+      for (let i = 0; i < totalPages; i++) {
+        if (i > 0) pdf.addPage();
+        const sliceStartDom = pageBreaks[i];
+        const sliceEndDom = pageBreaks[i + 1];
+        const sliceDomH = Math.max(1, sliceEndDom - sliceStartDom);
 
-      while (heightLeft > 0) {
-        position = -(imgHeight - heightLeft);
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-        heightLeft -= pageHeight;
+        const sy = Math.max(0, Math.floor(sliceStartDom * ratio));
+        const sh = Math.min(fullCanvas.height - sy, Math.ceil(sliceDomH * ratio));
+
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = fullCanvas.width;
+        pageCanvas.height = sh;
+        const ctx = pageCanvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#FAF8F5';
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(fullCanvas, 0, sy, fullCanvas.width, sh, 0, 0, fullCanvas.width, sh);
+        }
+
+        const sliceImg = pageCanvas.toDataURL('image/jpeg', 0.94);
+        const sliceHeightMm = Math.min(maxContentHeightMm, (sliceDomH / domWidth) * contentWidthMm);
+
+        // Running Header
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(120, 113, 108);
+        pdf.text('LEOFAMILY VEDIC & CHALDEAN NUMEROLOGY DOSSIER (FREE CONSULTATION REPORT)', marginX, 8.5);
+        pdf.text(`DOB: ${hasValidDob ? formattedDob : 'N/A'}`, pageWidthMm - marginX, 8.5, { align: 'right' });
+        pdf.setDrawColor(231, 229, 228);
+        pdf.line(marginX, 10, pageWidthMm - marginX, 10);
+
+        // Page Slice Image
+        pdf.addImage(sliceImg, 'JPEG', marginX, marginTop, contentWidthMm, sliceHeightMm, undefined, 'FAST');
+
+        // Running Footer & Page Number
+        pdf.setDrawColor(231, 229, 228);
+        pdf.line(marginX, pageHeightMm - 10.5, pageWidthMm - marginX, pageHeightMm - 10.5);
+        pdf.setFontSize(7.5);
+        pdf.setTextColor(120, 113, 108);
+        pdf.text('LeoFamily Astro-Numerology Authority • Authentic Calculation & Interpretation', marginX, pageHeightMm - 6.5);
+        pdf.text(`Page ${i + 1} of ${totalPages}`, pageWidthMm - marginX, pageHeightMm - 6.5, { align: 'right' });
       }
 
       const safeName = (rawName || 'Seeker').replace(/[^a-zA-Z0-9]/g, '_');
@@ -175,6 +301,7 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
     } catch (err) {
       console.error('PDF generation error:', err);
     } finally {
+      element.classList.remove('pdf-exporting');
       setPdfGenerating(false);
     }
   };
@@ -194,7 +321,8 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
             वैदिक, लो शू एवं चाल्डियन विस्तृत निःशुल्क अंकशास्त्रीय परामर्श रिपोर्ट
           </h2>
           <p className="text-stone-500 text-xs mt-1">
-            परामर्शार्थी: <strong>{rawName || 'जिज्ञासु'}</strong> • जन्मतिथि: <strong>{formattedDob}</strong> • मूलांक #{mulank} / भाग्यांक #{bhagyank}
+            परामर्शार्थी: <strong>{rawName || 'जिज्ञासु'}</strong> • जन्मतिथि: <strong>{formattedDob}</strong>
+            {hasValidDob ? ` • मूलांक #${mulank} / भाग्यांक #${bhagyank}` : ' • वैध जन्मतिथि आवश्यक'}
           </p>
         </div>
 
@@ -259,15 +387,21 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
             </div>
             <div>
               <span className="text-stone-400 text-[10px] uppercase font-bold block">मूलांक (Driver)</span>
-              <span className="font-bold text-[#D97706] text-sm block">#{mulank} ({mulankGraha})</span>
+              <span className="font-bold text-[#D97706] text-sm block">
+                {hasValidDob ? `#${mulank} (${mulankGraha})` : '— (DOB आवश्यक)'}
+              </span>
             </div>
             <div>
               <span className="text-stone-400 text-[10px] uppercase font-bold block">भाग्यांक (Conductor)</span>
-              <span className="font-bold text-blue-900 text-sm block">#{bhagyank} ({bhagyankGraha})</span>
+              <span className="font-bold text-blue-900 text-sm block">
+                {hasValidDob ? `#${bhagyank} (${bhagyankGraha})` : '— (DOB आवश्यक)'}
+              </span>
             </div>
             <div>
               <span className="text-stone-400 text-[10px] uppercase font-bold block">कुआ अंक / व्यक्तिगत वर्ष</span>
-              <span className="font-bold text-emerald-800 text-sm block">Kua #{kuaProfile.kuaNumber} • PY #{personalYear}</span>
+              <span className="font-bold text-emerald-800 text-sm block">
+                {hasValidDob && kuaProfile ? `Kua #${kuaProfile.kuaNumber} • PY #${personalYear}` : '— (DOB आवश्यक)'}
+              </span>
             </div>
           </div>
 
@@ -279,6 +413,33 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
           </div>
         </div>
 
+        {!hasValidDob ? (
+          <section className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-300 shadow-xs space-y-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-6 h-6 text-[#D97706] flex-shrink-0 mt-0.5" />
+              <div className="space-y-2 text-xs text-stone-700 leading-relaxed">
+                <h3 className="font-playfair text-lg sm:text-xl font-bold text-stone-900">
+                  वैध जन्मतिथि आवश्यक है (Valid Date of Birth Required — DD/MM/YYYY)
+                </h3>
+                <p>
+                  <strong>जन्मतिथि-आधारित गणनाएं स्थगित की गई हैं:</strong> प्रोफाइल में वैध जन्मतिथि (DD/MM/YYYY) उपलब्ध न होने के कारण मूलांक (Driver), भाग्यांक (Conductor), लो शू ग्रिड, कुआ अंक (Kua Number), व्यक्तिगत वर्ष (Personal Year) और वैदिक महादशा के परिणाम प्रदर्शित नहीं किए गए हैं।
+                </p>
+                <p>
+                  <strong>कोई कृत्रिम डिफ़ॉल्ट तिथि प्रयुक्त नहीं:</strong> LeoFamily के सटीकता मानकों के अनुसार किसी भी अनुपलब्ध जन्मतिथि के स्थान पर आज की तारीख, 01 जनवरी या काल्पनिक जन्म-वर्ष (जैसे 30 वर्ष पूर्व) का प्रयोग नहीं किया जाता। कृपया पूर्ण जन्मतिथि (उदाहरण: <strong>05/08/1983</strong>) दर्ज करें।
+                </p>
+                {!hasProvidedMobile && (
+                  <p className="pt-2 border-t border-stone-200 text-amber-900">
+                    <strong>मोबाइल नंबर सत्यापन सूचना:</strong>{' '}
+                    {hasPartialOrInvalidMobile
+                      ? `दर्ज किया गया मोबाइल नंबर (${rawMobile} — ${rawMobile.length} अंक) अपूर्ण है। भारतीय मोबाइल अंकशास्त्र एवं 81-युग्म विश्लेषण (Adjacent Pair Audit) के लिए पूर्ण 10-अंकीय मोबाइल नंबर आवश्यक है।`
+                      : 'प्रोफाइल में 10-अंकीय मोबाइल नंबर दर्ज नहीं किया गया है, इसलिए व्यक्तिगत मोबाइल युग्म ऑडिट प्रदर्शित नहीं किया गया है।'}
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+        ) : (
+          <>
         {/* ========================================================================= */}
         {/* SECTION 1: DRIVER (MULANK) & CONDUCTOR (BHAGYANK) DETAILED ANALYSIS */}
         {/* ========================================================================= */}
@@ -314,7 +475,7 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
                     मूलांक #{mulank} — स्वामी ग्रह: {mulankGraha}
                   </h4>
                   <span className="text-[11px] font-mono text-stone-600">
-                    गणना सूत्र: जन्म दिवस ({parsedDob.day || mulank}) → एकल अंक #{mulank} ({expertDossier.tithiAnkAnalysis.compoundTitle})
+                    गणना सूत्र: जन्म दिवस ({parsedDob?.day || mulank}) → एकल अंक #{mulank} ({expertDossier.tithiAnkAnalysis.compoundTitle})
                   </span>
                 </div>
                 <div className="w-14 h-14 rounded-2xl bg-[#D97706] text-white flex items-center justify-center font-playfair font-black text-3xl shadow-sm flex-shrink-0">
@@ -1094,11 +1255,17 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
             </div>
           ) : (
             <div className="p-5 bg-stone-50 rounded-2xl border border-stone-200 text-xs text-stone-700 space-y-2 leading-relaxed">
+              {hasPartialOrInvalidMobile ? (
+                <p className="text-amber-900">
+                  <strong>अपूर्ण या अमान्य मोबाइल नंबर ({rawMobile} — {rawMobile.length} अंक):</strong> भारतीय मोबाइल अंकशास्त्र एवं 81-युग्म विश्लेषण (Adjacent Pair Audit) के लिए पूर्ण <strong>10-अंकीय मोबाइल नंबर</strong> आवश्यक है। आंशिक नंबर (7–9 अंक) के आधार पर कोई कृत्रिम या अधूरा युग्म विश्लेषण प्रदर्शित नहीं किया गया है।
+                </p>
+              ) : (
+                <p>
+                  <strong>मोबाइल नंबर प्रविष्ट नहीं किया गया है (Mobile Number Not Provided):</strong> प्रोफाइल में 10-अंकीय मोबाइल नंबर उपलब्ध न होने के कारण व्यक्तिगत युग्म विश्लेषण (Adjacent Pair Audit) प्रदर्शित नहीं किया गया है।
+                </p>
+              )}
               <p>
-                <strong>मोबाइल नंबर प्रविष्ट नहीं किया गया है:</strong> प्रोफाइल में 10-अंकीय मोबाइल नंबर उपलब्ध न होने के कारण युग्म विश्लेषण (Adjacent Pair Audit) प्रदर्शित नहीं किया गया है।
-              </p>
-              <p>
-                <strong>आपके मूलांक #{mulank} एवं भाग्यांक #{bhagyank} के लिए शुभ मोबाइल कुल-योग मार्गदर्शन:</strong> आपके लिए ऐसे मोबाइल नंबर सर्वोत्तम रहते हैं जिनका एकल योग (Root Total) <strong>{Array.from(new Set([...mPlanet.friendlyNumbers, ...bPlanet.friendlyNumbers])).slice(0, 4).join(', ')}</strong> पर आता हो और जिनमें आपके लुप्त अंकों ({missingDigits.slice(0, 3).join(', ') || 'संतुलित अंकों'}) का सकारात्मक समावेश हो।
+                <strong>आपके मूलांक #{mulank} एवं भाग्यांक #{bhagyank} के लिए शुभ मोबाइल कुल-योग मार्गदर्शन:</strong> आपके लिए ऐसे 10-अंकीय मोबाइल नंबर सर्वोत्तम रहते हैं जिनका एकल योग (Root Total) <strong>{Array.from(new Set([...mPlanet.friendlyNumbers, ...bPlanet.friendlyNumbers])).slice(0, 4).join(', ')}</strong> पर आता हो और जिनमें आपके लुप्त अंकों ({missingDigits.slice(0, 3).join(', ') || 'संतुलित अंकों'}) का सकारात्मक समावेश हो।
               </p>
             </div>
           )}
@@ -1285,67 +1452,71 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-stone-200 space-y-2 text-center flex flex-col justify-center">
-              <span className="text-[10px] font-mono text-stone-500 uppercase block">पवित्र फेंगशुई / लो शू कुआ अंक</span>
-              <span className="text-4xl font-bold font-playfair text-emerald-700 block">
-                #{kuaProfile.kuaNumber}
-              </span>
-              <span className="font-bold text-stone-800 block">{kuaProfile.group} Group • {kuaProfile.element}</span>
-              <span className="text-[11px] text-stone-600 leading-relaxed">
-                जन्म वर्ष ({parsedDob.year || '—'}) और लिंग ({gender}) के आधार पर गणनाकृत।
-              </span>
-            </div>
+          {kuaProfile && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-stone-200 space-y-2 text-center flex flex-col justify-center">
+                  <span className="text-[10px] font-mono text-stone-500 uppercase block">पवित्र फेंगशुई / लो शू कुआ अंक</span>
+                  <span className="text-4xl font-bold font-playfair text-emerald-700 block">
+                    #{kuaProfile.kuaNumber}
+                  </span>
+                  <span className="font-bold text-stone-800 block">{kuaProfile.group} Group • {kuaProfile.element}</span>
+                  <span className="text-[11px] text-stone-600 leading-relaxed">
+                    जन्म वर्ष ({parsedDob?.year || '—'}) और लिंग ({gender}) के आधार पर गणनाकृत।
+                  </span>
+                </div>
 
-            <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2 md:col-span-2">
-              <strong className="text-emerald-950 font-playfair text-sm block">
-                आपकी 4 सर्वोच्च शुभ दिशाएं (4 Favorable Kua Directions):
-              </strong>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {kuaProfile.favorableDirections.map((dir) => (
-                  <div key={dir.name} className="p-3 bg-white rounded-xl border border-emerald-200/80 space-y-0.5">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-emerald-900">{dir.direction}</span>
-                      <span className="text-[10px] font-mono text-[#D97706] font-bold">{dir.name} ({dir.category})</span>
-                    </div>
-                    <p className="text-[11px] text-stone-600 leading-relaxed">{dir.description}</p>
+                <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2 md:col-span-2">
+                  <strong className="text-emerald-950 font-playfair text-sm block">
+                    आपकी 4 सर्वोच्च शुभ दिशाएं (4 Favorable Kua Directions):
+                  </strong>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {kuaProfile.favorableDirections.map((dir) => (
+                      <div key={dir.name} className="p-3 bg-white rounded-xl border border-emerald-200/80 space-y-0.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-emerald-900">{dir.direction}</span>
+                          <span className="text-[10px] font-mono text-[#D97706] font-bold">{dir.name} ({dir.category})</span>
+                        </div>
+                        <p className="text-[11px] text-stone-600 leading-relaxed">{dir.description}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-stone-200 space-y-2">
-              <strong className="text-stone-900 font-playfair text-sm block">
-                लो शू वास्तु ज़ोन एवं कक्ष मार्गदर्शन (Lo Shu Vastu Room Guidance):
-              </strong>
-              <p className="text-stone-700 leading-relaxed">
-                <strong>अनुकूल दिशा क्षेत्र:</strong> {vastu.compatibleDirections.map(d => d.direction).join(' • ')}
-              </p>
-              <ul className="space-y-1 text-stone-600">
-                <li>• <strong>करियर ज़ोन ({vastu.zonesSummary.careerZone.direction}):</strong> {vastu.zonesSummary.careerZone.hindiGuidance}</li>
-                <li>• <strong>धन ज़ोन ({vastu.zonesSummary.wealthZone.direction}):</strong> {vastu.zonesSummary.wealthZone.hindiGuidance}</li>
-                <li>• <strong>स्वास्थ्य ज़ोन ({vastu.zonesSummary.healthZone.direction}):</strong> {vastu.zonesSummary.healthZone.hindiGuidance}</li>
-                <li>• <strong>संबंध ज़ोन ({vastu.zonesSummary.relationshipZone.direction}):</strong> {vastu.zonesSummary.relationshipZone.hindiGuidance}</li>
-              </ul>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-stone-200 space-y-2">
+                  <strong className="text-stone-900 font-playfair text-sm block">
+                    लो शू वास्तु ज़ोन एवं कक्ष मार्गदर्शन (Lo Shu Vastu Room Guidance):
+                  </strong>
+                  <p className="text-stone-700 leading-relaxed">
+                    <strong>अनुकूल दिशा क्षेत्र:</strong> {vastu.compatibleDirections.map(d => d.direction).join(' • ')}
+                  </p>
+                  <ul className="space-y-1 text-stone-600">
+                    <li>• <strong>करियर ज़ोन ({vastu.zonesSummary.careerZone.direction}):</strong> {vastu.zonesSummary.careerZone.hindiGuidance}</li>
+                    <li>• <strong>धन ज़ोन ({vastu.zonesSummary.wealthZone.direction}):</strong> {vastu.zonesSummary.wealthZone.hindiGuidance}</li>
+                    <li>• <strong>स्वास्थ्य ज़ोन ({vastu.zonesSummary.healthZone.direction}):</strong> {vastu.zonesSummary.healthZone.hindiGuidance}</li>
+                    <li>• <strong>संबंध ज़ोन ({vastu.zonesSummary.relationshipZone.direction}):</strong> {vastu.zonesSummary.relationshipZone.hindiGuidance}</li>
+                  </ul>
+                </div>
 
-            <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2">
-              <strong className="text-amber-950 font-playfair text-sm block">
-                वास्तु दोष संतुलन एवं अनुपस्थित अंक उपचार (Vastu Balancing):
-              </strong>
-              <p className="text-stone-700 leading-relaxed">
-                <strong>बचने योग्य दिशाएं (Unfavorable Kua Directions):</strong>{' '}
-                {kuaProfile.unfavorableDirections.map(d => `${d.direction} (${d.name})`).join(', ')}
-              </p>
-              <ul className="space-y-1 text-stone-700">
-                {(vastu.homeEnergyAssessment?.traditionalBalancingSuggestions || []).slice(0, 4).map((rp, i) => (
-                  <li key={i}>• {rp}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+                <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-2">
+                  <strong className="text-amber-950 font-playfair text-sm block">
+                    वास्तु दोष संतुलन एवं अनुपस्थित अंक उपचार (Vastu Balancing):
+                  </strong>
+                  <p className="text-stone-700 leading-relaxed">
+                    <strong>बचने योग्य दिशाएं (Unfavorable Kua Directions):</strong>{' '}
+                    {kuaProfile.unfavorableDirections.map(d => `${d.direction} (${d.name})`).join(', ')}
+                  </p>
+                  <ul className="space-y-1 text-stone-700">
+                    {(vastu.homeEnergyAssessment?.traditionalBalancingSuggestions || []).slice(0, 4).map((rp, i) => (
+                      <li key={i}>• {rp}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
         </section>
 
         {/* ========================================================================= */}
@@ -1378,7 +1549,7 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
                   वर्ष {currentYear} की सक्रिय ऊर्जा: <strong className="text-[#D97706]">Personal Year #{personalYear} ({getPlanetName(personalYear, language)})</strong>
                 </span>
                 <span className="text-[11px] text-stone-600">
-                  गणना सूत्र: जन्म दिवस ({parsedDob.day || mulank}) + जन्म माह ({parsedDob.month || 1}) + वर्तमान वर्ष ({currentYear}) → एकल अंक #{personalYear}
+                  गणना सूत्र: जन्म दिवस ({parsedDob?.day || mulank}) + जन्म माह ({parsedDob?.month || 1}) + वर्तमान वर्ष ({currentYear}) → एकल अंक #{personalYear}
                 </span>
               </div>
               <span className="text-[10px] font-mono text-amber-900 bg-amber-200/70 px-3 py-1 rounded-lg font-bold">
@@ -1449,9 +1620,9 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
         </section>
 
         {/* ========================================================================= */}
-        {/* EXECUTIVE UPGRADE CARD (PREMIUM MASTER REPORT CALLOUT) */}
+        {/* EXECUTIVE UPGRADE CARD (PREMIUM MASTER REPORT CALLOUT — SCREEN ONLY) */}
         {/* ========================================================================= */}
-        <div className="bg-gradient-to-br from-[#1E293B] via-[#0F172A] to-[#1E293B] text-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-md border border-amber-500/30">
+        <div className="bg-gradient-to-br from-[#1E293B] via-[#0F172A] to-[#1E293B] text-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-md border border-amber-500/30 no-print">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-stone-700/80 pb-5">
             <div>
               <div className="inline-flex items-center gap-1.5 bg-amber-500/20 text-amber-300 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-amber-400/30 mb-2">
@@ -1510,6 +1681,8 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
             </button>
           </div>
         </div>
+          </>
+        )}
 
         {/* ========================================================================= */}
         {/* MANDATORY LEGAL & ETHICAL DISCLAIMER */}

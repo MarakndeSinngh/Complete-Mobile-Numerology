@@ -1,5 +1,6 @@
 import { CompleteNumerologyProfile } from './types';
 import { calculateKuaNumber } from './kuaEngine';
+import { calculatePersonalYearNumber } from './luckyDatesEngine';
 import { parseIndianDate } from '../utils/dateUtils';
 import { getCompoundDetails } from '../services/compoundDatabase';
 import { NUMBER_DEFINITIONS } from './methodology/numberMeanings';
@@ -242,21 +243,22 @@ export function deriveExpertConsultationDossier(
   const bPlanet = PLANET_DEFINITIONS[bhagyank] || PLANET_DEFINITIONS[1];
   const comb81 = getCombination81(mulank, bhagyank);
 
-  const dobValue = identity.dob || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
-  const parsed = parseIndianDate(dobValue);
-  const day = parsed?.day || 1;
-  const month = parsed?.month || 1;
-  const year = parsed?.year || new Date().getFullYear();
+  const rawDob = (identity?.dob || identity?.standardDOB || '').trim();
+  const parsed = parseIndianDate(rawDob);
+  const hasValidDob = Boolean(parsed && parsed.isValid);
+  const day = hasValidDob ? parsed!.day : 0;
+  const month = hasValidDob ? parsed!.month : 0;
+  const year = hasValidDob ? parsed!.year : 0;
 
-  const rDay = reduceDigit(day);
-  const rMonth = reduceDigit(month);
-  const rYear = reduceDigit(year);
+  const rDay = hasValidDob ? reduceDigit(day) : 0;
+  const rMonth = hasValidDob ? reduceDigit(month) : 0;
+  const rYear = hasValidDob ? reduceDigit(year) : 0;
 
   // 1. PINNACLES (Classical Indian / Western Synthesis)
-  const pin1Val = reduceDigit(rMonth + rDay);
-  const pin2Val = reduceDigit(rDay + rYear);
-  const pin3Val = reduceDigit(pin1Val + pin2Val);
-  const pin4Val = reduceDigit(rMonth + rYear);
+  const pin1Val = hasValidDob ? reduceDigit(rMonth + rDay) : 0;
+  const pin2Val = hasValidDob ? reduceDigit(rDay + rYear) : 0;
+  const pin3Val = hasValidDob ? reduceDigit(pin1Val + pin2Val) : 0;
+  const pin4Val = hasValidDob ? reduceDigit(rMonth + rYear) : 0;
 
   const p1EndAge = Math.max(27, 36 - bhagyank);
   const p2EndAge = p1EndAge + 9;
@@ -267,7 +269,7 @@ export function deriveExpertConsultationDossier(
   const pin3Def = NUMBER_DEFINITIONS[pin3Val] || mDef;
   const pin4Def = NUMBER_DEFINITIONS[pin4Val] || bDef;
 
-  const pinnacles: PinnaclePhase[] = [
+  const pinnacles: PinnaclePhase[] = hasValidDob ? [
     {
       phaseNumber: 1,
       name: 'प्रथम शिखर (Foundation Pinnacle)',
@@ -304,13 +306,13 @@ export function deriveExpertConsultationDossier(
       themeHi: `अंक #${pin4Val} (${PLANET_NAMES[pin4Val]}) का प्रभाव: आध्यात्मिक शांति, परामर्श और ${pin4Def.spirituality}`,
       guidanceHi: `आंतरिक शांति और समाज में सम्मानित मार्गदर्शक के रूप में सक्रिय रहें: ${pin4Def.family}`
     }
-  ];
+  ] : [];
 
   // 2. CHALLENGES
-  const ch1Val = Math.abs(rMonth - rDay);
-  const ch2Val = Math.abs(rDay - rYear);
-  const ch3Val = Math.abs(ch1Val - ch2Val);
-  const ch4Val = Math.abs(rMonth - rYear);
+  const ch1Val = hasValidDob ? Math.abs(rMonth - rDay) : 0;
+  const ch2Val = hasValidDob ? Math.abs(rDay - rYear) : 0;
+  const ch3Val = hasValidDob ? Math.abs(ch1Val - ch2Val) : 0;
+  const ch4Val = hasValidDob ? Math.abs(rMonth - rYear) : 0;
 
   const getChallengeDetails = (val: number, phaseTitle: string) => {
     const safeVal = val >= 1 && val <= 9 ? val : mulank;
@@ -330,7 +332,7 @@ export function deriveExpertConsultationDossier(
   const c3Info = getChallengeDetails(ch3Val, 'जीवन का केंद्रीय आत्म-अनुशासन');
   const c4Info = getChallengeDetails(ch4Val, 'परिपक्वता एवं आध्यात्मिक संतुलन');
 
-  const challenges: LifeChallenge[] = [
+  const challenges: LifeChallenge[] = hasValidDob ? [
     {
       challengeNumber: 1,
       name: 'प्रारंभिक जीवन चुनौती (Early Life Challenge)',
@@ -367,10 +369,10 @@ export function deriveExpertConsultationDossier(
       lessonHi: c4Info.lessonHi,
       remedyHi: c4Info.remedyHi
     }
-  ];
+  ] : [];
 
   // 3. EVENT WINDOWS
-  const eventWindows: EventWindow[] = [
+  const eventWindows: EventWindow[] = hasValidDob ? [
     {
       age: Math.max(23, 23 + (mulank % 4)),
       calendarYear: year + Math.max(23, 23 + (mulank % 4)),
@@ -403,14 +405,17 @@ export function deriveExpertConsultationDossier(
       descriptionHi: `समाज एवं कार्यक्षेत्र में अनुभवी मार्गदर्शक के रूप में स्थायी पहचान। ${bDef.spirituality}`,
       planetarySupportHi: `${PLANET_NAMES[pin3Val]} एवं ${PLANET_NAMES[pin4Val]} के शिखर का प्रभाव`
     }
-  ];
+  ] : [];
 
   // 4. TITHI & COMPOUND ANK ANALYSIS
-  const comp = getCompoundDetails(day);
+  const comp = hasValidDob ? getCompoundDetails(day) : {
+    title: 'वैध जन्मतिथि आवश्यक (Valid DOB Required)',
+    meaning: 'जन्मतिथि (DD/MM/YYYY) उपलब्ध या मान्य न होने के कारण तिथि अंक की गणना स्थगित की गई है।'
+  };
 
-  // 5. PERSONAL YEAR NARRATIVE
-  const py = reduceDigit(rDay + rMonth + reduceDigit(new Date().getFullYear()));
+  // 5. PERSONAL YEAR NARRATIVE (Authoritative Personal Year Calculation)
   const currentCalendarYear = new Date().getFullYear();
+  const py = hasValidDob ? calculatePersonalYearNumber(rawDob, currentCalendarYear) : 0;
 
   const pyNarratives: Record<number, PersonalYearNarrative> = {
     1: {
@@ -532,7 +537,21 @@ export function deriveExpertConsultationDossier(
     }
   };
 
-  const selectedPYNarrative = pyNarratives[py] || pyNarratives[5];
+  const selectedPYNarrative: PersonalYearNarrative = hasValidDob
+    ? (pyNarratives[py] || pyNarratives[1])
+    : {
+        year: currentCalendarYear,
+        personalYear: 0,
+        theme: 'मान्य जन्मतिथि आवश्यक (Valid DOB Required for Personal Year Calculation)',
+        career: 'जन्मतिथि (DD/MM/YYYY) उपलब्ध या मान्य न होने के कारण व्यक्तिगत वर्ष की गणना नहीं की गई है।',
+        finance: 'सटीक वार्षिक आर्थिक चक्र जानने हेतु कृपया वैध जन्मतिथि प्रविष्ट करें।',
+        relationships: 'जन्मतिथि उपलब्ध न होने के कारण वार्षिक संबंध चक्र स्थगित है।',
+        family: 'पारिवारिक वार्षिक गोचर की गणना हेतु जन्मतिथि आवश्यक है।',
+        travel: 'यात्रा एवं स्थान परिवर्तन चक्र हेतु वैध जन्मतिथि आवश्यक है।',
+        opportunities: 'वैध जन्मतिथि दर्ज करने पर वार्षिक अवसरों की गणना सक्रिय होगी।',
+        caution: 'किसी भी काल्पनिक तारीख के आधार पर भविष्यफल नहीं दिखाया गया है।',
+        recommendedFocus: 'कृपया पूर्ण जन्मतिथि (DD/MM/YYYY) दर्ज करें।'
+      };
 
   // 6. MONTHLY DASHA YOG FORECAST (12 MONTHS OF CURRENT CALENDAR YEAR)
   const monthNames = [
@@ -553,7 +572,7 @@ export function deriveExpertConsultationDossier(
   const currentMahadashaPlanet = vedicDasha?.currentMahadasha?.planetHi || PLANET_NAMES[bhagyank] || 'गुरु (Jupiter)';
   const currentAntardashaPlanet = vedicDasha?.currentAntardasha?.planetHi || PLANET_NAMES[mulank] || 'बुध (Mercury)';
 
-  const monthlyForecasts: MonthlyDashaYog[] = monthNames.map((m, idx) => {
+  const monthlyForecasts: MonthlyDashaYog[] = hasValidDob ? monthNames.map((m, idx) => {
     const mNum = idx + 1;
     const pm = reduceDigit(py + mNum);
     const pmPlanet = PLANET_NAMES[pm] || 'शुभ ग्रह';
@@ -645,7 +664,7 @@ export function deriveExpertConsultationDossier(
       caution,
       action
     };
-  });
+  }) : [];
 
   // 7. GRAH DRISHTI & PLANETARY SYNERGY (Dynamic based on actual Mulank, Bhagyank & Chart Digits)
   const isFriendly = mPlanet.friendlyNumbers.includes(bhagyank) || bPlanet.friendlyNumbers.includes(mulank);
@@ -663,8 +682,8 @@ export function deriveExpertConsultationDossier(
   const presentDigits = loshu.repetition && loshu.repetition.length > 0
     ? loshu.repetition.map(r => r.digit)
     : [mulank, bhagyank];
-  const secondaryDigit = presentDigits.find(d => d !== mulank && d !== bhagyank) || rMonth;
-  const tertiaryDigit = presentDigits.find(d => d !== mulank && d !== bhagyank && d !== secondaryDigit) || rYear;
+  const secondaryDigit = presentDigits.find(d => d !== mulank && d !== bhagyank) || (rMonth || mulank);
+  const tertiaryDigit = presentDigits.find(d => d !== mulank && d !== bhagyank && d !== secondaryDigit) || (rYear || bhagyank);
   const secDef = NUMBER_DEFINITIONS[secondaryDigit] || mDef;
   const terDef = NUMBER_DEFINITIONS[tertiaryDigit] || bDef;
 
@@ -714,19 +733,25 @@ export function deriveExpertConsultationDossier(
   return {
     consultantSnapshot: {
       title: 'LeoFamily Expert Dossier Snapshot',
-      coreVerdictHi: `जातक ${identity.fullName || 'विशेष व्यक्ति'} का चार्ट मूलांक #${mulank} (${PLANET_NAMES[mulank]}) और भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) के '${comb81.title}' से युक्त है। ${comb81.positiveMeaning}`,
-      dominantEnergyHi: `${mDef.personality} इसके साथ ही ${bDef.personality}`,
-      bestAvenueHi: `${comb81.careerMeaning} प्रमुख क्षेत्र: ${mDef.career}`,
-      strategicCautionHi: `${comb81.negativeMeaning} उपाय: ${comb81.remedy}`
+      coreVerdictHi: hasValidDob
+        ? `जातक ${identity.fullName || 'विशेष व्यक्ति'} का चार्ट मूलांक #${mulank} (${PLANET_NAMES[mulank]}) और भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) के '${comb81.title}' से युक्त है। ${comb81.positiveMeaning}`
+        : 'जन्मतिथि (DD/MM/YYYY) उपलब्ध या मान्य न होने के कारण जन्मतिथि-आधारित गणनाएं स्थगित की गई हैं। किसी भी कृत्रिम या डिफ़ॉल्ट तिथि का प्रयोग नहीं किया गया है।',
+      dominantEnergyHi: hasValidDob ? `${mDef.personality} इसके साथ ही ${bDef.personality}` : 'वैध जन्मतिथि प्रविष्ट करने पर मूलांक एवं भाग्यांक ऊर्जा का विश्लेषण उपलब्ध होगा।',
+      bestAvenueHi: hasValidDob ? `${comb81.careerMeaning} प्रमुख क्षेत्र: ${mDef.career}` : 'वैध जन्मतिथि आवश्यक (Valid DOB Required)',
+      strategicCautionHi: hasValidDob ? `${comb81.negativeMeaning} उपाय: ${comb81.remedy}` : 'कृपया पूर्ण जन्मतिथि (DD/MM/YYYY) दर्ज करें।'
     },
     tithiAnkAnalysis: {
       birthDate: day,
       compoundTitle: comp.title,
       compoundMeaning: comp.meaning,
-      tithiNatureHi: day > 9 
-        ? `चूँकि आपकी जन्म तारीख ${day} एक संयुक्त (Compound) अंक है, आपके व्यक्तित्व पर अंक ${Math.floor(day/10)} (${PLANET_NAMES[Math.floor(day/10)] || 'ग्रह'}) और अंक ${day%10} (${day%10 === 0 ? 'पूर्णता शून्य' : PLANET_NAMES[day%10]}) के संयोग से मूलांक #${mulank} (${PLANET_NAMES[mulank]}) की विशिष्ट ऊर्जा निर्मित होती है। ${mDef.mulankMeaning}`
-        : `चूँकि आपका जन्म एकल अंक ${day} के दिन हुआ है, आप पर ${PLANET_NAMES[mulank]} का प्रभाव अत्यंत प्रत्यक्ष, शुद्ध, केंद्रित और मौलिक है। ${mDef.mulankMeaning}`,
-      numericalFrequencyHi: `जन्म तिथि अंक #${day} (${comp.title}) आपको ${mDef.leadership} तथा ${mDef.communication} प्रदान करता है।`
+      tithiNatureHi: !hasValidDob
+        ? 'जन्मतिथि अनुपलब्ध या अमान्य होने के कारण किसी कृत्रिम तारीख का प्रयोग नहीं किया गया है। कृपया पूर्ण जन्मतिथि (DD/MM/YYYY) दर्ज करें।'
+        : day > 9 
+          ? `चूँकि आपकी जन्म तारीख ${day} एक संयुक्त (Compound) अंक है, आपके व्यक्तित्व पर अंक ${Math.floor(day/10)} (${PLANET_NAMES[Math.floor(day/10)] || 'ग्रह'}) और अंक ${day%10} (${day%10 === 0 ? 'पूर्णता शून्य' : PLANET_NAMES[day%10]}) के संयोग से मूलांक #${mulank} (${PLANET_NAMES[mulank]}) की विशिष्ट ऊर्जा निर्मित होती है। ${mDef.mulankMeaning}`
+          : `चूँकि आपका जन्म एकल अंक ${day} के दिन हुआ है, आप पर ${PLANET_NAMES[mulank]} का प्रभाव अत्यंत प्रत्यक्ष, शुद्ध, केंद्रित और मौलिक है। ${mDef.mulankMeaning}`,
+      numericalFrequencyHi: hasValidDob
+        ? `जन्म तिथि अंक #${day} (${comp.title}) आपको ${mDef.leadership} तथा ${mDef.communication} प्रदान करता है।`
+        : 'वैध जन्मतिथि प्रविष्ट करने पर तिथि एवं संयुक्त अंक का विश्लेषण उपलब्ध होगा।'
     },
     characteristicsProfile: {
       thinkingStyle: `${mDef.learning} ${bDef.creativity}`,

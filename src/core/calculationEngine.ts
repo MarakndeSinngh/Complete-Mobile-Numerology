@@ -87,9 +87,9 @@ export function generateCompleteNumerologyProfile(input: CompleteProfileInput): 
   // Standardize DOB for display
   const standardDOB = formatDateForDisplay(dob);
   const parsedDate = parseIndianDate(dob);
-  const parsedDay = parsedDate.isValid ? parsedDate.day : 1;
-  const parsedYear = parsedDate.isValid ? parsedDate.year : 1990;
-  const dobDigits = parsedDate.isValid ? parsedDate.digits : [1, 9, 9, 0];
+  const parsedDay = parsedDate?.isValid ? parsedDate.day : 1;
+  const parsedYear = parsedDate?.isValid ? parsedDate.year : 1990;
+  const dobDigits = parsedDate?.isValid && parsedDate.digits ? parsedDate.digits : [1, 9, 9, 0];
   const compoundDOBSum = dobDigits.reduce((acc, d) => acc + d, 0);
 
   // 2. Grids

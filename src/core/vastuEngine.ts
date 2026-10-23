@@ -512,10 +512,10 @@ export function analyzeNumeroVastu(inputs: VastuInputs): UnifiedVastuAnalysis {
   } = inputs;
 
   const parsedDate = parseIndianDate(dob);
-  const birthYear = parsedDate.isValid ? parsedDate.year : 1990;
+  const birthYear = parsedDate?.isValid ? parsedDate.year : 1990;
   const mulank = inputs.mulank || calculateMulank(dob);
   const bhagyank = inputs.bhagyank || calculateBhagyank(dob);
-  const compoundDOBSum = parsedDate.isValid ? parsedDate.digits.reduce((acc, d) => acc + d, 0) : 10;
+  const compoundDOBSum = parsedDate?.isValid && parsedDate.digits ? parsedDate.digits.reduce((acc, d) => acc + d, 0) : 10;
 
   // 1. KUA CALCULATION (Strictly called "Kua Number")
   const kuaProfile: KuaProfile = calculateKuaNumber(birthYear, gender);
@@ -800,7 +800,7 @@ export function analyzeNumeroVastu(inputs: VastuInputs): UnifiedVastuAnalysis {
 
   // 7. LO SHU + NUMERO VASTU FUSION
   const birthGridObj: Record<number, number> = {};
-  if (parsedDate.isValid) {
+  if (parsedDate?.isValid && parsedDate.digits) {
     parsedDate.digits.forEach(d => {
       if (d >= 1 && d <= 9) {
         birthGridObj[d] = (birthGridObj[d] || 0) + 1;

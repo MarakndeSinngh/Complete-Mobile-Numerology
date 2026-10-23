@@ -1,3 +1,5 @@
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { calculateMulank, calculateBhagyank, generateCompleteNumerologyProfile, CompleteNumerologyProfile } from '../src/core';
 import { calculateKuaNumber } from '../src/core/kuaEngine';
 import { calculatePersonalYearNumber } from '../src/core/luckyDatesEngine';
@@ -5,9 +7,14 @@ import { calculateChaldeanNameSum } from '../src/core/chaldeanEngine';
 import { calculatePythagoreanName } from '../src/core/pythagoreanEngine';
 import { analyzeMobileNumerology } from '../src/core/mobileNumerologyEngine';
 import { AdvancedInsightEngine } from '../src/core/advancedInsightEngine';
+import { deriveExpertConsultationDossier } from '../src/core/expertConsultationEngine';
 import { CHAPTER_RULE_GOVERNANCE_MAP } from '../src/core/methodology/chapterRuleMap';
 import { methodologyRegistry } from '../src/core/methodology/methodologyRegistry';
 import { reportAccessEngine } from '../src/server/accessEngine';
+import { ReportAccessService } from '../src/services/reportAccessService';
+import { LanguageProvider } from '../src/i18n';
+import { FreeNumerologyReport } from '../src/components/FreeNumerologyReport';
+import { MasterReportUnified } from '../src/components/MasterReportUnified';
 
 interface TestResult {
   suite: string;
@@ -197,7 +204,161 @@ async function runPhase9TestSuite() {
   assert('PAYMENT_LIFECYCLE', 'Admin Verification is Idempotent', repeatVerify.success === true, 'Idempotent verification passes without duplication');
 
   // =========================================================================
-  // 6. SUMMARY REPORT
+  // 6. REPORT DEPTH, SHARED VALUE CONSISTENCY & STRICT INPUT VALIDATION
+  // =========================================================================
+  console.log('\n--- SUITE 6: REPORT DEPTH, SHARED CONSISTENCY & INPUT VALIDATION ---');
+
+  // 6.1 Valid Profile (05/08/1983): Shared values and narrative depth across Free & Premium Reports
+  ReportAccessService.setCurrentUser({
+    userId: 'qa_admin_test_user',
+    email: 'affectioncosmos@gmail.com',
+    emailVerified: true,
+    hasClaimedFreeReport: false,
+  } as any);
+
+  const expertValid = deriveExpertConsultationDossier(profileObj);
+  const currentCalendarYear = new Date().getFullYear();
+  const authoritativePy = calculatePersonalYearNumber('1983-08-05', currentCalendarYear);
+  assert(
+    'REPORT_CONSISTENCY',
+    'Authoritative Personal Year Match in Expert Dossier',
+    expertValid.personalYearNarrative.personalYear === authoritativePy && expertValid.lifePinnacles.length === 4,
+    `Expert dossier uses authoritative PY #${authoritativePy} and 4 Pinnacles`
+  );
+
+  const freeValidHtml = renderToStaticMarkup(
+    React.createElement(
+      LanguageProvider,
+      null,
+      React.createElement(FreeNumerologyReport, {
+        profile: profileObj,
+        personalDetails: { name: 'Markandey Singh', dob: '05/08/1983', mobile: '9876543210', gender: 'MALE' },
+        onUpgradeToPremium: () => {},
+      })
+    )
+  );
+  const masterValidHtml = renderToStaticMarkup(
+    React.createElement(
+      LanguageProvider,
+      null,
+      React.createElement(MasterReportUnified, {
+        profile: profileObj,
+        personalDetails: { name: 'Markandey Singh', dob: '05/08/1983', mobile: '9876543210', gender: 'MALE' },
+      })
+    )
+  );
+
+  assert(
+    'REPORT_CONSISTENCY',
+    'Free Report Renders All 11 Sections & Shared Values for 05/08/1983',
+    freeValidHtml.includes('मूलांक (Driver) एवं भाग्यांक (Conductor) का गहन विश्लेषण') &&
+      freeValidHtml.includes('व्यक्तिगत वर्ष') &&
+      freeValidHtml.includes('#5') &&
+      freeValidHtml.includes('#7') &&
+      freeValidHtml.includes('#8') &&
+      freeValidHtml.length > 25000,
+    `Free Report HTML length: ${freeValidHtml.length} chars (contains Sections 01–11, Mulank #5, Bhagyank #7, Kua #8)`
+  );
+
+  assert(
+    'REPORT_CONSISTENCY',
+    'Master Report Renders Cover + All Chapters & Shared Values for 05/08/1983',
+    masterValidHtml.includes('id="sec-cover"') &&
+      masterValidHtml.includes('id="sec-01"') &&
+      masterValidHtml.includes('id="sec-18"') &&
+      masterValidHtml.includes('id="sec-31"') &&
+      masterValidHtml.includes('#5') &&
+      masterValidHtml.includes('#7') &&
+      masterValidHtml.includes('#8') &&
+      masterValidHtml.length > 80000,
+    `Master Report HTML length: ${masterValidHtml.length} chars (contains Cover + Chapters 01–31, Mulank #5, Bhagyank #7, Kua #8)`
+  );
+
+  // 6.2 Missing / Invalid DOB & Partial 8-Digit Mobile Profile: Must NOT fabricate synthetic dates or 8-digit mobile audits
+  const invalidProfileObj = generateCompleteNumerologyProfile({
+    dob: '',
+    name: 'Test Guest',
+    mobile: '98765432', // 8-digit partial mobile
+    gender: 'MALE',
+  });
+  // Force empty identity.dob to simulate missing/invalid DOB passed to report components
+  invalidProfileObj.identity.dob = '';
+  invalidProfileObj.identity.standardDOB = '';
+
+  const expertInvalid = deriveExpertConsultationDossier(invalidProfileObj);
+  assert(
+    'INPUT_VALIDATION',
+    'No Synthetic DOB Fallback in ExpertConsultationEngine',
+    expertInvalid.lifePinnacles.length === 0 &&
+      expertInvalid.lifeChallenges.length === 0 &&
+      expertInvalid.eventWindows.length === 0 &&
+      expertInvalid.monthlyDashaForecast.length === 0 &&
+      expertInvalid.personalYearNarrative.theme.includes('मान्य जन्मतिथि'),
+    'Missing DOB suppresses Pinnacles, Challenges, Event Windows & Monthly Forecasts with explicit notice'
+  );
+
+  const freeInvalidHtml = renderToStaticMarkup(
+    React.createElement(
+      LanguageProvider,
+      null,
+      React.createElement(FreeNumerologyReport, {
+        profile: invalidProfileObj,
+        personalDetails: { name: 'Test Guest', dob: 'invalid-dob', mobile: '98765432', gender: 'MALE' },
+        onUpgradeToPremium: () => {},
+      })
+    )
+  );
+  assert(
+    'INPUT_VALIDATION',
+    'Free Report Suppresses DOB Sections & Flags Partial 8-Digit Mobile',
+    freeInvalidHtml.includes('वैध जन्मतिथि आवश्यक है') &&
+      !freeInvalidHtml.includes('मूलांक (Driver) एवं भाग्यांक (Conductor) का गहन विश्लेषण') &&
+      freeInvalidHtml.includes('10-अंकीय मोबाइल नंबर आवश्यक है'),
+    'Free Report renders explicit DOB & 10-digit mobile notices and suppresses Sections 01–11'
+  );
+
+  const masterInvalidHtml = renderToStaticMarkup(
+    React.createElement(
+      LanguageProvider,
+      null,
+      React.createElement(MasterReportUnified, {
+        profile: invalidProfileObj,
+        personalDetails: { name: 'Test Guest', dob: 'invalid-dob', mobile: '98765432', gender: 'MALE' },
+      })
+    )
+  );
+  assert(
+    'INPUT_VALIDATION',
+    'Master Report Suppresses DOB Chapters & Flags Partial 8-Digit Mobile',
+    masterInvalidHtml.includes('id="sec-dob-validation-notice"') &&
+      !masterInvalidHtml.includes('id="sec-01"') &&
+      masterInvalidHtml.includes('10 अंक आवश्यक'),
+    'Master Report renders #sec-dob-validation-notice and suppresses #sec-01..31 on invalid DOB'
+  );
+
+  // 6.3 Valid DOB + Partial 8-Digit Mobile: Chapters render, but Mobile Section shows 10-digit requirement notice instead of pair audit
+  const partialMobileWithValidDobHtml = renderToStaticMarkup(
+    React.createElement(
+      LanguageProvider,
+      null,
+      React.createElement(MasterReportUnified, {
+        profile: profileObj,
+        personalDetails: { name: 'Markandey Singh', dob: '05/08/1983', mobile: '98765432', gender: 'MALE' },
+      })
+    )
+  );
+  assert(
+    'INPUT_VALIDATION',
+    'Partial 8-Digit Mobile Rejected in Master Report Chapter 18',
+    partialMobileWithValidDobHtml.includes('भारतीय मोबाइल विश्लेषण हेतु पूर्ण 10 अंक आवश्यक') &&
+      !partialMobileWithValidDobHtml.includes('Total 45'),
+    '8-digit partial mobile displays explicit 10-digit requirement notice in Chapter 18 instead of personalized mobile audit'
+  );
+
+  ReportAccessService.setCurrentUser(null);
+
+  // =========================================================================
+  // 7. SUMMARY REPORT
   // =========================================================================
   console.log('\n============================================================');
   console.log('PHASE 9 TEST SUMMARY:');
@@ -217,3 +378,4 @@ runPhase9TestSuite().catch((err) => {
   console.error('Test execution error:', err);
   process.exit(1);
 });
+

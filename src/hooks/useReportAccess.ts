@@ -35,14 +35,34 @@ export function useReportAccess(
   mobile?: string,
   email?: string
 ): UseReportAccessResult {
-  const [accessStatus, setAccessStatus] = useState<ReportAccessCheckResult | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserSession | null>(() =>
     ReportAccessService.getStoredUser()
   );
+  const isInitialAdmin = Boolean(
+    currentUser?.email &&
+      ['affectioncosmos@gmail.com', 'attractabundance909@gmail.com'].includes(
+        currentUser.email.trim().toLowerCase()
+      )
+  );
+  const [accessStatus, setAccessStatus] = useState<ReportAccessCheckResult | null>(() =>
+    isInitialAdmin
+      ? {
+          allowed: true,
+          requiresPayment: false,
+          isFirstFreeReport: false,
+          isFreeReportType: false,
+          canClaimFree: false,
+          price: 0,
+          reportType,
+          profileKey: profileKey || 'default_profile',
+          accessType: 'ADMIN_TEST',
+        }
+      : null
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(!isInitialAdmin && !isPublicReport(reportType));
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(isInitialAdmin || isPublicReport(reportType));
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(null);
 
   const checkAccess = useCallback(async (): Promise<ReportAccessCheckResult> => {
