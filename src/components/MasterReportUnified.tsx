@@ -56,6 +56,8 @@ import { ReportPaywallModal } from './ReportPaywallModal';
 import { ReportAccessGate } from './ReportAccessGate';
 import { ReportAccessService } from '../services/reportAccessService';
 import { Lock, Unlock, Gift } from 'lucide-react';
+import { buildAddendumConsultationDossier } from '../core/addendumConsultationModel';
+import { AddendumConsultationSections } from './AddendumConsultationSections';
 
 interface MasterReportUnifiedProps {
   profile: CompleteNumerologyProfile;
@@ -238,6 +240,19 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
     return AdvancedInsightEngine.generateDossier(profile);
   }, [profile]);
 
+  // ADDENDUM: 16-Section Consultation Dossier (Raajeev Singh Chauhann Student Sample Model)
+  const addendumDossier = React.useMemo(() => {
+    return buildAddendumConsultationDossier(profile, (language === 'hi' ? 'hi' : 'en') as 'hi' | 'en', {
+      personalDetails: {
+        name: personalDetails?.name || profile?.identity?.fullName || '',
+        dob: personalDetails?.dob || profile?.identity?.dob || '',
+        mobile: personalDetails?.mobile || profile?.identity?.mobile || '',
+        gender: personalDetails?.gender || profile?.identity?.gender || 'MALE'
+      },
+      isAdmin: false
+    });
+  }, [profile, personalDetails, language]);
+
   const [selectedProvenanceInsight, setSelectedProvenanceInsight] = useState<AdvancedInsight | null>(null);
   const [showDebugProvenanceModal, setShowDebugProvenanceModal] = useState<boolean>(false);
 
@@ -395,6 +410,7 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
   // Quick navigation menu items mapped to 5 pillars
   const navItems = [
     { id: 'sec-cover', pillar: 'CORE', label: '00. Cover Page & Snapshot', icon: <Sparkles className="w-3.5 h-3.5" /> },
+    { id: 'sec-addendum-consultation', pillar: 'CORE', label: '00B. 16-Section Consultation', icon: <Sparkles className="w-3.5 h-3.5" /> },
     { id: 'sec-01', pillar: 'CORE', label: '01. Executive Summary', icon: <Sparkles className="w-3.5 h-3.5" /> },
     { id: 'sec-02', pillar: 'CORE', label: '02. Core Numbers & Synthesis', icon: <User className="w-3.5 h-3.5" /> },
     { id: 'sec-03', pillar: 'CORE', label: '03-07. Lo Shu & Grids', icon: <Compass className="w-3.5 h-3.5" /> },
@@ -1049,6 +1065,35 @@ export const MasterReportUnified: React.FC<MasterReportUnifiedProps> = ({
           </section>
         ) : (
           <>
+        {/* ========================================================================= */}
+        {/* 16-SECTION AUTHENTIC CONSULTATION DOSSIER (ADDENDUM / STUDENT SAMPLE ARCHITECTURE) */}
+        {/* ========================================================================= */}
+        <section
+          id="sec-addendum-consultation"
+          className="space-y-4 print-avoid-break mb-8"
+        >
+          <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 p-5 rounded-3xl border border-amber-300 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-playfair text-xl font-bold text-slate-900 dark:text-slate-100">
+                  {language === 'hi' ? '16-अनुभाग प्रामाणिक परामर्श प्रतिवेदन (Student Sample Architecture)' : '16-Section Authentic Consultation Report'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  {language === 'hi' ? 'राजीव सिंह चौहान मार्गदर्शिका शैली: संक्षिप्त बुलेट, प्रत्यक्ष परामर्शक संवाद व ठोस उपाय' : 'Consultant voice: short bullets, direct address, bold key insights, and actionable remedies'}
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-mono font-bold px-3 py-1 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 border border-amber-300 rounded-full">
+              {language === 'hi' ? 'सम्पूर्ण 16 अनुभाग' : 'Complete 16 Sections'}
+            </span>
+          </div>
+
+          <AddendumConsultationSections dossier={addendumDossier} />
+        </section>
+
         {/* ========================================================================= */}
         {/* 01. EXECUTIVE SUMMARY */}
         {/* ========================================================================= */}

@@ -14,6 +14,8 @@ import { deriveExpertConsultationDossier } from '../core/expertConsultationEngin
 import { calculatePersonalYearNumber } from '../core/luckyDatesEngine';
 import { calculateKuaNumber } from '../core/kuaEngine';
 import { parseIndianDate, formatDateIndian } from '../utils/dateUtils';
+import { buildAddendumConsultationDossier } from '../core/addendumConsultationModel';
+import { AddendumConsultationSections } from './AddendumConsultationSections';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
@@ -90,6 +92,19 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
 
   // Expert Consultation Dossier
   const expertDossier = useMemo(() => deriveExpertConsultationDossier(profile), [profile]);
+
+  // ADDENDUM: 16-Section Consultation Dossier (Raajeev Singh Chauhann Student Sample Model)
+  const addendumDossier = useMemo(() => {
+    return buildAddendumConsultationDossier(profile, (language === 'hi' ? 'hi' : 'en') as 'hi' | 'en', {
+      personalDetails: {
+        name: personalDetails?.name || identity?.fullName || '',
+        dob: personalDetails?.dob || identity?.dob || '',
+        mobile: personalDetails?.mobile || identity?.mobile || '',
+        gender: personalDetails?.gender || identity?.gender || 'MALE'
+      },
+      isAdmin: false
+    });
+  }, [profile, personalDetails, identity, language]);
 
   // Personal Year (Authoritative single-source calculation; suppressed when DOB is invalid)
   const currentYear = new Date().getFullYear();
@@ -440,6 +455,32 @@ export const FreeNumerologyReport: React.FC<FreeNumerologyReportProps> = ({
           </section>
         ) : (
           <>
+        {/* ========================================================================= */}
+        {/* 16-SECTION AUTHENTIC CONSULTATION DOSSIER (ADDENDUM / STUDENT SAMPLE ARCHITECTURE) */}
+        {/* ========================================================================= */}
+        <div className="space-y-4 print-avoid-break mb-8">
+          <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 p-5 rounded-3xl border border-amber-300 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-amber-600 text-white rounded-xl shadow-xs">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-playfair text-xl font-bold text-stone-900 dark:text-stone-100">
+                  {language === 'hi' ? '16-अनुभाग प्रामाणिक परामर्श प्रतिवेदन (Student Sample Architecture)' : '16-Section Authentic Consultation Report'}
+                </h3>
+                <p className="text-xs text-stone-600 dark:text-stone-400">
+                  {language === 'hi' ? 'राजीव सिंह चौहान मार्गदर्शिका शैली: संक्षिप्त बुलेट, प्रत्यक्ष परामर्शक संवाद व ठोस उपाय' : 'Consultant voice: short bullets, direct address, bold key insights, and actionable remedies'}
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-mono font-bold px-3 py-1 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 border border-amber-300 rounded-full">
+              {language === 'hi' ? 'सम्पूर्ण 16 अनुभाग' : 'Complete 16 Sections'}
+            </span>
+          </div>
+
+          <AddendumConsultationSections dossier={addendumDossier} />
+        </div>
+
         {/* ========================================================================= */}
         {/* SECTION 1: DRIVER (MULANK) & CONDUCTOR (BHAGYANK) DETAILED ANALYSIS */}
         {/* ========================================================================= */}
