@@ -2,6 +2,10 @@ import { CompleteNumerologyProfile } from './types';
 import { calculateKuaNumber } from './kuaEngine';
 import { parseIndianDate } from '../utils/dateUtils';
 import { getCompoundDetails } from '../services/compoundDatabase';
+import { NUMBER_DEFINITIONS } from './methodology/numberMeanings';
+import { PLANET_DEFINITIONS } from './methodology/planetMappings';
+import { getCombination81 } from './methodology/combinationDefinitions';
+import { PROFESSION_RULES } from './methodology/professionDefinitions';
 
 export interface PinnaclePhase {
   phaseNumber: number;
@@ -200,12 +204,43 @@ const PLANET_NAMES: Record<number, string> = {
   9: 'मंगल (Mars)'
 };
 
+const YANTRA_BY_NUMBER: Record<number, string> = {
+  1: 'श्री सूर्य यंत्र (Surya Yantra) को पूर्व दिशा में स्थापित करें।',
+  2: 'श्री चंद्र यंत्र (Chandra Yantra) अथवा शिव पंचायत को उत्तर-पश्चिम या ईशान में रखें।',
+  3: 'श्री गुरु (बृहस्पति) यंत्र को उत्तर-पूर्व (ईशान कोण) में स्थापित करें।',
+  4: 'श्री राहु शांति यंत्र अथवा मां सरस्वती चित्र को नैऋत्य/ईशान में रखें।',
+  5: 'श्री बुध यंत्र अथवा कुबेर यंत्र को उत्तर दिशा में स्थापित करें।',
+  6: 'श्री शुक्र यंत्र अथवा श्री यंत्र को दक्षिण-पूर्व (आग्नेय) या ईशान में रखें।',
+  7: 'श्री केतु यंत्र अथवा श्री गणेश यंत्र को ईशान कोण में स्थापित करें।',
+  8: 'श्री शनि यंत्र अथवा हनुमान रक्षा कवच को पश्चिम दिशा में रखें।',
+  9: 'श्री मंगल यंत्र अथवा हनुमान यंत्र को दक्षिण या पूर्व दिशा में स्थापित करें।'
+};
+
+const AVOID_COLORS_BY_NUMBER: Record<number, string[]> = {
+  1: ['गहरा काला (Deep Black)', 'गहरा नीला (Dark Navy)'],
+  2: ['गहरा काला (Deep Black)', 'गहरा लाल (Dark Crimson)'],
+  3: ['गहरा काला (Deep Black)', 'गहरा भूरा (Dark Brown)'],
+  4: ['चमकीला लाल (Bright Red)', 'गहरा नारंगी (Fiery Orange)'],
+  5: ['गहरा काला (Deep Black)', 'गहरा लाल (Deep Crimson)'],
+  6: ['गहरा काला (Deep Black)', 'मटमैला भूरा (Dull Brown)'],
+  7: ['गहरा काला (Deep Black)', 'अत्यधिक भड़कीला लाल (Flashy Red)'],
+  8: ['चमकीला लाल (Bright Red)', 'तांबे जैसा नारंगी (Copper Orange)'],
+  9: ['गहरा काला (Deep Black)', 'गहरा स्लेटी (Dark Grey)']
+};
+
 export function deriveExpertConsultationDossier(
   profile: CompleteNumerologyProfile
 ): ExpertConsultationDossier {
   const { coreNumbers, identity, loshu, vedicDasha } = profile;
+  const kuaProfile = profile.kua;
   const mulank = coreNumbers.mulank || 1;
   const bhagyank = coreNumbers.bhagyank || 1;
+
+  const mDef = NUMBER_DEFINITIONS[mulank] || NUMBER_DEFINITIONS[1];
+  const bDef = NUMBER_DEFINITIONS[bhagyank] || NUMBER_DEFINITIONS[1];
+  const mPlanet = PLANET_DEFINITIONS[mulank] || PLANET_DEFINITIONS[1];
+  const bPlanet = PLANET_DEFINITIONS[bhagyank] || PLANET_DEFINITIONS[1];
+  const comb81 = getCombination81(mulank, bhagyank);
 
   const dobValue = identity.dob || `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
   const parsed = parseIndianDate(dobValue);
@@ -227,6 +262,11 @@ export function deriveExpertConsultationDossier(
   const p2EndAge = p1EndAge + 9;
   const p3EndAge = p2EndAge + 9;
 
+  const pin1Def = NUMBER_DEFINITIONS[pin1Val] || mDef;
+  const pin2Def = NUMBER_DEFINITIONS[pin2Val] || bDef;
+  const pin3Def = NUMBER_DEFINITIONS[pin3Val] || mDef;
+  const pin4Def = NUMBER_DEFINITIONS[pin4Val] || bDef;
+
   const pinnacles: PinnaclePhase[] = [
     {
       phaseNumber: 1,
@@ -234,8 +274,8 @@ export function deriveExpertConsultationDossier(
       ageSpan: `जन्म से ${p1EndAge} वर्ष की आयु तक`,
       pinnacleNumber: pin1Val,
       planet: PLANET_NAMES[pin1Val] || 'शुभ ग्रह',
-      themeHi: `प्रारंभिक शिक्षा, संस्कार, पारिवारिक वातावरण और मूल प्रतिभा की पहचान।`,
-      guidanceHi: `इस चरण में ज्ञान अर्जन और बौद्धिक नींव को मजबूत करना सर्वोच्च प्राथमिकता रही।`
+      themeHi: `अंक #${pin1Val} (${PLANET_NAMES[pin1Val]}) का प्रभाव: प्रारंभिक शिक्षा, संस्कार, पारिवारिक वातावरण और ${pin1Def.learning}`,
+      guidanceHi: `इस चरण में ${pin1Def.personality} विकास पर बल रहा। अनुशंसित अभ्यास: ${pin1Def.traditionalRemedies.behavioural}`
     },
     {
       phaseNumber: 2,
@@ -243,8 +283,8 @@ export function deriveExpertConsultationDossier(
       ageSpan: `${p1EndAge + 1} से ${p2EndAge} वर्ष की आयु तक`,
       pinnacleNumber: pin2Val,
       planet: PLANET_NAMES[pin2Val] || 'शुभ ग्रह',
-      themeHi: `करियर की स्थापना, व्यावसायिक प्रयास, पहचान और स्वतंत्र निर्णय लेने का समय।`,
-      guidanceHi: `अपने पेशेवर कौशल को निखारें और नए व्यापारिक या कार्यक्षेत्र के अवसरों को अपनाएं।`
+      themeHi: `अंक #${pin2Val} (${PLANET_NAMES[pin2Val]}) का प्रभाव: करियर की स्थापना, व्यावसायिक प्रयास और ${pin2Def.career}`,
+      guidanceHi: `अपने पेशेवर कौशल को निखारें: ${pin2Def.business} अनुशंसित अभ्यास: ${pin2Def.traditionalRemedies.lifestyle}`
     },
     {
       phaseNumber: 3,
@@ -252,8 +292,8 @@ export function deriveExpertConsultationDossier(
       ageSpan: `${p2EndAge + 1} से ${p3EndAge} वर्ष की आयु तक`,
       pinnacleNumber: pin3Val,
       planet: PLANET_NAMES[pin3Val] || 'शुभ ग्रह',
-      themeHi: `सामाजिक प्रतिष्ठा, आर्थिक स्थिरता, नेतृत्व और पारिवारिक जिम्मेदारियों का शिखर।`,
-      guidanceHi: `दीर्घकालिक परिसंपत्ति निर्माण और नेतृत्वकारी भूमिकाओं में मार्गदर्शन प्रदान करें।`
+      themeHi: `अंक #${pin3Val} (${PLANET_NAMES[pin3Val]}) का प्रभाव: सामाजिक प्रतिष्ठा, आर्थिक स्थिरता और ${pin3Def.wealth}`,
+      guidanceHi: `नेतृत्व और दीर्घकालिक संचय पर ध्यान दें: ${pin3Def.leadership} अनुशंसित अभ्यास: ${pin3Def.traditionalRemedies.charitable}`
     },
     {
       phaseNumber: 4,
@@ -261,8 +301,8 @@ export function deriveExpertConsultationDossier(
       ageSpan: `${p3EndAge + 1} वर्ष की आयु के बाद`,
       pinnacleNumber: pin4Val,
       planet: PLANET_NAMES[pin4Val] || 'शुभ ग्रह',
-      themeHi: `आध्यात्मिक शांति, परामर्श, स्थायी संपत्ति और संचित अनुभवों का समाज को दान।`,
-      guidanceHi: `आंतरिक शांति, परोपकार और समाज में सम्मानित मार्गदर्शक के रूप में सक्रिय रहें।`
+      themeHi: `अंक #${pin4Val} (${PLANET_NAMES[pin4Val]}) का प्रभाव: आध्यात्मिक शांति, परामर्श और ${pin4Def.spirituality}`,
+      guidanceHi: `आंतरिक शांति और समाज में सम्मानित मार्गदर्शक के रूप में सक्रिय रहें: ${pin4Def.family}`
     }
   ];
 
@@ -272,79 +312,96 @@ export function deriveExpertConsultationDossier(
   const ch3Val = Math.abs(ch1Val - ch2Val);
   const ch4Val = Math.abs(rMonth - rYear);
 
+  const getChallengeDetails = (val: number, phaseTitle: string) => {
+    const safeVal = val >= 1 && val <= 9 ? val : mulank;
+    const cDef = NUMBER_DEFINITIONS[safeVal] || mDef;
+    return {
+      planet: val === 0 ? 'पूर्ण संतुलन (Universal Choice 0)' : (PLANET_NAMES[safeVal] || 'संतुलन ऊर्जा'),
+      areaHi: val === 0 ? `${phaseTitle}: सभी अंकों के प्रति समान सजगता और आत्म-चयन` : `${phaseTitle}: अंक #${safeVal} (${PLANET_NAMES[safeVal]}) के गुणों का संतुलन`,
+      lessonHi: val === 0
+        ? 'चुनौती अंक 0 दर्शाता है कि आपको अपने निर्णय स्वयं लेने की पूर्ण स्वतंत्रता और जिम्मेदारी मिली है; अपनी ऊर्जा को बिखरने न दें।'
+        : `${cDef.missingMeaning.developmentalTheme} ${cDef.missingMeaning.practicalDevelopment}`,
+      remedyHi: cDef.traditionalRemedies.behavioural + ' ' + cDef.traditionalRemedies.charitable
+    };
+  };
+
+  const c1Info = getChallengeDetails(ch1Val, 'प्रारंभिक आत्मविश्वास एवं संवाद');
+  const c2Info = getChallengeDetails(ch2Val, 'मध्य जीवन कार्यक्षेत्र एवं सहयोग');
+  const c3Info = getChallengeDetails(ch3Val, 'जीवन का केंद्रीय आत्म-अनुशासन');
+  const c4Info = getChallengeDetails(ch4Val, 'परिपक्वता एवं आध्यात्मिक संतुलन');
+
   const challenges: LifeChallenge[] = [
     {
       challengeNumber: 1,
       name: 'प्रारंभिक जीवन चुनौती (Early Life Challenge)',
       value: ch1Val,
-      planet: PLANET_NAMES[ch1Val] || 'संतुलन ऊर्जा',
-      areaHi: 'आत्मविश्वास एवं व्यक्तिगत स्वतंत्रता',
-      lessonHi: 'दूसरों पर अत्यधिक निर्भर रहने के बजाय अपनी व्यक्तिगत क्षमताओं पर विश्वास करना सीखें।',
-      remedyHi: 'प्रातःकाल उगते सूर्य को अर्घ्य दें और अपने विचारों को स्पष्ट रूप से व्यक्त करें।'
+      planet: c1Info.planet,
+      areaHi: c1Info.areaHi,
+      lessonHi: c1Info.lessonHi,
+      remedyHi: c1Info.remedyHi
     },
     {
       challengeNumber: 2,
       name: 'मध्य जीवन चुनौती (Productive Years Challenge)',
       value: ch2Val,
-      planet: PLANET_NAMES[ch2Val] || 'संतुलन ऊर्जा',
-      areaHi: 'धैर्य, सहयोग एवं कार्यक्षेत्र संतुलन',
-      lessonHi: 'जल्दबाजी में निर्णय लेने से बचें और साझेदारों व सहयोगियों के साथ संवाद स्पष्ट रखें।',
-      remedyHi: 'कार्यों में लिखित समझौते रखें और बुधवार को गाय को हरा चारा अथवा पक्षियों को दाना डालें।'
+      planet: c2Info.planet,
+      areaHi: c2Info.areaHi,
+      lessonHi: c2Info.lessonHi,
+      remedyHi: c2Info.remedyHi
     },
     {
       challengeNumber: 3,
       name: 'प्रमुख मुख्य चुनौती (Core Life Lesson)',
       value: ch3Val,
-      planet: PLANET_NAMES[ch3Val] || 'संतुलन ऊर्जा',
-      areaHi: 'आंतरिक संतुलन एवं भावनात्मक दृढ़ता',
-      lessonHi: 'अति-विचार (overthinking) से दूर रहें और अपने ज्ञान को व्यावहारिक क्रियान्वयन में बदलें।',
-      remedyHi: 'प्रतिदिन 10 मिनट मौन ध्यान अथवा ॐ का उच्चारण मानसिक स्थिरता प्रदान करता है।'
+      planet: c3Info.planet,
+      areaHi: c3Info.areaHi,
+      lessonHi: c3Info.lessonHi,
+      remedyHi: c3Info.remedyHi
     },
     {
       challengeNumber: 4,
       name: 'उत्तर जीवन चुनौती (Maturity Challenge)',
       value: ch4Val,
-      planet: PLANET_NAMES[ch4Val] || 'संतुलन ऊर्जा',
-      areaHi: 'आध्यात्मिक संतुष्टि एवं अनासक्ति',
-      lessonHi: 'परिणामों के प्रति अत्यधिक आसक्ति के बिना निष्काम भाव से अपने उत्तरदायित्व निभाएं।',
-      remedyHi: 'धार्मिक व परोपकारी कार्यों में यथाशक्ति सहयोग करें।'
+      planet: c4Info.planet,
+      areaHi: c4Info.areaHi,
+      lessonHi: c4Info.lessonHi,
+      remedyHi: c4Info.remedyHi
     }
   ];
 
   // 3. EVENT WINDOWS
-  const currentAge = new Date().getFullYear() - year;
   const eventWindows: EventWindow[] = [
     {
       age: Math.max(23, 23 + (mulank % 4)),
       calendarYear: year + Math.max(23, 23 + (mulank % 4)),
       type: 'CAREER_SURGE',
-      titleHi: 'करियर की आधारशिला एवं प्रथम बड़ी प्रगति',
-      descriptionHi: 'पेशेवर जीवन में नई पहचान, महत्वपूर्ण अवसर या उच्च शिक्षा/कौशल का व्यावहारिक प्रारंभ।',
-      planetarySupportHi: `${PLANET_NAMES[mulank]} का सकारात्मक प्रभाव`
+      titleHi: `मूलांक #${mulank} सक्रियण: करियर की आधारशिला एवं प्रथम प्रगति`,
+      descriptionHi: `पेशेवर जीवन में नई पहचान और स्वतंत्र पहल का प्रारंभ। ${mDef.career}`,
+      planetarySupportHi: `${PLANET_NAMES[mulank]} का प्रत्यक्ष प्रभाव`
     },
     {
       age: Math.max(32, 32 + (bhagyank % 3)),
       calendarYear: year + Math.max(32, 32 + (bhagyank % 3)),
       type: 'TRANSFORMATION',
-      titleHi: 'जीवन का महत्वपूर्ण मोड़ (Destiny Shift Window)',
-      descriptionHi: 'भाग्यांक की ऊर्जा का पूर्ण सक्रियण। कार्यक्षेत्र में स्वतंत्र दायित्व, नई दिशा या महत्वपूर्ण पदोन्नति।',
-      planetarySupportHi: `${PLANET_NAMES[bhagyank]} की महादशात्मक रश्मियां`
+      titleHi: `भाग्यांक #${bhagyank} उदय: जीवन का महत्वपूर्ण मोड़ (Destiny Shift Window)`,
+      descriptionHi: `भाग्यांक #${bhagyank} की ऊर्जा का पूर्ण सक्रियण। ${bDef.bhagyankMeaning}`,
+      planetarySupportHi: `${PLANET_NAMES[bhagyank]} की भाग्यवर्धक रश्मियां`
     },
     {
       age: Math.max(41, 41 + ((mulank + bhagyank) % 5)),
       calendarYear: year + Math.max(41, 41 + ((mulank + bhagyank) % 5)),
       type: 'FINANCIAL_STABILITY',
       titleHi: 'आर्थिक संचय एवं स्थायी परिसंपत्ति निर्माण काल',
-      descriptionHi: 'अचल संपत्ति, व्यापारिक विस्तार या महत्वपूर्ण पारिवारिक उत्तरदायित्वों की सफलता का शुभ चरण।',
-      planetarySupportHi: `गुरु एवं शुक्र का संयुक्त ऊर्जा सहयोग`
+      descriptionHi: `${comb81.wealthMeaning} ${bDef.wealth}`,
+      planetarySupportHi: `${PLANET_NAMES[mulank]} एवं ${PLANET_NAMES[bhagyank]} का संयुक्त योग`
     },
     {
       age: Math.max(50, 50 + (bhagyank % 4)),
       calendarYear: year + Math.max(50, 50 + (bhagyank % 4)),
       type: 'MATURITY_MILESTONE',
       titleHi: 'सम्मान, सामाजिक प्रतिष्ठा एवं नेतृत्व की पराकाष्ठा',
-      descriptionHi: 'समाज एवं उद्योग जगत में विशेषज्ञ या मार्गदर्शक के रूप में स्थायी पहचान की स्थापना।',
-      planetarySupportHi: `सूर्य एवं शनि के शुभ गोचर का प्रभाव`
+      descriptionHi: `समाज एवं कार्यक्षेत्र में अनुभवी मार्गदर्शक के रूप में स्थायी पहचान। ${bDef.spirituality}`,
+      planetarySupportHi: `${PLANET_NAMES[pin3Val]} एवं ${PLANET_NAMES[pin4Val]} के शिखर का प्रभाव`
     }
   ];
 
@@ -360,118 +417,118 @@ export function deriveExpertConsultationDossier(
       year: currentCalendarYear,
       personalYear: 1,
       theme: 'नया शुभारंभ, नई योजनाएं, नेतृत्व एवं स्वतंत्र पहल (Year of New Beginnings)',
-      career: 'नई नौकरी, स्वतंत्र प्रोजेक्ट या व्यवसाय शुरू करने के लिए अत्यंत अनुकूल वर्ष।',
-      finance: 'दीर्घकालिक निवेशों की शुरुआत करें। आत्मविश्वास के साथ नए वित्तीय स्रोत बनाएं।',
-      relationships: 'आत्म-पहचान को मजबूत करें, लेकिन रिश्तों में अहंकार और हठधर्मिता से बचें।',
-      family: 'परिवार में आपके निर्णयों को प्राथमिकता मिलेगी। माता-पिता के स्वास्थ्य का ध्यान रखें।',
-      travel: 'काम और नए अवसरों के सिलसिले में कई छोटी-बड़ी यात्राओं के योग।',
-      opportunities: 'नेतृत्व के पद, नए अनुबंध और समाज में नई पहचान।',
-      caution: 'अति-उत्साह में बिना जांचे-परखे बड़े जोखिम न लें।',
-      recommendedFocus: 'नवाचार, आत्म-अनुशासन और स्पष्ट कार्ययोजना पर ध्यान केंद्रित करें।'
+      career: 'नई नौकरी, स्वतंत्र प्रोजेक्ट या व्यवसाय शुरू करने के लिए अत्यंत अनुकूल वर्ष। अपने मूलांक और भाग्यांक की प्राथमिक क्षमताओं को आगे लाएं।',
+      finance: 'दीर्घकालिक निवेशों की शुरुआत करें। आत्मविश्वास के साथ नए वित्तीय स्रोत बनाएं और अपनी आर्थिक स्वतंत्रता को सुदृढ़ करें।',
+      relationships: 'आत्म-पहचान को मजबूत करें, लेकिन रिश्तों में अहंकार और हठधर्मिता से बचें; जीवनसाथी व परिवार के सुझावों का आदर करें।',
+      family: 'परिवार में आपके निर्णयों को प्राथमिकता मिलेगी। माता-पिता के स्वास्थ्य और घर के वरिष्ठ सदस्यों के मार्गदर्शन का ध्यान रखें।',
+      travel: 'काम और नए अवसरों के सिलसिले में कई छोटी-बड़ी व्यावसायिक यात्राओं के योग बनेंगे।',
+      opportunities: 'नेतृत्व के पद, नए अनुबंध, स्वतंत्र ब्रांड पहचान और समाज में नई प्रतिष्ठा।',
+      caution: 'अति-उत्साह में बिना जांचे-परखे बड़े जोखिम न लें और अधैर्य से बचें।',
+      recommendedFocus: 'नवाचार, आत्म-अनुशासन और स्पष्ट 9-वर्षीय कार्ययोजना पर ध्यान केंद्रित करें।'
     },
     2: {
       year: currentCalendarYear,
       personalYear: 2,
       theme: 'साझेदारी, धैर्य, शांति एवं कूटनीतिक सहयोग (Year of Patience & Harmony)',
-      career: 'टीम वर्क और सहयोगियों के साथ सामंजस्य से कार्य आगे बढ़ेंगे। अकेले संघर्ष से बचें।',
-      finance: 'स्थिरता बनाए रखें। जल्दबाजी में भारी पूंजी न फंसाएं; नियमित बचत पर ध्यान दें।',
-      relationships: 'प्रेम और दांपत्य जीवन में मधुरता बढ़ेगी। भावनात्मक संवाद को प्राथमिकता दें।',
-      family: 'पारिवारिक सौहार्द और घरेलू सुख-सुविधाओं में वृद्धि।',
-      travel: 'जल स्थलों या शांत स्थानों की विश्रामदायक यात्राएं।',
-      opportunities: 'मजबूत साझेदारियां, मध्यस्थता और रचनात्मक अनुबंध।',
-      caution: 'भावुकता में आकर कोई बड़ा व्यावसायिक निर्णय न लें।',
-      recommendedFocus: 'धैर्य, कूटनीति और आपसी विश्वास को मजबूत करना।'
+      career: 'टीम वर्क और सहयोगियों के साथ सामंजस्य से कार्य आगे बढ़ेंगे। अकेले संघर्ष करने के बजाय भरोसेमंद नेटवर्क का सहारा लें।',
+      finance: 'स्थिरता बनाए रखें। जल्दबाजी में भारी पूंजी न फंसाएं; नियमित बचत और तरल संपत्ति (liquid assets) पर ध्यान दें।',
+      relationships: 'प्रेम और दांपत्य जीवन में मधुरता बढ़ेगी। भावनात्मक संवाद और पारस्परिक सहानुभूति को प्राथमिकता दें।',
+      family: 'पारिवारिक सौहार्द, माता का आशीर्वाद और घरेलू सुख-सुविधाओं में वृद्धि का समय।',
+      travel: 'जल स्थलों या शांत प्राकृतिक स्थानों की विश्रामदायक और मानसिक ऊर्जा बढ़ाने वाली यात्राएं।',
+      opportunities: 'मजबूत साझेदारियां, मध्यस्थता, कूटनीतिक समझौते और रचनात्मक अनुबंध।',
+      caution: 'अत्यधिक भावुकता या संदेह में आकर कोई बड़ा व्यावसायिक निर्णय न लें।',
+      recommendedFocus: 'धैर्य, कूटनीति, भावनात्मक संतुलन और आपसी विश्वास को मजबूत करना।'
     },
     3: {
       year: currentCalendarYear,
       personalYear: 3,
       theme: 'ज्ञान विस्तार, रचनात्मकता, सामाजिक दायरा एवं अभिव्यक्ति (Year of Self-Expression)',
-      career: 'सलाहकार, शिक्षण, मीडिया, लेखन और जनसंपर्क में शानदार उपलब्धियां।',
-      finance: 'आर्थिक स्थिति में सुधार होगा। रचनात्मक कार्यों से अतिरिक्त आय के स्रोत बनेंगे।',
-      relationships: 'सामाजिक दायरा बढ़ेगा। मित्रों और सहकर्मियों के साथ उत्सव और मेलजोल।',
-      family: 'परिवार में मांगलिक कार्य या शुभ समाचार के योग।',
-      travel: 'अध्ययन, तीर्थाटन और सांस्कृतिक यात्राएं लाभकारी रहेंगी।',
-      opportunities: 'सार्वजनिक मंचों पर सम्मान, नई बौद्धिक योजनाएं और नेटवर्किंग।',
-      caution: 'कई कामों को एक साथ शुरू करके अपनी ऊर्जा को बिखरने न दें।',
-      recommendedFocus: 'अपनी रचनात्मक प्रतिभा और संवाद कौशल को निखारें।'
+      career: 'सलाहकार, शिक्षण, मीडिया, लेखन, प्रबंधन और जनसंपर्क में शानदार उपलब्धियां और पदोन्नति के अवसर।',
+      finance: 'आर्थिक स्थिति में सुधार होगा। बौद्धिक और रचनात्मक कार्यों से अतिरिक्त आय के स्रोत बनेंगे।',
+      relationships: 'सामाजिक दायरा बढ़ेगा। मित्रों, विद्वानों और सहकर्मियों के साथ उत्सव और सार्थक मेलजोल रहेगा।',
+      family: 'परिवार में मांगलिक कार्य, संतान संबंधी शुभ समाचार या शैक्षिक उन्नति के योग।',
+      travel: 'अध्ययन, सेमिनार, तीर्थाटन और सांस्कृतिक यात्राएं लाभकारी रहेंगी।',
+      opportunities: 'सार्वजनिक मंचों पर सम्मान, नई बौद्धिक योजनाएं, कौशल विकास और नेटवर्किंग।',
+      caution: 'कई कामों को एक साथ शुरू करके अपनी ऊर्जा और धन को बिखरने न दें।',
+      recommendedFocus: 'अपनी रचनात्मक प्रतिभा, संवाद कौशल और ज्ञान संवर्धन को निखारें।'
     },
     4: {
       year: currentCalendarYear,
       personalYear: 4,
       theme: 'कठिन परिश्रम, संरचना, अनुशासन एवं व्यवस्था निर्माण (Year of Hard Work & Foundation)',
-      career: 'व्यवस्थित काम करने से भविष्य के लिए मजबूत आधार बनेगा। नियमों का पालन करें।',
-      finance: 'बजट पर नियंत्रण रखें। अचल संपत्ति या सुरक्षित फंड्स में पूंजी लगाएं।',
-      relationships: 'व्यावहारिकता जरूरी है। काम के दबाव का असर निजी रिश्तों पर न पड़ने दें।',
-      family: 'घर की मरम्मत, सुरक्षा या पारिवारिक जिम्मेदारियों को पूरा करने का समय।',
-      travel: 'काम से संबंधित व्यावहारिक यात्राएं।',
-      opportunities: 'दीर्घकालिक परियोजनाओं की मजबूत नींव और प्रशासनिक कौशल की सराहना।',
-      caution: 'आलस्य और शॉर्टकट से बचें; कानूनी मामलों में पूर्ण सावधानी बरतें।',
-      recommendedFocus: 'समय प्रबंधन, कार्य कुशलता और स्वास्थ्य की नियमित देखभाल।'
+      career: 'व्यवस्थित और तकनीकी रूप से सटीक काम करने से भविष्य के लिए मजबूत आधार बनेगा। नियमों और प्रक्रियाओं का पालन करें।',
+      finance: 'बजट पर कड़ा नियंत्रण रखें। अचल संपत्ति, भूमि या सुरक्षित फंड्स में सोच-समझकर पूंजी लगाएं।',
+      relationships: 'व्यावहारिकता जरूरी है। काम के दबाव का असर निजी रिश्तों पर न पड़ने दें और परिवार से संवाद बनाए रखें।',
+      family: 'घर की मरम्मत, निर्माण, सुरक्षा या पारिवारिक जिम्मेदारियों को व्यवस्थित रूप से पूरा करने का समय।',
+      travel: 'काम और परियोजनाओं के निरीक्षण से संबंधित व्यावहारिक यात्राएं।',
+      opportunities: 'दीर्घकालिक परियोजनाओं की मजबूत नींव, सिस्टम निर्माण और प्रशासनिक कौशल की सराहना।',
+      caution: 'आलस्य, टालमटोल और शॉर्टकट से बचें; कानूनी व दस्तावेजी मामलों में पूर्ण सावधानी बरतें।',
+      recommendedFocus: 'समय प्रबंधन, कार्य कुशलता, दस्तावेजी अनुशासन और स्वास्थ्य की नियमित देखभाल।'
     },
     5: {
       year: currentCalendarYear,
       personalYear: 5,
       theme: 'परिवर्तन, गतिशीलता, व्यापारिक लाभ एवं बहुआयामी विस्तार (Year of Freedom & Dynamic Change)',
-      career: 'व्यापार, मार्केटिंग, संचार और नौकरी में सकारात्मक बदलाव के प्रबल योग।',
-      finance: 'नकदी प्रवाह (Cash Flow) में तेजी आएगी। व्यापारिक सौदे लाभकारी रहेंगे।',
-      relationships: 'नए लोगों से परिचय होगा। रिश्तों में खुलापन और संवाद ताजगी लाएगा।',
-      family: 'पारिवारिक जीवन में चहल-पहल और नए बदलावों का स्वागत होगा।',
-      travel: 'व्यावसायिक एवं दर्शनीय यात्राओं के अनेक शुभ अवसर।',
-      opportunities: 'नए बाजारों तक पहुंच, डिजिटल विस्तार और त्वरित निर्णय लेने का लाभ।',
-      caution: 'अस्थिरता और बिना योजना के अनावश्यक बदलावों से बचें।',
-      recommendedFocus: 'लचीलापन, मार्केटिंग और अपने संपर्कों को सक्रिय रखना।'
+      career: 'व्यापार, मार्केटिंग, संचार, आईटी और नौकरी में सकारात्मक बदलाव तथा विस्तार के प्रबल योग।',
+      finance: 'नकदी प्रवाह (Cash Flow) में तेजी आएगी। व्यापारिक सौदे और त्वरित निर्णय लाभकारी रहेंगे।',
+      relationships: 'नए और प्रभावशाली लोगों से परिचय होगा। रिश्तों में खुलापन और संवाद ताजगी लाएगा।',
+      family: 'पारिवारिक जीवन में चहल-पहल, आधुनिक सुख-सुविधाओं और नए बदलावों का स्वागत होगा।',
+      travel: 'व्यावसायिक, व्यापारिक एवं दर्शनीय यात्राओं के अनेक शुभ अवसर प्राप्त होंगे।',
+      opportunities: 'नए बाजारों तक पहुंच, डिजिटल विस्तार, नेटवर्किंग और बहुआयामी आय के अवसर।',
+      caution: 'मानसिक अस्थिरता, जल्दबाजी और बिना योजना के अनावश्यक बदलावों से बचें।',
+      recommendedFocus: 'लचीलापन, स्मार्ट मार्केटिंग, संचार कौशल और अपने संपर्कों को सक्रिय रखना।'
     },
     6: {
       year: currentCalendarYear,
       personalYear: 6,
       theme: 'घरेलू सुख, प्रेम, दांपत्य, जिम्मेदारी एवं सौंदर्य (Year of Love, Family & Responsibility)',
-      career: 'ब्रांडिंग, डिजाइन, हॉस्पिटैलिटी, कला और जनसेवा में सफलता।',
-      finance: 'घर की सुख-सुविधाओं और वाहन या साज-सज्जा पर व्यय, साथ ही स्थिर लाभ।',
+      career: 'ब्रांडिंग, डिजाइन, हॉस्पिटैलिटी, कला, परामर्श और जनसेवा से जुड़े क्षेत्रों में विशेष सफलता और सम्मान।',
+      finance: 'घर की सुख-सुविधाओं, वाहन, आभूषण या साज-सज्जा पर शुभ व्यय, साथ ही स्थिर आर्थिक लाभ।',
       relationships: 'विवाह, प्रेम संबंधों में प्रगाढ़ता और पारिवारिक सामंजस्य का स्वर्णिम समय।',
-      family: 'परिवार की सेवा और बच्चों की उन्नति में आनंद की प्राप्ति।',
-      travel: 'पारिवारिक छुट्टियां और आरामदायक पर्यटन।',
-      opportunities: 'घरेलू सुख, रिश्तों का पुनर्निर्माण और सामाजिक सम्मान।',
+      family: 'परिवार की सेवा, मांगलिक उत्सव और बच्चों व जीवनसाथी की उन्नति में आनंद की प्राप्ति।',
+      travel: 'पारिवारिक छुट्टियां, सुखद और आरामदायक पर्यटन।',
+      opportunities: 'घरेलू सुख, रिश्तों का पुनर्निर्माण, सामाजिक प्रतिष्ठा और भरोसेमंद साझेदारी।',
       caution: 'अति-आदर्शवादी बनने या दूसरों के मामलों में बिना मांगे अधिक हस्तक्षेप से बचें।',
-      recommendedFocus: 'घर में प्रेम, सौहार्द और सौंदर्य का वातावरण बनाए रखना।'
+      recommendedFocus: 'घर और कार्यस्थल में प्रेम, सौहार्द, संतुलन और सौंदर्य का वातावरण बनाए रखना।'
     },
     7: {
       year: currentCalendarYear,
       personalYear: 7,
       theme: 'आत्म-चिंतन, शोध, आंतरिक शांति एवं आध्यात्मिक उन्नति (Year of Introspection & Spiritual Growth)',
-      career: 'रिसर्च, डेटा विश्लेषण, योजना निर्माण और गुप्त रणनीतियों के लिए सर्वोत्तम समय।',
-      finance: 'सावधानीपूर्वक निवेश करें। सट्टेबाजी या त्वरित लाभ के प्रलोभनों से बिल्कुल दूर रहें।',
-      relationships: 'गहन भावनात्मक समझ की आवश्यकता। कुछ समय एकांत में बिताना लाभकारी होगा।',
-      family: 'शांतिपूर्ण वातावरण रखें और परिवार के साथ गहरी समझ विकसित करें।',
-      travel: 'प्राकृतिक, शांत और आध्यात्मिक स्थलों की यात्राएं ऊर्जा को शुद्ध करेंगी।',
-      opportunities: 'गहन ज्ञान, तकनीकी विशेषज्ञता और अंतर्दृष्टि की जागृति।',
-      caution: 'अकेलेपन या अवसाद से बचें; नकारात्मक विचारों को मन में न पनपने दें।',
-      recommendedFocus: 'ध्यान, स्वाध्याय, स्वास्थ्य संवर्धन और जीवन के लक्ष्यों का पुनर्मूल्यांकन।'
+      career: 'रिसर्च, डेटा विश्लेषण, ऑडिट, लेखन, योजना निर्माण और गहन विशेषज्ञता के लिए सर्वोत्तम समय।',
+      finance: 'सावधानीपूर्वक और शोध के बाद ही निवेश करें। सट्टेबाजी या त्वरित लाभ के प्रलोभनों से बिल्कुल दूर रहें।',
+      relationships: 'गहन भावनात्मक समझ की आवश्यकता। अपने मन की बात जीवनसाथी से साझा करें ताकि दूरी का भ्रम न हो।',
+      family: 'शांतिपूर्ण वातावरण रखें और परिवार के साथ आध्यात्मिक व बौद्धिक समझ विकसित करें।',
+      travel: 'प्राकृतिक, शांत और आध्यात्मिक/तीर्थ स्थलों की यात्राएं आपकी ऊर्जा को पुनर्जीवित करेंगी।',
+      opportunities: 'गहन ज्ञान, शोध, तकनीकी विशेषज्ञता, गूढ़ विद्या और अंतर्दृष्टि की जागृति।',
+      caution: 'अकेलेपन, अति-संदेह या अवसाद से बचें; नकारात्मक विचारों को मन में न पनपने दें।',
+      recommendedFocus: 'ध्यान, स्वाध्याय, स्वास्थ्य संवर्धन और जीवन के दीर्घकालिक लक्ष्यों का पुनर्मूल्यांकन।'
     },
     8: {
       year: currentCalendarYear,
       personalYear: 8,
       theme: 'कर्म फल, अधिकार, धन संचय, न्याय एवं उच्च उपलब्धि (Year of Power & Manifestation)',
-      career: 'उच्च पद, कार्यक्षेत्र में दबदबा, बड़ा व्यापारिक विस्तार और अधिकार प्राप्ति।',
-      finance: 'महत्वपूर्ण वित्तीय लाभ, बड़े लेन-देन और संपत्ति में निवेश का शुभ समय।',
-      relationships: 'व्यावहारिकता और मान-सम्मान का ध्यान रखें। साथी के योगदान की कद्र करें।',
-      family: 'परिवार की वित्तीय स्थिति सुदृढ़ होगी और समाज में प्रतिष्ठा बढ़ेगी।',
-      travel: 'अधिकार और व्यापार से संबंधित उच्चस्तरीय यात्राएं।',
-      opportunities: 'बड़े अनुबंध, नेतृत्व और पिछले कई वर्षों की मेहनत का प्रत्यक्ष फल।',
-      caution: 'घमंड, अत्यधिक कार्यभार और सहयोगियों के प्रति कठोरता से बचें।',
-      recommendedFocus: 'न्यायपूर्ण व्यवहार, दूरदर्शी प्रबंधन और वित्तीय अनुशासन।'
+      career: 'उच्च पद, कार्यक्षेत्र में प्रशासनिक दबदबा, बड़ा व्यापारिक विस्तार और अधिकार प्राप्ति का समय।',
+      finance: 'महत्वपूर्ण वित्तीय लाभ, बड़े व्यापारिक लेन-देन और अचल संपत्ति या उद्योग में निवेश का शुभ समय।',
+      relationships: 'व्यावहारिकता और मान-सम्मान का ध्यान रखें। कार्य की व्यस्तता के बीच साथी के योगदान की कद्र करें।',
+      family: 'परिवार की वित्तीय स्थिति सुदृढ़ होगी, बड़े निर्णय सफल होंगे और समाज में प्रतिष्ठा बढ़ेगी।',
+      travel: 'अधिकार, प्रशासन और बड़े व्यापारिक सौदों से संबंधित उच्चस्तरीय यात्राएं।',
+      opportunities: 'बड़े अनुबंध, संस्थागत नेतृत्व और पिछले कई वर्षों की ईमानदार मेहनत का प्रत्यक्ष फल।',
+      caution: 'अहंकार, अत्यधिक कार्यभार और अधीनस्थ सहयोगियों के प्रति कठोरता से बचें।',
+      recommendedFocus: 'न्यायपूर्ण व्यवहार, दूरदर्शी प्रबंधन, कानूनी पारदर्शिता और वित्तीय अनुशासन।'
     },
     9: {
       year: currentCalendarYear,
       personalYear: 9,
       theme: 'पूर्णता, विसर्जन, परोपकार एवं आगामी चक्र की तैयारी (Year of Completion & Humanitarian Spirit)',
-      career: 'पुरानी अधूरी योजनाओं को समाप्त करें और नए 9-वर्षीय चक्र की तैयारी करें।',
-      finance: 'उधार चुकाएं, अनावश्यक खर्च रोकें और भविष्य की बचत सुरक्षित करें।',
-      relationships: 'पुरानी गलतफहमियों को क्षमा करें और नकारात्मक संबंधों से शांतिपूर्वक विदा लें।',
-      family: 'पारिवारिक सहयोग और समाज सेवा में भागीदारी।',
-      travel: 'दूरस्थ स्थानों या तीर्थ स्थलों की यात्राएं।',
-      opportunities: 'मानवीय सहयोग, वैश्विक दृष्टिकोण और पुराने बोझों से मुक्ति।',
-      caution: 'अनावश्यक भावुकता या अतीत की कड़वाहट को पकड़कर न रखें।',
-      recommendedFocus: 'क्षमा, दान, आत्म-शुद्धि और नई शुरुआत के लिए मानसिक स्थान बनाना।'
+      career: 'पुरानी अधूरी योजनाओं को सफलतापूर्वक समाप्त करें और आगामी वर्ष के नए 9-वर्षीय चक्र की रूपरेखा तैयार करें।',
+      finance: 'पुराने ऋण या उधार चुकाएं, अनावश्यक खर्च रोकें और भविष्य के लिए बचत को सुरक्षित करें।',
+      relationships: 'पुरानी गलतफहमियों को क्षमा करें और सामंजस्यपूर्ण व परोपकारी दृष्टिकोण अपनाएं।',
+      family: 'पारिवारिक सहयोग, बड़ों का आशीर्वाद और समाज सेवा में सार्थक भागीदारी।',
+      travel: 'दूरस्थ स्थानों, विदेश या तीर्थ स्थलों की प्रेरणादायक यात्राएं।',
+      opportunities: 'मानवीय सहयोग, व्यापक सामाजिक सम्मान और पुराने मानसिक बोझों से मुक्ति।',
+      caution: 'क्रोध, आवेग या अतीत की कड़वाहट को पकड़कर न रखें; विवादों से दूर रहें।',
+      recommendedFocus: 'क्षमा, दान, आत्म-शुद्धि और नई शुरुआत के लिए मानसिक व भौतिक स्थान बनाना।'
     }
   };
 
@@ -590,100 +647,141 @@ export function deriveExpertConsultationDossier(
     };
   });
 
-  // 7. GRAH DRISHTI & PLANETARY SYNERGY
+  // 7. GRAH DRISHTI & PLANETARY SYNERGY (Dynamic based on actual Mulank, Bhagyank & Chart Digits)
+  const isFriendly = mPlanet.friendlyNumbers.includes(bhagyank) || bPlanet.friendlyNumbers.includes(mulank);
+  const isEnemy = mPlanet.enemyNumbers.includes(bhagyank) || bPlanet.enemyNumbers.includes(mulank);
+  const relationshipType: GrahDrishtiAnalysis['relationshipType'] =
+    mulank === bhagyank ? 'HARMONIOUS' : isFriendly ? 'FRIENDLY' : isEnemy ? 'CHALLENGING' : 'NEUTRAL';
+
+  const relationshipLabelMap: Record<GrahDrishtiAnalysis['relationshipType'], string> = {
+    HARMONIOUS: `मूलांक स्वामी ${PLANET_NAMES[mulank]} एवं भाग्यांक स्वामी ${PLANET_NAMES[bhagyank]} का पूर्ण समरस योग`,
+    FRIENDLY: `मूलांक स्वामी ${PLANET_NAMES[mulank]} एवं भाग्यांक स्वामी ${PLANET_NAMES[bhagyank]} का मित्रवत एवं सहयोगी योग`,
+    NEUTRAL: `मूलांक स्वामी ${PLANET_NAMES[mulank]} एवं भाग्यांक स्वामी ${PLANET_NAMES[bhagyank]} का संतुलित पूरक योग`,
+    CHALLENGING: `मूलांक स्वामी ${PLANET_NAMES[mulank]} एवं भाग्यांक स्वामी ${PLANET_NAMES[bhagyank]} का परिवर्तनकारी संतुलन योग`
+  };
+
+  const presentDigits = loshu.repetition && loshu.repetition.length > 0
+    ? loshu.repetition.map(r => r.digit)
+    : [mulank, bhagyank];
+  const secondaryDigit = presentDigits.find(d => d !== mulank && d !== bhagyank) || rMonth;
+  const tertiaryDigit = presentDigits.find(d => d !== mulank && d !== bhagyank && d !== secondaryDigit) || rYear;
+  const secDef = NUMBER_DEFINITIONS[secondaryDigit] || mDef;
+  const terDef = NUMBER_DEFINITIONS[tertiaryDigit] || bDef;
+
   const grahDrishti: GrahDrishtiAnalysis = {
-    driverPlanet: PLANET_NAMES[mulank] || 'बुध (Mercury)',
-    conductorPlanet: PLANET_NAMES[bhagyank] || 'केतु (Ketu)',
-    relationshipType: mulank === bhagyank ? 'HARMONIOUS' : (mulank + bhagyank) % 2 === 0 ? 'FRIENDLY' : 'HARMONIOUS',
-    relationshipLabelHi: `मूलांक स्वामी ${PLANET_NAMES[mulank]} एवं भाग्यांक स्वामी ${PLANET_NAMES[bhagyank]} का सौहार्दपूर्ण योग`,
-    synergyNarrativeHi: `आपके जन्मांक में मूलांक #${mulank} (${PLANET_NAMES[mulank]}) की त्वरित बौद्धिक सोच और भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) की गहरी अंतर्दृष्टि का अद्भुत संतुलन है। यह योग आपको सतह से ऊपर उठकर गहराई से स्थितियों का मूल्यांकन करने और सही समय पर सटीक निर्णय लेने की योग्यता प्रदान करता है।`,
+    driverPlanet: PLANET_NAMES[mulank] || 'सूर्य (Sun)',
+    conductorPlanet: PLANET_NAMES[bhagyank] || 'गुरु (Jupiter)',
+    relationshipType,
+    relationshipLabelHi: relationshipLabelMap[relationshipType],
+    synergyNarrativeHi: `${comb81.positiveMeaning} आपके जन्मांक में मूलांक #${mulank} (${PLANET_NAMES[mulank]}) के स्वभाव (${mDef.personality}) और भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) की जीवन दिशा (${bDef.bhagyankMeaning}) का विशिष्ट संयोग है। ${comb81.spiritualMeaning}`,
     dominantAspects: [
       {
         planetPair: `${PLANET_NAMES[mulank]} ↔ ${PLANET_NAMES[bhagyank]}`,
-        vibeHi: 'बौद्धिक रणनीति एवं आध्यात्मिक अंतर्ज्ञान (Intellectual Intuition)',
-        lifeImpactHi: 'व्यापारिक फैसलों में तार्किक समझ और छठी इंद्री (intuition) का उत्तम तालमेल।'
+        vibeHi: `${comb81.title} (${comb81.planetaryPair})`,
+        lifeImpactHi: `${comb81.careerMeaning} ${comb81.wealthMeaning}`
       },
       {
-        planetPair: `सूर्य (1) ↔ गुरु (3)`,
-        vibeHi: 'प्रशासनिक प्रभाव एवं ज्ञान विस्तार (Executive Authority & Wisdom)',
-        lifeImpactHi: 'समाज एवं कार्यक्षेत्र में परामर्शदाता व सम्माननीय मार्गदर्शक के रूप में पहचान।'
+        planetPair: `${PLANET_NAMES[mulank]} ↔ ${PLANET_NAMES[secondaryDigit]}`,
+        vibeHi: 'व्यक्तित्व एवं व्यावहारिक कौशल समन्वय (Personality & Skill Synergy)',
+        lifeImpactHi: `मूलांक #${mulank} और चार्ट में उपस्थित अंक #${secondaryDigit} के मेल से: ${secDef.career}`
       },
       {
-        planetPair: `शुक्र (6) ↔ बुध (5)`,
-        vibeHi: 'व्यापारिक आकर्षण, समृद्धि एवं संवाद कौशल (Commerce & Magnetism)',
-        lifeImpactHi: 'आर्थिक संचय और नए संपर्कों के माध्यम से निरंतर धन आगमन के अवसर।'
+        planetPair: `${PLANET_NAMES[bhagyank]} ↔ ${PLANET_NAMES[tertiaryDigit]}`,
+        vibeHi: 'भाग्य एवं दीर्घकालिक स्थिरता (Destiny & Stability Aspect)',
+        lifeImpactHi: `भाग्यांक #${bhagyank} और अंक #${tertiaryDigit} के सहयोग से: ${terDef.wealth}`
       }
     ]
   };
 
+  // Match professions for Mulank and Bhagyank from registered PROFESSION_RULES
+  const matchedProfessions = Object.values(PROFESSION_RULES).filter(
+    rule => rule.requiredNumbers.includes(mulank) || rule.requiredNumbers.includes(bhagyank)
+  );
+  const dynamicCareerAvenues = Array.from(new Set([
+    ...mPlanet.careerResonances,
+    ...bPlanet.careerResonances,
+    ...matchedProfessions.map(r => `${r.hindiTitle} (${r.profession})`)
+  ])).slice(0, 6);
+
+  const favDir1 = kuaProfile?.favorableDirections?.[0]?.direction || mDef.traditionalRemedies.directional;
+  const favDir2 = kuaProfile?.favorableDirections?.[1]?.direction || bDef.traditionalRemedies.directional;
+
+  const luckyColorsList = Array.from(new Set([
+    mDef.traditionalRemedies.color,
+    bDef.traditionalRemedies.color
+  ]));
+
   return {
     consultantSnapshot: {
       title: 'LeoFamily Expert Dossier Snapshot',
-      coreVerdictHi: `जातक ${identity.fullName || 'विशेष व्यक्ति'} का चार्ट मूलांक #${mulank} (${PLANET_NAMES[mulank]}) की स्वाभाविक गतिशीलता और भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) के शोधपरक दृष्टिकोण से युक्त एक अत्यंत प्रभावशाली और संतुलित ब्लूप्रिंट है।`,
-      dominantEnergyHi: `बुद्धिमत्ता, त्वरित संप्रेषण, विश्लेषणात्मक दृष्टि एवं स्वतंत्र निर्णय क्षमता।`,
-      bestAvenueHi: `रणनीतिक प्रबंधन, व्यापार, वित्तीय परामर्श, तकनीक, शिक्षा एवं शोधपरक विश्लेषण।`,
-      strategicCautionHi: `अति-विचार (over-analysis) से बचें और अपने विचारों को समयबद्ध क्रियान्वयन में बदलें।`
+      coreVerdictHi: `जातक ${identity.fullName || 'विशेष व्यक्ति'} का चार्ट मूलांक #${mulank} (${PLANET_NAMES[mulank]}) और भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) के '${comb81.title}' से युक्त है। ${comb81.positiveMeaning}`,
+      dominantEnergyHi: `${mDef.personality} इसके साथ ही ${bDef.personality}`,
+      bestAvenueHi: `${comb81.careerMeaning} प्रमुख क्षेत्र: ${mDef.career}`,
+      strategicCautionHi: `${comb81.negativeMeaning} उपाय: ${comb81.remedy}`
     },
     tithiAnkAnalysis: {
       birthDate: day,
       compoundTitle: comp.title,
       compoundMeaning: comp.meaning,
       tithiNatureHi: day > 9 
-        ? `चूँकि आपकी जन्म तारीख ${day} एक दोहरा अंक है, आपके व्यक्तित्व पर अंक ${Math.floor(day/10)} और अंक ${day%10} की संयुक्त ऊर्जा का दोहरा आशीर्वाद है।`
-        : `चूँकि आपका जन्म एकल अंक ${day} के दिन हुआ है, आपका ग्रह प्रभाव अत्यंत प्रत्यक्ष, केंद्रित और मौलिक है।`,
-      numericalFrequencyHi: `कम्पाउंड अंक #${day} आपको समाज में प्रभावशाली संपर्क, सम्मान और विशिष्ट अवसरों की प्राप्ति कराता है।`
+        ? `चूँकि आपकी जन्म तारीख ${day} एक संयुक्त (Compound) अंक है, आपके व्यक्तित्व पर अंक ${Math.floor(day/10)} (${PLANET_NAMES[Math.floor(day/10)] || 'ग्रह'}) और अंक ${day%10} (${day%10 === 0 ? 'पूर्णता शून्य' : PLANET_NAMES[day%10]}) के संयोग से मूलांक #${mulank} (${PLANET_NAMES[mulank]}) की विशिष्ट ऊर्जा निर्मित होती है। ${mDef.mulankMeaning}`
+        : `चूँकि आपका जन्म एकल अंक ${day} के दिन हुआ है, आप पर ${PLANET_NAMES[mulank]} का प्रभाव अत्यंत प्रत्यक्ष, शुद्ध, केंद्रित और मौलिक है। ${mDef.mulankMeaning}`,
+      numericalFrequencyHi: `जन्म तिथि अंक #${day} (${comp.title}) आपको ${mDef.leadership} तथा ${mDef.communication} प्रदान करता है।`
     },
     characteristicsProfile: {
-      thinkingStyle: 'तथ्य-आधारित, विश्लेषणात्मक एवं दूरदर्शी योजना निर्माण।',
-      emotionalResponse: 'शांत, संतुलित और परिस्थितियों को वस्तुनिष्ठ रूप से समझने की क्षमता।',
-      workHabit: 'उच्च गुणवत्ता, परिशुद्धता और समयबद्ध कार्य निष्पादन।',
-      socialConduct: 'गरिमापूर्ण, कूटनीतिक और बौद्धिक रूप से समृद्ध संवाद।',
-      leadershipTrait: 'आदेश देने के बजाय प्रेरणा और तार्किक रणनीति द्वारा नेतृत्व।'
+      thinkingStyle: `${mDef.learning} ${bDef.creativity}`,
+      emotionalResponse: `${mDef.relationships} ${bDef.relationships}`,
+      workHabit: `${mDef.business} ${bDef.career}`,
+      socialConduct: `${mDef.communication} ${bDef.communication}`,
+      leadershipTrait: `${mDef.leadership} साथ ही ${bDef.leadership}`
     },
     lifePinnacles: pinnacles,
     lifeChallenges: challenges,
     eventWindows,
     educationAnalysis: {
-      learningStyle: 'अवधारणात्मक और व्यावहारिक (Conceptual & Analytical Learning)।',
-      academicStrengths: ['रणनीतिक विश्लेषण', 'गणितीय एवं तार्किक सोच', 'प्रभावी भाषा व संचार', 'शोध एवं नवाचार'],
-      suitableDisciplines: ['प्रबंधन एवं वाणिज्य (Commerce & MBA)', 'आईटी एवं डेटा साइंस', 'वित्तीय अर्थशास्त्र', 'कानून एवं जनसंपर्क'],
-      studyDirection: 'उत्तर-पूर्व (ईशान कोण) अथवा उत्तर दिशा की ओर मुख करके अध्ययन करना सर्वोच्च एकाग्रता प्रदान करता है।'
+      learningStyle: `${mDef.learning} एवं ${bDef.learning}`,
+      academicStrengths: [
+        ...mDef.positiveTraits.slice(0, 2).map(t => `${t} (मूलांक #${mulank} गुण)`),
+        ...bDef.positiveTraits.slice(0, 2).map(t => `${t} (भाग्यांक #${bhagyank} गुण)`)
+      ],
+      suitableDisciplines: dynamicCareerAvenues.slice(0, 4),
+      studyDirection: `अध्ययन एवं कौशल विकास के लिए आपकी शुभ दिशाएं (${favDir1} तथा ${favDir2}) तथा ईशान कोण (North-East) की ओर मुख करना एकाग्रता और स्मरण शक्ति को बढ़ाता है।`
     },
     careerDeepDive: {
       primaryAvenues: [
-        'कॉर्पोरेट रणनीति एवं व्यवसाय प्रबंधन',
-        'वित्तीय परामर्श, बैंकिंग एवं निवेश विश्लेषण',
-        'सूचना प्रौद्योगिकी, सॉफ्टवेयर एवं डिजिटल प्लेटफॉर्म्स',
-        'शिक्षा, प्रशिक्षण, लेखक एवं शोध संस्थान'
+        `मूलांक #${mulank} प्रधान क्षेत्र: ${mDef.career}`,
+        `भाग्यांक #${bhagyank} प्रधान क्षेत्र: ${bDef.career}`,
+        `संयुक्त योग (${mulank}-${bhagyank}): ${comb81.careerMeaning}`,
+        `व्यापारिक अनुप्रयोग: ${mDef.business}`
       ],
-      entrepreneurialFit: 'उच्च (स्वतंत्र व्यवसाय, कंसल्टेंसी या पार्टनरशिप में उत्कृष्ट संभावनाएं)।',
-      workplaceRole: 'रणनीतिकार, मुख्य परामर्शदाता या स्वतंत्र विभाग प्रमुख।',
-      successStrategy: 'नैतिक मूल्यों पर अडिग रहें, नए संपर्कों का विस्तार करें और कार्यों का स्पष्ट लिखित रिकॉर्ड रखें।'
+      entrepreneurialFit: `${mDef.business} साथ ही भाग्यांक #${bhagyank} के अनुसार: ${bDef.business}`,
+      workplaceRole: `${mDef.leadership}`,
+      successStrategy: `${comb81.remedy} ${mDef.traditionalRemedies.behavioural}`
     },
     financeBehaviour: {
-      moneyMindset: 'सुरक्षित, दीर्घकालिक संचय एवं रणनीतिक परिसंपत्ति निर्माण।',
-      wealthAccumulationPattern: 'मध्यम आयु के बाद निरंतर बढ़ती हुई वित्तीय स्थिरता और अचल संपत्ति के योग।',
-      investmentSuitability: 'दीर्घकालिक सुरक्षित म्यूचुअल फंड्स, वाणिज्यिक संपत्ति और ठोस व्यवसाय।',
-      financialCaution: 'अपरिचित लोगों के साथ जल्दबाजी में बिना लिखा-पढ़ी के भारी वित्तीय लेन-देन न करें।'
+      moneyMindset: `${mDef.wealth}`,
+      wealthAccumulationPattern: `${comb81.wealthMeaning} ${bDef.wealth}`,
+      investmentSuitability: `भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) के अनुसार दीर्घकालिक योजनाबद्ध संचय, सुरक्षित परिसंपत्ति और अपने अनुभव वाले क्षेत्रों में निवेश अनुकूल रहता है।`,
+      financialCaution: `${comb81.negativeMeaning} वित्तीय लेन-देन में हमेशा पारदर्शिता और लिखित अनुबंध रखें।`
     },
     relationshipFamilyDynamics: {
-      relationshipPattern: 'पारस्परिक बौद्धिक संवाद, स्वतंत्रता का आदर और निष्ठा पर आधारित प्रगाढ़ संबंध।',
-      familyRole: 'परिवार के मुख्य मार्गदर्शक, संकटमोचक और दूरदर्शी स्तंभ।',
-      communicationAdvice: 'घरेलू संवाद में तर्क के स्थान पर स्नेह और भावनात्मक समझ को प्राथमिकता दें।',
-      harmonyKey: 'जीवनसाथी के साथ समय बिताएं और मिलकर भविष्य की योजनाएं बनाएं।'
+      relationshipPattern: `${comb81.relationshipMeaning} ${mDef.relationships}`,
+      familyRole: `${mDef.family} ${bDef.family}`,
+      communicationAdvice: `${mDef.communication} घरेलु संवाद में ${mDef.traditionalRemedies.behavioural}`,
+      harmonyKey: `${bDef.relationships} जीवनसाथी और परिवार के साथ धैर्य व आत्मीय संवाद बनाए रखें।`
     },
     uniqueAboutYou: {
-      cosmicSignature: `मूलांक #${mulank} + भाग्यांक #${bhagyank} का 'ज्ञान-वाणिज्य-शोध' संगम`,
-      hiddenGift: 'जटिल परिस्थितियों में भी शांत रहकर तुरंत सबसे व्यावहारिक समाधान ढूंढ निकालना।',
-      distinctiveAura: 'सम्मानजनक, गंभीर और स्वाभाविक रूप से लोगों को आकर्षित करने वाला आभा-मंडल।'
+      cosmicSignature: `मूलांक #${mulank} (${PLANET_NAMES[mulank]}) + भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) — ${comb81.title}`,
+      hiddenGift: `${mDef.creativity} ${bDef.spirituality}`,
+      distinctiveAura: `${mPlanet.cosmicNature} तथा ${bPlanet.cosmicNature}`
     },
     numeroVastuInterpretation: {
-      loShuZoneHarmonyHi: 'उत्तर दिशा (बुध/जल तत्व) एवं उत्तर-पूर्व (ईशान) क्षेत्र का संतुलन आपके बौद्धिक विकास एवं आर्थिक स्थिरता के लिए सर्वोपरि है।',
-      residenceEntranceDynamicsHi: 'उत्तर अथवा पूर्व दिशा का मुख्य द्वार आपके मूलांक एवं भाग्यांक के साथ प्राकृतिक तालमेल बनाकर निरंतर शुभ अवसर आकर्षित करता है।',
+      loShuZoneHarmonyHi: `आपके मूलांक #${mulank} की दिशा (${mDef.traditionalRemedies.directional}) और भाग्यांक #${bhagyank} की दिशा (${bDef.traditionalRemedies.directional}) का वास्तु संतुलन आपके स्वास्थ्य, करियर और मानसिक शांति के लिए सर्वोपरि है।`,
+      residenceEntranceDynamicsHi: `कुआ (Kua) संख्या #${kuaProfile?.kuaNumber || mulank} के अनुसार आपकी प्रमुख शुभ दिशाएं ${favDir1} और ${favDir2} हैं। कार्यस्थल व शयन में इन दिशाओं का उपयोग सकारात्मक ऊर्जा का संचार करता है।`,
       suggestedVastuRemedies: [
-        'उत्तर दिशा में कुबेर स्थान को जल तत्व (जैसे ताजे जल का पात्र) से संवर्धित करें।',
-        'ईशान कोण (North-East) को हमेशा स्वच्छ, भारमुक्त और प्रकाशमान रखें।',
-        'दक्षिण-पश्चिम (नैऋत्य) में भारी फर्नीचर रखकर स्थिरता ऊर्जा को सुदृढ़ बनाएं।'
+        `मूलांक दिशा मार्गदर्शन: ${mDef.traditionalRemedies.directional}`,
+        `भाग्यांक दिशा मार्गदर्शन: ${bDef.traditionalRemedies.directional}`,
+        `ईशान कोण (North-East) और ब्रह्मस्थान को सदैव स्वच्छ, हवादार और भारमुक्त रखें।`
       ]
     },
     lifeChangingWindows: eventWindows.map(w => ({
@@ -700,41 +798,42 @@ export function deriveExpertConsultationDossier(
     })),
     grahDrishti,
     lifestyleSuggestions: {
-      dailyRoutineHi: 'प्रातःकाल 6:00 बजे से पूर्व उठें, 15 मिनट प्राणायाम करें और दिन की प्राथमिकताओं को निर्धारित करें।',
-      dietaryGuidelineHi: 'हल्का, ताजा और सात्विक आहार लें। हरी पत्तेदार सब्जियां, नारियल पानी और पर्याप्त जलपान ऊर्जा को संतुलित रखते हैं।',
-      mindfulnessPracticeHi: 'संध्याकाल में 10 मिनट का मौन ध्यान मानसिक तनाव को दूर करता है।',
-      favorableTimingHi: 'महत्वपूर्ण निर्णय, मीटिंग्स और हस्ताक्षर दिन के प्रथम पहर में करना अत्यंत शुभ रहता है।'
+      dailyRoutineHi: `${mDef.traditionalRemedies.lifestyle} साथ ही ${bDef.traditionalRemedies.lifestyle}`,
+      dietaryGuidelineHi: `मूलांक #${mulank} (${mDef.element} तत्व) और भाग्यांक #${bhagyank} (${bDef.element} तत्व) के संतुलन हेतु ताजा, सात्विक व ऋतु अनुकूल आहार लें तथा पर्याप्त जल ग्रहण करें।`,
+      mindfulnessPracticeHi: `${mDef.spirituality} प्रतिदिन 10-15 मिनट प्राणायाम व ध्यान (${mDef.traditionalRemedies.mantra}) मानसिक स्पष्टता प्रदान करता है।`,
+      favorableTimingHi: `आपके लिए ${mPlanet.day} एवं ${bPlanet.day} के दिन तथा प्रातःकाल का समय महत्वपूर्ण निर्णयों के लिए विशेष अनुकूल है।`
     },
     personalYearNarrative: selectedPYNarrative,
     monthlyDashaForecast: monthlyForecasts,
     balancingRemedies: {
-      primaryYantraHi: 'श्री बुध यंत्र अथवा कुबेर यंत्र को उत्तर दिशा में स्थापित करें।',
-      sacredMantraHi: 'ॐ बुं बुधाय नमः अथवा ॐ नमो भगवते वासुदेवाय (नित्य 11 या 108 बार जाप)।',
-      luckyColorsHi: ['हल्का हरा (Light Green)', 'सफेद (White)', 'क्रीम / हल्का पीला (Cream / Light Yellow)'],
-      avoidColorsHi: ['गहरा काला (Deep Black)', 'गहरा लाल (Deep Red/Dark Crimson)'],
-      crystalRecommendationHi: 'ग्रीन एवेंट्यूरिन (Green Aventurine) अथवा स्फटिक (Clear Quartz) ब्रेसलेट।',
-      planetaryCharityHi: 'बुधवार को गौशाला में हरा चारा दान करें अथवा पक्षियों को मूंग दाल अर्पित करें।',
-      signatureRecommendationHi: 'हस्ताक्षर को हमेशा नीचे से ऊपर की ओर 15 डिग्री के कोण पर सीधा और स्पष्ट करें; अंत में कभी पूर्णविराम (dot) न लगाएं।'
+      primaryYantraHi: YANTRA_BY_NUMBER[mulank] || YANTRA_BY_NUMBER[5],
+      sacredMantraHi: `${mDef.traditionalRemedies.mantra} तथा भाग्यांक मंत्र: ${bDef.traditionalRemedies.mantra}`,
+      luckyColorsHi: luckyColorsList,
+      avoidColorsHi: AVOID_COLORS_BY_NUMBER[mulank] || ['गहरा काला (Deep Black)'],
+      crystalRecommendationHi: `${mPlanet.gemstone} (मूलांक #${mulank} अनुसार) अथवा ${bPlanet.gemstone} (भाग्यांक #${bhagyank} अनुसार — विशेषज्ञ परामर्श से)।`,
+      planetaryCharityHi: `${mDef.traditionalRemedies.charitable} इसके अतिरिक्त: ${bDef.traditionalRemedies.charitable}`,
+      signatureRecommendationHi: 'हस्ताक्षर को हमेशा नीचे से ऊपर की ओर 15 डिग्री के कोण पर स्पष्ट, पठनीय और बिना काटे करें; अंत में आधार रेखा (underline) के नीचे दो बिंदु या ऊपर की ओर प्रवाह रखें।'
     },
     expertSummary: {
-      strongestTrait: `मूलांक #${mulank} एवं भाग्यांक #${bhagyank} का सामंजस्य - त्वरित विश्लेषण क्षमता, नवाचार एवं नेतृत्व।`,
-      developmentArea: 'अति-विचार (Over-thinking) से बचना और दीर्घकालिक रणनीतिक धैर्य बनाए रखना।',
-      careerDirection: 'प्रबंधन, वित्तीय परामर्श, बौद्धिक अनुसंधान, प्रौद्योगिकी एवं स्वतंत्र व्यवसाय।',
-      relationshipGuidance: 'खुला और आत्मीय संवाद बनाए रखें; व्यावसायिक व्यस्तता के बीच पारिवारिक समय सुरक्षित करें।',
-      primaryRemedy: 'उत्तर दिशा (कुबेर स्थान) को स्वच्छ रखें, हल्के हरे व सफेद रंगों का प्राथमिकता से उपयोग करें।',
-      timeCycleGuidance: `वर्तमान व्यक्तिगत वर्ष (PY #${py}) आपके लिए नई ऊर्जा, योजनाओं के कार्यान्वयन और प्रगति का कालखंड है।`,
-      masterAdvice: 'अंक आपके आंतरिक सामर्थ्य का मानचित्र हैं; सही दिशा में अनुशासित कर्म ही आपकी सफलता की कुंजी है।'
+      strongestTrait: `मूलांक #${mulank} (${PLANET_NAMES[mulank]}) एवं भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) का संगम: ${comb81.title}`,
+      developmentArea: `${comb81.negativeMeaning}`,
+      careerDirection: `${comb81.careerMeaning}`,
+      relationshipGuidance: `${comb81.relationshipMeaning}`,
+      primaryRemedy: `${comb81.remedy} (${mDef.traditionalRemedies.color})`,
+      timeCycleGuidance: `वर्तमान व्यक्तिगत वर्ष (PY #${py} - ${selectedPYNarrative.theme}) में ${selectedPYNarrative.recommendedFocus}`,
+      masterAdvice: `अपने मूलांक #${mulank} की स्वाभाविक क्षमता और भाग्यांक #${bhagyank} के जीवन पथ में संतुलन बनाए रखें: ${mDef.traditionalRemedies.behavioural}`
     },
     finalSummaryNotes: {
-      pinnacleVerdictHi: `आपका अंकशास्त्रीय ढांचा जीवन के मध्य और उत्तरार्ध में उच्च सफलता, सामाजिक प्रतिष्ठा और आंतरिक शांति के स्पष्ट संकेत देता है।`,
+      pinnacleVerdictHi: `मूलांक #${mulank} और भाग्यांक #${bhagyank} का आपका अंकशास्त्रीय ढांचा (${comb81.title}) निरंतर प्रगति, आत्म-विकास और सम्मानजनक उपलब्धियों का संकेत देता है।`,
       keyTakeawaysHi: [
-        `1. अपने मूलांक #${mulank} की बौद्धिक और व्यापारिक पहल को निरंतर सक्रिय रखें।`,
-        `2. भाग्यांक #${bhagyank} के शोध और अंतर्ज्ञान का उपयोग महत्वपूर्ण जीवन निर्णयों में करें।`,
-        `3. Personal Year #${py} के अनुकूल व्यापारिक और बौद्धिक विस्तार की योजनाओं को प्राथमिकता दें।`,
-        `4. वास्तु में उत्तर-पूर्व (ईशान) को स्वच्छ रखें और अध्ययन/कार्य की बैठक अपनी शुभ दिशा में रखें।`,
-        `5. 15° ऊपर की ओर हस्ताक्षर और शुभ रंगों का नियमित उपयोग आपके प्रयासों को गति देगा।`
+        `1. मूलांक #${mulank} (${PLANET_NAMES[mulank]}) की शक्ति: ${mDef.personality}`,
+        `2. भाग्यांक #${bhagyank} (${PLANET_NAMES[bhagyank]}) की दिशा: ${bDef.bhagyankMeaning}`,
+        `3. संयुक्त प्रभाव (${mulank}-${bhagyank}): ${comb81.careerMeaning}`,
+        `4. व्यक्तिगत वर्ष (PY #${py}) मार्गदर्शन: ${selectedPYNarrative.recommendedFocus}`,
+        `5. व्यवहारिक एवं पारंपरिक संतुलन: ${comb81.remedy}`
       ],
-      closingBlessingHi: `ईश्वर आपको उत्तम स्वास्थ्य, अटूट समृद्धि, पारिवारिक आनंद और दीर्घायु प्रदान करें। कर्म ही पूजा है, अंक आपके शुभ मार्गदर्शक हैं।`
+      closingBlessingHi: `ईश्वर आपको उत्तम स्वास्थ्य, समृद्धि, पारिवारिक सौहार्द और अपने जीवन पथ पर निरंतर सफलता प्रदान करें। अंक आपके सामर्थ्य के मार्गदर्शक हैं, सचेत कर्म आपकी सफलता की कुंजी है।`
     }
   };
 }
+
